@@ -1,0 +1,10 @@
+data
+node_modules
+.env*
+test
+cloud-backups
+*.sqlite*
+*.log
+CONTINUE-HERE.md
+create_plan.py
+*.cmd

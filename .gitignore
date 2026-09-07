@@ -1,0 +1,11 @@
+node_modules/
+data/
+test-output/
+*.log
+.env*
+!.env.example
+.vercel/
+dist/
+cloud-backups/
+.env
+.env

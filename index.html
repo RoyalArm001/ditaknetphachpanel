@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#174e50"><meta name="description" content="Ռաքերի, փաչ պանելների և ցանցային մալուխների կառավարում">
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ditaknet RackMap">
+  <title>Ditaknet RackMap · Ցանցային ռաքեր</title>
+  <link rel="stylesheet" href="styles.css"><script defer src="domain.js"></script><script defer src="rack3d.js"></script><script defer src="app.js"></script><script defer src="pwa.js"></script>
+</head>
+<body>
+  <aside class="sidebar" id="leftPanel">
+    <a class="brand" href="#overview"><span class="brand-mark">▤</span><span>RackMap<small>DITAKNET · ՑԱՆՑԻ ՔԱՐՏԵԶ</small></span></a>
+    <div class="company-switcher"><label class="company-label" for="companySelect">ԸՆԿԵՐՈՒԹՅՈՒՆ</label><select id="companySelect" aria-label="Ընտրել ընկերությունը" disabled><option>Բեռնվում է…</option></select><button class="company-add" data-action="company-new">＋ Նոր ընկերություն</button><div id="companyLabel" class="company-name">—</div></div>
+    <nav aria-label="Հիմնական բաժիններ">
+      <a href="#overview" data-view="overview"><span>▦</span> Ընդհանուր տեսք</a>
+      <a href="#floors" data-view="floors"><span>▤</span> Հարկեր և ռաքեր</a>
+      <a href="#search" data-view="search"><span>⌕</span> Մալուխներ և որոնում</a>
+      <a href="#reports" data-view="reports"><span>↗</span> Հաշվետվություններ</a>
+      <a href="#settings" data-view="settings"><span>⚙</span> Կարգավորումներ</a>
+    </nav>
+    <div class="sidebar-bottom"><button class="button small" data-action="install-app">↓ Տեղադրել հեռախոսում</button><p>Ditaknet-ի մաս · © Ditaknet</p><span class="live-dot"></span> Տեղական ցանց<div>Ձեր թիմի ընդհանուր քարտեզը</div></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><button class="button small panel-toggle" data-action="toggle-left" aria-controls="leftPanel" aria-expanded="true">☰ Մենյու</button><span id="breadcrumb">Աշխատանքային տարածք</span><div class="save-tools"><button id="rightToggle" class="button small panel-toggle" data-action="toggle-right" aria-controls="rightPanel" aria-expanded="true" hidden>Գործիքներ ▸</button><span id="saveStatus" role="status">Միանում է…</span><button data-action="save" class="button small">Պահպանել</button></div></header>
+    <div id="connectionBanner" role="alert" hidden></div><main id="content"><div class="empty">Բեռնվում է…</div></main>
+    <footer>RackMap <span>•</span> Ditaknet-ի մաս · © Ditaknet</footer>
+  </div>
+  <dialog id="dialog" aria-labelledby="dialogTitle"></dialog><div id="toast" role="status" hidden></div>
+</body>
+</html>
