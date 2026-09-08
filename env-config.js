@@ -12,6 +12,6 @@ function publicConfig(source=process.env){
   if(!env.POSTGRES_URL&&!env.POSTGRES_URL_NON_POOLING)missing.push('POSTGRES_URL');
   if(!env.SUPABASE_URL)missing.push('SUPABASE_URL');
   if(!env.SUPABASE_PUBLISHABLE_KEY&&!env.SUPABASE_ANON_KEY)missing.push('SUPABASE_PUBLISHABLE_KEY');
-  return {cloud:true,authRequired:true,pinEnabled:!!env.RACKMAP_PIN_HASH||!!env.RACKMAP_PIN_HASHES,accountEnabled:!!env.SUPABASE_URL&&(!!env.SUPABASE_PUBLISHABLE_KEY||!!env.SUPABASE_ANON_KEY),maxStateBytes:4194304,setupRequired:missing.length>0,missing};
+  return {cloud:true,authRequired:true,pinEnabled:!!env.RACKMAP_PIN_HASH||!!env.RACKMAP_PIN_HASHES,accountEnabled:!!env.SUPABASE_URL&&(!!env.SUPABASE_PUBLISHABLE_KEY||!!env.SUPABASE_ANON_KEY),personalAccountEnabled:missing.length===0,googleClientId:env.GOOGLE_DRIVE_CLIENT_ID||'',maxStateBytes:4194304,setupRequired:missing.length>0,missing};
 }
 module.exports={normalizeEnv,publicConfig};

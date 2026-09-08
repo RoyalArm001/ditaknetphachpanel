@@ -15,9 +15,10 @@ function createApp(options={}) {
   const pinModule=require('./pin-auth');
   const pinAuth=pinModule.createPinAuth(store,{secure:cloud})||(cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null);
   const accountAuth=cloud?(options.auth||require('./cloud-auth').createAuth()):null;
+  const personalAuth=cloud?(options.personalAuth||(options.auth?null:require('./cloud-auth').createAuth({...process.env,RACKMAP_AUTH_ACCESS:'all-authenticated'},fetch,{cookiePrefix:'mypatch'}))):null;
+  const accounts=cloud&&store.pool?require('./account-store').createAccounts(store):null;
   const authRequired=cloud||!!pinAuth;
   const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
-  const read=id=>store.read(id),listCompanies=()=>store.list();
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
@@ -28,8 +29,36 @@ function createApp(options={}) {
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
       const tr=require('./i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
-      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
-      if(authRequired&&url.pathname.startsWith('/api/')){
+      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,googleClientId:process.env.GOOGLE_DRIVE_CLIENT_ID||'',maxStateBytes:cloud?4*1024*1024:24*1024*1024});
+      let requestStore=store;
+      const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
+      if(accountSpace&&url.pathname.startsWith('/api/')){
+        if(!accounts||!personalAuth)return json(res,503,{error:tr('Անձնական cloud-ը հասանելի չէ')});
+        if(['POST','PUT','DELETE'].includes(req.method)){
+          if(req.headers.origin&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
+          if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
+        }
+        if(req.method==='POST'&&['/api/account/login','/api/account/signup','/api/account/recover'].includes(url.pathname)){
+          const body=await readBody(req);
+          if(url.pathname.endsWith('/recover')){
+            const user=await accounts.login(req,res,body.email,body.pin);
+            if(user?.limited)return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
+            return user?json(res,200,{user}):json(res,401,{error:tr('Էլ․ փոստը կամ անձնական PIN-ը սխալ է')});
+          }
+          const result=url.pathname.endsWith('/signup')?await personalAuth.signup(res,body.email,body.password):{user:await personalAuth.login(res,body.email,body.password)};
+          if(result?.confirmationRequired)return json(res,200,result);
+          if(!result?.user)return json(res,400,{error:tr('Մուտքը կամ գրանցումը չհաջողվեց։ Ստուգեք տվյալները և էլ․ փոստի հաստատումը։')});
+          accounts.clear(res);
+          return json(res,200,{user:result.user,pin:await accounts.provision(result.user)});
+        }
+        if(req.method==='POST'&&url.pathname==='/api/auth/logout'){personalAuth.clear(res);accounts.clear(res);return json(res,200,{ok:true});}
+        const user=await personalAuth.authenticate(req,res)||await accounts.authenticate(req);
+        if(!user)return json(res,401,{error:tr('Մուտք գործեք ձեր անձնական հաշվով')});
+        if(url.pathname==='/api/auth/session')return json(res,200,{user});
+        if(user.method==='recovery'&&req.method!=='GET'&&url.pathname!=='/api/backup')return json(res,403,{error:tr('Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։')});
+        if(req.method==='POST'&&url.pathname==='/api/account/pin/new')return json(res,200,{pin:await accounts.provision(user,true)});
+        requestStore=accounts.scope(user.id);
+      }else if(authRequired&&url.pathname.startsWith('/api/')){
         if(['POST','PUT','DELETE'].includes(req.method)&&req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(url.pathname==='/api/auth/pin'&&req.method==='POST'&&pinAuth){
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
@@ -49,15 +78,16 @@ function createApp(options={}) {
       }
 
       const companyId=url.searchParams.get('company')||'default';
-      if(req.method==='GET'&&url.pathname==='/api/storage')return json(res,200,{directory:store.directory,database:store.database,backups:store.backups,cloud});
+      const read=id=>requestStore.read(id),listCompanies=()=>requestStore.list();
+      if(req.method==='GET'&&url.pathname==='/api/storage')return json(res,200,{directory:requestStore.directory,database:requestStore.database,backups:requestStore.backups,cloud});
       if(req.method==='GET'&&url.pathname==='/api/companies')return json(res,200,await listCompanies());
       if(req.method==='POST'||req.method==='PUT'){
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
       }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
-        if(cloud){const data=Buffer.from(JSON.stringify(await store.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
-        const file=await store.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
+        if(cloud){const data=Buffer.from(JSON.stringify(await requestStore.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
+        const file=await requestStore.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
       }
       if(req.method==='POST'&&url.pathname==='/api/companies'){
         let body;try{body=await readBody(req);}catch(e){return json(res,e.code||400,{error:tr('Հարցման ձևաչափը սխալ է')});}
@@ -65,7 +95,7 @@ function createApp(options={}) {
         if(!name||name.length>200||!Number.isInteger(body.floorCount)||body.floorCount<1||body.floorCount>200)return json(res,400,{error:tr('Նշեք ընկերության անունը և 1–200 հարկ')});
         if((await listCompanies()).some(x=>x.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return json(res,400,{error:tr('Այս անունով ընկերություն արդեն կա')});
         const state={...Domain.empty(),company:name,floors:Array.from({length:body.floorCount},(_,i)=>({id:randomUUID(),name:tr`${i+1}-րդ հարկ`,racks:[]}))};
-        Domain.validate(state);const id=randomUUID();await store.create(id,state);
+        Domain.validate(state);const id=randomUUID();await requestStore.create(id,state);
         return json(res,201,{id,revision:0,state});
       }
       const scoped=['/api/state','/api/revision','/api/history','/api/export.xlsx','/api/export.pdf'].includes(url.pathname)||url.pathname.startsWith('/api/history/');
@@ -78,12 +108,12 @@ function createApp(options={}) {
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
         let body;try{body=await readBody(req);Domain.validate(body.state);}catch(e){return json(res,e.code||400,{error:e.message});}
         if(body.state.company&&(await listCompanies()).some(x=>x.id!==companyId&&x.name.toLocaleLowerCase()===body.state.company.trim().toLocaleLowerCase()))return json(res,400,{error:tr('Այս անունով ընկերություն արդեն կա')});
-        const result=await store.save(companyId,body.state,body.revision);
+        const result=await requestStore.save(companyId,body.state,body.revision);
         return result.conflict?json(res,409,{error:tr('Տվյալները փոփոխվել են այլ աշխատակցի կողմից։ Թարմացրեք էջը։'),revision:result.revision}):json(res,200,result);
       }
-      if(req.method==='GET'&&url.pathname==='/api/history')return json(res,200,await store.history(companyId));
+      if(req.method==='GET'&&url.pathname==='/api/history')return json(res,200,await requestStore.history(companyId));
       if(req.method==='GET'&&url.pathname.startsWith('/api/history/')){
-        const h=await store.version(companyId,Number(url.pathname.split('/').pop()));
+        const h=await requestStore.version(companyId,Number(url.pathname.split('/').pop()));
         return h?json(res,200,h):json(res,404,{error:tr('Տարբերակը չի գտնվել')});
       }
       if(req.method==='GET'&&url.pathname==='/api/network')return json(res,200,{urls:cloud?[`https://${req.headers.host}`]:Object.values(os.networkInterfaces()).flat().filter(x=>x.family==='IPv4'&&!x.internal).map(x=>`http://${x.address}:${server.address().port}`)});

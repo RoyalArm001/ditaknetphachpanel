@@ -5,7 +5,7 @@ async function hashPin(pin){
   if(!/^\d{8,12}$/.test(pin))throw new Error('PIN must contain 8–12 digits');
   const salt=randomBytes(16).toString('hex');return salt+':'+(await derive(pin,salt,32)).toString('hex');
 }
-function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now()}={}){
+function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),cookieName='rackmap_pin'}={}){
   const secret=env.RACKMAP_SESSION_SECRET;
   const hashes=env.RACKMAP_PIN_HASHES?JSON.parse(env.RACKMAP_PIN_HASHES):{};
   if(!hashes||typeof hashes!=='object'||Array.isArray(hashes))throw new Error('Invalid PIN server configuration');
@@ -16,11 +16,11 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now()}={}
   const fingerprint=hash=>createHash('sha256').update(hash).digest('hex').slice(0,16);
   const signature=value=>createHmac('sha256',secret).update(value).digest('base64url');
   const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
-  function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`rackmap_pin=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Strict; Max-Age=${age}`]);}
+  function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`${cookieName}=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Strict; Max-Age=${age}`]);}
   return {
     enabled:async()=>true,
     authenticate(req){
-      const token=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('rackmap_pin='))?.slice(12);
+      const token=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='))?.slice(cookieName.length+1);
       if(!token||token.length>500)return null;
       const [payload,mac]=token.split('.');if(!payload||!mac||!equal(signature(payload),mac))return null;
       try{const data=JSON.parse(Buffer.from(payload,'base64url')),id=data.id||'staff-pin';return Object.hasOwn(hashes,id)&&data.version===fingerprint(hashes[id])&&data.exp>now()&&data.exp<=now()+8*60*60*1000?{id,method:'pin'}:null;}catch{return null;}

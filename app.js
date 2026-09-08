@@ -10,11 +10,14 @@ let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
 const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
+let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
+const accountMode=()=>storageMode==='account';
 // Opening the app always asks for an explicit workspace choice.
 let authRequired=false,pinEnabled=false,accountEnabled=false;
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
 function renderLogin(method=pinEnabled?'pin':'account'){
+  if(accountMode())return renderAccountLogin(accountMethod);
   ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const usePin=method==='pin'&&pinEnabled;
   $('#content').innerHTML=tr('<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՇԽԱՏԱԿՑԻ ՄՈՒՏՔ</div><h1>Իմ փաչ</h1><p>Բացեք ընկերությունների բազան և խմբագրեք ռաքերն ու միացումները։</p>')+(pinEnabled&&accountEnabled?'<div class="login-tabs">'+button(tr('PIN կոդ'),'login-pin')+button(tr('Թիմային հաշիվ'),'login-account')+'</div>':'')+'<form id="loginForm">'+(usePin?input('pin',tr('Աշխատակցի PIN'),'','password',tr('required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off" placeholder="Մուտքագրեք PIN կոդը"')):input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username"')+input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password"'))+tr('<p id="loginError" role="alert"></p><button class="button primary" type="submit">Բացել աշխատանքային տարածքը →</button></form><p><button class="button" data-action="personal-mode">Շարունակել անձնական ռեժիմով</button></p><p class="hint">Ստեղծված է Սիփան Դանիելյանի կողմից · <a href="https://royalarm.uk" target="_blank" rel="noopener">royalarm.uk</a><br>Սպասարկող՝ <a href="https://www.ditaknet.com/en" target="_blank" rel="noopener">ditaknet.com</a></p></section>');
@@ -39,8 +42,8 @@ function togglePanel(k){panelPrefs[k]=!panelPrefs[k];if(window.matchMedia('(max-
 let selectedPortId='',portDraft=null,portDraftDirty=false,portTimer;
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
-const recoveryKey=()=>personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
-function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
+const recoveryKey=()=>accountMode()?'rackmap-account-'+accountUserId+'-'+activeCompanyId:personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
+function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
 const viewNames={get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get search(){return tr('Մալուխներ և որոնում');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
@@ -77,7 +80,7 @@ async function save(){
   })();
   try{return await saving;}finally{saving=null;}
 }
-function commit(fn,redraw=true){if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
+function commit(fn,redraw=true){if(accountReadOnly)throw new Error(tr('Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
 function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return {view:viewNames[v]?v:'overview',id};}
 function render(){
   document.body.classList.remove('login-view');
@@ -95,8 +98,26 @@ function renderSetup(){
 function renderWelcome(){
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  $('#content').innerHTML=tr`<section class="welcome panel"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>Ինչպե՞ս եք ցանկանում աշխատել</h1><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options"><section><h2>Սկսել իմ սարքում</h2><p>Ստեղծեք ձեր շենքը և ռաքերը։ Տվյալները պահվում են միայն այս բրաուզերում և չեն ուղարկվում ընդհանուր cloud։</p>${button(tr('Սկսել նոր նախագիծ'),'welcome-personal','','primary')}</section><section><h2>Բացել իմ պահուստային պատճենը</h2><p>Ընտրեք նախկինում պահված JSON ֆայլը և շարունակեք աշխատանքը այս սարքում։</p>${button(tr('Ընտրել JSON ֆայլ'),'welcome-import')}</section><section><h2>Միանալ թիմի տարածքին</h2><p>Բացեք ընդհանուր բազան ձեր թիմի հաշվով կամ PIN-ով։ Անձնական տվյալները կմնան առանձին։</p>${button(tr('Մուտք գործել թիմի տարածք'),'welcome-shared')}</section></div><input id="welcomeImport" type="file" accept=".json,application/json" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
-  $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await beginWorkspace('personal');await restoreFile(file);}catch(error){toast(error.message);}};
+  const choices=welcomeStep==='restore'?tr`<section><span class="option-number">JSON</span><h2>Վերականգնել ֆայլից</h2><p>Ընտրեք ձեր պահուստային JSON ֆայլը։ Մինչև հաստատելը տվյալները չեն փոխվի։</p>${button(tr('Ընտրել JSON ֆայլ'),'welcome-file','','primary')}</section><section><span class="option-number">CLOUD</span><h2>Վերականգնել cloud-ից</h2><p>Անձնական հաշվի ֆայլը բացեք էլ․ փոստով և ձեր վերականգնման PIN-ով։</p>${button(tr('Անձնական PIN-ով'),'account-recover')}${button(tr('Թիմային բազա · թիմի PIN'),'welcome-shared','','small')}</section><section><span class="option-number">DRIVE</span><h2>Վերականգնել Google Drive-ից</h2><p>Միացրեք ձեր Google հաշիվը և ընտրեք Իմ փաչ-ի պահուստային պատճենը։</p>${button(tr('Բացել Google Drive-ը'),'drive-restore')}</section>`:tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Բացեք պահուստային ֆայլը, անձնական կամ թիմային cloud-ը, կամ ձեր Google Drive-ը։</p>${button(tr('Ընտրել վերականգնման աղբյուրը'),'welcome-import')}${button(tr('Թիմային բազա · թիմի PIN'),'welcome-shared','','small')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
+  $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${welcomeStep==='restore'?tr('Որտե՞ղ է ձեր պահուստային պատճենը'):tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div>${welcomeStep==='restore'?button(tr('← Հետ'),'welcome-home'):''}<input id="welcomeImport" type="file" accept=".json,application/json" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
+  $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await readBackupFile(file);await beginWorkspace('personal');await restoreFile(file);}catch(error){toast(error.message);}finally{e.target.value='';}};
+}
+function renderAccountLogin(method='login'){
+  accountMethod=method;onboardingVisible=false;ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
+  const recovery=method==='recover',signup=method==='signup';
+  $('#content').innerHTML=tr`<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՆՁՆԱԿԱՆ ՀԱՇԻՎ</div><h1>${recovery?tr('Վերականգնել իմ ֆայլը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</h1><p class="hint">${recovery?tr('Գրեք ձեր հաշվի էլ․ փոստը և անձնական PIN-ը։ Կբացվեն միայն ձեր տվյալները՝ դիտելու և ներբեռնելու համար։'):tr('Ձեր ընկերությունները և պահուստային պատճենները հասանելի կլինեն միայն ձեր հաշվին։')}</p><form id="loginForm">${input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username" maxlength="320"')}${recovery?input('pin',tr('Անձնական PIN'),'','password','required inputmode="numeric" pattern="[0-9]{12}" minlength="12" maxlength="12" autocomplete="off"'):input('password',tr('Գաղտնաբառ'),'','password',`required ${signup?'minlength="12" autocomplete="new-password"':'autocomplete="current-password"'} maxlength="1024"`)}${signup?tr('<p class="hint">Գաղտնաբառը՝ առնվազն 12 նիշ։ Էլ․ փոստը հաստատելուց հետո առաջին մուտքի ժամանակ կստանաք անձնական վերականգնման PIN։</p>'):''}<p id="loginError" role="alert"></p><button class="button primary" type="submit">${recovery?tr('Բացել իմ պահուստային պատճենը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</button></form><div class="login-tabs">${button(tr('Մուտք գործել'),'account-login')}${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('← Հետ'),'welcome-home')}</div></section>`;
+  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{
+    const fd=new FormData(e.target),res=await fetch('/api/account/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))}),result=await res.json();
+    if(!res.ok)throw new Error(result.error);
+    if(result.confirmationRequired){$('#loginError').textContent=tr('Ստուգեք ձեր էլ․ փոստը և հաստատեք հաշիվը, ապա այստեղ մուտք գործեք։');return;}
+    storageMode='account';onboardingChoice='account';accountUserId=result.user.id;accountReadOnly=recovery;
+    activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
+    await init();if(result.pin)showPersonalPin(result.pin);
+  }catch(error){if($('#loginError'))$('#loginError').textContent=tr(error.message);}finally{b.disabled=false;}};
+}
+function showPersonalPin(pin){
+  modal(tr('Պահպանեք ձեր անձնական PIN-ը'),tr`<p>Այս կոդը ցուցադրվում է միայն հիմա։ Պահպանեք այն ապահով տեղում՝ ձեր ֆայլերը վերականգնելու համար։</p><output class="personal-pin">${esc(pin)}</output><p class="hint">Թիմային PIN-երը ձեր անձնական հաշիվը չեն բացում։</p>`,null,button(tr('Ներբեռնել PIN-ը'),'download-personal-pin','','primary'));
+  $('#dialog [data-action=download-personal-pin]').onclick=()=>download(new Blob(['My Patch\n'+location.origin+'\nPIN: '+pin+'\n'],{type:'text/plain'}),'MyPatch-personal-PIN.txt');
 }
 async function beginWorkspace(mode){
   if(modeBusy||companyBusy)return;
