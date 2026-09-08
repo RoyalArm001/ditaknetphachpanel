@@ -1,3 +1,13 @@
+# Հրապարակման ստուգման արդյունք՝ 2026-09-08
+
+6c2d961 commit-ը հաջողությամբ push է արվել main և Vercel-ում ստացել է Deployment completed։
+https://mypro.smarttechllc.am/՝ HTTP200, նոր անվանումն ու Սիպան Դանիելյան նշումը կան։
+/api/config՝ HTTP200, setupRequired=false, missing=[], accountEnabled=true, **pinEnabled=false**։
+/api/state առանց մուտքի՝ HTTP401 (սպասվող պաշտպանություն)։ Իրական Supabase տվյալների read/write-ը դեռ չի ստուգվել։
+Տեղական PIN login՝ HTTP200, մուտքից հետո 1 ընկերությունը հաջողությամբ կարդացվել է։ Կոդը՝ %LOCALAPPDATA%/RackMap/staff-pin.txt։
+Օգտատիրոջը խնդրվել է Vercel Production env-ում ներմուծել access.env-ի RACKMAP_PIN_HASH և RACKMAP_SESSION_SECRET-ը, ապա Redeploy։ Սպասում ենք դրան։ Supabase CA/migrations002 վիճակը նույնպես մնում է ստուգման ենթակա։
+Ավելացված mobile DOM թեստը ստուգում է փակ սկզբնական մենյուն, port bottom sheet-ը, փակելիս սևագրի պահպանումը և mobile navigation-ը։ Ընդամենը 28 թեստ։
+
 # Վերջին ստուգում՝ 2026-09-08
 
 Գործող կայքը https://mypro.smarttechllc.am/ է, GitHub՝ RoyalArm001/ditaknetphachpanel, main։ Տեղական պանակը կապված է origin/main պատմությանը՝ առանց ֆայլերը վերագրելու։

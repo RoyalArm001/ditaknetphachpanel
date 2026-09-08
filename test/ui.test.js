@@ -5,6 +5,22 @@ const {createApp}=require('../server');
 const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const {once}=require('node:events');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function until(fn){for(let i=0;i<100;i++){if(fn())return;await sleep(25);}throw new Error('Timed out waiting for UI');}
+
+test('mobile navigation starts closed and opens port sheet without a modal',async t=>{
+  const server=createApp({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'rackmap-mobile-'))});server.listen(0,'127.0.0.1');await once(server,'listening');
+  const base=`http://127.0.0.1:${server.address().port}`,D=require('../domain');
+  const state={...D.empty(),company:'Mobile',floors:[{id:'f',name:'Floor',racks:[{id:'r',name:'Rack',u:6,photo:'',location:'',devices:[{id:'d',name:'Panel',type:'panel',pos:6,height:1,color:'#174e50',model:'',portList:Array.from({length:12},(_,i)=>D.port(i+1,'p'+i))}]}]}]};
+  await fetch(base+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state,revision:0})});
+  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.fetch=(url,options)=>fetch(new URL(url,base),options);w.structuredClone=structuredClone;w.matchMedia=q=>({matches:q.includes('max-width'),addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
+  t.after(async()=>{dom.window.close();await new Promise(r=>server.close(r));});
+  const w=dom.window,$=q=>w.document.querySelector(q);await until(()=>$('.rack-link'));
+  assert.ok(w.document.body.classList.contains('left-collapsed'));assert.ok($('.mobile-nav'));
+  w.location.hash='#rack/r';await until(()=>$('.mini-port'));assert.equal($('#panelBackdrop').hidden,true);
+  $('.mini-port').click();await until(()=>$('#portForm'));assert.equal($('#panelBackdrop').hidden,false);assert.equal($('#dialog').open,false);
+  const form=$('#portForm');$('#panelBackdrop').click();await until(()=>$('#panelBackdrop').hidden);assert.equal($('#portForm'),form);
+  $('[data-action=toggle-left]').click();await until(()=>!w.document.body.classList.contains('left-collapsed'));
+  $('#leftPanel a[data-view=search]').click();await until(()=>$('[data-filter=query]'));assert.equal($('#panelBackdrop').hidden,true);
+});
 test('full UI flow: setup, racks, devices, validation, connections, search, editing and reload',async t=>{
   const server=createApp({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'rackmap-ui-'))});server.listen(0,'127.0.0.1');await once(server,'listening');
   const base=`http://127.0.0.1:${server.address().port}`;const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
