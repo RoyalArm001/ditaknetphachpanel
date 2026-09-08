@@ -3,6 +3,31 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {JSDOM,VirtualConsole}=require('jsdom');
+async function startup({shared=false}={}){
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  const dom=new JSDOM(html,{url:'https://mypro.smarttechllc.am/',runScripts:'outside-only'}),w=dom.window;
+  w.indexedDB=new(require('fake-indexeddb').IDBFactory)();w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;
+  w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){};
+  if(shared)w.localStorage.setItem('rackmap-storage-mode','shared');
+  const requests=[];w.fetch=async url=>{requests.push(url);return new Response(JSON.stringify({error:'Cloud unavailable'}),{status:503});};
+  for(const file of ['domain.js','personal-store.js','app.js'])w.eval(fs.readFileSync(path.join(__dirname,'..',file),'utf8'));
+  return {dom,w,requests};
+}
+async function until(fn){for(let i=0;i<100;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Startup did not finish');}
+test('first public launch opens personal setup even when the entire cloud is unavailable',async()=>{
+  const {dom,w,requests}=await startup();try{
+    await until(()=>w.document.querySelector('#setupForm'));assert.equal(requests.length,0);
+    assert.ok(!w.document.querySelector('#content').textContent.includes('Start-RackMap.cmd'));
+  }finally{dom.window.close();}
+});
+test('failed remembered cloud mode offers a working personal fallback without localhost instructions',async()=>{
+  const {dom,w,requests}=await startup({shared:true});try{
+    await until(()=>w.document.querySelector('[data-action=personal-mode]'));
+    assert.ok(!w.document.querySelector('#content').textContent.includes('localhost'));
+    w.document.querySelector('[data-action=personal-mode]').click();await until(()=>w.document.querySelector('.storage-mode'));
+    assert.equal(w.localStorage.getItem('rackmap-storage-mode'),'personal');assert.equal(requests.length,1);
+  }finally{dom.window.close();}
+});
 test('opening index from disk redirects to server without a file API request',()=>{
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   const vc=new VirtualConsole(),errors=[];

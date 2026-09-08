@@ -17,7 +17,9 @@
       '<p><strong>iPhone / iPad․</strong> Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։</p><p><strong>Android․</strong> Chrome-ի մենյու → Install app կամ Add to Home screen։ Եթե տեղադրումը դեռ հասանելի չէ, թարմացրեք էջը և կրկին փորձեք։</p><p class="hint">Անձնական ռեժիմը առաջին բացումից հետո աշխատում է նաև անցանց։ Թիմային cloud-ի համար ինտերնետ է պետք։</p>');
   };
   if(location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).catch(()=>{});
+    const hadController=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener?.('controllerchange',()=>{if(!hadController)return;if(typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty)){toast('Թարմացումը պատրաստ է։ Պահպանեք աշխատանքը և վերաբացեք էջը։');return;}location.reload();});
+    navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(registration=>registration.update?.()).catch(()=>{});
   }
   update();
 })();

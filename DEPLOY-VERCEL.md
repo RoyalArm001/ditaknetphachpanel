@@ -18,7 +18,7 @@ GitHub-ի նախորդ .env.example-ում իրական գաղտնի արժեք�
 - 5 փորձից հետո տվյալ IP-ի համար սահմանվում է 15-րոպեանոց սահմանափակում։ Cloud փորձերը պահվում են PostgreSQL-ում, տեղականը՝ SQLite-ում։ Session-ը 8 ժամ է։ PIN-ի պտտումը անվավեր է դարձնում նախկին PIN session-ները։
 - Տեղական npm start-ը կարդում է access.env-ը։ Ամպում կարգավորումները գալիս են միայն Vercel Environment Variables-ից։
 
-Ստեղծող՝ Սիպան Դանիելյան, https://royalarm.uk ։ Սպասարկող՝ https://diataknet.com ։
+Ստեղծող՝ Սիպան Դանիելյան, https://royalarm.uk ։ Սպասարկող՝ https://www.ditaknet.com/en ։
 Ստորև պահպանված տեղադրման մանրամասները լրացվում են այս թարմացմամբ։
 
 # Ditaknet RackMap · Supabase և Vercel

@@ -2,6 +2,9 @@
 const fs=require('node:fs');const path=require('node:path');
 const root=path.join(__dirname,'..'),out=path.join(root,'dist');
 fs.mkdirSync(out,{recursive:true});
-for(const name of ['index.html','app.js','domain.js','rack3d.js','styles.css','manifest.webmanifest','pwa.js','personal-store.js','sw.js','icon-192.png','icon-512.png'])fs.copyFileSync(path.join(root,name),path.join(out,name));
+for(const name of ['index.html','app.js','domain.js','rack3d.js','styles.css','manifest.webmanifest','pwa.js','personal-store.js','sw.js','icon-192.png','icon-512.png','favicon.ico'])fs.copyFileSync(path.join(root,name),path.join(out,name));
 fs.copyFileSync(path.join(root,'node_modules/exceljs/dist/exceljs.min.js'),path.join(out,'exceljs.min.js'));
+const hash=require('node:crypto').createHash('sha256');
+for(const name of fs.readdirSync(out).sort())if(name!=='sw.js')hash.update(fs.readFileSync(path.join(out,name)));
+fs.writeFileSync(path.join(out,'sw.js'),fs.readFileSync(path.join(root,'sw.js'),'utf8').replace('__BUILD_ID__',hash.digest('hex').slice(0,12)));
 console.log('Built public app assets; no environment files or database files included.');

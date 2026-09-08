@@ -112,4 +112,4 @@ RackMap-ը Ditaknet-ի մաս է · © Ditaknet։ Կողքի մենյուում 
 
 Ամպային տարբերակի տեղադրումը, նույն Ditaknet հաշիվների իրավունքները և տեղական բազայի անվտանգ տեղափոխումը նկարագրված են [DEPLOY-VERCEL.md](DEPLOY-VERCEL.md)-ում։ Կայքը հրապարակված է https://mypro.smarttechllc.am/ հասցեում։ Աշխատանքի համար անհրաժեշտ են Vercel սերվերային փոփոխականները և Supabase migrations-ը։ Տեղական `npm start` տարբերակը շարունակում է օգտագործել SQLite-ը, եթե `RACKMAP_STORAGE=supabase` միացված չէ։
 
-Ստեղծված է **Սիպան Դանիելյանի** կողմից՝ [royalarm.uk](https://royalarm.uk)։ Սպասարկող՝ [diataknet.com](https://diataknet.com)։
+Ստեղծված է **Սիպան Դանիելյանի** կողմից՝ [royalarm.uk](https://royalarm.uk)։ Սպասարկող՝ [ditaknet.com](https://www.ditaknet.com/en)։

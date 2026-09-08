@@ -121,9 +121,9 @@ function createApp(options={}) {
         const range=pdf.bufferedPageRange();for(let i=0;i<range.count;i++){pdf.switchToPage(i);pdf.fontSize(8).fillColor('#777777').text(`${i+1} / ${range.count}`,40,810,{lineBreak:false});}
         pdf.end();return;
       }
-      const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/domain.js':'domain.js','/rack3d.js':'rack3d.js','/styles.css':'styles.css','/manifest.webmanifest':'manifest.webmanifest','/sw.js':'sw.js','/pwa.js':'pwa.js','/personal-store.js':'personal-store.js','/exceljs.min.js':'node_modules/exceljs/dist/exceljs.min.js','/icon-192.png':'icon-192.png','/icon-512.png':'icon-512.png'};
+      const files={'/favicon.ico':'favicon.ico','/':'index.html','/index.html':'index.html','/app.js':'app.js','/domain.js':'domain.js','/rack3d.js':'rack3d.js','/styles.css':'styles.css','/manifest.webmanifest':'manifest.webmanifest','/sw.js':'sw.js','/pwa.js':'pwa.js','/personal-store.js':'personal-store.js','/exceljs.min.js':'node_modules/exceljs/dist/exceljs.min.js','/icon-192.png':'icon-192.png','/icon-512.png':'icon-512.png'};
       if(req.method==='GET'&&files[url.pathname]){
-        const file=files[url.pathname],mime=file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
+        const file=files[url.pathname],mime=file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(path.join(__dirname,file)).pipe(res);
       }
       json(res,404,{error:'Չի գտնվել'});
