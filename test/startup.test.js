@@ -25,6 +25,8 @@ test('failed remembered cloud mode offers a working personal fallback without lo
     await until(()=>w.document.querySelector('[data-action=personal-mode]'));
     assert.ok(!w.document.querySelector('#content').textContent.includes('localhost'));
     w.document.querySelector('[data-action=personal-mode]').click();await until(()=>w.document.querySelector('.storage-mode'));
+    await until(()=>w.document.querySelector('#storageInfo .storage-path')&&w.document.querySelector('#networkInfo .hint'));
+
     assert.equal(w.localStorage.getItem('rackmap-storage-mode'),'personal');assert.equal(requests.length,1);
   }finally{dom.window.close();}
 });

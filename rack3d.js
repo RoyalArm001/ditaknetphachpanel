@@ -1,8 +1,10 @@
 (function(root,factory){if(typeof module==='object')module.exports=factory(require('./domain'));else root.Rack3D=factory(root.RackDomain);})(typeof globalThis!=='undefined'?globalThis:this,function(D){
   'use strict';
+const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
+
   const U=.18;
   function buildScene(state,rackId){
-    const rack=state.floors.flatMap(f=>f.racks).find(r=>r.id===rackId);if(!rack)throw new Error('Ռաքը չի գտնվել');
+    const rack=state.floors.flatMap(f=>f.racks).find(r=>r.id===rackId);if(!rack)throw new Error(tr('Ռաքը չի գտնվել'));
     const all=D.ports(state),byId=new Map(all.map(x=>[x.p.id,x]));
     const linked=all.filter(x=>x.p.switchPortId&&byId.has(x.p.switchPortId)).map(x=>({from:x,to:byId.get(x.p.switchPortId)})).filter(x=>x.from.r.id===rackId||x.to.r.id===rackId);
     const remote=[...new Map(linked.flatMap(x=>[x.from,x.to]).filter(x=>x.r.id!==rackId).map(x=>[x.d.id,x])).values()];
@@ -39,7 +41,7 @@
         hit.push({id:link.id,points:points.map(project)});
         if(isSelected){for(const [point,label] of [[link.a,scene.points.find(x=>x.id===link.fromId)?.number],[link.b,scene.points.find(x=>x.id===link.toId)?.number]]){const q=project(point);ctx.beginPath();ctx.arc(q.x,q.y,7,0,Math.PI*2);ctx.fillStyle='#f5d879';ctx.fill();ctx.font='bold 12px Segoe UI';ctx.fillStyle='#142e34';ctx.fillText(String(label),q.x+10,q.y+4);}}
       }
-      if(!scene.links.length){ctx.fillStyle='#bdd3cf';ctx.font='14px Segoe UI';ctx.fillText('Գրանցված միացումներ դեռ չկան',20,height-24);}
+      if(!scene.links.length){ctx.fillStyle='#bdd3cf';ctx.font='14px Segoe UI';ctx.fillText(tr('Գրանցված միացումներ դեռ չկան'),20,height-24);}
     }
     canvas.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY};moved=false;canvas.setPointerCapture?.(e.pointerId);};
     canvas.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;yaw+=dx*.008;pitch=Math.max(-.6,Math.min(.6,pitch+dy*.006));drag={x:e.clientX,y:e.clientY};draw();};

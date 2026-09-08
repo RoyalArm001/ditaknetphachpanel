@@ -18,6 +18,17 @@ test('integration environment aliases expose names, never secret values',()=>{
   assert.equal(normalizeEnv(env).POSTGRES_URL,'postgres://private');assert.equal(publicConfig(env).setupRequired,false);
   assert.ok(!JSON.stringify(publicConfig(env)).includes('postgres://private'));assert.equal(publicConfig({}).missing.length,3);
 });
+test('Vercel Supabase integration variables configure database and account auth',async()=>{
+  const {normalizeEnv,publicConfig}=require('../env-config');
+  const env={supabase_POSTGRES_URL:'postgres://user:password@db.test/app',supabase_SUPABASE_URL:'https://project.supabase.co',NEXT_PUBLIC_supabase_SUPABASE_URL:'https://project.supabase.co',supabase_SUPABASE_PUBLISHABLE_KEY:'publishable-test',supabase_SUPABASE_ANON_KEY:'anon-test',supabase_SUPABASE_SECRET_KEY:'secret-test',supabase_SUPABASE_SERVICE_ROLE_KEY:'service-test',RACKMAP_STORAGE:'supabase'};
+  const config=publicConfig(env);assert.equal(config.setupRequired,false);assert.deepEqual(config.missing,[]);
+  assert.equal(normalizeEnv(env).POSTGRES_URL,env.supabase_POSTGRES_URL);
+  const pool=require('../cloud-store').createPool(env);assert.equal(pool.options.connectionString,env.supabase_POSTGRES_URL);await pool.end();
+  let key;const auth=require('../cloud-auth').createAuth(env,async(url,options)=>{assert.equal(url,'https://project.supabase.co/auth/v1/user');key=options.headers.apikey;return {ok:true,json:async()=>({id:'staff',app_metadata:{rackmap_access:true}})};});
+  assert.equal((await auth.authenticate({headers:{authorization:'Bearer token'}},{})).id,'staff');assert.equal(key,'publishable-test');
+  for(const value of ['password','publishable-test','anon-test','secret-test','service-test'])assert.ok(!JSON.stringify(config).includes(value));
+  assert.equal(publicConfig({supabase_POSTGRES_URL_NON_POOLING:'postgres://fallback',NEXT_PUBLIC_supabase_SUPABASE_URL:'https://project.supabase.co',SUPABASE_ANON_KEY:'anon'}).setupRequired,false);
+});
 test('local PIN gate protects state, returns cookie and allows editing',async t=>{
   const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{once}=require('node:events');
   const hash=await hashPin('12345678'),oldHash=process.env.RACKMAP_PIN_HASH,oldSecret=process.env.RACKMAP_SESSION_SECRET;

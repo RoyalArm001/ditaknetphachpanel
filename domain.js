@@ -3,14 +3,16 @@
   else root.RackDomain = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const statuses = {free:'Ազատ', used:'Զբաղված', fault:'Անսարք'};
+const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
+
+  const statuses = {get free(){return tr('Ազատ');}, get used(){return tr('Զբաղված');}, get fault(){return tr('Անսարք');}};
   const services = {
-    '':{label:'Չնշված',color:'#64748b'},
-    camera:{label:'Տեսախցիկ',color:'#a65d08'},
+    '':{get label(){return tr('Չնշված');},color:'#64748b'},
+    camera:{get label(){return tr('Տեսախցիկ');},color:'#a65d08'},
     wifi:{label:'Wi-Fi',color:'#2563b0'},
-    access:{label:'Access control',color:'#7c3daf'},
-    phone:{label:'Հեռախոս',color:'#b83878'},
-    internet:{label:'Internet',color:'#08796b'}
+    access:{get label(){return tr('Access control');},color:'#7c3daf'},
+    phone:{get label(){return tr('Հեռախոս');},color:'#b83878'},
+    internet:{get label(){return tr('Internet');},color:'#08796b'}
   };
   const serviceColor = (s,key) => s.serviceColors?.[key] || services[key]?.color || services[''].color;
   const empty = () => ({schema:2, company:'', floors:[]});
@@ -19,41 +21,41 @@
   const port = (number, id) => ({id,number,status:'free',cable:'',floorId:'',room:'',door:'',side:'',notes:'',switchPortId:'',service:'',vlan:''});
   const assert = (v,m) => {if (!v) throw new Error(m);};
   function validate(s) {
-    assert(s && s.schema===2 && typeof s.company==='string' && s.company.length<=200 && Array.isArray(s.floors), 'Տվյալների ձևաչափը սխալ է');
+    assert(s && s.schema===2 && typeof s.company==='string' && s.company.length<=200 && Array.isArray(s.floors), tr('Տվյալների ձևաչափը սխալ է'));
     if(s.serviceColors!==undefined){
-      assert(s.serviceColors && typeof s.serviceColors==='object' && !Array.isArray(s.serviceColors),'Գույների ձևաչափը սխալ է');
-      for(const [key,value] of Object.entries(s.serviceColors))assert(Object.hasOwn(services,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),'Գույնը պետք է լինի HEX ձևաչափով');
+      assert(s.serviceColors && typeof s.serviceColors==='object' && !Array.isArray(s.serviceColors),tr('Գույների ձևաչափը սխալ է'));
+      for(const [key,value] of Object.entries(s.serviceColors))assert(Object.hasOwn(services,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),tr('Գույնը պետք է լինի HEX ձևաչափով'));
     }
-    assert(s.floors.length<=200,'Առավելագույնը 200 հարկ');
+    assert(s.floors.length<=200,tr('Առավելագույնը 200 հարկ'));
     const ids=new Set();
-    const id=x=>{assert(typeof x==='string' && /^[\w-]{1,80}$/.test(x) && !ids.has(x),'Կրկնվող կամ սխալ ID');ids.add(x);};
-    const text=(x,max=200)=>assert(typeof x==='string' && x.length<=max,'Տեքստային դաշտը սխալ է կամ չափազանց երկար');
-    const name=x=>{text(x);assert(x.trim(),'Անվանումը պարտադիր է');};
-    const integer=(x,min,max)=>assert(Number.isInteger(x)&&x>=min&&x<=max,'Չափը կամ պորտի համարը սխալ է');
-    const uniqueNames=xs=>assert(new Set(xs.map(x=>x.name.trim().toLowerCase())).size===xs.length,'Անվանումները պետք է տարբեր լինեն');
+    const id=x=>{assert(typeof x==='string' && /^[\w-]{1,80}$/.test(x) && !ids.has(x),tr('Կրկնվող կամ սխալ ID'));ids.add(x);};
+    const text=(x,max=200)=>assert(typeof x==='string' && x.length<=max,tr('Տեքստային դաշտը սխալ է կամ չափազանց երկար'));
+    const name=x=>{text(x);assert(x.trim(),tr('Անվանումը պարտադիր է'));};
+    const integer=(x,min,max)=>assert(Number.isInteger(x)&&x>=min&&x<=max,tr('Չափը կամ պորտի համարը սխալ է'));
+    const uniqueNames=xs=>assert(new Set(xs.map(x=>x.name.trim().toLowerCase())).size===xs.length,tr('Անվանումները պետք է տարբեր լինեն'));
     uniqueNames(s.floors);
     for (const f of s.floors) {
-      id(f.id); name(f.name); assert(Array.isArray(f.racks)&&f.racks.length<=100,'Ռաքերի ցանկը սխալ է');uniqueNames(f.racks);
+      id(f.id); name(f.name); assert(Array.isArray(f.racks)&&f.racks.length<=100,tr('Ռաքերի ցանկը սխալ է'));uniqueNames(f.racks);
       for(const r of f.racks) {
         id(r.id);name(r.name);integer(r.u,1,60);text(r.location);text(r.photo,3000000);
-        assert(!r.photo || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo),'Լուսանկարի ձևաչափը սխալ է');
-        assert(Array.isArray(r.devices)&&r.devices.length<=60,'Սարքերի ցանկը սխալ է');uniqueNames(r.devices);
+        assert(!r.photo || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo),tr('Լուսանկարի ձևաչափը սխալ է'));
+        assert(Array.isArray(r.devices)&&r.devices.length<=60,tr('Սարքերի ցանկը սխալ է'));uniqueNames(r.devices);
         const used=new Set();
         for(const d of r.devices) {
-          id(d.id);name(d.name);assert(['panel','switch'].includes(d.type),'Սարքի տեսակը սխալ է');text(d.model);text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),'Սարքի գույնը սխալ է');
-          integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,'Սարքը դուրս է գալիս ռաքի սահմաններից');
-          for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
-          assert(Array.isArray(d.portList),'Պորտերի ցանկը սխալ է');integer(d.portList.length,1,96);
-          if(d.type==='panel') assert([12,24,48].includes(d.portList.length),'Փաչ պանելը պետք է ունենա 12, 24 կամ 48 պորտ');
+          id(d.id);name(d.name);assert(['panel','switch'].includes(d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
+          integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
+          for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
+          assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);
+          if(d.type==='panel') assert([12,24,48].includes(d.portList.length),tr('Փաչ պանելը պետք է ունենա 12, 24 կամ 48 պորտ'));
           d.portList.forEach((p,i)=>{
-            id(p.id);assert(p.number===i+1,'Պորտերի համարակալումը սխալ է');assert(Object.hasOwn(statuses,p.status),'Պորտի վիճակը սխալ է');
+            id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
             // Missing fields remain valid for existing databases and older backups.
-            if(p.service!==undefined)assert(typeof p.service==='string'&&Object.hasOwn(services,p.service),'Պորտի նշանակությունը սխալ է');
-            if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),'VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ');
-            assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),'Մալուխի հարկը չի գտնվել');
-            assert(p.status!=='free'||(!p.cable&&!p.switchPortId),'Մալուխով կամ կապով պորտը չի կարող ազատ լինել');
-            assert(d.type==='panel'||!p.switchPortId,'Կապը լրացվում է փաչ պանելի պորտում');
+            if(p.service!==undefined)assert(typeof p.service==='string'&&Object.hasOwn(services,p.service),tr('Պորտի նշանակությունը սխալ է'));
+            if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
+            assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),tr('Մալուխի հարկը չի գտնվել'));
+            assert(p.status!=='free'||(!p.cable&&!p.switchPortId),tr('Մալուխով կամ կապով պորտը չի կարող ազատ լինել'));
+            assert(d.type==='panel'||!p.switchPortId,tr('Կապը լրացվում է փաչ պանելի պորտում'));
           });
         }
       }
@@ -61,8 +63,8 @@
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x])), taken=new Set();
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
-      assert(d.type==='panel'&&to&&to.d.type==='switch','Սվիչի պորտը չի գտնվել');
-      assert(!taken.has(p.switchPortId),'Սվիչի պորտն արդեն կապված է այլ փաչ պորտի հետ');taken.add(p.switchPortId);
+      assert(d.type==='panel'&&to&&to.d.type==='switch',tr('Սվիչի պորտը չի գտնվել'));
+      assert(!taken.has(p.switchPortId),tr('Սվիչի պորտն արդեն կապված է այլ փաչ պորտի հետ'));taken.add(p.switchPortId);
     }
     return s;
   }
