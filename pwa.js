@@ -10,12 +10,12 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   }
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
   window.addEventListener('rackmap-languagechange',update);
-  window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Ditaknet փաչ պանել-ը տեղադրված է'));});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Իմ փաչ-ը տեղադրված է'));});
   actions['install-app']=async()=>{
     if(standalone()){toast(tr('Ծրագիրն արդեն բացված է որպես հավելված'));return;}
     if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();await prompt.userChoice;update();return;}
     const secure=window.isSecureContext;
-    modal(tr('Տեղադրել Ditaknet փաչ պանել-ը'),
+    modal(tr('Տեղադրել Իմ փաչ-ը'),
       (secure?'':tr('<p><strong>Հեռախոսում տեղադրելու համար բացեք ծրագրի HTTPS հասցեն։</strong> Սովորական տեղական HTTP հասցեն նախատեսված է բրաուզերով աշխատանքի համար։ HTTPS հասցեն պետք է կարգավորի ցանցի ադմինիստրատորը։</p>'))+
       tr('<p><strong>iPhone / iPad․</strong> Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։</p><p><strong>Android․</strong> Chrome-ի մենյու → Install app կամ Add to Home screen։ Եթե տեղադրումը դեռ հասանելի չէ, թարմացրեք էջը և կրկին փորձեք։</p><p class="hint">Անձնական ռեժիմը առաջին բացումից հետո աշխատում է նաև անցանց։ Թիմային cloud-ի համար ինտերնետ է պետք։</p>'));
   };

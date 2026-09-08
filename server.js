@@ -43,7 +43,7 @@ function createApp(options={}) {
         }
         if(url.pathname==='/api/auth/logout'&&req.method==='POST'){auth.clear(res);return json(res,200,{ok:true});}
         const user=await auth.authenticate(req,res);
-        if(!user)return json(res,401,{error:tr('Մուտք գործեք Ditaknet-ի ձեր հաշվով')});
+        if(!user)return json(res,401,{error:tr('Մուտք գործեք Իմ փաչ-ի ձեր հաշվով')});
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
       }
 
@@ -55,7 +55,7 @@ function createApp(options={}) {
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
       }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
-        if(cloud){const data=Buffer.from(JSON.stringify(await store.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="Ditaknet-RackMap-all.json"'});return res.end(data);}
+        if(cloud){const data=Buffer.from(JSON.stringify(await store.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
         const file=await store.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
       }
       if(req.method==='POST'&&url.pathname==='/api/companies'){
@@ -89,7 +89,7 @@ function createApp(options={}) {
       if(req.method==='GET'&&['/api/export.xlsx','/api/export.pdf'].includes(url.pathname)){
         const {state}=current, rows=Domain.rows(state,Object.fromEntries(url.searchParams));
         if(url.pathname.endsWith('xlsx')){
-          const book=new ExcelJS.Workbook();book.creator=tr('Սիպան Դանիելյան · royalarm.uk · Ditaknet փաչ պանել');
+          const book=new ExcelJS.Workbook();book.creator=tr('Սիպան Դանիելյան · royalarm.uk · Իմ փաչ');
           const sheet=book.addWorksheet(tr('Միացումներ'),{views:[{state:'frozen',ySplit:1}]});
           sheet.columns=columns.map(([key,header])=>({header:tr(header),key,width:key==='notes'?45:key==='connection'?36:22}));
           for(const row of rows)sheet.addRow(Object.fromEntries(columns.map(([k])=>[k,exportValue(row,k,tr)])));

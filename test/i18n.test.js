@@ -5,6 +5,7 @@ const i18n=require('../i18n'),{parse}=require('acorn');
 async function until(fn){for(let i=0;i<150;i++){if(fn())return;await new Promise(r=>setTimeout(r,20));}assert.fail('UI did not settle');}
 
 test('English and Russian cover all Armenian source text and preserve interpolated data',()=>{
+  for(const lang of ['en','ru'])assert.doesNotMatch(i18n.translate(fs.readFileSync('index.html','utf8'),lang),/[\u0531-\u0587]/);
   for(const [key,values]of Object.entries(require('../locales'))){assert.ok(!key.includes('??'));assert.equal(values.length,2);for(const value of values)assert.ok(value&&!value.includes('??'),key);}
   const font=require('fontkit').openSync('assets/DejaVuSans.ttf');
   for(const char of 'Հայերեն English Русский')assert.ok(font.hasGlyphForCodePoint(char.codePointAt(0)),char);
@@ -35,6 +36,9 @@ test('language switching preserves setup input and company data, translates new 
   t.after(async()=>{dom.window.close();await new Promise(r=>server.close(r));});
   const w=dom.window,$=q=>w.document.querySelector(q);
   async function language(lang){$('#languageSelect').value=lang;$('#languageSelect').dispatchEvent(new w.Event('change'));await until(()=>!$('#languageSelect').disabled);assert.equal(w.document.documentElement.lang,lang);}
+  await until(()=>$('[data-action=welcome-personal]'));
+  await language('ru');assert.equal($('#content h1').textContent,'Как вы хотите работать?');
+  $('[data-action=welcome-shared]').click();
   await until(()=>$('#setupForm'));$('#company').value='Հարկեր';$('#count').value='2';
   await language('en');assert.equal($('#content h1').textContent,'Start with your building');assert.equal($('#company').value,'Հարկեր');assert.equal($('#count').value,'2');
   assert.equal($('.language-picker span').textContent,'Language');
@@ -70,6 +74,7 @@ test('account-only cloud opens sign-in and keeps entered credentials when langua
   const requests=[];w.fetch=async url=>{requests.push(url);return url==='/api/config'?new Response(JSON.stringify({cloud:true,authRequired:true,accountEnabled:true,pinEnabled:false})):new Response(JSON.stringify({error:'Մուտք գործեք Ditaknet-ի ձեր հաշվով'}),{status:401});};
   try{
     for(const file of ['locales.js','i18n.js','domain.js','personal-store.js','app.js'])w.eval(fs.readFileSync(file,'utf8'));
+    await until(()=>$('[data-action=welcome-personal]'));$('[data-action=welcome-personal]').click();
     await until(()=>$('[data-action=connect-cloud]'));$('[data-action=connect-cloud]').click();await until(()=>$('#loginForm'));
     assert.ok($('#email'));assert.equal($('#pin'),null);assert.ok(!requests.some(x=>x.includes('/api/auth/pin')));
     $('#email').value='staff@example.test';$('#password').value='unsent-test';

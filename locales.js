@@ -537,9 +537,9 @@
     "No code required.",
     "Код не требуется."
   ],
-  "Մուտք՝ Ditaknet-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։": [
-    "Sign in with a Ditaknet account and RackMap staff permission.",
-    "Войдите с аккаунтом Ditaknet и разрешением сотрудника RackMap."
+  "Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։": [
+    "Sign in with a My Patch account and RackMap staff permission.",
+    "Войдите с аккаунтом Мой патч и разрешением сотрудника RackMap."
   ],
   "Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։": [
     "Local access. If PIN is enabled, enter the staff code.",
@@ -1274,8 +1274,8 @@
     "Основные разделы"
   ],
   "ի մաս · © Ditaknet": [
-    "part · © Ditaknet",
-    "часть · © Ditaknet"
+    "part · © My Patch",
+    "часть · © Мой патч"
   ],
   "Տեղական ցանց": [
     "Local network",
@@ -1441,9 +1441,9 @@
     "The app is already running in standalone mode",
     "Приложение уже открыто в автономном окне"
   ],
-  "Տեղադրել Ditaknet փաչ պանել-ը": [
-    "Install Ditaknet patch panel",
-    "Установить Ditaknet патч-панель"
+  "Տեղադրել Իմ փաչ-ը": [
+    "Install My Patch",
+    "Установить Мой патч"
   ],
   "Հեռախոսում տեղադրելու համար բացեք ծրագրի HTTPS հասցեն։": [
     "Open the app's HTTPS address to install it on your phone.",
@@ -1549,9 +1549,9 @@
     "Sign-in failed or RackMap permission is missing",
     "Не удалось войти или отсутствует разрешение RackMap"
   ],
-  "Մուտք գործեք Ditaknet-ի ձեր հաշվով": [
-    "Sign in with your Ditaknet account",
-    "Войдите с аккаунтом Ditaknet"
+  "Մուտք գործեք Իմ փաչ-ի ձեր հաշվով": [
+    "Sign in with your My Patch account",
+    "Войдите с аккаунтом Мой патч"
   ],
   "Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։": [
     "The full backup is too large. Use the cloud:export command.",
@@ -1569,9 +1569,9 @@
     "Another staff member changed the data. Refresh the page.",
     "Другой сотрудник изменил данные. Обновите страницу."
   ],
-  "Սիպան Դանիելյան · royalarm.uk · Ditaknet փաչ պանել": [
-    "Sipan Danielyan · royalarm.uk · Ditaknet patch panel",
-    "Сипан Даниелян · royalarm.uk · Ditaknet патч-панель"
+  "Սիպան Դանիելյան · royalarm.uk · Իմ փաչ": [
+    "Sipan Danielyan · royalarm.uk · My Patch",
+    "Сипан Даниелян · royalarm.uk · Мой патч"
   ],
   "Ռաքեր և սարքեր": [
     "Racks and devices",
@@ -1669,9 +1669,9 @@
     "VLAN must be an integer from 1 to 4094 or empty",
     "VLAN должен быть целым числом от 1 до 4094 или пустым"
   ],
-  "Ditaknet-ի մաս · © Ditaknet": [
-    "Part of Ditaknet · © Ditaknet",
-    "Часть Ditaknet · © Ditaknet"
+  "Իմ փաչ-ի մաս · © Ditaknet": [
+    "Part of My Patch · © My Patch",
+    "Часть Мой патч · © Мой патч"
   ],
   "Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։": [
     "In Safari, open the app address → Share → Add to Home Screen → Add.",
@@ -1692,5 +1692,85 @@
   "Վերջին 50 փոփոխությունները և JSON արտահանում": [
     "Last 50 changes and JSON export",
     "Последние 50 изменений и экспорт JSON"
+  ],
+  "Իմ փաչ": [
+    "My Patch",
+    "Мой патч"
+  ],
+  "ԻՄ ՓԱՉ": [
+    "MY PATCH",
+    "МОЙ ПАТЧ"
+  ],
+  "ՑԱՆՑԱՅԻՆ ՌԱՔԵՐ": [
+    "NETWORK RACKS",
+    "СЕТЕВЫЕ СТОЙКИ"
+  ],
+  "Թիմային հաշիվ": [
+    "Team account",
+    "Аккаунт команды"
+  ],
+  "Ինչպե՞ս եք ցանկանում աշխատել": [
+    "How would you like to work?",
+    "Как вы хотите работать?"
+  ],
+  "Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։": [
+    "Choose your workspace. You can change this later in Settings.",
+    "Выберите рабочее пространство. Позже выбор можно изменить в настройках."
+  ],
+  "Սկսել իմ սարքում": [
+    "Start on my device",
+    "Начать на моём устройстве"
+  ],
+  "Ստեղծեք ձեր շենքը և ռաքերը։ Տվյալները պահվում են միայն այս բրաուզերում և չեն ուղարկվում ընդհանուր cloud։": [
+    "Create your building and racks. Data stays in this browser and is not sent to the shared cloud.",
+    "Создайте здание и стойки. Данные остаются в этом браузере и не отправляются в общее облако."
+  ],
+  "Սկսել նոր նախագիծ": [
+    "Start a new project",
+    "Начать новый проект"
+  ],
+  "Բացել իմ պահուստային պատճենը": [
+    "Open my backup",
+    "Открыть мою резервную копию"
+  ],
+  "Ընտրեք նախկինում պահված JSON ֆայլը և շարունակեք աշխատանքը այս սարքում։": [
+    "Choose a saved JSON file and continue working on this device.",
+    "Выберите сохранённый файл JSON и продолжите работу на этом устройстве."
+  ],
+  "Ընտրել JSON ֆայլ": [
+    "Choose JSON file",
+    "Выбрать файл JSON"
+  ],
+  "Միանալ թիմի տարածքին": [
+    "Join a team workspace",
+    "Присоединиться к команде"
+  ],
+  "Բացեք ընդհանուր բազան ձեր թիմի հաշվով կամ PIN-ով։ Անձնական տվյալները կմնան առանձին։": [
+    "Open the shared database with your team account or PIN. Personal data stays separate.",
+    "Откройте общую базу с аккаунтом команды или PIN-кодом. Личные данные останутся отдельно."
+  ],
+  "Մուտք գործել թիմի տարածք": [
+    "Sign in to team workspace",
+    "Войти в пространство команды"
+  ],
+  "Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։": [
+    "No registration is needed for personal work. Keep a backup too.",
+    "Для личной работы регистрация не нужна. Сохраняйте также резервную копию."
+  ],
+  "Ընտրել աշխատանքային տարածքը": [
+    "Choose workspace",
+    "Выбрать рабочее пространство"
+  ],
+  "Իմ փաչ · բջջային հավելված": [
+    "My Patch · mobile app",
+    "Мой патч · мобильное приложение"
+  ],
+  "Իմ փաչ-ը տեղադրված է": [
+    "My Patch installed",
+    "Мой патч установлен"
+  ],
+  "Իմ փաչ · Ցանցային ռաքեր": [
+    "My Patch · Network racks",
+    "Мой патч · Сетевые стойки"
   ]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

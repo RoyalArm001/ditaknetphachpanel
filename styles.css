@@ -89,6 +89,7 @@ body.right-collapsed .rack-side{display:none}
 .login-view .sidebar,.login-view .mobile-nav,.login-view .topbar,.login-view #panelBackdrop{display:none!important}
 .login-view .workspace{margin-left:0}
 .language-picker{display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0}
+.welcome{max-width:1060px;margin:30px auto;padding:32px}.welcome>.login-mark{margin-left:0}.welcome-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:26px 0}.welcome-options>section{display:flex;flex-direction:column;padding:22px;border:1px solid var(--line);border-radius:10px;background:#f8fbfa}.welcome-options h2{line-height:1.5}.welcome-options p{color:var(--muted);font-size:13px;flex:1}.welcome-options .button{width:100%;min-height:44px}@media(max-width:760px){.welcome{padding:20px;margin:0 auto}.welcome-options{grid-template-columns:1fr;gap:12px}.welcome-options>section{padding:18px}}
 .language-picker select{min-width:66px;padding:6px 8px;font-size:12px}
 .login-view .topbar{display:flex!important;justify-content:flex-end}
 .login-view .topbar>*:not(.language-picker){display:none}

@@ -4,13 +4,13 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#174e50"><meta name="description" content="Ռաքերի, փաչ պանելների և ցանցային մալուխների կառավարում">
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" type="image/x-icon">
-  <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ditaknet փաչ պանել">
-  <title>Ditaknet փաչ պանել · Ցանցային ռաքեր</title>
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Իմ փաչ">
+  <title>Իմ փաչ · Ցանցային ռաքեր</title>
   <link rel="stylesheet" href="styles.css"><script defer src="locales.js"></script><script defer src="i18n.js"></script><script defer src="domain.js"></script><script defer src="rack3d.js"></script><script defer src="personal-store.js"></script><script defer src="app.js"></script><script defer src="pwa.js"></script>
 </head>
 <body>
   <aside class="sidebar" id="leftPanel">
-    <a class="brand" href="#overview"><span class="brand-mark">▤</span><span>Ditaknet<small>ՓԱՉ ՊԱՆԵԼ</small></span></a>
+    <a class="brand" href="#overview"><span class="brand-mark">▤</span><span>Իմ փաչ<small>ՑԱՆՑԱՅԻՆ ՌԱՔԵՐ</small></span></a>
     <div class="company-switcher"><label class="company-label" for="companySelect">ԸՆԿԵՐՈՒԹՅՈՒՆ</label><select id="companySelect" aria-label="Ընտրել ընկերությունը" disabled><option>Բեռնվում է…</option></select><button class="company-add" data-action="company-new">＋ Նոր ընկերություն</button><div id="companyLabel" class="company-name">—</div></div>
     <nav aria-label="Հիմնական բաժիններ">
       <a href="#overview" data-view="overview"><span>▦</span> Ընդհանուր տեսք</a>
@@ -19,13 +19,13 @@
       <a href="#reports" data-view="reports"><span>↗</span> Հաշվետվություններ</a>
       <a href="#settings" data-view="settings"><span>⚙</span> Կարգավորումներ</a>
     </nav>
-    <div class="sidebar-bottom"><button class="button small" data-action="install-app">↓ Տեղադրել հեռախոսում</button><p>Ditaknet-ի մաս · © Ditaknet</p><span class="live-dot"></span> Տեղական ցանց<div>Ձեր թիմի ընդհանուր քարտեզը</div></div>
+    <div class="sidebar-bottom"><button class="button small" data-action="install-app">↓ Տեղադրել հեռախոսում</button><p>Իմ փաչ</p><span class="live-dot"></span> Տեղական ցանց<div>Ձեր թիմի ընդհանուր քարտեզը</div></div>
   </aside>
   <button id="panelBackdrop" class="panel-backdrop" data-action="panels-close" aria-label="Փակել կողային վահանակը" hidden></button>
   <div class="workspace">
     <header class="topbar"><button class="button small panel-toggle" data-action="toggle-left" aria-controls="leftPanel" aria-expanded="true">☰ Մենյու</button><span id="breadcrumb">Աշխատանքային տարածք</span><label class="language-picker"><span>Լեզու</span><select id="languageSelect" data-language aria-label="Լեզու"><option value="hy">HY</option><option value="en">EN</option><option value="ru">RU</option></select></label><div class="save-tools"><button id="rightToggle" class="button small panel-toggle" data-action="toggle-right" aria-controls="rightPanel" aria-expanded="true" hidden>Գործիքներ ▸</button><span id="saveStatus" role="status">Միանում է…</span><button data-action="save" class="button small">Պահպանել</button></div></header>
     <div id="connectionBanner" role="alert" hidden></div><main id="content"><div class="empty">Բեռնվում է…</div></main>
-    <footer class="credits"><strong>Ditaknet փաչ պանել</strong><span>Ստեղծված է Սիպան Դանիելյանի կողմից · <a href="https://royalarm.uk" target="_blank" rel="noopener">royalarm.uk</a></span><span>Սպասարկող՝ <a href="https://www.ditaknet.com/en" target="_blank" rel="noopener">ditaknet.com</a></span></footer>
+    <footer class="credits"><strong>Իմ փաչ</strong><span>Ստեղծված է Սիպան Դանիելյանի կողմից · <a href="https://royalarm.uk" target="_blank" rel="noopener">royalarm.uk</a></span><span>Սպասարկող՝ <a href="https://www.ditaknet.com/en" target="_blank" rel="noopener">ditaknet.com</a></span></footer>
   </div>
   <nav class="mobile-nav" aria-label="Բջջային նավարկում"><a href="#overview" data-view="overview">▦<span>Գլխավոր</span></a><a href="#floors" data-view="floors">▤<span>Ռաքեր</span></a><a href="#search" data-view="search">⌕<span>Որոնում</span></a><a href="#settings" data-view="settings">⚙<span>Կարգավորումներ</span></a></nav>
   <dialog id="dialog" aria-labelledby="dialogTitle"></dialog><div id="toast" role="status" hidden></div>
