@@ -1,5 +1,6 @@
 'use strict';
 function createAuth(env=process.env,fetcher=fetch){
+  env=require('./env-config').normalizeEnv(env);
   const base=env.SUPABASE_URL||env.NEXT_PUBLIC_SUPABASE_URL;
   const key=env.SUPABASE_PUBLISHABLE_KEY||env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY||env.SUPABASE_ANON_KEY;
   if(!base||!key||new URL(base).protocol!=='https:')throw new Error('Supabase HTTPS URL and publishable key are required');

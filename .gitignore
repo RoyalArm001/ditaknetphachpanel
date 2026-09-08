@@ -7,5 +7,3 @@ test-output/
 .vercel/
 dist/
 cloud-backups/
-.env
-.env

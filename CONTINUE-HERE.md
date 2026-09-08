@@ -1,3 +1,20 @@
+# Վերջին ստուգում՝ 2026-09-08
+
+Գործող կայքը https://mypro.smarttechllc.am/ է, GitHub՝ RoyalArm001/ditaknetphachpanel, main։ Տեղական պանակը կապված է origin/main պատմությանը՝ առանց ֆայլերը վերագրելու։
+Ստուգման ժամանակ HTML/JS՝ HTTP200, API config/state՝ HTTP503 initialization։ Ավելացվել է prefixed Supabase env ճանաչում և անկախ public config endpoint, որը բացահայտում է միայն բացակայող անունները։
+Գտնվել են իրական գաղտնի արժեքներ նախկին tracked .env.example-ում։ Պահվել է մասնավոր պատճեն %LOCALAPPDATA%/RackMap/cloud-received.env, հրապարակվող .env.example-ը մաքրվել է։ Git պատմությունը չի վերաշարադրվել, արժեքները պետք է փոխարինի սեփականատերը։
+
+Ավարտված նոր փոփոխություններ.
+- PIN UI + սերվերային մուտք, scrypt hash, ստորագրված HttpOnly session, ժամկետ/rotation, մշտական IP սահմանափակում։ SQLite schema3, cloud migration002։
+- Ստեղծված տեղական PIN՝ %LOCALAPPDATA%/RackMap/staff-pin.txt, hash/secret՝ access.env։ Երբեք չհրապարակել։
+- Mobile ստորին նավարկում, drawer և պորտի bottom sheet, safe area, խոշոր հպման պորտեր և 16px մուտքեր, Escape/Tab մշակում։
+- Ditaknet փաչ պանել անվանում, հեղինակ Սիպան Դանիելյան / royalarm.uk, սպասարկող diataknet.com։
+- 27 ավտոմատ թեստ անցնում են։ Իրական բրաուզերային տեսողական ստուգումը հասանելի չէ (CUA browsers=[]).
+- Անավարտ արտաքին կարգավորումներ՝ Vercel env/PIN, Supabase CA և migrations/import։ Իրական cloud բազա այս սեսիայից չի փոփոխվել։
+- DEPLOY-VERCEL.md-ում բոլոր ընթացիկ հրամաններն ու պահանջները կան։
+
+Ստորև հին ընթացքի մանրամասներն են. հակասության դեպքում այս վերին թարմացումը գերակա է։
+
 # RackMap շարունակության պլան
 
 Թարմացվել է՝ 2026-09-07։ Նախագիծ՝ `E:\MyPachpanel`։ Հաջորդ սեսիան պետք է նախ կարդա այս ֆայլը։ Այն ներառում է օգտատիրոջ պահանջները, ավարտված աշխատանքը և մնացած ստուգումները։

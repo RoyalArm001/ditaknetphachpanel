@@ -87,7 +87,7 @@ function createApp(options={}) {
       if(req.method==='GET'&&['/api/export.xlsx','/api/export.pdf'].includes(url.pathname)){
         const {state}=current, rows=Domain.rows(state,Object.fromEntries(url.searchParams));
         if(url.pathname.endsWith('xlsx')){
-          const book=new ExcelJS.Workbook();book.creator='Ditaknet RackMap';
+          const book=new ExcelJS.Workbook();book.creator='Սիպան Դանիելյան · royalarm.uk · Ditaknet փաչ պանել';
           const sheet=book.addWorksheet('Միացումներ',{views:[{state:'frozen',ySplit:1}]});
           sheet.columns=columns.map(([key,header])=>({header,key,width:key==='notes'?45:key==='connection'?36:22}));
           for(const row of rows)sheet.addRow(Object.fromEntries(columns.map(([k])=>[k,exportValue(row,k)])));
@@ -102,7 +102,7 @@ function createApp(options={}) {
         }
         const font=options.font||process.env.RACKMAP_FONT||(fs.existsSync(path.join(__dirname,'assets','NotoSansArmenian.ttf'))?path.join(__dirname,'assets','NotoSansArmenian.ttf'):'C:/Windows/Fonts/sylfaen.ttf');
         if(!fs.existsSync(font))return json(res,503,{error:'Հայերեն PDF-ի համար նշեք RACKMAP_FONT տառատեսակի ֆայլը'});
-        const pdf=new PDFDocument({size:'A4',margin:40,bufferPages:true,info:{Title:'RackMap '+state.company,Author:'Ditaknet'}});
+        const pdf=new PDFDocument({size:'A4',margin:40,bufferPages:true,info:{Title:'RackMap '+state.company,Author:'Սիպան Դանիելյան · royalarm.uk',Subject:'Սպասարկող՝ diataknet.com'}});
         const chunks=[];pdf.on('data',b=>chunks.push(b));
         pdf.on('end',()=>{if(cloud&&chunks.reduce((n,b)=>n+b.length,0)>4*1024*1024)return json(res,413,{error:'Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։'});res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="RackMap.pdf"'});res.end(Buffer.concat(chunks));});
         pdf.font(font).fontSize(21).fillColor('#174E50').text(state.company||'RackMap');

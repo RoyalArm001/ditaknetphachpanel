@@ -2,6 +2,7 @@
 const fs=require('node:fs');
 const D=require('./domain');
 function createPool(env=process.env){
+  env=require('./env-config').normalizeEnv(env);
   const raw=env.POSTGRES_URL||env.POSTGRES_URL_NON_POOLING;
   if(!raw)throw new Error('POSTGRES_URL is required for cloud storage');
   const url=new URL(raw);for(const k of ['sslmode','sslcert','sslkey','sslrootcert','pgbouncer','supa'])url.searchParams.delete(k);

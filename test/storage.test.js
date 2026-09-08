@@ -19,7 +19,7 @@ test('legacy database migration preserves data and history outside the source fo
   assert.equal(store.db.prepare("SELECT revision FROM companies WHERE id='default'").get().revision,7);
   assert.equal(store.db.prepare("SELECT count(*) AS n FROM company_history WHERE company_id='default'").get().n,1);
   assert.deepEqual(fs.readFileSync(legacyPath),original);
-  const files=fs.readdirSync(store.backups);assert.ok(files.some(x=>x.startsWith('before-schema-2-')));assert.ok(files.some(x=>x.startsWith('rackmap-')));
+  const files=fs.readdirSync(store.backups);assert.ok(files.some(x=>x.startsWith(`before-schema-${SCHEMA_VERSION}-`)));assert.ok(files.some(x=>x.startsWith('rackmap-')));
   const snap=new DatabaseSync(store.backup(),{readOnly:true});assert.equal(snap.prepare('PRAGMA integrity_check').get().integrity_check,'ok');assert.equal(snap.prepare('SELECT count(*) AS n FROM companies').get().n,1);snap.close();
   store.db.prepare("UPDATE companies SET revision=8,body=? WHERE id='default'").run(JSON.stringify({...old,company:'Նոր անուն'}));store.db.close();
   store=openStore({dataDir,legacyPath});assert.equal(JSON.parse(store.db.prepare("SELECT body FROM companies WHERE id='default'").get().body).company,'Նոր անուն');assert.equal(store.db.prepare("SELECT revision FROM companies WHERE id='default'").get().revision,8);store.db.close();

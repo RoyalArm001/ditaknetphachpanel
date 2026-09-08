@@ -1,3 +1,22 @@
+# Թարմացում՝ 2026-09-08
+
+Գործող հասցե՝ https://mypro.smarttechllc.am/։ Ստուգման սկզբում էջը տալիս էր 200, իսկ /api/config և /api/state՝ 503։ Կոդը հիմա ընդունում է Vercel integration-ի supabase_ և NEXT_PUBLIC_supabase_ նախածանցերը։ /api/config-ը անկախ է բազայի սկզբնավորումից և հայտնում է միայն բացակայող փոփոխականների անունները։
+
+GitHub-ի նախորդ .env.example-ում իրական գաղտնի արժեքներ էին հրապարակված։ Ֆայլը մաքրված է, բայց Git պատմությունը չի վերաշարադրվել։ Փոխարինեք գաղտնի արժեքները Supabase-ում և համապատասխան Ditaknet/Vercel միջավայրերում։
+
+## Աշխատակիցների PIN
+
+- npm run pin:setup ստեղծում է պատահական 8-նիշ ընդհանուր աշխատակցային PIN։ Վերագեներացում՝ npm run pin:setup -- --rotate։
+- PIN-ը հասանելի է միայն տեղական %LOCALAPPDATA%/RackMap/staff-pin.txt-ում։ Սերվերային hash-ն ու session secret-ը՝ հարակից access.env-ում։ Դրանք GitHub չեն ուղարկվում։
+- Vercel-ում access.env-ից ավելացրեք RACKMAP_PIN_HASH և RACKMAP_SESSION_SECRET փոփոխականները, ապա redeploy։
+- npm run cloud:migrate-ը պետք է գործարկել թարմ կոդով՝ նաև migrations/002-pin.sql-ը կիրառելու համար։
+- PIN-ով մուտքը տալիս է բոլոր ընկերությունները խմբագրելու իրավունք։ Սա ընդհանուր թիմային կոդ է, անհատական աշխատակիցների audit չէ։ Այն փոխանցեք միայն աշխատակիցներին։
+- 5 փորձից հետո տվյալ IP-ի համար սահմանվում է 15-րոպեանոց սահմանափակում։ Cloud փորձերը պահվում են PostgreSQL-ում, տեղականը՝ SQLite-ում։ Session-ը 8 ժամ է։ PIN-ի պտտումը անվավեր է դարձնում նախկին PIN session-ները։
+- Տեղական npm start-ը կարդում է access.env-ը։ Ամպում կարգավորումները գալիս են միայն Vercel Environment Variables-ից։
+
+Ստեղծող՝ Սիպան Դանիելյան, https://royalarm.uk ։ Սպասարկող՝ https://diataknet.com ։
+Ստորև պահպանված տեղադրման մանրամասները լրացվում են այս թարմացմամբ։
+
 # Ditaknet RackMap · Supabase և Vercel
 
 ## Իրական վիճակը
