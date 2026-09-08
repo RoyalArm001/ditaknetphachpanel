@@ -10,7 +10,7 @@ let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
 const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
-try{const choice=localStorage.getItem('rackmap-workspace-choice')||localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(choice))onboardingChoice=choice;}catch{}
+// Opening the app always asks for an explicit workspace choice.
 let authRequired=false,pinEnabled=false,accountEnabled=false;
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
@@ -438,14 +438,7 @@ async function init(){
     return;
   }
   try{
-    if(!onboardingChoice){
-      // Keep existing device data accessible when upgrading from older versions.
-      if(!localHost&&globalThis.PersonalStore){
-        const existing=await PersonalStore.request('/api/companies');
-        if(existing.some(company=>company.name)){onboardingChoice='personal';storageMode='personal';}
-      }
-      if(!onboardingChoice){renderWelcome();return;}
-    }
+    if(!onboardingChoice){renderWelcome();return;}
     onboardingVisible=false;
     let config;
     if(personal()){config={cloud:!localHost,authRequired:false};}

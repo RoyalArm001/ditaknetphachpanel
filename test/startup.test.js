@@ -8,7 +8,7 @@ async function startup({shared=false,legacy=false}={}){
   const dom=new JSDOM(html,{url:'https://mypro.smarttechllc.am/',runScripts:'outside-only'}),w=dom.window;
   w.indexedDB=new(require('fake-indexeddb').IDBFactory)();w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;
   w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){};
-  if(shared)w.localStorage.setItem('rackmap-storage-mode','shared');
+  if(shared){w.localStorage.setItem('rackmap-storage-mode','shared');w.localStorage.setItem('rackmap-workspace-choice','shared');}
   const requests=[];w.fetch=async url=>{requests.push(url);return new Response(JSON.stringify({error:'Cloud unavailable'}),{status:503});};
   for(const file of ['domain.js','personal-store.js','app.js']){
     if(file==='app.js'&&legacy)await w.PersonalStore.request('/api/state',{method:'PUT',body:JSON.stringify({state:{schema:2,company:'Existing company',floors:[]},revision:0})});
@@ -29,6 +29,9 @@ test('first public launch offers a choice and personal setup without contacting 
 });
 test('failed remembered cloud mode offers a working personal fallback without localhost instructions',async()=>{
   const {dom,w,requests}=await startup({shared:true});try{
+    await until(()=>w.document.querySelector('[data-action=welcome-shared]'));
+    await new Promise(r=>setTimeout(r,50));assert.ok(w.document.querySelector('.welcome'));assert.equal(requests.length,0);
+    w.document.querySelector('[data-action=welcome-shared]').click();
     await until(()=>w.document.querySelector('[data-action=personal-mode]'));
     assert.ok(!w.document.querySelector('#content').textContent.includes('localhost'));
     w.document.querySelector('[data-action=personal-mode]').click();await until(()=>w.document.querySelector('.storage-mode'));
@@ -37,8 +40,10 @@ test('failed remembered cloud mode offers a working personal fallback without lo
     assert.equal(w.localStorage.getItem('rackmap-storage-mode'),'personal');assert.equal(requests.length,1);
   }finally{dom.window.close();}
 });
-test('upgrading existing personal data skips onboarding and returning to choices preserves data',async()=>{
+test('existing personal data still requires an explicit choice and is preserved',async()=>{
   const {dom,w,requests}=await startup({legacy:true});try{
+    await until(()=>w.document.querySelector('.welcome'));assert.equal(requests.length,0);
+    w.document.querySelector('[data-action=welcome-personal]').click();
     await until(()=>w.document.querySelector('#companyLabel').textContent==='Existing company');
     assert.equal(w.document.querySelector('.welcome'),null);assert.equal(requests.length,0);
     w.location.hash='#settings';await until(()=>w.document.querySelector('[data-action=workspace-choice]'));

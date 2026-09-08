@@ -1,8 +1,12 @@
 'use strict';
-let server;
+let server,pinStore;
 module.exports=async(req,res)=>{
   const config=require('../env-config').publicConfig();
   if(new URL(req.url,'https://localhost').pathname==='/api/config'){
+    if(!config.pinEnabled&&!config.setupRequired){
+      try{pinStore||=require('../cloud-store').openCloudStore();config.pinEnabled=await pinStore.pinEnabled();}
+      catch{config.pinConfigUnavailable=true;}
+    }
     res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
     return res.end(JSON.stringify(config));
   }

@@ -4,6 +4,7 @@ const {JSDOM,VirtualConsole}=require('jsdom');
 const {createApp}=require('../server');
 const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const {once}=require('node:events');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function enterWorkspace(w,mode){await until(()=>w.document.querySelector('[data-action=welcome-'+mode+']'));w.document.querySelector('[data-action=welcome-'+mode+']').click();}
 async function until(fn){for(let i=0;i<100;i++){if(fn())return;await sleep(25);}throw new Error('Timed out waiting for UI');}
 
 test('mobile navigation starts closed and opens port sheet without a modal',async t=>{
@@ -13,7 +14,7 @@ test('mobile navigation starts closed and opens port sheet without a modal',asyn
   await fetch(base+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state,revision:0})});
   const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.localStorage.setItem('rackmap-storage-mode','shared');w.fetch=(url,options)=>fetch(new URL(url,base),options);w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;w.matchMedia=q=>({matches:q.includes('max-width'),addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
   t.after(async()=>{dom.window.close();await new Promise(r=>server.close(r));});
-  const w=dom.window,$=q=>w.document.querySelector(q);await until(()=>$('.rack-link'));
+  const w=dom.window,$=q=>w.document.querySelector(q);await enterWorkspace(w,'shared');await until(()=>$('.rack-link'));
   assert.ok(w.document.body.classList.contains('left-collapsed'));assert.ok($('.mobile-nav'));
   w.location.hash='#rack/r';await until(()=>$('.mini-port'));assert.equal($('#panelBackdrop').hidden,true);
   $('.mini-port').click();await until(()=>$('#portForm'));assert.equal($('#panelBackdrop').hidden,false);assert.equal($('#dialog').open,false);
@@ -29,7 +30,7 @@ test('full UI flow: setup, racks, devices, validation, connections, search, edit
   const w=dom.window,$=q=>w.document.querySelector(q),click=async q=>{assert.ok($(q),`Missing ${q}`);$(q).click();await sleep(15);};
   const fill=(name,value)=>{const e=$(`#dialog[open] [name="${name}"]`)||$(`#portForm [name="${name}"]`)||$(`[name="${name}"]`);assert.ok(e,`Missing field ${name}`);e.value=value;};
   const submit=async()=>{const form=$('#dialog[open] #modalForm')||$('#portForm')||$('#setupForm');form.requestSubmit(form.querySelector('button[type=submit]')||form.querySelector('button'));await sleep(25);};
-  await until(()=>$('#setupForm'));fill('company','Իմ ընկերություն');fill('count',2);await submit();assert.ok($('#companyLabel').textContent.includes('Իմ ընկերություն'));
+  await enterWorkspace(w,'shared');await until(()=>$('#setupForm'));fill('company','Իմ ընկերություն');fill('count',2);await submit();assert.ok($('#companyLabel').textContent.includes('Իմ ընկերություն'));
   w.location.hash='#floors';await sleep(30);await click('[data-action="rack-new"]');fill('name','R-01');fill('u',9);await submit();
   await click('.rack-link');await until(()=>$('.rack-case'));assert.equal(w.document.querySelectorAll('.rack-tick').length,9);
   await click('[data-action="device-new"]');fill('name','PP-01');fill('pos',8);fill('height',2);await submit();assert.equal(w.document.querySelectorAll('.mini-port').length,24);
@@ -75,7 +76,7 @@ test('personal UI saves on device without sending company data to server',async 
   const base='http://127.0.0.1:'+server.address().port;
   const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.localStorage.setItem('rackmap-storage-mode','shared');w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.localStorage.setItem('rackmap-storage-mode','personal');w.indexedDB=idb;w.fetch=async(u,o)=>{requests.push(String(u));if(String(u)==='/api/config')return new Response(JSON.stringify({cloud:true,pinEnabled:true,authRequired:false}));if(String(u)==='/api/auth/pin')return new Response(JSON.stringify({user:{id:'staff'}}));return fetch(new URL(u,base),o);};w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
   t.after(async()=>{dom.window.close();server.closeAllConnections();await new Promise(r=>server.close(r));});
-  const $=q=>dom.window.document.querySelector(q);await until(()=>$('#setupForm'));
+  const $=q=>dom.window.document.querySelector(q);await enterWorkspace(dom.window,'personal');await until(()=>$('#setupForm'));
   $('#company').value='Only on phone';$('#count').value='1';$('#setupForm').requestSubmit();await until(()=>$('.floor-card'));
   $('[data-action=save]').click();await until(()=>$('#saveStatus').textContent.includes('սարքում'));
   dom.window.location.hash='#settings';await until(()=>$('.storage-mode'));

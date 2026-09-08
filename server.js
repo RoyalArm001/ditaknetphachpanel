@@ -12,10 +12,11 @@ const exportValue=(r,k,tr=x=>x)=>k==='status'?tr(Domain.statuses[r[k]]):k==='ser
 function createApp(options={}) {
   const cloud=options.cloud??(process.env.RACKMAP_STORAGE==='supabase'||process.env.VERCEL==='1');
   const store=options.store||(cloud?require('./cloud-store').openCloudStore():require('./local-repository').openLocalRepository(options));
-  const pinAuth=require('./pin-auth').createPinAuth(store,{secure:cloud});
+  const pinModule=require('./pin-auth');
+  const pinAuth=pinModule.createPinAuth(store,{secure:cloud})||(cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null);
   const accountAuth=cloud?(options.auth||require('./cloud-auth').createAuth()):null;
   const authRequired=cloud||!!pinAuth;
-  const auth=authRequired?{authenticate:async(req,res)=>pinAuth?.authenticate(req)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
+  const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
   const read=id=>store.read(id),listCompanies=()=>store.list();
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
@@ -27,7 +28,7 @@ function createApp(options={}) {
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
       const tr=require('./i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
-      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth,accountEnabled:!!accountAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
+      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
       if(authRequired&&url.pathname.startsWith('/api/')){
         if(['POST','PUT','DELETE'].includes(req.method)&&req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(url.pathname==='/api/auth/pin'&&req.method==='POST'&&pinAuth){

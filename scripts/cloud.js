@@ -34,7 +34,7 @@ function sqliteArchive(filename){
 async function main(){
   const [command,file]=process.argv.slice(2);const pool=createPool();
   try{
-    if(command==='migrate'){const exists=await pool.query("SELECT to_regclass('rackmap.schema_version') AS name");let version=0;if(exists.rows[0].name)version=(await pool.query('SELECT max(version) AS version FROM rackmap.schema_version')).rows[0].version||0;if(version>2)throw new Error('Newer cloud schema');for(const [n,file] of [[1,'001-cloud.sql'],[2,'002-pin.sql']])if(version<n)await pool.query(fs.readFileSync(path.join(__dirname,'../migrations',file),'utf8'));console.log('Cloud schema ready. Existing company data unchanged.');}
+    if(command==='migrate'){const exists=await pool.query("SELECT to_regclass('rackmap.schema_version') AS name");let version=0;if(exists.rows[0].name)version=(await pool.query('SELECT max(version) AS version FROM rackmap.schema_version')).rows[0].version||0;if(version>3)throw new Error('Newer cloud schema');for(const [n,file] of [[1,'001-cloud.sql'],[2,'002-pin.sql'],[3,'003-multiple-pins.sql']])if(version<n)await pool.query(fs.readFileSync(path.join(__dirname,'../migrations',file),'utf8'));console.log('Cloud schema ready. Existing company data unchanged.');}
     else if(command==='init'){await pool.query('INSERT INTO rackmap.companies(id,revision,body) SELECT $1,0,$2 WHERE NOT EXISTS(SELECT 1 FROM rackmap.companies)',['default',JSON.stringify(D.empty())]);console.log('Empty cloud initialized if needed.');}
     else if(command==='import-sqlite'||command==='restore'){
       if(!file)throw new Error('Source file required');const archive=command==='import-sqlite'?sqliteArchive(file):JSON.parse(fs.readFileSync(file,'utf8'));

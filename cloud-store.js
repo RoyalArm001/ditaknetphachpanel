@@ -6,7 +6,8 @@ function createPool(env=process.env){
   const raw=env.POSTGRES_URL||env.POSTGRES_URL_NON_POOLING;
   if(!raw)throw new Error('POSTGRES_URL is required for cloud storage');
   const url=new URL(raw);for(const k of ['sslmode','sslcert','sslkey','sslrootcert','pgbouncer','supa'])url.searchParams.delete(k);
-  return new (require('pg').Pool)({connectionString:url.toString(),max:2,idleTimeoutMillis:10000,connectionTimeoutMillis:10000,statement_timeout:20000,ssl:{rejectUnauthorized:true,...(env.POSTGRES_SSL_CA_PEM?{ca:env.POSTGRES_SSL_CA_PEM.replace(/\\n/g,'\n')}:(env.POSTGRES_SSL_CA?{ca:fs.readFileSync(env.POSTGRES_SSL_CA,'utf8')}:{}))}});
+  const ca=env.POSTGRES_SSL_CA_PEM?.replace(/\\n/g,'\n')||(env.POSTGRES_SSL_CA?fs.readFileSync(env.POSTGRES_SSL_CA,'utf8'):/\.supabase\.com$/.test(url.hostname)?fs.readFileSync(require('node:path').join(__dirname,'assets/supabase-ca.crt'),'utf8'):undefined);
+  return new (require('pg').Pool)({connectionString:url.toString(),max:2,idleTimeoutMillis:10000,connectionTimeoutMillis:10000,statement_timeout:20000,ssl:{rejectUnauthorized:true,...(ca?{ca}:{})}});
 }
 function openCloudStore(options={}){
   const pool=options.pool||createPool();
@@ -30,6 +31,12 @@ function openCloudStore(options={}){
     backup:async()=>{const client=await pool.connect();try{await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');const companies=(await client.query('SELECT id,revision,body FROM rackmap.companies ORDER BY id')).rows;const history=(await client.query('SELECT company_id,revision,saved_at,body FROM rackmap.company_history ORDER BY company_id,revision')).rows;await client.query('COMMIT');return {format:'ditaknet-rackmap-cloud',version:1,exportedAt:new Date().toISOString(),companies,history};}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}},
     pinAttempt:async key=>{await pool.query("DELETE FROM rackmap.pin_attempts WHERE started_at < now()-interval '15 minutes'");return (await pool.query('INSERT INTO rackmap.pin_attempts(key,attempts) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET attempts=rackmap.pin_attempts.attempts+1 RETURNING attempts',[key])).rows[0].attempts;},
     pinReset:key=>pool.query('DELETE FROM rackmap.pin_attempts WHERE key=$1',[key]),
+    pinEnabled:async()=>{try{return (await pool.query('SELECT EXISTS(SELECT 1 FROM rackmap.pin_keys WHERE enabled) AND EXISTS(SELECT 1 FROM rackmap.pin_session_config) AS enabled')).rows[0].enabled;}catch(error){if(error.code==='42P01')return false;throw error;}},
+    pinConfiguration:async()=>{
+      try{const {rows}=await pool.query('SELECT c.secret,k.id,k.pin_hash FROM rackmap.pin_session_config c CROSS JOIN rackmap.pin_keys k WHERE k.enabled');
+        return rows.length?{RACKMAP_SESSION_SECRET:rows[0].secret,RACKMAP_PIN_HASHES:JSON.stringify(Object.fromEntries(rows.map(row=>[row.id,row.pin_hash])))}:null;
+      }catch(error){if(error.code==='42P01')return null;throw error;}
+    },
     close:()=>pool.end()
   };
 }
