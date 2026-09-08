@@ -1,10 +1,13 @@
 'use strict';
-// Always use the server's current code and data. No company data is cached.
-self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+const CACHE='ditaknet-shell-v3';
+const SHELL=['/','/index.html','/styles.css','/domain.js','/personal-store.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/exceljs.min.js'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('ditaknet-shell-')&&name!==CACHE)await caches.delete(name);await self.clients.claim();})()));
 self.addEventListener('fetch',event=>{
-  if(event.request.mode!=='navigate')return;
-  event.respondWith(fetch(event.request).catch(()=>new Response(
-    '<!doctype html><html lang="hy"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ditaknet փաչ պանել</title><body><h1>Ditaknet փաչ պանել</h1><p>Սերվերի հետ կապ չկա։ Միացեք աշխատանքային ցանցին և համոզվեք, որ սերվերը միացված է։</p><a href="/">Կրկին փորձել</a><p>Ditaknet-ի մաս · © Ditaknet</p></body></html>',
-    {status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}})));
+  const url=new URL(event.request.url);
+  if(event.request.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
+  if(event.request.mode==='navigate'){
+    event.respondWith(fetch(event.request).catch(async()=>await (await caches.open(CACHE)).match('/index.html')||new Response('Կապ չկա։ Առաջին բացման համար անհրաժեշտ է ինտերնետ։',{status:503})));return;
+  }
+  if(SHELL.includes(url.pathname))event.respondWith(caches.open(CACHE).then(async cache=>await cache.match(url.pathname)||fetch(event.request)));
 });

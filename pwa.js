@@ -14,7 +14,7 @@
     const secure=window.isSecureContext;
     modal('Տեղադրել Ditaknet փաչ պանել-ը',
       (secure?'':'<p><strong>Հեռախոսում տեղադրելու համար բացեք ծրագրի HTTPS հասցեն։</strong> Սովորական տեղական HTTP հասցեն նախատեսված է բրաուզերով աշխատանքի համար։ HTTPS հասցեն պետք է կարգավորի ցանցի ադմինիստրատորը։</p>')+
-      '<p><strong>iPhone / iPad․</strong> Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։</p><p><strong>Android․</strong> Chrome-ի մենյու → Install app կամ Add to Home screen։ Եթե տեղադրումը դեռ հասանելի չէ, թարմացրեք էջը և կրկին փորձեք։</p><p class="hint">Տեղադրված հավելվածին նույնպես պետք է կապ ծրագրի սերվերի հետ։ Պատկերակը տվյալների առանձին պատճեն չի ստեղծում։</p>');
+      '<p><strong>iPhone / iPad․</strong> Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։</p><p><strong>Android․</strong> Chrome-ի մենյու → Install app կամ Add to Home screen։ Եթե տեղադրումը դեռ հասանելի չէ, թարմացրեք էջը և կրկին փորձեք։</p><p class="hint">Անձնական ռեժիմը առաջին բացումից հետո աշխատում է նաև անցանց։ Թիմային cloud-ի համար ինտերնետ է պետք։</p>');
   };
   if(location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).catch(()=>{});

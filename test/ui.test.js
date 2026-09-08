@@ -11,7 +11,7 @@ test('mobile navigation starts closed and opens port sheet without a modal',asyn
   const base=`http://127.0.0.1:${server.address().port}`,D=require('../domain');
   const state={...D.empty(),company:'Mobile',floors:[{id:'f',name:'Floor',racks:[{id:'r',name:'Rack',u:6,photo:'',location:'',devices:[{id:'d',name:'Panel',type:'panel',pos:6,height:1,color:'#174e50',model:'',portList:Array.from({length:12},(_,i)=>D.port(i+1,'p'+i))}]}]}]};
   await fetch(base+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state,revision:0})});
-  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.fetch=(url,options)=>fetch(new URL(url,base),options);w.structuredClone=structuredClone;w.matchMedia=q=>({matches:q.includes('max-width'),addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
+  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.fetch=(url,options)=>fetch(new URL(url,base),options);w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;w.matchMedia=q=>({matches:q.includes('max-width'),addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
   t.after(async()=>{dom.window.close();await new Promise(r=>server.close(r));});
   const w=dom.window,$=q=>w.document.querySelector(q);await until(()=>$('.rack-link'));
   assert.ok(w.document.body.classList.contains('left-collapsed'));assert.ok($('.mobile-nav'));
@@ -24,7 +24,7 @@ test('mobile navigation starts closed and opens port sheet without a modal',asyn
 test('full UI flow: setup, racks, devices, validation, connections, search, editing and reload',async t=>{
   const server=createApp({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'rackmap-ui-'))});server.listen(0,'127.0.0.1');await once(server,'listening');
   const base=`http://127.0.0.1:${server.address().port}`;const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
-  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.fetch=(url,opts)=>fetch(new URL(url,base),opts);w.structuredClone=structuredClone;w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.confirm=()=>true;w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
+  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.fetch=(url,opts)=>fetch(new URL(url,base),opts);w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.confirm=()=>true;w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
   t.after(async()=>{dom.window.close();await new Promise(r=>server.close(r));});
   const w=dom.window,$=q=>w.document.querySelector(q),click=async q=>{assert.ok($(q),`Missing ${q}`);$(q).click();await sleep(15);};
   const fill=(name,value)=>{const e=$(`#dialog[open] [name="${name}"]`)||$(`#portForm [name="${name}"]`)||$(`[name="${name}"]`);assert.ok(e,`Missing field ${name}`);e.value=value;};
@@ -68,4 +68,20 @@ test('full UI flow: setup, racks, devices, validation, connections, search, edit
   fill('room','206');await submit();await click('[data-action=save]');await until(()=>$('#saveStatus').dataset.error==='true');
   assert.equal((await(await fetch(base+'/api/state')).json()).state.company,'Այլ աշխատակցի փոփոխություն');assert.ok(w.localStorage.getItem('rackmap-recovery-v2'));assert.equal($('#connectionBanner').hidden,false);
   assert.deepEqual(errors,[]);
+});
+test('personal UI saves on device without sending company data to server',async t=>{
+  const {IDBFactory}=require('fake-indexeddb'),idb=new IDBFactory(),requests=[];
+  const server=createApp({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'rackmap-personal-ui-'))});server.listen(0,'127.0.0.1');await once(server,'listening');
+  const base='http://127.0.0.1:'+server.address().port;
+  const dom=await JSDOM.fromURL(base,{runScripts:'dangerously',resources:'usable',pretendToBeVisual:true,beforeParse(w){w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.localStorage.setItem('rackmap-storage-mode','personal');w.indexedDB=idb;w.fetch=async(u,o)=>{requests.push(String(u));if(String(u)==='/api/config')return new Response(JSON.stringify({cloud:true,pinEnabled:true,authRequired:false}));if(String(u)==='/api/auth/pin')return new Response(JSON.stringify({user:{id:'staff'}}));return fetch(new URL(u,base),o);};w.structuredClone=structuredClone;w.AbortSignal=AbortSignal;w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.HTMLDialogElement.prototype.close=function(){this.open=false;};}});
+  t.after(async()=>{dom.window.close();server.closeAllConnections();await new Promise(r=>server.close(r));});
+  const $=q=>dom.window.document.querySelector(q);await until(()=>$('#setupForm'));
+  $('#company').value='Only on phone';$('#count').value='1';$('#setupForm').requestSubmit();await until(()=>$('.floor-card'));
+  $('[data-action=save]').click();await until(()=>$('#saveStatus').textContent.includes('սարքում'));
+  dom.window.location.hash='#settings';await until(()=>$('.storage-mode'));
+  assert.ok($('[data-action=connect-cloud]'));assert.equal(requests.filter(x=>!x.includes('/api/config')).length,0);
+  const saved=await dom.window.PersonalStore.request('/api/state');assert.equal(saved.state.company,'Only on phone');
+  const remote=await(await fetch(base+'/api/state')).json();assert.equal(remote.state.company,'');
+  $('[data-action=connect-cloud]').click();await until(()=>$('#cloudPin'));$('#cloudPin').value='12345678';$('#modalForm').requestSubmit();await until(()=>$('[data-action=personal-mode]')&&!$('[data-action=connect-cloud]'));
+  assert.notEqual($('#companyLabel').textContent,'Only on phone');$('[data-action=personal-mode]').click();await until(()=>$('#companyLabel').textContent==='Only on phone');assert.ok($('[data-action=connect-cloud]'));
 });

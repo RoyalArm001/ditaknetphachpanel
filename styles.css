@@ -125,3 +125,5 @@ body.right-collapsed .rack-side{display:none}
  .login-view .workspace{padding-bottom:0}.login-card{margin:3vh auto;padding:24px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+.storage-mode{border:2px solid #08796b;background:#f2faf7}.storage-mode p{line-height:1.8}
+@media print{.sidebar,.topbar,.mobile-nav,.panel-backdrop,footer,.filters,.page-head .actions,.actions,td:last-child{display:none!important}.workspace{margin:0!important;padding:0!important}#content{padding:0!important;overflow:visible!important}.table-wrap{overflow:visible!important}table{font-size:9px}body{background:white}}

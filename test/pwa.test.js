@@ -14,8 +14,8 @@ test('install prompt, fallback guidance and secure worker registration',async()=
 });
 test('offline navigation fallback leaves API traffic and data uncached',async()=>{
   const listeners={};
-  vm.runInNewContext(fs.readFileSync('sw.js','utf8'),{self:{addEventListener:(k,f)=>listeners[k]=f},fetch:async()=>{throw Error('offline');},Response});
-  let response;listeners.fetch({request:{mode:'navigate'},respondWith:p=>response=p});
-  const offline=await response;assert.equal(offline.status,503);assert.match(await offline.text(),/Ditaknet/);
-  listeners.fetch({request:{mode:'cors'},respondWith:()=>assert.fail('API intercepted')});
+  vm.runInNewContext(fs.readFileSync('sw.js','utf8'),{self:{location:{origin:'https://app.test'},addEventListener:(k,f)=>listeners[k]=f},caches:{open:async()=>({match:async()=>new Response('Ditaknet cached shell')})},fetch:async()=>{throw Error('offline');},Response,URL});
+  let response;listeners.fetch({request:{mode:'navigate',method:'GET',url:'https://app.test/'},respondWith:p=>response=p});
+  const offline=await response;assert.equal(offline.status,200);assert.match(await offline.text(),/Ditaknet/);
+  listeners.fetch({request:{mode:'cors',method:'GET',url:'https://app.test/api/state'},respondWith:()=>assert.fail('API intercepted')});
 });
