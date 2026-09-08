@@ -45,7 +45,7 @@
     "Continue in personal mode",
     "Продолжить в личном режиме"
   ],
-  "Ստեղծված է Սիպան Դանիելյանի կողմից ·": [
+  "Ստեղծված է Սիփան Դանիելյանի կողմից ·": [
     "Created by Sipan Danielyan ·",
     "Создано Сипаном Даниеляном ·"
   ],
@@ -1569,7 +1569,7 @@
     "Another staff member changed the data. Refresh the page.",
     "Другой сотрудник изменил данные. Обновите страницу."
   ],
-  "Սիպան Դանիելյան · royalarm.uk · Իմ փաչ": [
+  "Սիփան Դանիելյան · royalarm.uk · Իմ փաչ": [
     "Sipan Danielyan · royalarm.uk · My Patch",
     "Сипан Даниелян · royalarm.uk · Мой патч"
   ],
@@ -1593,7 +1593,7 @@
     "Set RACKMAP_FONT to a font file for Armenian PDF output",
     "Для PDF на армянском укажите файл шрифта RACKMAP_FONT"
   ],
-  "Սիպան Դանիելյան · royalarm.uk": [
+  "Սիփան Դանիելյան · royalarm.uk": [
     "Sipan Danielyan · royalarm.uk",
     "Сипан Даниелян · royalarm.uk"
   ],

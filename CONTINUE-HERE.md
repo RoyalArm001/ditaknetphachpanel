@@ -12,7 +12,7 @@ Production PIN-ի նախորդ արտաքին կարգավորման բացը դ
 # Հրապարակման ստուգման արդյունք՝ 2026-09-08
 
 6c2d961 commit-ը հաջողությամբ push է արվել main և Vercel-ում ստացել է Deployment completed։
-https://mypro.smarttechllc.am/՝ HTTP200, նոր անվանումն ու Սիպան Դանիելյան նշումը կան։
+https://mypro.smarttechllc.am/՝ HTTP200, նոր անվանումն ու Սիփան Դանիելյան նշումը կան։
 /api/config՝ HTTP200, setupRequired=false, missing=[], accountEnabled=true, **pinEnabled=false**։
 /api/state առանց մուտքի՝ HTTP401 (սպասվող պաշտպանություն)։ Իրական Supabase տվյալների read/write-ը դեռ չի ստուգվել։
 Տեղական PIN login՝ HTTP200, մուտքից հետո 1 ընկերությունը հաջողությամբ կարդացվել է։ Կոդը՝ %LOCALAPPDATA%/RackMap/staff-pin.txt։
@@ -29,7 +29,7 @@ https://mypro.smarttechllc.am/՝ HTTP200, նոր անվանումն ու Սիպ�
 - PIN UI + սերվերային մուտք, scrypt hash, ստորագրված HttpOnly session, ժամկետ/rotation, մշտական IP սահմանափակում։ SQLite schema3, cloud migration002։
 - Ստեղծված տեղական PIN՝ %LOCALAPPDATA%/RackMap/staff-pin.txt, hash/secret՝ access.env։ Երբեք չհրապարակել։
 - Mobile ստորին նավարկում, drawer և պորտի bottom sheet, safe area, խոշոր հպման պորտեր և 16px մուտքեր, Escape/Tab մշակում։
-- Ditaknet փաչ պանել անվանում, հեղինակ Սիպան Դանիելյան / royalarm.uk, սպասարկող diataknet.com։
+- Ditaknet փաչ պանել անվանում, հեղինակ Սիփան Դանիելյան / royalarm.uk, սպասարկող diataknet.com։
 - 27 ավտոմատ թեստ անցնում են։ Իրական բրաուզերային տեսողական ստուգումը հասանելի չէ (CUA browsers=[]).
 - Անավարտ արտաքին կարգավորումներ՝ Vercel env/PIN, Supabase CA և migrations/import։ Իրական cloud բազա այս սեսիայից չի փոփոխվել։
 - DEPLOY-VERCEL.md-ում բոլոր ընթացիկ հրամաններն ու պահանջները կան։
