@@ -28,7 +28,8 @@ function createAuth(env=process.env,fetcher=fetch,{cookiePrefix='rackmap'}={}){
   return {authenticate,clear,
     signup:async(res,email,password)=>{
       if(typeof email!=='string'||!/^\S+@\S+\.\S+$/.test(email)||email.length>320||typeof password!=='string'||password.length<12||password.length>1024)return false;
-      const session=await request('signup',{method:'POST',body:JSON.stringify({email,password})});
+      const returnUrl=env.RACKMAP_PUBLIC_URL||'https://patch.ditaknet.com/';
+      const session=await request('signup?redirect_to='+encodeURIComponent(returnUrl),{method:'POST',body:JSON.stringify({email,password})});
       if(!session)return false;
       if(!session.access_token)return {confirmationRequired:true};
       const user=await request('user',{headers:{Authorization:'Bearer '+session.access_token}});

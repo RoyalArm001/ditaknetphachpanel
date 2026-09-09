@@ -48,8 +48,8 @@ test('existing personal data still requires an explicit choice and is preserved'
     assert.equal(w.document.querySelector('.welcome'),null);assert.equal(requests.length,0);
     w.location.hash='#settings';await until(()=>w.document.querySelector('[data-action=workspace-choice]'));
     w.document.querySelector('[data-action=workspace-choice]').click();await until(()=>w.document.querySelector('.welcome'));
-    w.document.querySelector('[data-action=welcome-personal]').click();await until(()=>w.document.querySelector('.storage-mode'));
-    await until(()=>w.document.querySelector('#storageInfo .storage-path')&&w.document.querySelector('#networkInfo .hint'));
+    w.document.querySelector('[data-action=welcome-personal]').click();await until(()=>w.document.querySelector('.stats'));
+    assert.equal(w.location.hash,'#overview');
     assert.equal((await w.PersonalStore.request('/api/state')).state.company,'Existing company');assert.equal(requests.length,0);
   }finally{w.close();}
 });

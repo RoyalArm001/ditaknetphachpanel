@@ -23,7 +23,7 @@ function createApp(options={}) {
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try{
       const url=new URL(req.url,'http://localhost');
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
@@ -41,6 +41,7 @@ function createApp(options={}) {
         if(req.method==='POST'&&['/api/account/login','/api/account/signup','/api/account/recover'].includes(url.pathname)){
           const body=await readBody(req);
           if(url.pathname.endsWith('/recover')){
+            personalAuth.clear(res);
             const user=await accounts.login(req,res,body.email,body.pin);
             if(user?.limited)return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
             return user?json(res,200,{user}):json(res,401,{error:tr('Էլ․ փոստը կամ անձնական PIN-ը սխալ է')});
@@ -154,9 +155,9 @@ function createApp(options={}) {
         const range=pdf.bufferedPageRange();for(let i=0;i<range.count;i++){pdf.switchToPage(i);pdf.fontSize(8).fillColor('#777777').text(`${i+1} / ${range.count}`,40,810,{lineBreak:false});}
         pdf.end();return;
       }
-      const files={'/locales.js':'locales.js','/i18n.js':'i18n.js','/favicon.ico':'favicon.ico','/':'index.html','/index.html':'index.html','/app.js':'app.js','/domain.js':'domain.js','/rack3d.js':'rack3d.js','/styles.css':'styles.css','/manifest.webmanifest':'manifest.webmanifest','/sw.js':'sw.js','/pwa.js':'pwa.js','/personal-store.js':'personal-store.js','/exceljs.min.js':'node_modules/exceljs/dist/exceljs.min.js','/icon-192.png':'icon-192.png','/icon-512.png':'icon-512.png'};
+      const files={'/assets/DejaVuSans.ttf':'assets/DejaVuSans.ttf','/assets/LICENSE_DEJAVU':'assets/LICENSE_DEJAVU','/locales.js':'locales.js','/i18n.js':'i18n.js','/favicon.ico':'favicon.ico','/':'index.html','/index.html':'index.html','/app.js':'app.js','/domain.js':'domain.js','/rack3d.js':'rack3d.js','/styles.css':'styles.css','/manifest.webmanifest':'manifest.webmanifest','/sw.js':'sw.js','/pwa.js':'pwa.js','/personal-store.js':'personal-store.js','/drive-store.js':'drive-store.js','/exceljs.min.js':'node_modules/exceljs/dist/exceljs.min.js','/icon-192.png':'icon-192.png','/icon-512.png':'icon-512.png'};
       if(req.method==='GET'&&files[url.pathname]){
-        const file=files[url.pathname],mime=file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
+        const file=files[url.pathname],mime=file.endsWith('.ttf')?'font/ttf':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(path.join(__dirname,file)).pipe(res);
       }
       json(res,404,{error:tr('Չի գտնվել')});

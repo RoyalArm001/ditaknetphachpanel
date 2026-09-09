@@ -9,7 +9,7 @@ test('English and Russian cover all Armenian source text and preserve interpolat
   for(const [key,values]of Object.entries(require('../locales'))){assert.ok(!key.includes('??'));assert.equal(values.length,2);for(const value of values)assert.ok(value&&!value.includes('??'),key);}
   const font=require('fontkit').openSync('assets/DejaVuSans.ttf');
   for(const char of 'Հայերեն English Русский')assert.ok(font.hasGlyphForCodePoint(char.codePointAt(0)),char);
-  for(const file of ['app.js','domain.js','personal-store.js','pwa.js','rack3d.js','server.js']){
+  for(const file of ['app.js','domain.js','personal-store.js','drive-store.js','pwa.js','rack3d.js','server.js']){
     const ast=parse(fs.readFileSync(file,'utf8'),{ecmaVersion:'latest'});
     function walk(node){
       if(!node||typeof node!=='object')return;
@@ -75,6 +75,7 @@ test('account-only cloud opens sign-in and keeps entered credentials when langua
   try{
     for(const file of ['locales.js','i18n.js','domain.js','personal-store.js','app.js'])w.eval(fs.readFileSync(file,'utf8'));
     await until(()=>$('[data-action=welcome-personal]'));$('[data-action=welcome-personal]').click();
+    await until(()=>$('#setupForm'));w.location.hash='#settings';
     await until(()=>$('[data-action=connect-cloud]'));$('[data-action=connect-cloud]').click();await until(()=>$('#loginForm'));
     assert.ok($('#email'));assert.equal($('#pin'),null);assert.ok(!requests.some(x=>x.includes('/api/auth/pin')));
     $('#email').value='staff@example.test';$('#password').value='unsent-test';

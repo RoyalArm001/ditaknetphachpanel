@@ -87,8 +87,9 @@ function render(){
   sceneController?.destroy();sceneController=null;
   $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');$('#breadcrumb').textContent=viewNames[view];
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-  if(!state.company&&view!=='settings'){renderSetup();applyPanels();return;}
+  if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
   if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
+  if(accountReadOnly)$('#content').insertAdjacentHTML('afterbegin',tr`<section class="panel recovery-notice"><h2>Ձեր ֆայլը վերականգնված է</h2><p>Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։</p>${button(tr('Ներբեռնել իմ տվյալները'),'backup','','primary')}${button(tr('Մուտք գործել'),'account-login')}</section>`);
   applyPanels();
 }
 function renderSetup(){
@@ -106,12 +107,14 @@ function renderAccountLogin(method='login'){
   accountMethod=method;onboardingVisible=false;ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const recovery=method==='recover',signup=method==='signup';
   $('#content').innerHTML=tr`<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՆՁՆԱԿԱՆ ՀԱՇԻՎ</div><h1>${recovery?tr('Վերականգնել իմ ֆայլը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</h1><p class="hint">${recovery?tr('Գրեք ձեր հաշվի էլ․ փոստը և անձնական PIN-ը։ Կբացվեն միայն ձեր տվյալները՝ դիտելու և ներբեռնելու համար։'):tr('Ձեր ընկերությունները և պահուստային պատճենները հասանելի կլինեն միայն ձեր հաշվին։')}</p><form id="loginForm">${input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username" maxlength="320"')}${recovery?input('pin',tr('Անձնական PIN'),'','password','required inputmode="numeric" pattern="[0-9]{12}" minlength="12" maxlength="12" autocomplete="off"'):input('password',tr('Գաղտնաբառ'),'','password',`required ${signup?'minlength="12" autocomplete="new-password"':'autocomplete="current-password"'} maxlength="1024"`)}${signup?tr('<p class="hint">Գաղտնաբառը՝ առնվազն 12 նիշ։ Էլ․ փոստը հաստատելուց հետո առաջին մուտքի ժամանակ կստանաք անձնական վերականգնման PIN։</p>'):''}<p id="loginError" role="alert"></p><button class="button primary" type="submit">${recovery?tr('Բացել իմ պահուստային պատճենը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</button></form><div class="login-tabs">${button(tr('Մուտք գործել'),'account-login')}${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('← Հետ'),'welcome-home')}</div></section>`;
+  $('#loginForm').dataset.account='true';
   $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{
     const fd=new FormData(e.target),res=await fetch('/api/account/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))}),result=await res.json();
     if(!res.ok)throw new Error(result.error);
     if(result.confirmationRequired){$('#loginError').textContent=tr('Ստուգեք ձեր էլ․ փոստը և հաստատեք հաշիվը, ապա այստեղ մուտք գործեք։');return;}
     storageMode='account';onboardingChoice='account';accountUserId=result.user.id;accountReadOnly=recovery;
     activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
+    const url=new URL(location.href);url.hash='overview';url.searchParams.delete('company');history.replaceState(null,'',url);
     await init();if(result.pin)showPersonalPin(result.pin);
   }catch(error){if($('#loginError'))$('#loginError').textContent=tr(error.message);}finally{b.disabled=false;}};
 }
@@ -119,11 +122,33 @@ function showPersonalPin(pin){
   modal(tr('Պահպանեք ձեր անձնական PIN-ը'),tr`<p>Այս կոդը ցուցադրվում է միայն հիմա։ Պահպանեք այն ապահով տեղում՝ ձեր ֆայլերը վերականգնելու համար։</p><output class="personal-pin">${esc(pin)}</output><p class="hint">Թիմային PIN-երը ձեր անձնական հաշիվը չեն բացում։</p>`,null,button(tr('Ներբեռնել PIN-ը'),'download-personal-pin','','primary'));
   $('#dialog [data-action=download-personal-pin]').onclick=()=>download(new Blob(['My Patch\n'+location.origin+'\nPIN: '+pin+'\n'],{type:'text/plain'}),'MyPatch-personal-PIN.txt');
 }
+async function driveDialog(restore=false){
+  if(ready&&!await save())return;
+  if(!globalThis.DriveStore)throw new Error(tr('Google-ի կապը չբեռնվեց։ Կրկին փորձեք։'));
+  if(!DriveStore.connected()){
+    let clientId;try{clientId=await DriveStore.prepare();}catch(error){modal('Google Drive',`<p role="status">${esc(error.message)}</p>`);return;}
+    modal(tr('Միացնել Google Drive-ը'),tr('<p>Թույլատրեք պահել Իմ փաչ-ի պահուստային պատճենները ձեր Google Drive-ում։ Ֆայլերը փոխանցվում են անմիջապես ձեր բրաուզերի և Google-ի միջև։</p>'),null,button(tr('Շարունակել Google-ով'),'drive-authorize','','primary'));
+    $('#dialog [data-action=drive-authorize]').onclick=async e=>{e.target.disabled=true;try{await DriveStore.connect(clientId);await driveDialog(restore);}catch(error){$('#formError').hidden=false;$('#formError').textContent=error.message;}finally{e.target.disabled=false;}};return;
+  }
+  if(!restore){
+    if(!ready){await beginWorkspace('personal');location.hash='settings';}
+    modal('Google Drive',tr('<p>Google Drive-ը միացված է։ «Պահել Drive-ում» կոճակով ստեղծվում է ընթացիկ ընկերության նոր պատճեն։ Նախորդ պատճենները մնում են Drive-ում։</p>'),null,button(tr('Պահել Drive-ում'),'drive-save','','primary')+button(tr('Վերականգնել Google Drive-ից'),'drive-restore')+button(tr('Անջատել կապը'),'drive-disconnect'));
+    return;
+  }
+  const files=await DriveStore.list();
+  modal(tr('Վերականգնել Google Drive-ից'),files.length?select('driveFile',tr('Պահուստային պատճեն'),files.map(f=>[f.id,f.name]))+tr('<p class="hint">Ցուցադրվում են վերջին 100 պատճենները։ Ընտրելուց հետո կհաստատեք վերականգնումը։</p>'):tr('<p>Google Drive-ում Իմ փաչ-ի պատճեններ դեռ չկան։</p>'),files.length?async fd=>{
+    const data=await DriveStore.read(fd.get('driveFile'));
+    if(!ready||!personal())await beginWorkspace('personal');
+    setTimeout(()=>restoreFile(new File([JSON.stringify(data)],'MyPatch-drive.json')).catch(e=>toast(e.message)),0);
+  }:null);
+}
 async function beginWorkspace(mode){
   if(modeBusy||companyBusy)return;
+  const fromWelcome=onboardingVisible;
   onboardingChoice=mode;onboardingVisible=false;
   try{localStorage.setItem('rackmap-workspace-choice',mode);localStorage.setItem('rackmap-storage-mode',mode);}catch{}
   await switchStorage(mode);
+  if(fromWelcome&&ready){location.hash='overview';render();}
 }
 function floorCards(){return `<div class="floor-grid">${state.floors.map(f=>tr`<section class="floor-card"><div class="floor-title"><div><h3>${esc(f.name)}</h3><small>${f.racks.length} ռաք · ${f.racks.reduce((n,r)=>n+r.devices.length,0)} սարք</small></div>${button(tr('Խմբագրել'),'floor',f.id,'small')}</div>${f.racks.map(r=>tr`<a class="rack-link" href="#rack/${r.id}"><span class="rack-icon">▤</span><span><strong>${esc(r.name)}</strong><small>${r.u}U · ${r.devices.length} սարք ${r.location?'· '+esc(r.location):''}</small></span><span class="arrow">→</span></a>`).join('')||tr('<div class="empty" style="padding:18px">Այս հարկում ռաք դեռ չկա</div>')}<button class="floor-add" data-action="rack-new" data-id="${f.id}">＋ Ավելացնել ռաք</button></section>`).join('')}</div>`;}
 function renderOverview(){const rs=racks(),ds=D.devices(state),all=D.rows(state),used=all.filter(x=>x.status==='used').length,fault=all.filter(x=>x.status==='fault').length;
@@ -159,6 +184,14 @@ function renderSettings(){
   $('.settings-grid').insertAdjacentHTML('afterbegin',tr`<section class="panel"><h2>Պորտերի նշանակության գույներ</h2><p class="hint">Այս ընկերության գույները կիրառվում են պորտերին և 3D կապերին։ Փոփոխությունները պահպանվում են ավտոմատ։</p><div class="color-settings">${Object.entries(D.services).map(([key,x])=>tr`<label><span>${esc(x.label)}</span><input type="color" data-service-color="${key}" value="${D.serviceColor(state,key)}" aria-label="${esc(x.label)} գույն"></label>`).join('')}</div>${button(tr('Սկզբնական գույները'),'colors-reset')}</section>`);
   document.querySelectorAll('[data-service-color]').forEach(el=>el.onchange=()=>{try{commit(s=>{s.serviceColors={...s.serviceColors,[el.dataset.serviceColor]:el.value};},false);}catch(err){el.value=D.serviceColor(state,el.dataset.serviceColor);toast(err.message);}});
   const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
+  if(accountMode()){
+    $('.storage-mode h2').textContent=tr('Անձնական · cloud');
+    $('.storage-mode p').textContent=tr('Միայն ձեր հաշվի ընկերություններն ու պատճենները։ Թիմի ընդհանուր բազան առանձին է։');
+    networkInfo.previousElementSibling.textContent=tr('Այս հասցեով մուտք գործեք ձեր անձնական հաշվով ցանկացած սարքից։');
+    networkInfo.nextElementSibling.textContent=tr('Վերականգնման համար օգտագործեք ձեր էլ․ փոստը և անձնական PIN-ը։');
+    if(!accountReadOnly)$('.storage-mode .actions').insertAdjacentHTML('beforeend',button(tr('Փոխարինել անձնական PIN-ը'),'account-pin-new'));
+  }
+  $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>Google Drive</h2><p>Պահեք և վերականգնեք ընթացիկ ընկերության պատճենը ձեր սեփական Google Drive-ում։</p><div class="actions">${button(tr('Միացնել Google Drive-ը'),'drive-connect')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</div></section>`);
   api('/api/storage').then(x=>{if(storageInfo.isConnected)storageInfo.innerHTML=tr`<strong>Բազա</strong><div class="storage-path">${esc(x.database)}</div><strong>Ավտոմատ պատճեններ</strong><div class="storage-path">${esc(tr(x.backups))}</div>`;}).catch(()=>{if(storageInfo.isConnected)storageInfo.textContent=tr('Չհաջողվեց ստանալ բազայի տվյալները');});
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
 }
@@ -304,7 +337,15 @@ async function uploadPhoto(id,file){if(!file)return;if(!['image/png','image/jpeg
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 function backup(){download(new Blob([JSON.stringify({application:'RackMap',schema:2,exportedAt:new Date().toISOString(),state,portDraft:portDraftDirty?portDraft:null},null,2)],{type:'application/json'}),`RackMap-${new Date().toISOString().slice(0,10)}.json`);}
 async function exportReport(type){if(personal())return exportPersonal(type);const exportCompany=activeCompanyId,exportFilters={...filters};if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));const res=await fetch(companyUrl(`/api/export.${type}?${new URLSearchParams(exportFilters)}`,exportCompany));if(!res.ok)throw new Error((await res.json()).error);download(await res.blob(),`RackMap.${type}`);toast(tr('Հաշվետվությունը պատրաստ է'));}
-async function restoreFile(file){if(!file)return;if(file.size>24*1024*1024)throw new Error(tr('Ֆայլը չափազանց մեծ է'));let data;try{data=JSON.parse(await file.text());}catch{throw new Error(tr('JSON ֆայլը վնասված է'));}const next=data.state||data;D.validate(next);
+async function readBackupFile(file){if(file.size>24*1024*1024)throw new Error(tr('Ֆայլը չափազանց մեծ է'));let data;try{data=JSON.parse(await file.text());}catch{throw new Error(tr('JSON ֆայլը վնասված է'));}
+  if(data.format==='ditaknet-rackmap-cloud'&&data.version===1&&Array.isArray(data.companies)){
+    if(!data.companies.length)throw new Error(tr('Պահուստային պատճենում ընկերություններ չկան'));
+    for(const row of data.companies)D.validate(row.body);
+  }else D.validate(data.state||data);return data;
+}
+async function restoreFile(file){if(!file)return;const data=await readBackupFile(file);
+  if(data.companies){modal(tr('Ընտրեք վերականգնվող ընկերությունը'),select('restoreCompany',tr('Ընկերություն'),data.companies.map((row,i)=>[i,row.body.company])),async fd=>{const row=data.companies[Number(fd.get('restoreCompany'))];setTimeout(()=>restoreFile(new File([JSON.stringify({state:row.body})],'company.json')).catch(e=>toast(e.message)),0);});return;}
+  const next=data.state||data;
   const draft=data.portDraft;
   if(draft&&(!draft.values||typeof draft.values!=='object'||!Object.values(draft.values).every(v=>typeof v==='string')||!D.ports(next).some(x=>x.p.id===draft.id)))throw new Error(tr('Պորտի չպահված պատճենի ձևաչափը սխալ է'));
   confirmAction(tr('Վերականգնել պատճենը'),tr`Ընկերություն՝ ${next.company}։ Հարկեր՝ ${next.floors.length}։ Ներկայիս տվյալները կփոխարինվեն և կպահվեն պատմության մեջ։`,()=>{
@@ -354,7 +395,7 @@ function newCompany(){
 async function backupAll(){
   if(personal()){if(!await save())return;download(new Blob([JSON.stringify(await api('/api/backup'))],{type:'application/json'}),'MyPatch-personal-all.json');return;}
   if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));
-  const res=await fetch('/api/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const res=await fetch(companyUrl('/api/backup'),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
   if(!res.ok)throw new Error((await res.json()).error);
   download(await res.blob(),`RackMap-all-companies-${new Date().toISOString().slice(0,10)}.${cloudMode?'json':'sqlite'}`);toast(tr('Բոլոր ընկերությունների պատճենը պատրաստ է'));
 }
@@ -366,7 +407,7 @@ async function switchStorage(mode){
   modeBusy=true;ready=false;
   try{storageMode=mode;try{localStorage.setItem('rackmap-storage-mode',mode);}catch{}activeCompanyId='default';selectedPortId='';portDraft=null;portDraftDirty=false;dirty=false;conflict=false;filters={query:'',floor:'',rack:'',status:''};page=0;clearTimeout(portTimer);clearTimeout(saveTimer);
     const url=new URL(location.href);url.searchParams.delete('company');url.hash='settings';history.replaceState(null,'',url);
-    await init();
+    accountReadOnly=false;accountUserId='';await init();
   }finally{modeBusy=false;}
 }
 async function connectCloud(){
@@ -392,8 +433,18 @@ async function exportPersonal(type){
 const actions={
   'welcome-personal':()=>beginWorkspace('personal'),
   'welcome-shared':()=>beginWorkspace('shared'),
-  'welcome-import':()=>$('#welcomeImport').click(),
-  'workspace-choice':async()=>{if(ready&&!await save())return;renderWelcome();},
+  'welcome-import':()=>{welcomeStep='restore';renderWelcome();},
+  'welcome-home':()=>{welcomeStep='home';renderWelcome();},
+  'welcome-file':()=>$('#welcomeImport').click(),
+  'account-signup':()=>renderAccountLogin('signup'),
+  'account-login':()=>renderAccountLogin('login'),
+  'account-recover':()=>renderAccountLogin('recover'),
+  'account-pin-new':()=>confirmAction(tr('Փոխարինել անձնական PIN-ը'),tr('Հին անձնական PIN-ը կդադարի աշխատել։ Նոր կոդը պետք է նորից պահպանել։'),async()=>{const result=await api('/api/account/pin/new',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});setTimeout(()=>showPersonalPin(result.pin),0);}),
+  'drive-connect':()=>driveDialog(false),
+  'drive-restore':()=>driveDialog(true),
+  'drive-save':async()=>{if(!await save())return;await DriveStore.save(structuredClone(state));toast(tr('Պատճենը պահված է ձեր Google Drive-ում'));$('#dialog').close();},
+  'drive-disconnect':()=>{DriveStore.disconnect();$('#dialog').close();toast(tr('Google Drive-ի կապն անջատված է'));},
+  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';renderWelcome();},
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},
   'login-pin':()=>renderLogin('pin'),'login-account':()=>renderLogin('account'),
@@ -473,6 +524,7 @@ async function init(){
     maxStateBytes=personal()?24*1024*1024:config.maxStateBytes||maxStateBytes;
     $('[data-action=logout]')?.remove();
     if(authRequired)$('.save-tools').insertAdjacentHTML('beforeend',button(tr('Դուրս գալ'),'logout','','small'));
+    if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=user.method==='recovery';}
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';
     const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
@@ -490,9 +542,9 @@ if(languageSelect&&globalThis.RackI18n)languageSelect.addEventListener('change',
     // Preserve in-progress setup/sign-in fields without storing credentials.
     const form=$('#setupForm')||$('#loginForm');
     const values=form?[...form.elements].filter(x=>x.name).map(x=>({name:x.name,value:x.value})):[];
-    const login=!!$('#loginForm'),method=$('#pin')?'pin':'account';
+    const login=!!$('#loginForm'),personalLogin=$('#loginForm')?.dataset.account==='true',method=$('#pin')?'pin':'account';
     RackI18n.setLanguage(next);
-    if(onboardingVisible)renderWelcome();else if(login)renderLogin(method);else if(ready)render();else await init();
+    if(onboardingVisible)renderWelcome();else if(personalLogin)renderAccountLogin(accountMethod);else if(login)renderLogin(method);else if(ready)render();else await init();
     const current=$('#setupForm')||$('#loginForm');
     for(const field of values){const control=current?.elements.namedItem(field.name);if(control)control.value=field.value;}
     if(ready)status(tr(personal()?'Պահված է սարքում':'Պահված է'));
