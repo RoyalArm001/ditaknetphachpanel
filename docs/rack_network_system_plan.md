@@ -20,7 +20,26 @@
 
 **Կարգավիճակ՝ կոդը և նմանակված API թեստը պատրաստ են, իրական Google կապը սպասում է OAuth Client ID-ին։** `src/client/js/drive-store.js`-ը օգտագործում է `appDataFolder` և `drive.appdata` թույլտվությունը։ Օգտատերը կապը հաստատում է Google-ի պատուհանում։ Ֆայլերն անմիջապես փոխանցվում են բրաուզերի և Drive-ի միջև, access token-ը պահվում է միայն հիշողությունում։ Պահպանումը ձեռքով է՝ «Պահել Drive-ում» կոճակով, յուրաքանչյուր անգամ նոր պատճեն է ստեղծվում։ Կապի սխալը չի վերագրում նախորդ պատճենը։
 
-### Մնացած աշխատանքը և արտաքին կարգավորումները
+### Google Drive-ի ակտիվացման քայլեր — v2.2.1
+
+Կարգավորումը կատարվում է մեկ անգամ՝ հավելվածի պատասխանատուի կողմից։ Օգտատերերը հետո միացնում են իրենց Google հաշիվները։ **Այս քայլերը դեռ կատարված չեն․ Drive-ի իրական կապը ակտիվացված համարել միայն պահպանումն ու վերականգնումը փորձարկելուց հետո։**
+
+- [ ] Google Cloud Console-ում ստեղծել կամ ընտրել `My Patch` նախագիծը։
+- [ ] `APIs & Services → Library → Google Drive API → Enable` միջոցով միացնել API-ն։
+- [ ] `Google Auth Platform → Branding` բաժնում նշել հավելվածի անունը՝ `My Patch`, գործող աջակցության և կապի էլ․ փոստերը, կայքը՝ `https://patch.ditaknet.com/`։
+- [ ] `Audience`-ում ընտրել `External`, իսկ փորձարկման ժամանակ `Test users`-ում ավելացնել փորձարկողների Google հաշիվները։
+- [ ] `Data Access → Add or Remove Scopes` բաժնում ավելացնել միայն `https://www.googleapis.com/auth/drive.appdata` թույլտվությունը։ Այն նախատեսված է հավելվածի սեփական թաքնված պահոցի համար։
+- [ ] `Clients → Create Client` բաժնում ընտրել `Web application`, անունը՝ `My Patch Web`, `Authorized JavaScript origins`-ում նշել `https://patch.ditaknet.com`՝ առանց վերջի `/`-ի և էջի ուղու։ Ներկայիս popup token մոդելի համար redirect URI պետք չէ։
+- [ ] Պատճենել `.apps.googleusercontent.com` վերջավորությամբ Client ID-ն։ Այս տարբերակում Client Secret, Service Account բանալի կամ օգտատիրոջ Google գաղտնաբառ պետք չէ։
+- [ ] Vercel-ի նախագծի `Settings → Environment Variables` բաժնում սահմանել `GOOGLE_DRIVE_CLIENT_ID` փոփոխականը՝ Production միջավայրի համար, ապա կատարել Redeploy։ Preview օգտագործելու դեպքում ավելացնել նաև դրա փոփոխականն ու Google-ում համապատասխան origin-ը։
+- [ ] Կայքից երկու իրական Google հաշիվներով առանձին պահպանել և վերականգնել փորձնական նախագծեր՝ համոզվելով, որ հաշիվների ֆայլերը չեն խառնվում։ Google-ի մերժված թույլտվությունը և կապի ընդհատումը չպետք է վնասեն ընթացիկ տվյալները։
+- [ ] Բոլոր օգտատերերի համար բացելուց առաջ կատարել `Audience → Publish app` քայլը և Console-ի պահանջած հաստատումները։ Անհրաժեշտության դեպքում հրապարակել գործող գաղտնիության քաղաքականության էջը և ավարտել դոմենի հաստատումը։
+
+Drive-ի պատճենները սովորական `My Drive` ցանկում չեն երևում․ դրանք հասանելի են հավելվածի վերականգնման պատուհանից։ Ներկա տարբերակը պահպանում և վերականգնում է ձեռքով․ ավտոմատ համաժամացումը և Google-ով My Patch հաշվի գրանցումը առանձին հետագա գործեր են։
+
+Ուղեցույցներ՝ [Google OAuth-ի կարգավորում](https://developers.google.com/workspace/guides/configure-oauth-consent), [Drive API-ի միացում](https://developers.google.com/workspace/drive/api/quickstart/js), [appDataFolder](https://developers.google.com/workspace/drive/api/guides/appdata), [Vercel փոփոխականներ](https://vercel.com/docs/environment-variables)։
+
+### Մնացած գործերի ցանկ
 
 - [x] Սկզբնական էջ՝ երեք տարբերակ. local, վերականգնում (JSON / անձնական PIN / թիմային cloud / Google Drive), հաշիվ կամ Google Drive։ Ընտրությունը չի փակվում ինքնաբերաբար։
 - [x] HY/EN/RU նոր էջեր, մուտքի դաշտերի պահպանում լեզուն փոխելիս, բազմաընկերություն JSON-ից ընկերության ընտրություն։

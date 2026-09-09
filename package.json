@@ -1,6 +1,6 @@
 {
   "name": "rackmap",
-  "version": "1.0.0",
+  "version": "2.2.1",
   "private": true,
   "description": "Armenian LAN rack and patch panel manager",
   "scripts": {

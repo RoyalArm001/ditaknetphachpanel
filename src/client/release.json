@@ -1,24 +1,27 @@
 {
-  "version": "2026.09.09.2",
+  "version": "2.2.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Տեղադրումից հետո կամ տեղադրված հավելվածն առաջին անգամ բացելիս առաջարկվում է միացնել ծանուցումները։",
-      "Թույլտվությունը տրվում է ձեր սեղմումով։ Արգելված կամ չաջակցվող ծանուցումների համար ցուցադրվում են հուշումներ։"
+      "Հավելվածի տարբերակը՝ v2.2.1։ Այն ցուցադրվում է նաև էջի ներքևում։",
+      "Նախագծի սեփական անվանումներն ու գույները և տեղադրումից հետո ծանուցումների թույլտվության առաջարկը ներառված են այս տարբերակում։",
+      "Google Drive-ի ակտիվացման քայլերը ավելացված են պլանում։ Իրական միացումը դեռ սպասում է Google OAuth-ի կարգավորմանը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "After installation or the first installed-app launch, you are prompted to enable notifications.",
-      "Permission is requested only when you tap the button. Blocked and unsupported notifications show guidance."
+      "App version v2.2.1 is also displayed in the page footer.",
+      "This release includes custom project labels and colors, and a notification permission offer after installation.",
+      "Google Drive activation steps are documented in the plan. The connection still requires Google OAuth configuration."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "После установки или при первом запуске установленного приложения предлагается включить уведомления.",
-      "Разрешение запрашивается только после нажатия кнопки. Для заблокированных и неподдерживаемых уведомлений показаны подсказки."
+      "Версия приложения v2.2.1 также отображается внизу страницы.",
+      "Версия включает собственные названия и цвета проекта, а также предложение разрешить уведомления после установки.",
+      "Шаги активации Google Drive добавлены в план. Подключение по-прежнему требует настройки Google OAuth."
     ]
   }
 }

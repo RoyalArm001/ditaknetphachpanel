@@ -11,11 +11,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       if(!response.ok)return;
       const release=await response.json(),key='mypatch-seen-release';
       if(typeof release.version!=='string'||!release.version)return;
+      const version=document.querySelector('#appVersion');
+      if(version){version.textContent='v'+release.version;version.hidden=false;}
       try{if(localStorage.getItem(key)===release.version)return;}catch{}
       const notes=release[document.documentElement.lang]||release.hy;
       if(!notes||typeof notes.title!=='string'||!Array.isArray(notes.changes)||!notes.changes.every(x=>typeof x==='string'))return;
       if(!document.querySelector('.welcome')||document.querySelector('#dialog')?.open)return;
-      modal(notes.title,`<p class="hint">${esc(release.version)}</p><ul>${notes.changes.map(item=>`<li style="margin-bottom:12px;line-height:1.7">${esc(item)}</li>`).join('')}</ul>`);
+      modal(notes.title,`<p class="hint">v${esc(release.version)}</p><ul>${notes.changes.map(item=>`<li style="margin-bottom:12px;line-height:1.7">${esc(item)}</li>`).join('')}</ul>`);
       document.querySelector('#dialog').addEventListener('close',()=>{
         try{localStorage.setItem(key,release.version);}catch{}
       },{once:true});
