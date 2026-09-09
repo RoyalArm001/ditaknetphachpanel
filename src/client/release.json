@@ -4,24 +4,21 @@
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Հավելվածի տարբերակը՝ v2.2.1։ Այն ցուցադրվում է նաև էջի ներքևում։",
-      "Նախագծի սեփական անվանումներն ու գույները և տեղադրումից հետո ծանուցումների թույլտվության առաջարկը ներառված են այս տարբերակում։",
-      "Google Drive-ի ակտիվացման քայլերը ավելացված են պլանում։ Իրական միացումը դեռ սպասում է Google OAuth-ի կարգավորմանը։"
+      "Նախագծի սեփական անվանումներն ու գույները և տեղադրումից հետո ծանուցումների թույլտվության առաջարկը ներառված են այս տարբերակում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
       "App version v2.2.1 is also displayed in the page footer.",
-      "This release includes custom project labels and colors, and a notification permission offer after installation.",
-      "Google Drive activation steps are documented in the plan. The connection still requires Google OAuth configuration."
+      "This release includes custom project labels and colors, and a notification permission offer after installation."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
       "Версия приложения v2.2.1 также отображается внизу страницы.",
-      "Версия включает собственные названия и цвета проекта, а также предложение разрешить уведомления после установки.",
-      "Шаги активации Google Drive добавлены в план. Подключение по-прежнему требует настройки Google OAuth."
+      "Версия включает собственные названия и цвета проекта, а также предложение разрешить уведомления после установки."
     ]
   }
 }

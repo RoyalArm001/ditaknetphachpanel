@@ -1,6 +1,11 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Մուտքագրեք ձեր բազայի PIN կոդը։":["Enter the PIN for your database.","Введите PIN-код вашей базы."],
+"Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։":["Restore from your computer, with your database PIN, or from Google Drive.","Восстановите с компьютера, по PIN-коду базы или из Google Drive."],
+"Ընտրեք՝ վերականգնել համակարգչից, անձնական PIN-ով կամ Google Drive-ից։":["Restore from your computer, with your personal recovery PIN, or from Google Drive.","Восстановите с компьютера, с помощью личного PIN-кода или из Google Drive."],
+"Վերականգնել համակարգչից":["Restore from computer","Восстановить с компьютера"],
+"Վերականգնման PIN-ով":["Use recovery PIN","По PIN-коду восстановления"],
 "Ծանուցումներ":["Notifications","Уведомления"],
 "Ծանուցումների թույլտվությունը միացված է։":["Notification permission is enabled.","Разрешение на уведомления включено."],
 "Ծանուցումներն արգելված են։ Միացրեք դրանք կայքի կամ հավելվածի համակարգային կարգավորումներում։":["Notifications are blocked. Enable them in the site or app system settings.","Уведомления заблокированы. Разрешите их в системных настройках сайта или приложения."],

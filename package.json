@@ -4,6 +4,7 @@
   "private": true,
   "description": "Armenian LAN rack and patch panel manager",
   "scripts": {
+    "dev": "node src/server/server.js",
     "start": "node src/server/server.js",
     "check": "node --check src/client/js/app.js && node --check src/shared/domain.js && node --check src/server/server.js && node --check src/server/storage.js && node --check src/client/js/rack3d.js && node --check src/server/cloud-store.js && node --check src/server/cloud-auth.js && node --check src/server/local-repository.js && node --check api/index.js && node --check src/client/js/pwa.js && node --check src/client/sw.js && node --check scripts/cloud.js && node --check src/server/pin-auth.js && node --check src/server/env-config.js && node --check src/client/js/personal-store.js && node --check src/shared/i18n.js && node --check src/shared/locales.js && node --check scripts/setup-cloud-pins.js && node --check src/server/account-store.js && node --check src/client/js/drive-store.js && node --check src/client/js/theme.js && node --check src/server/public-files.js && node --check src/client/open-local.js",
     "build": "node scripts/build.js",

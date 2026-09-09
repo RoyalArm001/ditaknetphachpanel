@@ -117,9 +117,20 @@ function renderSetup(){
 function renderWelcome(){
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  const choices=welcomeStep==='restore'?tr`<section><span class="option-number">JSON</span><h2>Վերականգնել ֆայլից</h2><p>Ընտրեք ձեր պահուստային JSON ֆայլը։ Մինչև հաստատելը տվյալները չեն փոխվի։</p>${button(tr('Ընտրել JSON ֆայլ'),'welcome-file','','primary')}</section><section><span class="option-number">CLOUD</span><h2>Վերականգնել cloud-ից</h2><p>Անձնական հաշվի ֆայլը բացեք էլ․ փոստով և ձեր վերականգնման PIN-ով։</p>${button(tr('Անձնական PIN-ով'),'account-recover')}${button(tr('Թիմային բազա · թիմի PIN'),'welcome-shared','','small')}</section><section><span class="option-number">DRIVE</span><h2>Վերականգնել Google Drive-ից</h2><p>Միացրեք ձեր Google հաշիվը և ընտրեք Իմ փաչ-ի պահուստային պատճենը։</p>${button(tr('Բացել Google Drive-ը'),'drive-restore')}</section>`:tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Բացեք պահուստային ֆայլը, անձնական կամ թիմային cloud-ը, կամ ձեր Google Drive-ը։</p>${button(tr('Ընտրել վերականգնման աղբյուրը'),'welcome-import')}${button(tr('Թիմային բազա · թիմի PIN'),'welcome-shared','','small')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
-  $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${welcomeStep==='restore'?tr('Որտե՞ղ է ձեր պահուստային պատճենը'):tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div>${welcomeStep==='restore'?button(tr('← Հետ'),'welcome-home'):''}<input id="welcomeImport" type="file" accept=".json,application/json" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
-  $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await readBackupFile(file);await beginWorkspace('personal');await restoreFile(file);}catch(error){toast(error.message);}finally{e.target.value='';}};
+  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Վերականգնման PIN-ով'),'account-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
+  $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div><input id="welcomeImport" type="file" accept=".json,application/json" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
+  $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
+}
+function recoverAccountDialog(){
+  modal(tr('Վերականգնել իմ ֆայլը'),tr`<p class="hint">Մուտքագրեք ձեր բազայի PIN կոդը։</p>${input('pin',tr('PIN կոդ'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off"')}`,async fd=>{
+    const response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))});
+    const result=await response.json();if(!response.ok)throw new Error(result.error);
+    storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
+    activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
+    const url=new URL(location.href);url.hash='overview';url.searchParams.delete('company');history.replaceState(null,'',url);
+    await init();
+  });
+  $('#modalForm button[type=submit]').textContent=tr('Բացել իմ պահուստային պատճենը');
 }
 function renderAccountLogin(method='login'){
   accountMethod=method;onboardingVisible=false;ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
@@ -156,8 +167,7 @@ async function driveDialog(restore=false){
   const files=await DriveStore.list();
   modal(tr('Վերականգնել Google Drive-ից'),files.length?select('driveFile',tr('Պահուստային պատճեն'),files.map(f=>[f.id,f.name]))+tr('<p class="hint">Ցուցադրվում են վերջին 100 պատճենները։ Ընտրելուց հետո կհաստատեք վերականգնումը։</p>'):tr('<p>Google Drive-ում Իմ փաչ-ի պատճեններ դեռ չկան։</p>'),files.length?async fd=>{
     const data=await DriveStore.read(fd.get('driveFile'));
-    if(!ready||!personal())await beginWorkspace('personal');
-    setTimeout(()=>restoreFile(new File([JSON.stringify(data)],'MyPatch-drive.json')).catch(e=>toast(e.message)),0);
+    setTimeout(()=>restoreFile(new File([JSON.stringify(data)],'MyPatch-drive.json'),{personalWorkspace:true}).catch(e=>toast(e.message)),0);
   }:null);
 }
 async function beginWorkspace(mode){
@@ -358,12 +368,13 @@ async function readBackupFile(file){if(file.size>24*1024*1024)throw new Error(tr
     for(const row of data.companies)D.validate(row.body);
   }else D.validate(data.state||data);return data;
 }
-async function restoreFile(file){if(!file)return;const data=await readBackupFile(file);
-  if(data.companies){modal(tr('Ընտրեք վերականգնվող ընկերությունը'),select('restoreCompany',tr('Ընկերություն'),data.companies.map((row,i)=>[i,row.body.company])),async fd=>{const row=data.companies[Number(fd.get('restoreCompany'))];setTimeout(()=>restoreFile(new File([JSON.stringify({state:row.body})],'company.json')).catch(e=>toast(e.message)),0);});return;}
+async function restoreFile(file,{personalWorkspace=false}={}){if(!file)return;const data=await readBackupFile(file);
+  if(data.companies){modal(tr('Ընտրեք վերականգնվող ընկերությունը'),select('restoreCompany',tr('Ընկերություն'),data.companies.map((row,i)=>[i,row.body.company])),async fd=>{const row=data.companies[Number(fd.get('restoreCompany'))];setTimeout(()=>restoreFile(new File([JSON.stringify({state:row.body})],'company.json'),{personalWorkspace}).catch(e=>toast(e.message)),0);});return;}
   const next=data.state||data;
   const draft=data.portDraft;
   if(draft&&(!draft.values||typeof draft.values!=='object'||!Object.values(draft.values).every(v=>typeof v==='string')||!D.ports(next).some(x=>x.p.id===draft.id)))throw new Error(tr('Պորտի չպահված պատճենի ձևաչափը սխալ է'));
-  confirmAction(tr('Վերականգնել պատճենը'),tr`Ընկերություն՝ ${next.company}։ Հարկեր՝ ${next.floors.length}։ Ներկայիս տվյալները կփոխարինվեն և կպահվեն պատմության մեջ։`,()=>{
+  confirmAction(tr('Վերականգնել պատճենը'),tr`Ընկերություն՝ ${next.company}։ Հարկեր՝ ${next.floors.length}։ Ներկայիս տվյալները կփոխարինվեն և կպահվեն պատմության մեջ։`,async()=>{
+    if(personalWorkspace){await beginWorkspace('personal');if(!ready)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));}
     clearTimeout(portTimer);portDraft=null;portDraftDirty=false;
     commit(s=>{Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,next);});
     if(draft){portDraft=draft;portDraftDirty=true;selectedPortId=draft.id;location.hash='#rack/'+findPort(draft.id).r.id;render();}
@@ -448,12 +459,11 @@ async function exportPersonal(type){
 const actions={
   'welcome-personal':()=>beginWorkspace('personal'),
   'welcome-shared':()=>beginWorkspace('shared'),
-  'welcome-import':()=>{welcomeStep='restore';renderWelcome();},
   'welcome-home':()=>{welcomeStep='home';renderWelcome();},
   'welcome-file':()=>$('#welcomeImport').click(),
   'account-signup':()=>renderAccountLogin('signup'),
   'account-login':()=>renderAccountLogin('login'),
-  'account-recover':()=>renderAccountLogin('recover'),
+  'account-recover':recoverAccountDialog,
   'account-pin-new':()=>confirmAction(tr('Փոխարինել անձնական PIN-ը'),tr('Հին անձնական PIN-ը կդադարի աշխատել։ Նոր կոդը պետք է նորից պահպանել։'),async()=>{const result=await api('/api/account/pin/new',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});setTimeout(()=>showPersonalPin(result.pin),0);}),
   'drive-connect':()=>driveDialog(false),
   'drive-restore':()=>driveDialog(true),
