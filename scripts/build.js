@@ -4,7 +4,7 @@ const root=path.join(__dirname,'..'),out=path.join(root,'dist');
 fs.mkdirSync(out,{recursive:true});
 fs.mkdirSync(path.join(out,'assets'),{recursive:true});
 for(const name of ['DejaVuSans.ttf','LICENSE_DEJAVU'])fs.copyFileSync(path.join(root,'assets',name),path.join(out,'assets',name));
-for(const name of ['index.html','locales.js','i18n.js','app.js','domain.js','rack3d.js','styles.css','manifest.webmanifest','pwa.js','personal-store.js','drive-store.js','sw.js','icon-192.png','icon-512.png','favicon.ico'])fs.copyFileSync(path.join(root,name),path.join(out,name));
+for(const name of ['index.html','locales.js','i18n.js','app.js','domain.js','rack3d.js','styles.css','theme.css','theme.js','manifest.webmanifest','pwa.js','personal-store.js','drive-store.js','sw.js','icon-192.png','icon-512.png','favicon.ico'])fs.copyFileSync(path.join(root,name),path.join(out,name));
 fs.copyFileSync(path.join(root,'node_modules/exceljs/dist/exceljs.min.js'),path.join(out,'exceljs.min.js'));
 const hash=require('node:crypto').createHash('sha256');
 for(const name of fs.readdirSync(out,{recursive:true}).sort())if(name!=='sw.js'&&fs.statSync(path.join(out,name)).isFile())hash.update(fs.readFileSync(path.join(out,name)));

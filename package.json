@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "check": "node --check app.js && node --check domain.js && node --check server.js && node --check storage.js && node --check rack3d.js && node --check cloud-store.js && node --check cloud-auth.js && node --check local-repository.js && node --check api/index.js && node --check pwa.js && node --check sw.js && node --check scripts/cloud.js && node --check pin-auth.js && node --check env-config.js && node --check personal-store.js && node --check i18n.js && node --check locales.js && node --check scripts/setup-cloud-pins.js && node --check account-store.js && node --check drive-store.js",
+    "check": "node --check app.js && node --check domain.js && node --check server.js && node --check storage.js && node --check rack3d.js && node --check cloud-store.js && node --check cloud-auth.js && node --check local-repository.js && node --check api/index.js && node --check pwa.js && node --check sw.js && node --check scripts/cloud.js && node --check pin-auth.js && node --check env-config.js && node --check personal-store.js && node --check i18n.js && node --check locales.js && node --check scripts/setup-cloud-pins.js && node --check account-store.js && node --check drive-store.js && node --check theme.js",
     "build": "node scripts/build.js",
     "cloud:migrate": "node --env-file-if-exists=.env.local scripts/cloud.js migrate",
     "cloud:init": "node --env-file-if-exists=.env.local scripts/cloud.js init",

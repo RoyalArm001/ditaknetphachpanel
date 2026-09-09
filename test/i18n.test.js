@@ -9,7 +9,7 @@ test('English and Russian cover all Armenian source text and preserve interpolat
   for(const [key,values]of Object.entries(require('../locales'))){assert.ok(!key.includes('??'));assert.equal(values.length,2);for(const value of values)assert.ok(value&&!value.includes('??'),key);}
   const font=require('fontkit').openSync('assets/DejaVuSans.ttf');
   for(const char of 'Հայերեն English Русский')assert.ok(font.hasGlyphForCodePoint(char.codePointAt(0)),char);
-  for(const file of ['app.js','domain.js','personal-store.js','drive-store.js','pwa.js','rack3d.js','server.js']){
+  for(const file of ['app.js','domain.js','personal-store.js','drive-store.js','theme.js','pwa.js','rack3d.js','server.js']){
     const ast=parse(fs.readFileSync(file,'utf8'),{ecmaVersion:'latest'});
     function walk(node){
       if(!node||typeof node!=='object')return;

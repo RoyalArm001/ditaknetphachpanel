@@ -6,7 +6,7 @@
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" type="image/x-icon">
   <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Իմ փաչ">
   <title>Իմ փաչ · Ցանցային ռաքեր</title>
-  <link rel="stylesheet" href="styles.css"><script defer src="locales.js"></script><script defer src="i18n.js"></script><script defer src="domain.js"></script><script defer src="rack3d.js"></script><script defer src="personal-store.js"></script><script defer src="drive-store.js"></script><script defer src="app.js"></script><script defer src="pwa.js"></script>
+  <script src="theme.js"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="theme.css"><script defer src="locales.js"></script><script defer src="i18n.js"></script><script defer src="domain.js"></script><script defer src="rack3d.js"></script><script defer src="personal-store.js"></script><script defer src="drive-store.js"></script><script defer src="app.js"></script><script defer src="pwa.js"></script>
 </head>
 <body>
   <aside class="sidebar" id="leftPanel">
@@ -23,7 +23,7 @@
   </aside>
   <button id="panelBackdrop" class="panel-backdrop" data-action="panels-close" aria-label="Փակել կողային վահանակը" hidden></button>
   <div class="workspace">
-    <header class="topbar"><button class="button small panel-toggle" data-action="toggle-left" aria-controls="leftPanel" aria-expanded="true">☰ Մենյու</button><span id="breadcrumb">Աշխատանքային տարածք</span><label class="language-picker"><span>Լեզու</span><select id="languageSelect" data-language aria-label="Լեզու"><option value="hy">HY</option><option value="en">EN</option><option value="ru">RU</option></select></label><div class="save-tools"><button id="rightToggle" class="button small panel-toggle" data-action="toggle-right" aria-controls="rightPanel" aria-expanded="true" hidden>Գործիքներ ▸</button><span id="saveStatus" role="status">Միանում է…</span><button data-action="save" class="button small">Պահպանել</button></div></header>
+    <header class="topbar"><button class="button small panel-toggle" data-action="toggle-left" aria-controls="leftPanel" aria-expanded="true">☰ Մենյու</button><span id="breadcrumb">Աշխատանքային տարածք</span><label class="language-picker"><span>Լեզու</span><select id="languageSelect" data-language aria-label="Լեզու"><option value="hy">HY</option><option value="en">EN</option><option value="ru">RU</option></select></label><button id="themeToggle" class="button theme-toggle" type="button" aria-pressed="false" aria-label="Night mode"><span class="theme-moon" aria-hidden="true">☾</span><span class="theme-sun" aria-hidden="true">☀</span></button><div class="save-tools"><button id="rightToggle" class="button small panel-toggle" data-action="toggle-right" aria-controls="rightPanel" aria-expanded="true" hidden>Գործիքներ ▸</button><span id="saveStatus" role="status">Միանում է…</span><button data-action="save" class="button small">Պահպանել</button></div></header>
     <div id="connectionBanner" role="alert" hidden></div><main id="content"><div class="empty">Բեռնվում է…</div></main>
     <footer class="credits"><strong>Իմ փաչ</strong><span>Ստեղծված է Սիփան Դանիելյանի կողմից · <a href="https://royalarm.uk" target="_blank" rel="noopener">royalarm.uk</a></span><span>Սպասարկող՝ <a href="https://www.ditaknet.com/en" target="_blank" rel="noopener">ditaknet.com</a></span></footer>
   </div>

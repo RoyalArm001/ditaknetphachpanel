@@ -1,6 +1,9 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+  "Գիշերային ռեժիմ": ["Night mode","Ночной режим"],
+  "Միացնել ցերեկային ռեժիմը": ["Switch to day mode","Включить дневной режим"],
+  "Միացնել գիշերային ռեժիմը": ["Switch to night mode","Включить ночной режим"],
   "Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։": ["A recovery PIN lets you view and download your data. Sign in with your password to edit.","PIN восстановления позволяет просматривать и скачивать ваши данные. Для редактирования войдите с паролем."],
   "Մուտք գործել": ["Sign in","Войти"],
   "Ձեր ֆայլը վերականգնված է": ["Your file is available for recovery","Ваш файл доступен для восстановления"],
