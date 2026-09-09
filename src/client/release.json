@@ -1,21 +1,21 @@
 {
-  "version": "2.2.2",
+  "version": "2.2.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղված է. ֆայլը վերականգնելուց հետո էջը թարմացնելիս այլևս չի վերադառնում setup էջին։"
+      "Ավելացվել է անվտանգ բջջային թարմացում՝ առանց ձեր բազայի և հաշվի տվյալները ջնջելու, ինչպես նաև թարգմանությունների թարմացումներ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed: after restoring a file and refreshing the page, the app no longer returns to the setup screen."
+      "Added a safe mobile app update flow that preserves your databases and account data, plus translation updates."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлено: после восстановления файла и обновления страницы приложение больше не возвращается на экран настройки."
+      "Добавлено безопасное мобильное обновление приложения без удаления баз и данных аккаунта, а также обновлены переводы."
     ]
   }
 }

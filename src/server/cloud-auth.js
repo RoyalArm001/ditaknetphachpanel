@@ -26,21 +26,22 @@ function createAuth(env=process.env,fetcher=fetch,{cookiePrefix='rackmap'}={}){
     return permitted(user)?{id:user.id,email:user.email}:null;
   }
   return {authenticate,clear,
-    signup:async(res,email,password)=>{
+    signup:async(res,email,password,profile={})=>{
       if(typeof email!=='string'||!/^\S+@\S+\.\S+$/.test(email)||email.length>320||typeof password!=='string'||password.length<12||password.length>1024)return false;
       const returnUrl=env.RACKMAP_PUBLIC_URL||'https://patch.ditaknet.com/';
-      const session=await request('signup?redirect_to='+encodeURIComponent(returnUrl),{method:'POST',body:JSON.stringify({email,password})});
+      const data={full_name:profile.fullName||'',phone:profile.phone||'',username:profile.username||''};
+      const session=await request('signup?redirect_to='+encodeURIComponent(returnUrl),{method:'POST',body:JSON.stringify({email,password,data})});
       if(!session)return false;
       if(!session.access_token)return {confirmationRequired:true};
       const user=await request('user',{headers:{Authorization:'Bearer '+session.access_token}});
-      if(!permitted(user))return false;setSession(res,session);return {user:{id:user.id,email:user.email}};
+      if(!permitted(user))return false;setSession(res,session);return {user:{id:user.id,email:user.email,...(user.user_metadata||{})}};
     },
     login:async(res,email,password)=>{
       if(typeof email!=='string'||typeof password!=='string'||email.length>320||password.length>1024)return false;
       const session=await request('token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
       if(!session?.access_token)return false;
       const user=await request('user',{headers:{Authorization:'Bearer '+session.access_token}});
-      if(!permitted(user))return false;setSession(res,session);return {id:user.id,email:user.email};
+      if(!permitted(user))return false;setSession(res,session);return {id:user.id,email:user.email,...(user.user_metadata||{})};
     }
   };
 }

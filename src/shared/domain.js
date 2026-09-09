@@ -53,7 +53,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(Array.isArray(r.devices)&&r.devices.length<=60,tr('Սարքերի ցանկը սխալ է'));uniqueNames(r.devices);
         const used=new Set();
         for(const d of r.devices) {
-          id(d.id);name(d.name);assert(['panel','switch'].includes(d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
+          id(d.id);name(d.name);assert(['panel','switch'].includes(d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);if(d.modelType!==undefined)assert(typeof d.modelType==='string'&&['','poe','poe-plus','none'].includes(d.modelType),tr('Սվիչի մոդելի տեսակը սխալ է'));text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
           integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
           for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
           assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);

@@ -14,7 +14,14 @@ function createApp(options={}) {
   const cloud=options.cloud??(process.env.RACKMAP_STORAGE==='supabase'||process.env.VERCEL==='1');
   const store=options.store||(cloud?require('./cloud-store').openCloudStore():require('./local-repository').openLocalRepository(options));
   const pinModule=require('./pin-auth');
-  const pinAuth=pinModule.createPinAuth(store,{secure:cloud})||(cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null);
+  const configuredPinAuth=pinModule.createPinAuth(store,{secure:cloud});
+  const databasePinAuth=cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null;
+  const pinAuth=(configuredPinAuth||databasePinAuth)?{
+    enabled:async()=>!!(await configuredPinAuth?.enabled?.())||!!(await databasePinAuth?.enabled?.()),
+    authenticate:async(req,res)=>await configuredPinAuth?.authenticate(req)||await databasePinAuth?.authenticate(req),
+    login:async(req,res,pin)=>await configuredPinAuth?.login(req,res,pin)||await databasePinAuth?.login(req,res,pin),
+    clear:res=>{configuredPinAuth?.clear(res);databasePinAuth?.clear(res);}
+  }:null;
   const accountAuth=cloud?(options.auth||require('./cloud-auth').createAuth()):null;
   const personalAuth=cloud?(options.personalAuth||(options.auth?null:require('./cloud-auth').createAuth({...process.env,RACKMAP_AUTH_ACCESS:'all-authenticated'},fetch,{cookiePrefix:'mypatch'}))):null;
   const accounts=cloud&&store.pool?require('./account-store').createAccounts(store):null;
@@ -43,11 +50,13 @@ function createApp(options={}) {
           const body=await readBody(req);
           if(url.pathname.endsWith('/recover')){
             personalAuth.clear(res);
-            const user=await accounts.login(req,res,body.email,body.pin);
+            const user=await accounts.login(req,res,null,body.pin);
             if(user?.limited)return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
-            return user?json(res,200,{user}):json(res,401,{error:tr('Էլ․ փոստը կամ անձնական PIN-ը սխալ է')});
+            return user?json(res,200,{user}):json(res,401,{error:tr('Անձնական PIN-ը սխալ է')});
           }
-          const result=url.pathname.endsWith('/signup')?await personalAuth.signup(res,body.email,body.password):{user:await personalAuth.login(res,body.email,body.password)};
+          const identifier=body.email||body.username;
+          const loginEmail=url.pathname.endsWith('/signup')?body.email:await accounts.emailForLogin(identifier)||identifier;
+          const result=url.pathname.endsWith('/signup')?await personalAuth.signup(res,body.email,body.password,{fullName:[body.firstName,body.lastName].filter(Boolean).join(' ').trim(),phone:body.phone,username:body.username}):{user:await personalAuth.login(res,loginEmail,body.password)};
           if(result?.confirmationRequired)return json(res,200,result);
           if(!result?.user)return json(res,400,{error:tr('Մուտքը կամ գրանցումը չհաջողվեց։ Ստուգեք տվյալները և էլ․ փոստի հաստատումը։')});
           accounts.clear(res);
@@ -57,7 +66,6 @@ function createApp(options={}) {
         const user=await personalAuth.authenticate(req,res)||await accounts.authenticate(req);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք ձեր անձնական հաշվով')});
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
-        if(user.method==='recovery'&&req.method!=='GET'&&url.pathname!=='/api/backup')return json(res,403,{error:tr('Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։')});
         if(req.method==='POST'&&url.pathname==='/api/account/pin/new')return json(res,200,{pin:await accounts.provision(user,true)});
         requestStore=accounts.scope(user.id);
       }else if(authRequired&&url.pathname.startsWith('/api/')){

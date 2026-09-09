@@ -3,6 +3,7 @@
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
   let installPrompt=null;
+  let registration=null,updateReady=false,updateBusy=false;
   // One versioned file is the source of release notes for every language.
   // Show only on the welcome screen, never over a form or ongoing work.
   async function announceRelease(){
@@ -52,12 +53,19 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   if(standalone())setTimeout(offerNotifications,300);
   function update(){
     const control=document.querySelector('[data-action="install-app"]');
-    if(control)control.textContent=standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հեռախոսում');
+    if(control)control.textContent=updateReady?tr('↻ Թարմացնել հավելվածը'):standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հեռախոսում');
+  }
+  function hasUnsavedWork(){return typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty);}
+  function activateUpdate(){
+    if(!registration?.waiting){updateReady=false;update();return;}
+    if(hasUnsavedWork()){toast(tr('Նախ պահպանեք փոփոխությունները, հետո թարմացրեք հավելվածը։'));return;}
+    updateBusy=true;registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
   }
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
   window.addEventListener('rackmap-languagechange',update);
   window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
   actions['install-app']=async()=>{
+    if(updateReady){activateUpdate();return;}
     if(standalone()){notificationDialog();return;}
     if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();await prompt.userChoice;update();return;}
     const secure=window.isSecureContext;
@@ -67,8 +75,17 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   };
   if(location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
     const hadController=!!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener?.('controllerchange',()=>{if(!hadController)return;if(typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty)){toast(tr('Թարմացումը պատրաստ է։ Պահպանեք աշխատանքը և վերաբացեք էջը։'));return;}location.reload();});
-    navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(registration=>registration.update?.()).catch(()=>{});
+    navigator.serviceWorker.addEventListener?.('controllerchange',()=>{if(!hadController||updateBusy){location.reload();return;}if(hasUnsavedWork()){toast(tr('Թարմացումը պատրաստ է։ Պահպանեք աշխատանքը և վերաբացեք էջը։'));return;}location.reload();});
+    navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{
+      registration=reg;
+      if(reg.waiting){updateReady=true;update();}
+      reg.addEventListener('updatefound',()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller){updateReady=true;update();}});
+      });
+      return reg.update?.();
+    }).catch(()=>{});
   }
   update();
 })();

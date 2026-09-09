@@ -1,6 +1,6 @@
 'use strict';
 const D=require('../shared/domain'),{randomInt,randomBytes,createHash}=require('node:crypto');
-const {hashPin,createPinAuth}=require('./pin-auth');
+const {hashPin,verifyPin,createPinAuth}=require('./pin-auth');
 // A separate set of tables keeps personal records out of team lists and exports.
 function accountStore(pool,userId){
   if(!userId)throw new Error('Account identity required');
@@ -35,16 +35,24 @@ function createAccounts(store){
       if(!rotate&&(await pool.query('SELECT 1 FROM rackmap.personal_accounts WHERE user_id=$1',[user.id])).rows.length)return null;
       await pool.query('INSERT INTO rackmap.pin_session_config(singleton,secret) VALUES(true,$1) ON CONFLICT DO NOTHING',[randomBytes(32).toString('hex')]);
       const pin=String(randomInt(100000000000,1000000000000)),hash=await hashPin(pin);
-      const result=rotate?await pool.query('UPDATE rackmap.personal_accounts SET pin_hash=$2,email=$3 WHERE user_id=$1 RETURNING user_id',[user.id,hash,user.email.toLowerCase()]):await pool.query('INSERT INTO rackmap.personal_accounts(user_id,email,pin_hash) VALUES($1,$2,$3) ON CONFLICT(user_id) DO NOTHING RETURNING user_id',[user.id,user.email.toLowerCase(),hash]);
+      const profile=[user.full_name||user.fullName||'',user.phone||'',user.username||''];
+      const result=rotate?await pool.query('UPDATE rackmap.personal_accounts SET pin_hash=$2,email=$3,full_name=$4,phone=$5,username=$6 WHERE user_id=$1 RETURNING user_id',[user.id,hash,user.email.toLowerCase(),...profile]):await pool.query('INSERT INTO rackmap.personal_accounts(user_id,email,pin_hash,full_name,phone,username) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(user_id) DO NOTHING RETURNING user_id',[user.id,user.email.toLowerCase(),hash,...profile]);
       await pool.query('INSERT INTO rackmap.personal_companies(user_id,id,body) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[user.id,'default',JSON.stringify(D.empty())]);
       return result.rows.length?pin:null;
+    },
+    async emailForLogin(identifier){
+      if(typeof identifier!=='string')return null;
+      const row=(await pool.query('SELECT email FROM rackmap.personal_accounts WHERE lower(email)=lower($1) OR lower(username)=lower($1) LIMIT 1',[identifier.trim()])).rows[0];
+      return row?.email||null;
     },
     async login(req,res,email,pin){
       const ip=process.env.VERCEL==='1'?req.headers['x-real-ip']||'unknown':req.socket?.remoteAddress||'unknown';
       const key=createHash('sha256').update('personal-recovery:'+ip).digest('hex');
       if(await store.pinAttempt(key)>5)return {limited:true};
-      if(typeof email!=='string'||email.length>320||typeof pin!=='string'||!/^\d{12}$/.test(pin))return null;
-      const row=(await pool.query('SELECT user_id,pin_hash FROM rackmap.personal_accounts WHERE email=$1',[email.trim().toLowerCase()])).rows[0];
+      if(typeof pin!=='string'||!/^\d{8,12}$/.test(pin))return null;
+      const rows=(await pool.query('SELECT user_id,pin_hash FROM rackmap.personal_accounts')).rows;
+      let row=null;
+      for(const candidate of rows)if(await verifyPin(pin,candidate.pin_hash)){row=candidate;break;}
       const auth=await configure(row),result=await auth?.login(req,res,pin);
       if(result&&!result.limited){await store.pinReset(key);return {...result,method:'recovery'};}return result||null;
     },

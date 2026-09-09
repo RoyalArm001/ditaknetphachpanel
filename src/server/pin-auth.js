@@ -5,6 +5,14 @@ async function hashPin(pin){
   if(!/^\d{8,12}$/.test(pin))throw new Error('PIN must contain 8–12 digits');
   const salt=randomBytes(16).toString('hex');return salt+':'+(await derive(pin,salt,32)).toString('hex');
 }
+async function verifyPin(pin,stored){
+  if(typeof pin!=='string'||!/^\d{8,12}$/.test(pin)||typeof stored!=='string')return false;
+  const [salt,digest]=stored.split(':');
+  if(!/^[a-f0-9]{32}$/.test(salt)||!/^[a-f0-9]{64}$/.test(digest))return false;
+  const actual=await derive(pin,salt,32);
+  return equalHex(actual.toString('hex'),digest);
+}
+function equalHex(a,b){const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);}
 function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),cookieName='rackmap_pin'}={}){
   const secret=env.RACKMAP_SESSION_SECRET;
   const hashes=env.RACKMAP_PIN_HASHES?JSON.parse(env.RACKMAP_PIN_HASHES):{};
@@ -48,4 +56,4 @@ function createDatabasePinAuth(store,options={}){
     clear:res=>{const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`rackmap_pin=; Path=/api; HttpOnly; ${options.secure===false?'':'Secure; '}SameSite=Strict; Max-Age=0`]);}
   };
 }
-module.exports={hashPin,createPinAuth,createDatabasePinAuth};
+module.exports={hashPin,verifyPin,createPinAuth,createDatabasePinAuth};

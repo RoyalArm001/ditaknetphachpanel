@@ -97,7 +97,7 @@ async function save(){
   })();
   try{return await saving;}finally{saving=null;}
 }
-function commit(fn,redraw=true){if(accountReadOnly)throw new Error(tr('Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
+function commit(fn,redraw=true){if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
 function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return {view:viewNames[v]?v:'overview',id};}
 function render(){
   for(const key of Object.keys(D.statuses))document.documentElement.style.setProperty('--'+key,D.statusColor(state,key));
@@ -107,7 +107,6 @@ function render(){
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
   if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
-  if(accountReadOnly)$('#content').insertAdjacentHTML('afterbegin',tr`<section class="panel recovery-notice"><h2>Ձեր ֆայլը վերականգնված է</h2><p>Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։</p>${button(tr('Ներբեռնել իմ տվյալները'),'backup','','primary')}${button(tr('Մուտք գործել'),'account-login')}</section>`);
   applyPanels();
 }
 function renderSetup(){
@@ -122,10 +121,20 @@ function renderWelcome(){
   $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
 }
 function recoverAccountDialog(){
-  modal(tr('Վերականգնել իմ ֆայլը'),tr`<p class="hint">Մուտքագրեք ձեր բազայի PIN կոդը։</p>${input('pin',tr('PIN կոդ'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off"')}`,async fd=>{
-    const response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))});
-    const result=await response.json();if(!response.ok)throw new Error(result.error);
-    storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
+  modal(tr('Վերականգնել իմ ֆայլը'),tr`<p class="hint">Մուտքագրեք միայն PIN կոդը։ Անձնական PIN-ը կբացի ձեր հաշիվը, իսկ թիմային PIN-ը՝ ընդհանուր բազան։</p>${input('pin',tr('PIN կոդ'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="one-time-code"')}`,async fd=>{
+    const body={pin:fd.get('pin')};
+    let response=await fetch('/api/account/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    let result=await response.json();
+    if(!response.ok){
+      response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      result=await response.json();
+      if(!response.ok)throw new Error(result.error);
+      storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
+      activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
+      const teamUrl=new URL(location.href);teamUrl.hash='overview';teamUrl.searchParams.delete('company');history.replaceState(null,'',teamUrl);
+      await init();return;
+    }
+    storageMode='account';onboardingChoice='account';onboardingVisible=false;accountUserId=result.user.id;accountReadOnly=false;
     activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
     const url=new URL(location.href);url.hash='overview';url.searchParams.delete('company');history.replaceState(null,'',url);
     await init();
@@ -135,9 +144,16 @@ function recoverAccountDialog(){
 function renderAccountLogin(method='login'){
   accountMethod=method;onboardingVisible=false;ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const recovery=method==='recover',signup=method==='signup';
-  $('#content').innerHTML=tr`<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՆՁՆԱԿԱՆ ՀԱՇԻՎ</div><h1>${recovery?tr('Վերականգնել իմ ֆայլը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</h1><p class="hint">${recovery?tr('Գրեք ձեր հաշվի էլ․ փոստը և անձնական PIN-ը։ Կբացվեն միայն ձեր տվյալները՝ դիտելու և ներբեռնելու համար։'):tr('Ձեր ընկերությունները և պահուստային պատճենները հասանելի կլինեն միայն ձեր հաշվին։')}</p><form id="loginForm">${input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username" maxlength="320"')}${recovery?input('pin',tr('Անձնական PIN'),'','password','required inputmode="numeric" pattern="[0-9]{12}" minlength="12" maxlength="12" autocomplete="off"'):input('password',tr('Գաղտնաբառ'),'','password',`required ${signup?'minlength="12" autocomplete="new-password"':'autocomplete="current-password"'} maxlength="1024"`)}${signup?tr('<p class="hint">Գաղտնաբառը՝ առնվազն 12 նիշ։ Էլ․ փոստը հաստատելուց հետո առաջին մուտքի ժամանակ կստանաք անձնական վերականգնման PIN։</p>'):''}<p id="loginError" role="alert"></p><button class="button primary" type="submit">${recovery?tr('Բացել իմ պահուստային պատճենը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</button></form><div class="login-tabs">${button(tr('Մուտք գործել'),'account-login')}${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('← Հետ'),'welcome-home')}</div></section>`;
+  const fields=signup?`<div class="signup-step" data-step="0">${input('firstName',tr('Անուն'),'','text','required maxlength="80" autocomplete="given-name"')}${input('lastName',tr('Ազգանուն'),'','text','required maxlength="80" autocomplete="family-name"')}<button class="button primary" type="button" data-signup-next>${tr('Հաջորդը')} →</button></div><div class="signup-step" data-step="1" hidden>${input('phone',tr('Հեռախոսահամար'),'','tel','required maxlength="40" autocomplete="tel"')}${input('username',tr('Username'),'','text','required pattern="[A-Za-z0-9._-]{3,40}" maxlength="40" autocomplete="username"')}<div class="actions">${button(tr('← Հետ'),'signup-prev')}<button class="button primary" type="button" data-signup-next>${tr('Հաջորդը')} →</button></div></div><div class="signup-step" data-step="2" hidden>${input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="email" maxlength="320"')}${input('password',tr('Գաղտնաբառ'),'','password','required minlength="12" autocomplete="new-password" maxlength="1024"')}<p class="hint">${tr('Վերջում կստեղծվի և կցուցադրվի ձեր անձնական PIN կոդը։')}</p><div class="actions">${button(tr('← Հետ'),'signup-prev')}<button class="button primary" type="submit">${tr('Ստեղծել հաշիվ')}</button></div></div>`:`${input('email',tr('Էլ․ փոստ կամ username'),'','text','required autocomplete="username" maxlength="320"')}${recovery?input('pin',tr('Անձնական PIN'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="one-time-code"'):input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password" maxlength="1024"')}<button class="button primary" type="submit">${recovery?tr('Բացել իմ պահուստային պատճենը'):tr('Մուտք գործել')}</button>`;
+  $('#content').innerHTML=tr`<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՆՁՆԱԿԱՆ ՀԱՇԻՎ</div><h1>${recovery?tr('Վերականգնել իմ ֆայլը'):signup?tr('Ստեղծել հաշիվ'):tr('Մուտք գործել')}</h1><p class="hint">${recovery?tr('Մուտքագրեք անձնական PIN-ը։'):signup?tr('Լրացրեք հաշվի տվյալները երեք պարզ քայլով։'):tr('Ձեր ընկերությունները և պահուստային պատճենները հասանելի կլինեն միայն ձեր հաշվին։')}</p>${signup?'<div class="signup-progress"><span data-progress="0">1</span><i></i><span data-progress="1">2</span><i></i><span data-progress="2">3</span></div>':''}<form id="loginForm">${fields}<p id="loginError" role="alert"></p></form><div class="login-tabs">${button(tr('Մուտք գործել'),'account-login')}${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('← Հետ'),'welcome-home')}</div></section>`;
   $('#loginForm').dataset.account='true';
-  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{
+  if(signup){
+    let step=0;
+    const showStep=next=>{step=next;document.querySelectorAll('.signup-step').forEach(x=>x.hidden=Number(x.dataset.step)!==step);document.querySelectorAll('[data-progress]').forEach(x=>x.classList.toggle('active',Number(x.dataset.progress)<=step));};
+    document.querySelectorAll('[data-signup-next]').forEach(next=>next.onclick=()=>{const current=document.querySelector(`.signup-step[data-step="${step}"]`);if([...current.querySelectorAll('input')].every(x=>x.reportValidity()))showStep(step+1);});
+    document.querySelectorAll('[data-action="signup-prev"]').forEach(back=>back.onclick=()=>showStep(Math.max(0,step-1)));showStep(0);
+  }
+  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button[type="submit"]');b.disabled=true;try{
     const fd=new FormData(e.target),res=await fetch('/api/account/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))}),result=await res.json();
     if(!res.ok)throw new Error(result.error);
     if(result.confirmationRequired){$('#loginError').textContent=tr('Ստուգեք ձեր էլ․ փոստը և հաստատեք հաշիվը, ապա այստեղ մուտք գործեք։');return;}
@@ -186,9 +202,9 @@ function renderFloors(){$('#content').innerHTML=header(tr('Հարկեր և ռա�
 function renderRack(id){const found=findRack(id);if(!found){$('#content').innerHTML=header(tr('Ռաքը չի գտնվել'),tr('Ընտրեք ռաքը հարկերի ցանկից'))+tr('<a class="button" href="#floors">← Հարկեր և ռաքեր</a>');return;}const {f,r}=found;
   const rows=D.rows(state),byPort=new Map(rows.map(x=>[x.p.id,x]));const mobile=window.matchMedia('(max-width:760px)').matches;const narrow=window.matchMedia('(max-width:1150px)').matches;const unit=Math.max(mobile?248:88,...r.devices.map(d=>Math.ceil((Math.ceil(d.portList.length/(mobile?6:narrow?12:24))*(mobile?46:23)+40)/d.height)));let grid='';
   for(let u=r.u;u>=1;u--){const row=r.u-u+1,occupied=r.devices.some(d=>u>=d.pos&&u<d.pos+d.height);grid+=`<div class="rack-tick" style="grid-row:${row};grid-column:1">${u}</div><div class="rack-hole" style="grid-row:${row};grid-column:3">▪</div>`;if(!occupied)grid+=tr`<button class="rack-blank" data-action="device-new" data-id="${r.id}" data-pos="${u}" style="grid-row:${row};grid-column:2" title="Ավելացնել սարք U${u}">＋ Ազատ դիրք · ${u}U</button>`;}
-  for(const d of r.devices){grid+=tr`<section class="rack-device" style="grid-column:2;grid-row:${r.u-(d.pos+d.height-1)+1} / span ${d.height};--device:${d.color}"><div class="device-head"><button data-action="device-detail" data-id="${d.id}">${esc(d.name)} · ${d.type==='panel'?tr('Փաչ պանել'):tr('Սվիչ')}</button><small>${d.portList.length} պորտ · ${d.height}U</small></div><div class="mini-ports">${d.portList.map(p=>{const x=byPort.get(p.id);return tr`<button class="mini-port ${x.status}" data-action="port" data-id="${p.id}" aria-label="${esc(d.name)} պորտ ${p.number} ${esc(D.statusLabel(state,x.status))}" title="${esc(`${d.name} / ${p.number} · ${esc(D.statusLabel(state,x.status))} · ${x.cable} ${x.room}`)}">${p.number}</button>`;}).join('')}</div></section>`;}
+  for(const d of r.devices){grid+=tr`<section class="rack-device" style="grid-column:2;grid-row:${r.u-(d.pos+d.height-1)+1} / span ${d.height};--device:${d.color}"><div class="device-head"><button data-action="device-detail" data-id="${d.id}">${esc(d.name)} · ${d.type==='panel'?tr('Փաչ պանել'):tr('Սվիչ')}</button><span class="device-move">${button('↑','device-move-up',d.id,'small')}${button('↓','device-move-down',d.id,'small')}<small>${d.portList.length} պորտ · ${d.height}U</small></span></div><div class="mini-ports">${d.portList.map(p=>{const x=byPort.get(p.id);return tr`<button class="mini-port ${x.status}" data-action="port" data-id="${p.id}" aria-label="${esc(d.name)} պորտ ${p.number} ${esc(D.statusLabel(state,x.status))}" title="${esc(`${d.name} / ${p.number} · ${esc(D.statusLabel(state,x.status))} · ${x.cable} ${x.room}`)}">${p.number}</button>`;}).join('')}</div></section>`;}
   $('#breadcrumb').textContent=`${f.name} / ${r.name}`;
-  $('#content').innerHTML=header(r.name,`${f.name} · ${r.location||tr('Ռաքի առջևի տեսք')}`,tr`<a class="button" href="#floors">← Հարկեր</a><a class="button" href="#connections/${r.id}">3D կապեր</a>${button(tr('Խմբագրել ռաքը'),'rack',r.id)}${button(tr('＋ Սարք'),'device-new',r.id,'primary')}`)+tr`<div class="section-head">${legend()}<span class="hint">U1՝ ներքևում · ${r.u}U</span></div><div class="rack-layout"><div class="rack-case"><div class="rack-rails" style="grid-template-rows:repeat(${r.u},${unit}px)">${grid}</div></div><aside class="rack-side" id="rightPanel"><div class="mobile-sheet-head"><strong>Պորտի գործիքներ</strong><button class="button small" data-action="toggle-right" aria-label="Փակել գործիքները">Փակել ×</button></div><section id="portTools" class="panel port-tools" aria-label="Պորտի գործիքներ"></section><details class="panel rack-info"><summary>Ռաքի տվյալներ և լուսանկար</summary><h2>Ռաքի տվյալներ</h2><div class="rack-detail"><div><small>Չափ</small>${r.u}U</div><div><small>Զբաղեցված է</small>${r.devices.reduce((n,d)=>n+d.height,0)}U</div><div><small>Սարքեր</small>${r.devices.length}</div><div><small>Պորտեր</small>${r.devices.reduce((n,d)=>n+d.portList.length,0)}</div></div>${r.photo?tr`<button class="text-button" data-action="photo" data-id="${r.id}" aria-label="Բացել ռաքի լուսանկարը"><img class="photo" src="${esc(r.photo)}" alt="${esc(r.name)} լուսանկար"></button>`:tr('<div class="empty" style="padding:18px 0">Լուսանկար չկա</div>')}${button(r.photo?tr('Փոխել լուսանկարը'):tr('＋ Ավելացնել լուսանկար'),'photo-upload',r.id,'small')}${r.photo?button(tr('Հեռացնել'),'photo-remove',r.id,'small'):''}<input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" hidden></details><section class="panel"><h2>Սարքերի ցանկ</h2>${[...r.devices].sort((a,b)=>b.pos-a.pos).map(d=>`<div class="device-item"><div><strong>${esc(d.name)}</strong><small>U${d.pos} · ${d.height}U · ${esc(d.model||'')}</small></div>${button(tr('Բացել'),'device-detail',d.id,'small')}</div>`).join('')||tr('<p class="hint">Սեղմեք ռաքի ազատ U դիրքի վրա՝ սարք ավելացնելու համար։</p>')}</section></aside></div>`;
+  $('#content').innerHTML=header(r.name,`${f.name} · ${r.location||tr('Ռաքի առջևի տեսք')}`,tr`<a class="button" href="#floors">← Հարկեր</a><a class="button" href="#connections/${r.id}">3D կապեր</a>${button(tr('Խմբագրել ռաքը'),'rack',r.id)}${button(tr('＋ Սարք'),'device-new',r.id,'primary')}`)+tr`<div class="section-head">${legend()}<span class="hint">U1՝ ներքևում · ${r.u}U</span></div><div class="rack-layout"><div class="rack-case"><div class="rack-rails" style="grid-template-rows:repeat(${r.u},${unit}px)">${grid}</div></div><aside class="rack-side" id="rightPanel"><div class="mobile-sheet-head"><strong>Պորտի գործիքներ</strong><button class="button small" data-action="toggle-right" aria-label="Փակել գործիքները">Փակել ×</button></div><section id="portTools" class="panel port-tools" aria-label="Պորտի գործիքներ"></section><details class="panel rack-info"><summary>Ռաքի տվյալներ և լուսանկար</summary><h2>Ռաքի տվյալներ</h2><div class="rack-detail"><div><small>Չափ</small>${r.u}U</div><div><small>Զբաղեցված է</small>${r.devices.reduce((n,d)=>n+d.height,0)}U</div><div><small>Սարքեր</small>${r.devices.length}</div><div><small>Պորտեր</small>${r.devices.reduce((n,d)=>n+d.portList.length,0)}</div></div>${r.photo?tr`<button class="text-button" data-action="photo" data-id="${r.id}" aria-label="Բացել ռաքի լուսանկարը"><img class="photo" src="${esc(r.photo)}" alt="${esc(r.name)} լուսանկար"></button>`:tr('<div class="empty" style="padding:18px 0">Լուսանկար չկա</div>')}${button(r.photo?tr('Փոխել լուսանկարը'):tr('＋ Ավելացնել լուսանկար'),'photo-upload',r.id,'small')}${r.photo?button(tr('Հեռացնել'),'photo-remove',r.id,'small'):''}<input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" hidden></details><section class="panel"><h2>Սարքերի ցանկ</h2>${[...r.devices].sort((a,b)=>b.pos-a.pos).map(d=>`<div class="device-item"><div><strong>${esc(d.name)}</strong><small>U${d.pos} · ${d.height}U · ${esc(d.model||'')}</small></div><span class="device-move">${button('↑','device-move-up',d.id,'small')}${button('↓','device-move-down',d.id,'small')}${button(tr('Բացել'),'device-detail',d.id,'small')}</span></div>`).join('')||tr('<p class="hint">Սեղմեք ռաքի ազատ U դիրքի վրա՝ սարք ավելացնելու համար։</p>')}</section></aside></div>`;
   renderPortTools();paintPorts();
 }
 function renderConnections(id){
@@ -231,24 +247,28 @@ function floorModal(id){const f=state.floors.find(x=>x.id===id);modal(f?tr('Խմ
 function rackModal(id,floorId){const found=findRack(id),r=found?.r;modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),found?.f.id||floorId)}${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div>`,fd=>commit(s=>{const target=s.floors.find(f=>f.id===fd.get('floorId'));if(r){let source=s.floors.find(f=>f.racks.some(x=>x.id===id));const edit=source.racks.find(x=>x.id===id);Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});if(source.id!==target.id){source.racks=source.racks.filter(x=>x.id!==id);target.racks.push(edit);}}else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});}),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');$('#preset').onchange=e=>{if(e.target.value)$('#u').value=e.target.value;};}
 function deviceModal(id,rackId,position){const found=findDevice(id),d=found?.d,r=found?.r||findRack(rackId)?.r;if(!r)return;
   const nextPosition=position||Array.from({length:r.u},(_,i)=>r.u-i).find(u=>!r.devices.some(d=>u>=d.pos&&u<d.pos+d.height))||1;
-  modal(d?tr('Խմբագրել սարքը'):tr('Նոր սարք'),tr`<div class="form-grid">${input('name',tr('Սարքի անվանում'),d?.name||'','text',tr('required maxlength="200" placeholder="PP-01 կամ SW-01"'))}${select('type',tr('Սարքի տեսակ'),[['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')]],d?.type||'panel')}${select('template',tr('Պատրաստի ձևանմուշ'),[['',tr('Ընտրել')],['panel-12-1',tr('Փաչ պանել 12 պորտ · 1U')],['panel-24-1',tr('Փաչ պանել 24 պորտ · 1U')],['panel-48-2',tr('Փաչ պանել 48 պորտ · 2U')],['switch-28-1',tr('Սվիչ 28 պորտ · 1U')],['switch-48-1',tr('Սվիչ 48 պորտ · 1U')]])}${input('model',tr('Մոդել'),d?.model||'','text','maxlength="200"')}${input('pos',tr('Սկզբնական U դիրք ներքևից'),d?.pos||nextPosition,'number',`required min="1" max="${r.u}"`)}${input('height',tr('Բարձրություն U'),d?.height||1,'number',`required min="1" max="${r.u}" list="heights"`)}${select('count',tr('Պորտերի քանակ'),[],d?.portList.length||24)}${input('color',tr('Սարքի գույն'),d?.color||'#397c78','color')}${!d?select('initialStatus',tr('Նոր պորտերի սկզբնական վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),'free')+select('initialService',tr('Նոր պորտերի նշանակություն'),Object.keys(D.services).map(key=>[key,D.serviceLabel(state,key)]),''):''}<datalist id="heights"><option value="1"><option value="2"><option value="4"></datalist><datalist id="portCounts"><option value="12"><option value="24"><option value="48"></datalist></div><p class="form-note">Փաչ պանել՝ 12, 24 կամ 48 պորտ։ Չափը ճշտեք սարքի մոդելով. 48 պորտանոց պանելը կարող է լինել 1U կամ 2U։ Տեղափոխելիս փոխեք U դիրքը։</p>`,fd=>commit(s=>{
+  modal(d?tr('Խմբագրել սարքը'):tr('Նոր սարք'),tr`<div class="form-grid">${input('name',tr('Սարքի անվանում'),d?.name||'','text',tr('required maxlength="200" placeholder="PP-01 կամ SW-01"'))}${select('type',tr('Սարքի տեսակ'),[['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')]],d?.type||'panel')}${input('model',tr('Մոդել'),d?.model||'','text','maxlength="200" placeholder="Օրինակ՝ Digitus DN-93615"')}${select('modelType',tr('Սվիչի մոդելի տեսակ'),[['',tr('Ընտրել')],['poe','PoE'],['poe-plus','PoE+'],['none',tr('Առանց PoE')]],d?.modelType||'')}${input('pos',tr('Սկզբնական U դիրք ներքևից'),d?.pos||nextPosition,'number',`required min="1" max="${r.u}"`)}${input('height',tr('Բարձրություն U'),d?.height||1,'number',`required min="1" max="${r.u}" list="heights"`)}${select('count',tr('Պորտերի քանակ'),[],d?.portList.length||24)}${input('color',tr('Սարքի գույն'),d?.color||'#397c78','color')}${!d?select('initialStatus',tr('Նոր պորտերի սկզբնական վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),'free')+select('initialService',tr('Նոր պորտերի նշանակություն'),Object.keys(D.services).map(key=>[key,D.serviceLabel(state,key)]),''):''}<datalist id="heights"><option value="1"><option value="2"><option value="4"></datalist><datalist id="portCounts"><option value="12"><option value="24"><option value="48"></datalist></div><p class="form-note">Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։</p>`,fd=>commit(s=>{
     const rr=s.floors.flatMap(f=>f.racks).find(x=>x.id===r.id);const edit=d?rr.devices.find(x=>x.id===id):{id:uid(),portList:[]};const count=+fd.get('count');
     const removed=edit.portList.slice(count);if(removed.some(p=>p.status!=='free'||p.cable||p.room||p.notes||p.service||p.vlan||p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
     if(d&&d.type!==fd.get('type')&&edit.portList.some(p=>p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Կապված սարքի տեսակը փոխելուց առաջ անջատեք կապերը։'));
-    Object.assign(edit,{name:fd.get('name').trim(),type:fd.get('type'),model:fd.get('model').trim(),pos:+fd.get('pos'),height:+fd.get('height'),color:fd.get('color')});
+    Object.assign(edit,{name:fd.get('name').trim(),type:fd.get('type'),model:fd.get('type')==='panel'?String(fd.get('model')||'').trim():'',modelType:fd.get('type')==='switch'?String(fd.get('modelType')||''):'',pos:+fd.get('pos'),height:+fd.get('height'),color:fd.get('color')});
     edit.portList=Array.from({length:count},(_,i)=>edit.portList[i]||{...D.port(i+1,uid()),...(!d?{status:fd.get('initialStatus'),service:fd.get('initialService')}:{})});if(!d)rr.devices.push(edit);
   }),d?button(tr('Ջնջել սարքը'),'device-delete',id,'danger'):'');
   const setPortChoices=(preferred)=>{
-    const isSwitch=$('#type').value==='switch',counts=isSwitch?[28,48]:[12,24,48];
+    const isSwitch=$('#type').value==='switch',counts=[12,24,48];
     if(d&&d.type===$('#type').value&&!counts.includes(d.portList.length))counts.unshift(d.portList.length);
-    const chosen=counts.includes(Number(preferred))?Number(preferred):(isSwitch?28:24);
+    const chosen=counts.includes(Number(preferred))?Number(preferred):24;
     $('#count').innerHTML=opts(counts.map(n=>[n,n+tr(' պորտ')]),chosen);
   };
   setPortChoices(d?.portList.length||24);
-  $('#type').onchange=()=>setPortChoices();
-  $('#template').onchange=e=>{if(!e.target.value)return;const [type,count,height]=e.target.value.split('-');$('#type').value=type;setPortChoices(count);$('#height').value=height;};
+  const syncTypeFields=()=>{
+    const isSwitch=$('#type').value==='switch';
+    $('#model').closest('.field').hidden=isSwitch;
+    $('#modelType').closest('.field').hidden=!isSwitch;
+  };
+  syncTypeFields();$('#type').onchange=()=>{setPortChoices();syncTypeFields();};
 }
-function deviceDetail(id){const {d,r}=findDevice(id)||{};if(!d)return;const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));modal(d.name,`<p class="port-title">${esc(r.name)} · U${d.pos} · ${d.height}U · ${esc(d.model)} </p>${legend()}<div class="port-overview">${d.portList.map(p=>`<button class="${byId.get(p.id).status}" data-action="port" data-id="${p.id}" title="${esc(D.statusLabel(state,byId.get(p.id).status))}">${p.number}</button>`).join('')}</div>`,null,button(tr('Խմբագրել սարքը'),'device',id,'primary'));paintPorts();}
+function deviceDetail(id){const {d,r}=findDevice(id)||{};if(!d)return;const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));const modelType=d.type==='switch'&&d.modelType?` · ${d.modelType==='poe'?'PoE':d.modelType==='poe-plus'?'PoE+':tr('Առանց PoE')}`:'';modal(d.name,`<p class="port-title">${esc(r.name)} · U${d.pos} · ${d.height}U · ${esc(d.model)}${esc(modelType)} </p>${legend()}<div class="port-overview">${d.portList.map(p=>`<button class="${byId.get(p.id).status}" data-action="port" data-id="${p.id}" title="${esc(D.statusLabel(state,byId.get(p.id).status))}">${p.number}</button>`).join('')}</div>`,null,button(tr('Խմբագրել սարքը'),'device',id,'primary'));paintPorts();}
 
 function serviceLegend(){return '<div class="service-legend">'+Object.entries(D.services).map(([key,x])=>`<span><i style="background:${D.serviceColor(state,key)}"></i>${esc(D.serviceLabel(state,key))}</span>`).join('')+'</div>';}
 function paintPorts(){
@@ -291,14 +311,16 @@ function renderPortTools(){
     <div class="form-grid">
       ${select('status',tr('Վիճակ'),incoming?[['used',D.statusLabel(state,'used')],['fault',D.statusLabel(state,'fault')]]:Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),v.status)}
       ${input('cable',tr('Մալուխի համար'),v.cable,'text','maxlength="200" placeholder="C-024"')}
+      ${d.type==='panel'?`<div class="field full">${select('switchPortId',tr('Միացված սվիչի պորտ'),[['',tr('Կապ չկա')],...choices],v.switchPortId)}</div>`:''}
+    </div>
+    <details class="port-extra"><summary>${tr('Այլ տվյալներ')}</summary><div class="form-grid">
       ${select('floorId',tr('Նպատակակետի հարկ'),[['',tr('Ընտրել')],...state.floors.map(f=>[f.id,f.name])],v.floorId)}
       ${input('room',tr('Սենյակ'),v.room,'text','maxlength="200" placeholder="205"')}
       ${input('door',tr('Դուռ / տեղադրություն'),v.door,'text',tr('maxlength="200" placeholder="Աջ կողմի դուռ"'))}
       ${input('side',tr('Կողմ'),v.side,'text','maxlength="200" list="sides"')}
       <datalist id="sides"><option value="Աջ"><option value="Ձախ"><option value="Կենտրոն"></datalist>
-      ${d.type==='panel'?`<div class="field full">${select('switchPortId',tr('Միացված սվիչի պորտ'),[['',tr('Կապ չկա')],...choices],v.switchPortId)}</div>`:''}
-      <div class="field full"><label for="notes">Լրացուցիչ նշումներ</label><textarea id="notes" name="notes" maxlength="2000">${esc(v.notes)}</textarea></div>
-    </div>
+      <div class="field full"><label for="notes">${tr('Լրացուցիչ նշումներ')}</label><textarea id="notes" name="notes" maxlength="2000">${esc(v.notes)}</textarea></div>
+    </div></details>
     <div id="portError" class="form-error" role="alert" hidden></div>
     <div class="port-save-status hint" id="portSaveStatus" role="status">Փոփոխությունները պահպանվում են ավտոմատ։</div>
     <div class="form-actions">${button(tr('Չեղարկել'),'port-discard','','small')}${button(tr('Մաքրել'),'port-clear',p.id,'danger')}<button type="submit" class="button primary">Պահպանել</button></div>
@@ -354,6 +376,15 @@ function portModal(id){
   if(route().view!=='rack'||route().id!==item.r.id){location.hash='#rack/'+item.r.id;return;}
   renderPortTools();paintPorts();
   if(window.matchMedia('(max-width:760px)').matches)$('#portTools').scrollIntoView?.({behavior:'smooth',block:'start'});
+}
+function moveDevice(id,direction){
+  const found=D.devices(state).find(x=>x.d.id===id);
+  if(!found)return;
+  const next=found.d.pos+(direction==='up'?1:-1);
+  if(next<1||next+found.d.height-1>found.r.u){toast(tr('Սարքը չի կարող դուրս գալ ռաքի սահմաններից'));return;}
+  if(found.r.devices.some(d=>d.id!==id&&next<d.pos+d.height&&next+found.d.height>d.pos)){toast(tr('Այս դիրքը զբաղված է այլ սարքով'));return;}
+  commit(s=>{const d=D.devices(s).find(x=>x.d.id===id)?.d;if(d)d.pos=next;});
+  render();
 }
 async function uploadPhoto(id,file){if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error(tr('Ընտրեք PNG, JPEG կամ WebP լուսանկար'));if(file.size>12*1024*1024)throw new Error(tr('Լուսանկարը պետք է լինի մինչև 12 ՄԲ'));
   const uploadCompany=activeCompanyId;
@@ -485,7 +516,7 @@ const actions={
   'company-new':newCompany,'backup-all':backupAll,
   save:async()=>{if(await save())toast(tr('Տվյալները պահպանված են'));},close:()=>$('#dialog').close(),
   floor:id=>floorModal(id),'rack-new':id=>rackModal('',id),rack:id=>rackModal(id),
-  'device-new':(id,el)=>deviceModal('',id,+el.dataset.pos||undefined),device:id=>deviceModal(id),'device-detail':deviceDetail,port:portModal,
+  'device-new':(id,el)=>deviceModal('',id,+el.dataset.pos||undefined),device:id=>deviceModal(id),'device-detail':deviceDetail,'device-move-up':id=>moveDevice(id,'up'),'device-move-down':id=>moveDevice(id,'down'),port:portModal,
   'floor-delete':id=>deleteItem('floor',id),'rack-delete':id=>deleteItem('rack',id),'device-delete':id=>deleteItem('device',id),
   'port-deselect':()=>{if(!flushPortEditor())return;selectedPortId='';portDraft=null;renderPortTools();paintPorts();},
   'port-discard':()=>{clearTimeout(portTimer);portDraftDirty=false;portDraft=null;renderPortTools();status(dirty?tr('Չպահված փոփոխություններ'):tr('Պահված է'));},
@@ -547,7 +578,7 @@ async function init(){
     maxStateBytes=personal()?24*1024*1024:config.maxStateBytes||maxStateBytes;
     $('[data-action=logout]')?.remove();
     if(authRequired)$('.save-tools').insertAdjacentHTML('beforeend',button(tr('Դուրս գալ'),'logout','','small'));
-    if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=user.method==='recovery';}
+    if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=false;}
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';
     const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
