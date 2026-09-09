@@ -158,7 +158,7 @@ function createApp(options={}) {
       }
       const file=publicFiles[url.pathname==='/'?'/index.html':url.pathname];
       if(req.method==='GET'&&file){
-        const mime=file.endsWith('.ttf')?'font/ttf':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
+        const mime=file.endsWith('.json')?'application/json':file.endsWith('.ttf')?'font/ttf':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(file).pipe(res);
       }
       json(res,404,{error:tr('Չի գտնվել')});

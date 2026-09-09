@@ -7,6 +7,7 @@ const root=path.resolve(__dirname,'../..');
 const sources={
   'index.html':'src/client/index.html',
   'open-local.js':'src/client/open-local.js',
+  'release.json':'src/client/release.json',
   'manifest.webmanifest':'src/client/manifest.webmanifest',
   'sw.js':'src/client/sw.js',
   'styles.css':'src/client/css/styles.css',
