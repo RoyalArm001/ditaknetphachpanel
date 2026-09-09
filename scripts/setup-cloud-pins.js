@@ -2,11 +2,11 @@
 // Run with server credentials loaded into the environment. Never prints PIN values.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {randomInt,randomBytes,randomUUID}=require('node:crypto');
-const {hashPin}=require('../pin-auth');
+const {hashPin}=require('../src/server/pin-auth');
 async function main(){
   const at=process.argv.indexOf('--count'),count=at<0?3:Number(process.argv[at+1]);
   if(!Number.isInteger(count)||count<1||count>10)throw new Error('Use --count between 1 and 10');
-  const pool=require('../cloud-store').createPool();let client;
+  const pool=require('../src/server/cloud-store').createPool();let client;
   try{
     const existing=await pool.query('SELECT count(*)::int AS count FROM rackmap.pin_keys WHERE enabled');
     if(existing.rows[0].count+count>20)throw new Error('At most 20 active PINs. Disable unused keys first.');

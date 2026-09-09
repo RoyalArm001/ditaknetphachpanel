@@ -5,6 +5,7 @@ test
 cloud-backups
 *.sqlite*
 *.log
-CONTINUE-HERE.md
-create_plan.py
-*.cmd
+docs
+scripts/create_plan.py
+scripts/*.cmd
+test-output

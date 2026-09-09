@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{randomInt,randomBytes}=require('node:crypto');
-const {hashPin}=require('../pin-auth');
+const {hashPin}=require('../src/server/pin-auth');
 (async()=>{
   const directory=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'RackMap');fs.mkdirSync(directory,{recursive:true});
   const config=path.join(directory,'access.env'),privateFile=path.join(directory,'staff-pin.txt');

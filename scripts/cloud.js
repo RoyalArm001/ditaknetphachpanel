@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
-const D=require('../domain');
-const {createPool,openCloudStore}=require('../cloud-store');
+const D=require('../src/shared/domain');
+const {createPool,openCloudStore}=require('../src/server/cloud-store');
 async function importArchive(pool,archive){
   if(archive.format!=='ditaknet-rackmap-cloud'||archive.version!==1||!Array.isArray(archive.companies)||!Array.isArray(archive.history))throw new Error('Invalid archive');
   const ids=new Set();for(const x of archive.companies){D.validate(x.body);if(Buffer.byteLength(JSON.stringify(x.body))>4*1024*1024-2048)throw new Error('Company exceeds cloud request size; reduce photos before import');if(typeof x.id!=='string'||!/^[\w-]{1,80}$/.test(x.id)||ids.has(x.id)||!Number.isInteger(x.revision)||x.revision<0)throw new Error('Invalid company');ids.add(x.id);}

@@ -1,12 +1,14 @@
 'use strict';
 const fs=require('node:fs');const path=require('node:path');
-const root=path.join(__dirname,'..'),out=path.join(root,'dist');
+const {root,publicFiles}=require('../src/server/public-files');
+const out=path.join(root,'dist');
 fs.mkdirSync(out,{recursive:true});
-fs.mkdirSync(path.join(out,'assets'),{recursive:true});
-for(const name of ['DejaVuSans.ttf','LICENSE_DEJAVU'])fs.copyFileSync(path.join(root,'assets',name),path.join(out,'assets',name));
-for(const name of ['index.html','locales.js','i18n.js','app.js','domain.js','rack3d.js','styles.css','theme.css','theme.js','manifest.webmanifest','pwa.js','personal-store.js','drive-store.js','sw.js','icon-192.png','icon-512.png','favicon.ico'])fs.copyFileSync(path.join(root,name),path.join(out,name));
-fs.copyFileSync(path.join(root,'node_modules/exceljs/dist/exceljs.min.js'),path.join(out,'exceljs.min.js'));
+for(const [url,source] of Object.entries(publicFiles)){
+  const destination=path.join(out,url.slice(1));
+  fs.mkdirSync(path.dirname(destination),{recursive:true});
+  fs.copyFileSync(source,destination);
+}
 const hash=require('node:crypto').createHash('sha256');
 for(const name of fs.readdirSync(out,{recursive:true}).sort())if(name!=='sw.js'&&fs.statSync(path.join(out,name)).isFile())hash.update(fs.readFileSync(path.join(out,name)));
-fs.writeFileSync(path.join(out,'sw.js'),fs.readFileSync(path.join(root,'sw.js'),'utf8').replace('__BUILD_ID__',hash.digest('hex').slice(0,12)));
+fs.writeFileSync(path.join(out,'sw.js'),fs.readFileSync(publicFiles['/sw.js'],'utf8').replace('__BUILD_ID__',hash.digest('hex').slice(0,12)));
 console.log('Built public app assets; no environment files or database files included.');

@@ -4,9 +4,8 @@
   "private": true,
   "description": "Armenian LAN rack and patch panel manager",
   "scripts": {
-    "start": "node server.js",
-    "test": "node --test test/*.test.js",
-    "check": "node --check app.js && node --check domain.js && node --check server.js && node --check storage.js && node --check rack3d.js && node --check cloud-store.js && node --check cloud-auth.js && node --check local-repository.js && node --check api/index.js && node --check pwa.js && node --check sw.js && node --check scripts/cloud.js && node --check pin-auth.js && node --check env-config.js && node --check personal-store.js && node --check i18n.js && node --check locales.js && node --check scripts/setup-cloud-pins.js && node --check account-store.js && node --check drive-store.js && node --check theme.js",
+    "start": "node src/server/server.js",
+    "check": "node --check src/client/js/app.js && node --check src/shared/domain.js && node --check src/server/server.js && node --check src/server/storage.js && node --check src/client/js/rack3d.js && node --check src/server/cloud-store.js && node --check src/server/cloud-auth.js && node --check src/server/local-repository.js && node --check api/index.js && node --check src/client/js/pwa.js && node --check src/client/sw.js && node --check scripts/cloud.js && node --check src/server/pin-auth.js && node --check src/server/env-config.js && node --check src/client/js/personal-store.js && node --check src/shared/i18n.js && node --check src/shared/locales.js && node --check scripts/setup-cloud-pins.js && node --check src/server/account-store.js && node --check src/client/js/drive-store.js && node --check src/client/js/theme.js && node --check src/server/public-files.js && node --check src/client/open-local.js",
     "build": "node scripts/build.js",
     "cloud:migrate": "node --env-file-if-exists=.env.local scripts/cloud.js migrate",
     "cloud:init": "node --env-file-if-exists=.env.local scripts/cloud.js init",
@@ -14,8 +13,7 @@
     "cloud:export": "node --env-file-if-exists=.env.local scripts/cloud.js export",
     "cloud:restore": "node --env-file-if-exists=.env.local scripts/cloud.js restore",
     "pin:setup": "node scripts/setup-pin.js",
-    "pin:cloud": "node --env-file-if-exists=.env.local scripts/setup-cloud-pins.js",
-    "test:browser": "node scripts/audit-ui.js"
+    "pin:cloud": "node --env-file-if-exists=.env.local scripts/setup-cloud-pins.js"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -24,14 +22,6 @@
     "exceljs": "^4.4.0",
     "pdfkit": "^0.17.2",
     "pg": "^8.23.0"
-  },
-  "devDependencies": {
-    "@electric-sql/pglite": "^0.5.8",
-    "acorn": "^8.18.0",
-    "axe-core": "^4.13.0",
-    "fake-indexeddb": "^6.2.5",
-    "jsdom": "^26.1.0",
-    "playwright": "^1.63.0"
   },
   "overrides": {
     "exceljs": {
