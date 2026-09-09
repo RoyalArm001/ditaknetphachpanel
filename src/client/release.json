@@ -1,24 +1,21 @@
 {
-  "version": "2.2.1",
+  "version": "2.2.2",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հավելվածի տարբերակը՝ v2.2.1։ Այն ցուցադրվում է նաև էջի ներքևում։",
-      "Նախագծի սեփական անվանումներն ու գույները և տեղադրումից հետո ծանուցումների թույլտվության առաջարկը ներառված են այս տարբերակում։"
+      "Ուղղված է. ֆայլը վերականգնելուց հետո էջը թարմացնելիս այլևս չի վերադառնում setup էջին։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "App version v2.2.1 is also displayed in the page footer.",
-      "This release includes custom project labels and colors, and a notification permission offer after installation."
+      "Fixed: after restoring a file and refreshing the page, the app no longer returns to the setup screen."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Версия приложения v2.2.1 также отображается внизу страницы.",
-      "Версия включает собственные названия и цвета проекта, а также предложение разрешить уведомления после установки."
+      "Исправлено: после восстановления файла и обновления страницы приложение больше не возвращается на экран настройки."
     ]
   }
 }

@@ -10,9 +10,9 @@ let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
 const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
+try{onboardingChoice=localStorage.getItem('rackmap-workspace-choice')||null;}catch{}
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
 const accountMode=()=>storageMode==='account';
-// Opening the app always asks for an explicit workspace choice.
 let authRequired=false,pinEnabled=false,accountEnabled=false;
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
@@ -469,7 +469,7 @@ const actions={
   'drive-restore':()=>driveDialog(true),
   'drive-save':async()=>{if(!await save())return;await DriveStore.save(structuredClone(state));toast(tr('Պատճենը պահված է ձեր Google Drive-ում'));$('#dialog').close();},
   'drive-disconnect':()=>{DriveStore.disconnect();$('#dialog').close();toast(tr('Google Drive-ի կապն անջատված է'));},
-  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';renderWelcome();},
+  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';onboardingChoice=null;try{localStorage.removeItem('rackmap-workspace-choice');}catch{}renderWelcome();},
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},
   'login-pin':()=>renderLogin('pin'),'login-account':()=>renderLogin('account'),
