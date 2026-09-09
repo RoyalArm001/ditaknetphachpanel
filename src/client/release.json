@@ -1,21 +1,21 @@
 {
-  "version": "2.2.4",
+  "version": "2.2.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել է անվտանգ բջջային թարմացում՝ առանց ձեր բազայի և հաշվի տվյալները ջնջելու, ինչպես նաև թարգմանությունների թարմացումներ։"
+      "Ավելացվել է անվտանգ բջջային թարմացում և սարքի տվյալների պաշտպանություն՝ առանց ձեր բազայի ու հաշվի տվյալների ջնջման։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added a safe mobile app update flow that preserves your databases and account data, plus translation updates."
+      "Added safe mobile updates and device storage protection without deleting your databases or account data."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлено безопасное мобильное обновление приложения без удаления баз и данных аккаунта, а также обновлены переводы."
+      "Добавлены безопасное мобильное обновление и защита хранилища без удаления баз и данных аккаунта."
     ]
   }
 }

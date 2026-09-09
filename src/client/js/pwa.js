@@ -4,6 +4,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
 
   let installPrompt=null;
   let registration=null,updateReady=false,updateBusy=false;
+  async function protectLocalData(){
+    if(!navigator.storage?.persist)return false;
+    try{
+      if(await navigator.storage.persisted?.())return true;
+      return await navigator.storage.persist();
+    }catch{return false;}
+  }
   // One versioned file is the source of release notes for every language.
   // Show only on the welcome screen, never over a form or ongoing work.
   async function announceRelease(){
@@ -59,11 +66,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function activateUpdate(){
     if(!registration?.waiting){updateReady=false;update();return;}
     if(hasUnsavedWork()){toast(tr('Նախ պահպանեք փոփոխությունները, հետո թարմացրեք հավելվածը։'));return;}
-    updateBusy=true;registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
+    updateBusy=true;protectLocalData();registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
   }
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
   window.addEventListener('rackmap-languagechange',update);
-  window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;protectLocalData();update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
   actions['install-app']=async()=>{
     if(updateReady){activateUpdate();return;}
     if(standalone()){notificationDialog();return;}
@@ -87,5 +94,6 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       return reg.update?.();
     }).catch(()=>{});
   }
+  if(window.isSecureContext)protectLocalData();
   update();
 })();
