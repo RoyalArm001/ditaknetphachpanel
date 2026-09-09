@@ -1,6 +1,14 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Ծանուցումներ":["Notifications","Уведомления"],
+"Ծանուցումների թույլտվությունը միացված է։":["Notification permission is enabled.","Разрешение на уведомления включено."],
+"Ծանուցումներն արգելված են։ Միացրեք դրանք կայքի կամ հավելվածի համակարգային կարգավորումներում։":["Notifications are blocked. Enable them in the site or app system settings.","Уведомления заблокированы. Разрешите их в системных настройках сайта или приложения."],
+"Այս միջավայրում ծանուցումների թույլտվությունը հասանելի չէ։ iPhone-ում բացեք հավելվածը գլխավոր էկրանից։":["Notification permission is unavailable here. On iPhone, open the app from the Home Screen.","Здесь разрешение на уведомления недоступно. На iPhone откройте приложение с главного экрана."],
+"Միացրեք ծանուցումների թույլտվությունը և բրաուզերի հարցման մեջ ընտրեք «Թույլատրել»։":["Enable notification permission and choose Allow in the browser prompt.","Включите уведомления и выберите «Разрешить» в запросе браузера."],
+"Փակ հավելվածին թարմացումների ուղարկումը դեռ միացված չէ։":["Update delivery while the app is closed is not enabled yet.","Отправка обновлений при закрытом приложении пока не включена."],
+"Միացնել ծանուցումները":["Enable notifications","Включить уведомления"],
+"Չհաջողվեց միացնել ծանուցումները։ Կրկին փորձեք։":["Could not enable notifications. Please try again.","Не удалось включить уведомления. Попробуйте ещё раз."],
 "Մուտքի վերահսկում":["Access control","Контроль доступа"],
 "Ինտերնետ":["Internet","Интернет"],
 "Գույն":["Color","Цвет"],

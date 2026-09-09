@@ -23,15 +23,40 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   }
   if(location.protocol!=='file:')setTimeout(announceRelease,600);
   const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  let notificationOfferPending=false;
+  const notificationSupported=()=>window.isSecureContext&&'Notification' in window;
+  function notificationDialog(){
+    const permission=notificationSupported()?Notification.permission:'unsupported';
+    const message=permission==='granted'?tr('Ծանուցումների թույլտվությունը միացված է։'):permission==='denied'?tr('Ծանուցումներն արգելված են։ Միացրեք դրանք կայքի կամ հավելվածի համակարգային կարգավորումներում։'):permission==='unsupported'?tr('Այս միջավայրում ծանուցումների թույլտվությունը հասանելի չէ։ iPhone-ում բացեք հավելվածը գլխավոր էկրանից։'):tr('Միացրեք ծանուցումների թույլտվությունը և բրաուզերի հարցման մեջ ընտրեք «Թույլատրել»։');
+    modal(tr('Ծանուցումներ'),`<p>${esc(message)}</p><p class="hint">${esc(tr('Փակ հավելվածին թարմացումների ուղարկումը դեռ միացված չէ։'))}</p>`+(permission==='default'?`<button type="button" class="button primary" id="enableNotifications">${esc(tr('Միացնել ծանուցումները'))}</button>`:''));
+    document.querySelector('#dialog').addEventListener('close',()=>{try{localStorage.setItem('mypatch-notification-offer','seen');}catch{}},{once:true});
+    const control=document.querySelector('#enableNotifications');
+    if(control)control.onclick=()=>{
+      // Request directly from the click, before any await, for mobile browsers.
+      const request=Notification.requestPermission();control.disabled=true;
+      request.then(()=>{if(control.isConnected&&document.querySelector('#dialog').open){document.querySelector('#dialog').close();setTimeout(notificationDialog,0);}}).catch(()=>{control.disabled=false;toast(tr('Չհաջողվեց միացնել ծանուցումները։ Կրկին փորձեք։'));});
+    };
+  }
+  function offerNotifications(){
+    if(notificationSupported()&&Notification.permission==='granted')return;
+    try{if(localStorage.getItem('mypatch-notification-offer')==='seen')return;}catch{}
+    const dialog=document.querySelector('#dialog');
+    if(dialog?.open){
+      if(!notificationOfferPending){notificationOfferPending=true;dialog.addEventListener('close',()=>{notificationOfferPending=false;setTimeout(offerNotifications,0);},{once:true});}
+      return;
+    }
+    notificationDialog();
+  }
+  if(standalone())setTimeout(offerNotifications,300);
   function update(){
     const control=document.querySelector('[data-action="install-app"]');
     if(control)control.textContent=standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հեռախոսում');
   }
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
   window.addEventListener('rackmap-languagechange',update);
-  window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Իմ փաչ-ը տեղադրված է'));});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
   actions['install-app']=async()=>{
-    if(standalone()){toast(tr('Ծրագիրն արդեն բացված է որպես հավելված'));return;}
+    if(standalone()){notificationDialog();return;}
     if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();await prompt.userChoice;update();return;}
     const secure=window.isSecureContext;
     modal(tr('Տեղադրել Իմ փաչ-ը'),
