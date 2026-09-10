@@ -1,24 +1,24 @@
 {
-  "version": "2.2.7",
+  "version": "2.2.8",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
-      "Վերականգնումից կամ մուտքից հետո հավելվածը հիշում է ձեր աշխատանքային տարածքը։"
+      "Վերականգնված բազան պահվում է բրաուզերի live cache-ում և հաջորդ անգամ PIN չի պահանջում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
-      "The app remembers your workspace after recovery or sign-in."
+      "A restored database is saved in the browser live cache and does not request the PIN again."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
-      "Приложение запоминает рабочее пространство после восстановления или входа."
+      "Восстановленная база сохраняется в live-кэше браузера и больше не запрашивает PIN."
     ]
   }
 }
