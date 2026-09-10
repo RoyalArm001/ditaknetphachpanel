@@ -10,7 +10,8 @@ let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
 const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
-try{onboardingChoice=localStorage.getItem('rackmap-workspace-choice')||null;}catch{}
+try{const choice=localStorage.getItem('rackmap-workspace-choice');if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
+function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}}
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
 const accountMode=()=>storageMode==='account';
 let authRequired=false,pinEnabled=false,accountEnabled=false;
@@ -130,11 +131,13 @@ function recoverAccountDialog(){
       result=await response.json();
       if(!response.ok)throw new Error(result.error);
       storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
+      rememberWorkspace();
       activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
       const teamUrl=new URL(location.href);teamUrl.hash='overview';teamUrl.searchParams.delete('company');history.replaceState(null,'',teamUrl);
       await init();return;
     }
     storageMode='account';onboardingChoice='account';onboardingVisible=false;accountUserId=result.user.id;accountReadOnly=false;
+    rememberWorkspace();
     activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
     const url=new URL(location.href);url.hash='overview';url.searchParams.delete('company');history.replaceState(null,'',url);
     await init();
@@ -158,6 +161,7 @@ function renderAccountLogin(method='login'){
     if(!res.ok)throw new Error(result.error);
     if(result.confirmationRequired){$('#loginError').textContent=tr('Ստուգեք ձեր էլ․ փոստը և հաստատեք հաշիվը, ապա այստեղ մուտք գործեք։');return;}
     storageMode='account';onboardingChoice='account';accountUserId=result.user.id;accountReadOnly=recovery;
+    rememberWorkspace();
     activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
     const url=new URL(location.href);url.hash='overview';url.searchParams.delete('company');history.replaceState(null,'',url);
     await init();if(result.pin)showPersonalPin(result.pin);
@@ -224,6 +228,7 @@ function renderSettings(){
   let hasRecovery=false;try{hasRecovery=!!localStorage.getItem(recoveryKey());}catch{}
   $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button(tr('↓ Այս ընկերության JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,application/json" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
   const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
+  $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel storage-mode"><h2>Աշխատանքային տարածք</h2><p>${esc(state.company)}</p><div class="actions">${button(tr('Ինչպե՞ս եք ցանկանում աշխատել'),'workspace-choice')}</div></section>`);
   if(!accountReadOnly)$('[data-action=company]').insertAdjacentHTML('afterend',button(tr('Նախագծի անվանումներ և գույներ'),'project-style'));
   if(accountMode()){
     $('.storage-mode h2').textContent=tr('Անձնական · cloud');
@@ -404,6 +409,7 @@ async function restoreFile(file,{personalWorkspace=false}={}){if(!file)return;co
     if(personalWorkspace){await beginWorkspace('personal');if(!ready)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));}
     clearTimeout(portTimer);portDraft=null;portDraftDirty=false;
     commit(s=>{Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,next);});
+    if(!await save())throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
     if(draft){portDraft=draft;portDraftDirty=true;selectedPortId=draft.id;location.hash='#rack/'+findPort(draft.id).r.id;render();}
   });
 }
@@ -496,7 +502,7 @@ const actions={
   'drive-restore':()=>driveDialog(true),
   'drive-save':async()=>{if(!await save())return;await DriveStore.save(structuredClone(state));toast(tr('Պատճենը պահված է ձեր Google Drive-ում'));$('#dialog').close();},
   'drive-disconnect':()=>{DriveStore.disconnect();$('#dialog').close();toast(tr('Google Drive-ի կապն անջատված է'));},
-  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';onboardingChoice=null;try{localStorage.removeItem('rackmap-workspace-choice');}catch{}renderWelcome();},
+  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';renderWelcome();},
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},
   'login-pin':()=>renderLogin('pin'),'login-account':()=>renderLogin('account'),
