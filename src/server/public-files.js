@@ -12,7 +12,7 @@ const sources={
   'sw.js':'src/client/sw.js',
   'styles.css':'src/client/css/styles.css',
   'theme.css':'src/client/css/theme.css',
-  ...Object.fromEntries(['app','drive-store','personal-store','pwa','rack3d','theme'].map(name=>[name+'.js','src/client/js/'+name+'.js'])),
+  ...Object.fromEntries(['project-file','app','drive-store','personal-store','pwa','rack3d','theme'].map(name=>[name+'.js','src/client/js/'+name+'.js'])),
   ...Object.fromEntries(['domain','i18n','locales'].map(name=>[name+'.js','src/shared/'+name+'.js'])),
   ...Object.fromEntries(['favicon.ico','icon-192.png','icon-512.png'].map(name=>[name,'assets/icons/'+name])),
   'assets/DejaVuSans.ttf':'assets/fonts/DejaVuSans.ttf',

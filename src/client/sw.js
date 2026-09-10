@@ -1,6 +1,6 @@
 'use strict';
 const CACHE='ditaknet-shell-v4-__BUILD_ID__';
-const SHELL=['/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/domain.js','/personal-store.js','/drive-store.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
+const SHELL=['/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/domain.js','/personal-store.js','/drive-store.js','/project-file.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('ditaknet-shell-')&&name!==CACHE)await caches.delete(name);await self.clients.claim();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});

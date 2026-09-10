@@ -18,7 +18,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || translate(services[key]?.label||'');
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
-  const projectStyle = s => Object.fromEntries(['serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
+  const projectStyle = s => Object.fromEntries(['backupFormat','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
   const empty = () => ({schema:2, company:'', floors:[]});
   const devices = s => s.floors.flatMap(f => f.racks.flatMap(r => r.devices.map(d => ({f,r,d}))));
   const ports = s => devices(s).flatMap(x => x.d.portList.map(p => ({...x,p})));
@@ -26,6 +26,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const assert = (v,m) => {if (!v) throw new Error(m);};
   function validate(s) {
     assert(s && s.schema===2 && typeof s.company==='string' && s.company.length<=200 && Array.isArray(s.floors), tr('Տվյալների ձևաչափը սխալ է'));
+    if(s.backupFormat!==undefined)assert(['json','xlsx'].includes(s.backupFormat),'Invalid backup format');
     if(s.serviceColors!==undefined){
       assert(s.serviceColors && typeof s.serviceColors==='object' && !Array.isArray(s.serviceColors),tr('Գույների ձևաչափը սխալ է'));
       for(const [key,value] of Object.entries(s.serviceColors))assert(Object.hasOwn(services,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),tr('Գույնը պետք է լինի HEX ձևաչափով'));

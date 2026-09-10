@@ -1,6 +1,11 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Պահուստային ֆայլի տեսակ":["Backup file format","Формат резервного файла"],
+"Պահուստային ֆայլը վնասված է կամ չի աջակցվում":["The backup file is damaged or unsupported.","Резервный файл повреждён или не поддерживается."],
+"Հաստատեք էլ․ փոստը, ապա մուտք գործեք։ Առաջին մուտքի ժամանակ կստեղծվեն ձեր անձնական բազան և PIN-ը։":["Confirm your email, then sign in. Your personal database and PIN will be created on your first sign-in.","Подтвердите почту и войдите. При первом входе будут созданы личная база и PIN."],
+"Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։":["An Excel or JSON backup preserves the entire building, connections and rack photos.","Копия Excel или JSON сохраняет всё здание, подключения и фотографии стоек."],
+"Աղյուսակը դիտելու համար է։ Վերականգնումն օգտագործում է ֆայլում պահված ամբողջական պատճենը։":["The table is for viewing. Restore uses the complete snapshot stored in this file, not edits to the table.","Таблица предназначена для просмотра. Восстановление использует полный снимок в файле, а не изменения таблицы."],
 "Մուտքագրեք ձեր բազայի PIN կոդը։":["Enter the PIN for your database.","Введите PIN-код вашей базы."],
 "Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։":["Restore from your computer, with your database PIN, or from Google Drive.","Восстановите с компьютера, по PIN-коду базы или из Google Drive."],
 "Ընտրեք՝ վերականգնել համակարգչից, անձնական PIN-ով կամ Google Drive-ից։":["Restore from your computer, with your personal recovery PIN, or from Google Drive.","Восстановите с компьютера, с помощью личного PIN-кода или из Google Drive."],
