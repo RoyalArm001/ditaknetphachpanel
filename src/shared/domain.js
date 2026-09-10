@@ -19,9 +19,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
   const projectStyle = s => Object.fromEntries(['backupFormat','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
-  const empty = () => ({schema:2, company:'', floors:[]});
+  const empty = () => ({schema:2, company:'', floors:[], networks:[]});
   const devices = s => s.floors.flatMap(f => f.racks.flatMap(r => r.devices.map(d => ({f,r,d}))));
   const ports = s => devices(s).flatMap(x => x.d.portList.map(p => ({...x,p})));
+  const networks = s => Array.isArray(s.networks)?s.networks:[];
+  const hostsForDevice = (s,deviceId) => networks(s).flatMap(n=>n.hosts.filter(h=>h.deviceId===deviceId).map(h=>({n,h})));
+  const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
+  const vlanIp = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\/(?:3[0-2]|[12]?\d))?$/;
   const port = (number, id) => ({id,number,status:'free',cable:'',floorId:'',room:'',door:'',side:'',notes:'',switchPortId:'',service:'',vlan:''});
   const assert = (v,m) => {if (!v) throw new Error(m);};
   function validate(s) {
@@ -72,6 +76,25 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         }
       }
     }
+    if(s.networks!==undefined){
+      assert(Array.isArray(s.networks)&&s.networks.length<=400,tr('Ցանցերի ցանկը սխալ է'));
+      uniqueNames(s.networks);
+      const vlans=new Set();
+      for(const n of s.networks){
+        id(n.id);name(n.name);
+        assert(typeof n.vlan==='string'&&/^\d{1,4}$/.test(n.vlan)&&Number(n.vlan)>=1&&Number(n.vlan)<=4094,tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
+        assert(!vlans.has(n.vlan),tr('VLAN համարները պետք է տարբեր լինեն'));vlans.add(n.vlan);
+        text(n.ip);if(n.ip)assert(vlanIp.test(n.ip),tr('VLAN IP-ն պետք է լինի IPv4 հասցե կամ CIDR, կամ դատարկ'));
+        assert(Array.isArray(n.hosts)&&n.hosts.length<=400,tr('Սարքերի IP ցանկը սխալ է'));uniqueNames(n.hosts);
+        const hostIps=new Set();
+        for(const h of n.hosts){
+          id(h.id);name(h.name);text(h.ip);assert(ipv4.test(h.ip),tr('Սարքի IP-ն պետք է լինի IPv4 հասցե'));
+          assert(!hostIps.has(h.ip),tr('Նույն ցանցում IP հասցեները պետք է տարբեր լինեն'));hostIps.add(h.ip);
+          text(h.username);text(h.password);
+          if(h.deviceId!==undefined){text(h.deviceId);assert(!h.deviceId||s.floors.some(f=>f.racks.some(r=>r.devices.some(d=>d.id===h.deviceId))),tr('Սարքը չի գտնվել'));}
+        }
+      }
+    }
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x])), taken=new Set();
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
@@ -91,10 +114,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       return {floor:f.name,rack:r.name,device:d.name,type:d.type,port:p.number,status, cable:info.cable,
         destination:s.floors.find(f=>f.id===info.floorId)?.name||'', room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
         connection:peer?`${peer.r.name} / ${peer.d.name} / ${peer.p.number}`:'',...x};
-    }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
+    }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
   }
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
   }
-  return {empty,validate,devices,ports,port,rows,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,devices,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

@@ -216,7 +216,32 @@ function renderOverview(){const rs=racks(),ds=D.devices(state),all=D.rows(state)
 function renderFloors(){$('#content').innerHTML=header(tr('Հարկեր և ռաքեր'),tr`${state.floors.length} հարկ · ${racks().length} ռաք`,button(tr('＋ Ավելացնել հարկ'),'floor','','primary'))+floorCards();}
 function renderNetworks(){
   const list=D.networks(state);
-  $('#content').innerHTML=header(tr('Ցանցերի ինֆորմացիա'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),button(tr('＋ Ավելացնել ցանց'),'network-new','','primary'))+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(n.name)}</h2><p class="hint">VLAN ${esc(n.vlan)}${n.ip?' · '+esc(n.ip):''}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Սարքի IP'),'host-new',n.id,'small primary')}</div></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Բացել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Սարքերի IP դեռ չկա')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները username-ով և գաղտնաբառով։</p></section>'));
+  $('#content').innerHTML=header(tr('Ցանցերի ինֆորմացիա'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),button(tr('＋ Ավելացնել ցանց'),'network-new','','primary'))+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(n.name)}</h2><p class="hint">VLAN ${esc(n.vlan)}${n.ip?' · '+esc(n.ip):''}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի կոնկրետ սարքերի IP-ները, username-ները և password-ները')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները username-ով և գաղտնաբառով։</p></section>'));
+}
+function networkModal(id=''){
+  const network=D.networks(state).find(x=>x.id===id);
+  modal(network?tr('Խմբագրել VLAN ցանցը'):tr('Նոր VLAN ցանց'),`<div class="form-grid">${input('name',tr('Ցանցի անվանում'),network?.name||'','text','required maxlength="200" placeholder="Տեսախցիկներ"')}${input('vlan',tr('VLAN ID'),network?.vlan||'','number','required min="1" max="4094" step="1" placeholder="10"')}${input('ip',tr('Ցանցի IP կամ CIDR'),network?.ip||'','text','maxlength="200" placeholder="192.168.10.0/24"')}</div><p class="hint">${tr('VLAN ID-ն միայն ցանցի նույնացուցիչ է և ինքնուրույն չի փոխում պորտի նշանակությունը։')}</p>`,fd=>commit(s=>{
+    const networks=ensureNetworks(s),name=String(fd.get('name')||'').trim(),vlan=String(fd.get('vlan')||'').trim(),ip=String(fd.get('ip')||'').trim();
+    if(!name||!vlan)throw new Error(tr('Գրեք ցանցի անվանումը և VLAN ID-ն'));
+    if(networks.some(x=>x.id!==id&&x.name.trim().toLowerCase()===name.toLowerCase()))throw new Error(tr('Այս անունով ցանց արդեն կա'));
+    if(networks.some(x=>x.id!==id&&x.vlan===vlan))throw new Error(tr('Այս VLAN ID-ն արդեն օգտագործվում է'));
+    const target=networks.find(x=>x.id===id);
+    if(target)Object.assign(target,{name,vlan,ip});else networks.push({id:uid(),name,vlan,ip,hosts:[]});
+  }),network?button(tr('Ջնջել ցանցը'),'network-delete',id,'danger'):'');
+}
+function hostModal(value){
+  const [networkId,hostId]=String(value||'').split('/'),network=D.networks(state).find(x=>x.id===networkId);
+  if(!network)return;
+  const host=network.hosts.find(x=>x.id===hostId),linked=host?.deviceId?findDevice(host.deviceId):null;
+  const body=`<div class="form-grid">${input('name',tr('Սարքի անվանում'),host?.name||linked?.d.name||'','text','required maxlength="200"')}${input('ip','IP հասցե',host?.ip||'','text','required maxlength="200" placeholder="192.168.10.20" inputmode="decimal"')}${input('username',tr('Մուտքանուն'),host?.username||'','text','maxlength="200" autocomplete="off"')}${secretInput('password',tr('Գաղտնաբառ'),host?.password||'')}${select('deviceId',tr('Կապված սարք'),[['',tr('Չկապել')],...deviceChoices()],host?.deviceId||'')}</div><p class="hint">VLAN ${esc(network.vlan)} · ${esc(network.name)}</p>`;
+  modal(host?tr('Խմբագրել սարքի IP-ն'):tr('Ավելացնել սարքի IP'),body,fd=>commit(s=>{
+    const target=ensureNetworks(s).find(x=>x.id===networkId),name=String(fd.get('name')||'').trim(),ip=String(fd.get('ip')||'').trim(),deviceId=String(fd.get('deviceId')||'').trim();
+    if(!target)throw new Error(tr('Ցանցը չի գտնվել'));
+    if(target.hosts.some(x=>x.id!==hostId&&x.ip===ip))throw new Error(tr('Այս IP-ն արդեն օգտագործվում է այս ցանցում'));
+    const next={id:host?.id||uid(),name,ip,username:String(fd.get('username')||'').trim(),password:String(fd.get('password')||''),deviceId};
+    const current=target.hosts.find(x=>x.id===hostId);
+    if(current)Object.assign(current,next);else target.hosts.push(next);
+  }),host?button(tr('Ջնջել'),'host-delete',networkId+'/'+host.id,'danger'):'');
 }
 function renderRack(id){const found=findRack(id);if(!found){$('#content').innerHTML=header(tr('Ռաքը չի գտնվել'),tr('Ընտրեք ռաքը հարկերի ցանկից'))+tr('<a class="button" href="#floors">← Հարկեր և ռաքեր</a>');return;}const {f,r}=found;
   const rows=D.rows(state),byPort=new Map(rows.map(x=>[x.p.id,x]));const mobile=window.matchMedia('(max-width:760px)').matches;const narrow=window.matchMedia('(max-width:1150px)').matches;const unit=Math.max(mobile?248:88,...r.devices.map(d=>Math.ceil((Math.ceil(d.portList.length/(mobile?6:narrow?12:24))*(mobile?46:23)+40)/d.height)));let grid='';
@@ -331,8 +356,8 @@ function renderPortTools(){
   <form id="portForm">
     <fieldset class="link-config"><legend>Link config</legend>
       <div class="service-choices">${Object.entries(D.services).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${(v.service||'')===key?'checked':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
-      ${input('vlan','VLAN',v.vlan||'','number',tr('min="1" max="4094" step="1" placeholder="Օրինակ՝ 20"'))}
-      <p class="hint">VLAN 1–4094 · տեղեկատվական դաշտ</p>
+      ${input('vlan','VLAN',v.vlan||'','number',tr('min="1" max="4094" step="1" list="vlanChoices" placeholder="Օրինակ՝ 20"'))}<datalist id="vlanChoices">${D.networks(state).map(n=>`<option value="${esc(n.vlan)}">${esc(n.name)}</option>`).join('')}</datalist>
+      <p class="hint">${tr('Ընտրեք պահպանված VLAN ID-ից կամ գրեք նոր ID։ VLAN ID-ն չի փոխում պորտի նշանակությունը։')}</p>
     </fieldset>
     ${incoming?tr`<div class="connection-path">Կապ՝ ${esc(incoming.d.name)} / ${incoming.p.number}<br><small>Նշանակությունը, VLAN-ն ու մալուխի տվյալները ընդհանուր են կապի երկու ծայրերի համար։</small></div>`:''}
     <div class="form-grid">
@@ -538,6 +563,12 @@ const actions={
   'toggle-left':()=>togglePanel('left'),
   'toggle-right':()=>togglePanel('right'),
   'project-style':()=>modal(tr('Նախագծի անվանումներ և գույներ'),styleFields(state,true),fd=>commit(s=>Object.assign(s,readStyle(fd)))),
+  'network-new':()=>networkModal(),
+  network:networkModal,
+  'network-delete':id=>confirmAction(tr('Ջնջել VLAN ցանցը'),tr('Ցանցը և դրա սարքերի IP գրառումները կհեռացվեն։ Պորտերի VLAN ID-ները չեն փոխվի։'),()=>commit(s=>{s.networks=ensureNetworks(s).filter(x=>x.id!==id);})),
+  'host-new':id=>hostModal(id),
+  host:hostModal,
+  'host-delete':value=>{const [networkId,hostId]=String(value).split('/');confirmAction(tr('Ջնջել սարքի IP-ն'),tr('Այս սարքի IP գրառումը կհեռացվի VLAN ցանցից։'),()=>commit(s=>{const network=ensureNetworks(s).find(x=>x.id===networkId);if(network)network.hosts=network.hosts.filter(x=>x.id!==hostId);}))},
   'scene-left':()=>sceneController?.rotate(-.2),'scene-right':()=>sceneController?.rotate(.2),
   'scene-in':()=>sceneController?.zoom(1.2),'scene-out':()=>sceneController?.zoom(1/1.2),
   'scene-reset':()=>{sceneController?.reset();document.querySelectorAll('.scene-link').forEach(el=>el.classList.remove('selected'));},

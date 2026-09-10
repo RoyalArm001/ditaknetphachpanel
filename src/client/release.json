@@ -1,24 +1,24 @@
 {
-  "version": "2.2.8",
+  "version": "2.2.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
-      "Վերականգնված բազան պահվում է բրաուզերի live cache-ում և հաջորդ անգամ PIN չի պահանջում։"
+      "Ավելացվել են VLAN էջը և սարքերի IP, username ու password տվյալների պահպանումը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
-      "A restored database is saved in the browser live cache and does not request the PIN again."
+      "Added a VLAN page with storage for device IP, username, and password details."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
-      "Восстановленная база сохраняется в live-кэше браузера и больше не запрашивает PIN."
+      "Добавлена страница VLAN с сохранением IP, логина и пароля устройств."
     ]
   }
 }
