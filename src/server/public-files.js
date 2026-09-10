@@ -6,6 +6,8 @@ const root=path.resolve(__dirname,'../..');
 // Only these files may be served locally or copied to the public build.
 const sources={
   'index.html':'src/client/index.html',
+  'robots.txt':'src/client/robots.txt',
+  'sitemap.xml':'src/client/sitemap.xml',
   'open-local.js':'src/client/open-local.js',
   'release.json':'src/client/release.json',
   'manifest.webmanifest':'src/client/manifest.webmanifest',

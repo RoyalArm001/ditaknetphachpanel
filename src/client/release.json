@@ -1,24 +1,24 @@
 {
-  "version": "2.2.6",
+  "version": "2.2.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Վերականգնումից կամ մուտքից հետո հավելվածը հիշում է ձեր աշխատանքային տարածքը․ վերաբացելիս setup-ը կրկին չի ցուցադրվում։",
-      "Ֆայլի վերականգնումն ավարտվում է տվյալները պահպանելուց հետո։"
+      "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+      "Վերականգնումից կամ մուտքից հետո հավելվածը հիշում է ձեր աշխատանքային տարածքը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The app remembers your workspace after recovery or sign-in, so reopening skips setup.",
-      "File restoration now waits for the data to be saved."
+      "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+      "The app remembers your workspace after recovery or sign-in."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Приложение запоминает рабочее пространство после восстановления или входа и при повторном открытии пропускает настройку.",
-      "Восстановление файла теперь завершается после сохранения данных."
+      "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+      "Приложение запоминает рабочее пространство после восстановления или входа."
     ]
   }
 }
