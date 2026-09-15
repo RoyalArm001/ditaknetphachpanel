@@ -46,6 +46,7 @@
 .service-choice input:focus-visible+span{outline:3px solid #eab54b;outline-offset:2px}
 .service-legend{display:flex;flex-wrap:wrap;gap:9px 14px;margin:12px 0 17px}
 .service-legend span{display:inline-flex;align-items:center;gap:6px;font-size:11px}
+.network-type-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.network-type-tags .tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:#e7f1ed;color:var(--dark);font-size:10px;font-weight:600}
 .bulk-service-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .link-config .hint{margin:7px 0 0;font-size:10px}
 .port-tools .field{min-width:0}.port-tools input,.port-tools select,.port-tools textarea{width:100%;font-size:12px}.port-tools .form-grid{gap:12px 9px}

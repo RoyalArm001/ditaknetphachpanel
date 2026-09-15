@@ -91,6 +91,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(typeof n.vlan==='string'&&/^\d{1,4}$/.test(n.vlan)&&Number(n.vlan)>=1&&Number(n.vlan)<=4094,tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
         assert(!vlans.has(n.vlan),tr('VLAN համարները պետք է տարբեր լինեն'));vlans.add(n.vlan);
         text(n.ip);if(n.ip)assert(vlanIp.test(n.ip),tr('VLAN IP-ն պետք է լինի IPv4 հասցե կամ CIDR, կամ դատարկ'));
+        if(n.deviceTypes!==undefined){assert(Array.isArray(n.deviceTypes)&&n.deviceTypes.every(type=>deviceTypes(s).some(([key])=>key===type)),tr('VLAN-ի սարքերի տեսակները սխալ են'));assert(new Set(n.deviceTypes).size===n.deviceTypes.length,tr('VLAN-ի սարքերի տեսակները չպետք է կրկնվեն'));}
         assert(Array.isArray(n.hosts)&&n.hosts.length<=400,tr('Սարքերի IP ցանկը սխալ է'));uniqueNames(n.hosts);
         const hostIps=new Set();
         for(const h of n.hosts){
