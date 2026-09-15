@@ -80,6 +80,12 @@ const racks=()=>state.floors.flatMap(f=>f.racks.map(r=>({f,r})));
 const findRack=id=>racks().find(x=>x.r.id===id);
 const findDevice=id=>D.devices(state).find(x=>x.d.id===id);
 const findPort=id=>D.ports(state).find(x=>x.p.id===id);
+const panelPortFor=id=>{
+  const item=findPort(id);
+  if(!item)return null;
+  if(item.d.type==='panel')return item;
+  return D.ports(state).find(x=>x.p.switchPortId===id)||null;
+};
 const serviceVlan=service=>{
   if(!service)return '';
   const label=String(D.serviceLabel(state,service)||'').toLowerCase();
@@ -437,9 +443,11 @@ function flushPortEditor(){
 }
 function portModal(id){
   if(!flushPortEditor())return;
-  const item=findPort(id);if(!item)return;
+  const original=findPort(id),item=panelPortFor(id);
+  if(!original)return;
+  if(original.d.type==='switch'&&!item){toast(tr('Սվիչի պորտը ընտրելու համար նախ միացրեք այն փաչ պանելի պորտին։'));return;}
   selectedPortIds.clear();
-  selectedPortId=id;portDraft=null;portDraftDirty=false;panelPrefs.right=true;if(window.matchMedia('(max-width:760px)').matches)panelPrefs.left=false;applyPanels();
+  selectedPortId=item.p.id;portDraft=null;portDraftDirty=false;panelPrefs.right=true;if(window.matchMedia('(max-width:760px)').matches)panelPrefs.left=false;applyPanels();
   $('#dialog').close();
   if(route().view!=='rack'||route().id!==item.r.id){location.hash='#rack/'+item.r.id;return;}
   renderPortTools();paintPorts();
@@ -641,10 +649,12 @@ document.addEventListener('click',e=>{
   const port=e.target.closest('.mini-port,.port-overview [data-action="port"]');
   if(port&&(e.ctrlKey||e.metaKey)){
     e.preventDefault();
-    const item=findPort(port.dataset.id);
-    if(item?.d.type==='panel'){
+    const item=panelPortFor(port.dataset.id);
+    if(item){
       if(selectedPortIds.has(item.p.id))selectedPortIds.delete(item.p.id);else selectedPortIds.add(item.p.id);
       selectedPortId='';renderPortTools();paintPorts();
+    }else if(findPort(port.dataset.id)?.d.type==='switch'){
+      toast(tr('Չմիացված սվիչի պորտը բազմակի ընտրության համար հասանելի չէ։ Նախ կապեք փաչ պանելի պորտին։'));
     }
     return;
   }
