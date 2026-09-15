@@ -81,8 +81,9 @@ const findRack=id=>racks().find(x=>x.r.id===id);
 const findDevice=id=>D.devices(state).find(x=>x.d.id===id);
 const findPort=id=>D.ports(state).find(x=>x.p.id===id);
 const serviceVlan=service=>{
-  if(!['camera','phone'].includes(service))return '';
-  const terms=service==='camera'?['camera','cctv','տեսախցիկ']:['phone','voip','հեռախոս'];
+  if(!service)return '';
+  const label=String(D.serviceLabel(state,service)||'').toLowerCase();
+  const terms=[service.toLowerCase(),label].filter(Boolean);
   return D.networks(state).find(n=>terms.some(term=>String(n.name||'').toLowerCase().includes(term)))?.vlan||'';
 };
 const header=(title,sub,actions='')=>tr`<div class="page-head"><div><div class="eyebrow">ԻՄ ՓԱՉ / ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ</div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="actions">${actions}</div></div>`;
@@ -349,7 +350,8 @@ function paintPorts(){
 function renderPortTools(){
   const host=$('#portTools');if(!host)return;
   if(selectedPortIds.size){
-    host.innerHTML=tr`<div class="eyebrow">ԲԱԶՄԱԿԻ ԸՆՏՐՈՒԹՅՈՒՆ</div><h2>${selectedPortIds.size} պորտ</h2><p class="hint">Ընտրված են միայն փաչ պանելի պորտերը։ Նշանակեք բոլորին հեռախոս կամ տեսախցիկ։</p><div class="bulk-service-actions">${button(tr('Տեսախցիկ'),'bulk-service','camera','primary')}${button(tr('Հեռախոս'),'bulk-service','phone','primary')}${button(tr('Չեղարկել ընտրությունը'),'bulk-clear','','small')}</div>`;
+    const services=Object.entries(D.services);
+    host.innerHTML=tr`<div class="eyebrow">ԲԱԶՄԱԿԻ ԸՆՏՐՈՒԹՅՈՒՆ</div><h2>${selectedPortIds.size} պորտ</h2><p class="hint">Ընտրված փաչ պանելի պորտերին կարող եք նշանակել ցանկացած հասանելի նշանակություն։</p><div class="bulk-service-actions">${services.map(([key])=>button(D.serviceLabel(state,key),'bulk-service',key,key?'primary':'' )).join('')}${button(tr('Չեղարկել ընտրությունը'),'bulk-clear','','small')}</div>`;
     return;
   }
   const item=findPort(selectedPortId);
@@ -600,7 +602,7 @@ const actions={
         const item=D.ports(s).find(x=>x.p.id===id);
         if(!item||item.d.type!=='panel')continue;
         item.p.service=service;
-        if(!item.p.vlan)item.p.vlan=serviceVlan(service);
+        if(serviceVlan(service))item.p.vlan=serviceVlan(service);
         if(item.p.status==='free')item.p.status='used';
       }
     });

@@ -1,27 +1,27 @@
 {
-  "version": "2.3.0",
+  "version": "2.3.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
-      "Ավելացվել է Ctrl/⌘-ով փաչ պանելի պորտերի բազմակի ընտրությունը՝ տեսախցիկ կամ հեռախոս նշանակելու համար։",
-      "Տեսախցիկի կամ հեռախոսի VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ ցանցի անվանումը համապատասխանում է սարքի տեսակին։"
+      "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+      "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
-      "Added Ctrl/⌘ multi-selection for patch-panel ports to assign camera or phone purpose in bulk.",
-      "Camera or phone VLAN IDs are filled automatically in the patch-panel field when the network name matches the device type."
+      "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+      "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
-      "Добавлен выбор нескольких портов патч-панели через Ctrl/⌘ для массового назначения камеры или телефона.",
-      "VLAN камеры или телефона автоматически подставляется в поле патч-панели, если имя сети соответствует типу устройства."
+      "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+      "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению."
     ]
   }
 }
