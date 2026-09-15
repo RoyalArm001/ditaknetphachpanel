@@ -1,5 +1,5 @@
 {
-  "version": "2.4.4",
+  "version": "2.4.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
@@ -15,7 +15,7 @@
       "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
       "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
       "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։",
-      "VLAN-ի ձևում ցանցի անվանումը փոխարինվել է հստակ սարքի տեսակի ընտրությամբ՝ տեսախցիկ, հեռախոս, Wi-Fi և այլ նշանակություններ։"
+      "Մեկ VLAN-ին այժմ կարող եք կցել մի քանի տարբեր IP կամ CIDR ցանցեր։"
     ]
   },
   "en": {
@@ -33,7 +33,7 @@
       "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
       "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
       "Settings now lets you create custom device types that are immediately available when adding a device.",
-      "The VLAN form now uses a clear device-type selector for the network, such as camera, phone, Wi-Fi, and other purposes."
+      "A VLAN can now contain multiple different IP or CIDR networks."
     ]
   },
   "ru": {
@@ -51,7 +51,7 @@
       "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
       "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
       "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства.",
-      "В форме VLAN теперь есть понятный выбор типа устройств сети: камера, телефон, Wi-Fi и другие назначения."
+      "Теперь к одному VLAN можно привязать несколько разных IP- или CIDR-сетей."
     ]
   }
 }
