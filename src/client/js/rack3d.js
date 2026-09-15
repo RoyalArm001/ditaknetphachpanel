@@ -33,10 +33,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       for(const y of [0,scene.height])line([[-1.08,y,.4],[1.08,y,.4]],'#91a6a4',2);
       for(const b of [...scene.boxes].sort((a,b)=>project(a.min).z-project(b.min).z)){
         const [x,y,z]=b.min,[xx,yy,zz]=b.max;
-        polygon([[x,y,z],[xx,y,z],[xx,yy,z],[x,yy,z]],shade(b.color,-.35));
-        polygon([[x,yy,z],[xx,yy,z],[xx,yy,zz],[x,yy,zz]],shade(b.color,.18));
-        polygon([[xx,y,z],[xx,yy,z],[xx,yy,zz],[xx,y,zz]],shade(b.color,-.12));
-        polygon([[x,y,zz],[xx,y,zz],[xx,yy,zz],[x,yy,zz]],b.color);
+        polygon([[x,y,z],[xx,y,z],[xx,yy,z],[x,yy,z]],'rgba(102,126,130,.16)');
+        polygon([[x,yy,z],[xx,yy,z],[xx,yy,zz],[x,yy,zz]],'rgba(190,208,205,.22)');
+        polygon([[xx,y,z],[xx,yy,z],[xx,yy,zz],[xx,y,zz]],shade(b.color,-.05));
+        polygon([[x,y,zz],[xx,y,zz],[xx,yy,zz],[x,yy,zz]],'rgba(218,230,226,.2)');
         const label=project([x,yy+.035,zz]);ctx.font='bold 11px Segoe UI, sans-serif';ctx.fillStyle='#fff';ctx.fillText(b.label,label.x,label.y-4);
       }
       for(const p of scene.points){const v=project(p.point);ctx.fillStyle='#285957';ctx.fillRect(v.x-2,v.y-2,4,4);}
