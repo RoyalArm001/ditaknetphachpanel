@@ -1,11 +1,12 @@
 {
-  "version": "2.3.1",
+  "version": "2.3.2",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
       "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
-      "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։"
+      "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+      "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։"
     ]
   },
   "en": {
@@ -13,7 +14,8 @@
     "changes": [
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
       "Bulk Ctrl/⌘ selection now supports every available port purpose.",
-      "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose."
+      "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+      "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards."
     ]
   },
   "ru": {
@@ -21,7 +23,8 @@
     "changes": [
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
       "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
-      "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению."
+      "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+      "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений."
     ]
   }
 }

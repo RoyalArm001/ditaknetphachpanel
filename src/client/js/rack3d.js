@@ -47,9 +47,9 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     canvas.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;yaw+=dx*.008;pitch=Math.max(-.6,Math.min(.6,pitch+dy*.006));drag={x:e.clientX,y:e.clientY};draw();};
     canvas.onpointerup=e=>{drag=null;if(moved)return;const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let nearest=null,distance=14;for(const h of hit)for(const p of h.points){const d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;nearest=h.id;}}if(nearest){selected=nearest;draw();onSelect?.(nearest);}};
     canvas.onpointercancel=()=>{drag=null;};
-    canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.45,Math.min(4,zoom*Math.exp(-e.deltaY*.001)));draw();};
+    canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.45,Math.min(4,zoom*Math.exp(-e.deltaY*.0015)));draw();};
     const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;observer?.observe(canvas);draw();
-    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},zoom(factor){zoom=Math.max(.45,Math.min(4,zoom*factor));draw();},reset(){yaw=-.35;pitch=.10;zoom=1;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=null;}};
+    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},tilt(delta){pitch=Math.max(-.95,Math.min(.95,pitch+delta));draw();},zoom(factor){zoom=Math.max(.45,Math.min(4,zoom*factor));draw();},reset(){yaw=-.35;pitch=.10;zoom=1;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=null;}};
   }
   return {buildScene,curve,mount};
 });
