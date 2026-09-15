@@ -37,7 +37,7 @@
   "Միացնել գիշերային ռեժիմը": ["Switch to night mode","Включить ночной режим"],
   "Վերականգնման PIN-ով կարող եք միայն դիտել և ներբեռնել ձեր տվյալները։ Խմբագրելու համար մուտք գործեք գաղտնաբառով։": ["A recovery PIN lets you view and download your data. Sign in with your password to edit.","PIN восстановления позволяет просматривать и скачивать ваши данные. Для редактирования войдите с паролем."],
   "Մուտք գործել": ["Sign in","Войти"],
-  "Ձեր ֆայլը վերականգնված է": ["Your file is available for recovery","Ваш файл доступен для восстановления"],
+  "Ձեր ֆայլը վերականգնված է": ["Your file has been restored","Ваш файл восстановлен"],
   "Անձնական PIN-ով": ["Use my recovery PIN","По личному PIN"],
   "Թիմային բազա · թիմի PIN": ["Team database · team PIN","База команды · PIN команды"],
   "Բացել Google Drive-ը": ["Open Google Drive","Открыть Google Диск"],
@@ -1369,8 +1369,8 @@
     "Основные разделы"
   ],
   "ի մաս · © Ditaknet": [
-    "part · © My Patch",
-    "часть · © Мой патч"
+    "part · © Ditaknet",
+    "часть · © Ditaknet"
   ],
   "Տեղական ցանց": [
     "Local network",
@@ -1765,8 +1765,8 @@
     "VLAN должен быть целым числом от 1 до 4094 или пустым"
   ],
   "Իմ փաչ-ի մաս · © Ditaknet": [
-    "Part of My Patch · © My Patch",
-    "Часть Мой патч · © Мой патч"
+    "Part of My Patch · © Ditaknet",
+    "Часть «Мой патч» · © Ditaknet"
   ],
   "Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։": [
     "In Safari, open the app address → Share → Add to Home Screen → Add.",
@@ -1882,7 +1882,7 @@
   ],
   "Մեկ VLAN-ին կարող եք կցել մի քանի տարբեր IP/CIDR ցանցեր։": [
     "You can attach multiple different IP/CIDR networks to one VLAN.",
-    "К одному VLAN можно привязать несколько разных IP-/CIDR-сетей."
+    "К одному VLAN можно привязать несколько разных IP-сетей или CIDR-сетей."
   ],
   "Ընտրեք ցանցի տեսակը և գրեք VLAN ID-ն": [
     "Select the network type and enter the VLAN ID.",
@@ -1890,19 +1890,19 @@
   ],
   "VLAN IP-ները պետք է տարբեր լինեն": [
     "VLAN IP addresses must be unique.",
-    "IP-адреса VLAN должны отличаться."
+    "IP-адреса VLAN должны быть уникальными."
   ],
   "VLAN IP-ն պետք է լինի IPv4 հասցե կամ CIDR, կամ դատարկ": [
     "VLAN IP must be an IPv4 address or CIDR, or empty.",
-    "IP VLAN должен быть IPv4-адресом или CIDR, либо быть пустым."
+    "IP-адрес VLAN должен быть IPv4-адресом или CIDR, либо поле должно быть пустым."
   ],
-  "Ցանցերի ինֆորմացիա": [
+  "Ցանցերի տվյալներ": [
     "Network information",
     "Информация о сетях"
   ],
   "Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։": [
     "Register VLANs, VLAN IPs, and device access details in advance.",
-    "Заранее зарегистрируйте VLAN, IP VLAN и данные доступа к устройствам."
+    "Заранее добавьте VLAN, IP-адреса VLAN и данные доступа к устройствам."
   ],
   "＋ Ավելացնել ցանց": [
     "＋ Add network",
@@ -1910,19 +1910,19 @@
   ],
   "Ընտրեք, թե այս ցանցը ինչ սարքերի համար է՝ տեսախցիկ, հեռախոս, Wi-Fi և այլն։": [
     "Choose which devices this network is for: cameras, phones, Wi-Fi, and more.",
-    "Выберите, для каких устройств предназначена сеть: камеры, телефоны, Wi-Fi и другие."
+    "Выберите, для каких устройств предназначена сеть: камеры, телефоны, Wi-Fi и другие устройства."
   ],
   "VLAN ID-ն միայն ցանցի նույնացուցիչ է և ինքնուրույն չի փոխում պորտի նշանակությունը։": [
     "The VLAN ID only identifies the network and does not change a port's purpose by itself.",
-    "ID VLAN только идентифицирует сеть и сам по себе не меняет назначение порта."
+    "Идентификатор VLAN только обозначает сеть и сам по себе не меняет назначение порта."
   ],
   "Սարքի IP և մուտք": [
     "Device IP and access",
     "IP и доступ к устройству"
   ],
-  "Այս VLAN-ի կոնկրետ սարքերի IP-ները, username-ները և password-ները": [
+  "Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը": [
     "IP addresses, usernames, and passwords for devices in this VLAN",
-    "IP-адреса, имена пользователей и пароли устройств этого VLAN"
+    "IP-адреса, имена пользователей и пароли устройств в этом VLAN"
   ],
   "＋ Պահպանել IP / գաղտնաբառ": [
     "＋ Save IP / password",
@@ -1947,5 +1947,110 @@
   "Ցանցի անվանումը պարտադիր է": [
     "Network name is required.",
     "Название сети обязательно."
-  ]
+  ],
+  "Ցանցեր և VLAN": ["Networks and VLANs","Сети и VLAN"],
+  "Ցանցեր": ["Networks","Сети"],
+  "Ցույց տալ": ["Show","Показать"],
+  "Թաքցնել": ["Hide","Скрыть"],
+  "Առանց ռաքի սարք": ["Device outside a rack","Устройство вне стойки"],
+  "Չհաջողվեց բեռնել վերականգնված բազան": ["Could not load the restored database","Не удалось загрузить восстановленную базу"],
+  "Անուն": ["First name","Имя"],
+  "Ազգանուն": ["Last name","Фамилия"],
+  "Հաջորդը": ["Next","Далее"],
+  "Հեռախոսահամար": ["Phone number","Номер телефона"],
+  "Վերջում կստեղծվի և կցուցադրվի ձեր անձնական PIN կոդը։": ["Your personal PIN will be generated and displayed at the end.","В конце будет создан и показан ваш личный PIN-код."],
+  "Էլ․ փոստ կամ մուտքանուն": ["Email or username","Эл. почта или имя пользователя"],
+  "Մուտքագրեք անձնական PIN-ը։": ["Enter your personal PIN.","Введите личный PIN-код."],
+  "Լրացրեք հաշվի տվյալները երեք պարզ քայլով։": ["Enter your account details in three simple steps.","Заполните данные аккаунта за три простых шага."],
+  "Մուտքանուն": ["Username","Имя пользователя"],
+  "Փոխել": ["Change","Изменить"],
+  "Այս անունով ցանց արդեն կա": ["A network with this name already exists","Сеть с таким названием уже существует"],
+  "Այս VLAN ID-ն արդեն օգտագործվում է": ["This VLAN ID is already in use","Этот ID VLAN уже используется"],
+  "Ջնջել ցանցը": ["Delete network","Удалить сеть"],
+  "Սարքերի տեսակներ": ["Device types","Типы устройств"],
+  "Ավելացրեք ձեր սարքերի տեսակները։ Դրանք կհայտնվեն «Նոր սարք» ձևի տեսակների ցանկում։ Փաչ պանելն ու սվիչը համակարգային տեսակներ են։": ["Add your own device types. They will appear in the New device form. Patch panel and switch are built-in types.","Добавьте собственные типы устройств. Они появятся в форме «Новое устройство». Патч-панель и коммутатор — встроенные типы."],
+  "Ձեր սեփական տեսակներ դեռ չկան։": ["You have not added any custom types yet.","Вы ещё не добавили собственные типы."],
+  "Նոր սարքի տեսակի անվանում": ["New device type name","Название нового типа устройства"],
+  "Օրինակ՝ DVR կամ Access Point": ["For example: DVR or Access Point","Например: DVR или точка доступа"],
+  "Գրեք սարքի տեսակի անվանումը": ["Enter the device type name","Введите название типа устройства"],
+  "Այս սարքի տեսակն արդեն կա": ["This device type already exists","Такой тип устройства уже существует"],
+  "IP հասցե": ["IP address","IP-адрес"],
+  "Կապված սարք": ["Linked device","Связанное устройство"],
+  "Չկապել": ["Do not link","Не связывать"],
+  "Խմբագրել սարքի IP-ն": ["Edit device IP","Изменить IP устройства"],
+  "Ավելացնել սարքի IP": ["Add device IP","Добавить IP устройства"],
+  "Ցանցը չի գտնվել": ["Network not found","Сеть не найдена"],
+  "Այս IP-ն արդեն օգտագործվում է այս ցանցում": ["This IP address is already in use on this network","Этот IP-адрес уже используется в этой сети"],
+  "Ավտոմատ պահպանում": ["Autosave","Автосохранение"],
+  "Փոփոխությունները ավտոմատ պահպանվում են։": ["Changes are saved automatically.","Изменения сохраняются автоматически."],
+  "Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։": ["Changes will be saved when you click Save.","Изменения сохранятся после нажатия кнопки «Сохранить»."],
+  "Անջատել ավտոմատ պահպանումը": ["Turn off autosave","Отключить автосохранение"],
+  "Միացնել ավտոմատ պահպանումը": ["Turn on autosave","Включить автосохранение"],
+  "Ստեղծեք ձեր սեփական սարքի տեսակները, որոնք կհայտնվեն նոր սարք ավելացնելիս։": ["Create custom device types to choose from when adding a device.","Создайте собственные типы устройств для выбора при добавлении устройства."],
+  "Կառավարել սարքերի տեսակները": ["Manage device types","Управление типами устройств"],
+  "Սվիչի մոդելի տեսակ": ["Switch model type","Тип модели коммутатора"],
+  "Առանց PoE": ["No PoE","Без PoE"],
+  "Փաչ պանելի կամ սվիչի գույնը 3D-ում": ["Patch panel or switch color in 3D","Цвет патч-панели или коммутатора в 3D"],
+  "Սարքի IP-ն, մուտքանունը և գաղտնաբառը պահվում են ընտրված VLAN ցանցում։": ["The device IP address, username, and password are stored in the selected VLAN network.","IP-адрес, имя пользователя и пароль устройства сохраняются в выбранной сети VLAN."],
+  "Նախ «Ցանցեր» բաժնում ավելացրեք VLAN։": ["First add a VLAN in the Networks section.","Сначала добавьте VLAN в разделе «Сети»."],
+  "Ցանց": ["Network","Сеть"],
+  "Չնշել": ["None","Не указывать"],
+  "Սարքի IP": ["Device IP","IP устройства"],
+  "Ընտրեք ցանցը և գրեք սարքի IP-ն։": ["Select the network and enter the device IP address.","Выберите сеть и введите IP-адрес устройства."],
+  "ԲԱԶՄԱԿԻ ԸՆՏՐՈՒԹՅՈՒՆ": ["MULTIPLE SELECTION","МНОЖЕСТВЕННЫЙ ВЫБОР"],
+  "Ընտրված փաչ պանելի պորտերին կարող եք նշանակել ցանկացած հասանելի նշանակություն։": ["Assign any available purpose to the selected patch panel ports.","Вы можете задать любое доступное назначение выбранным портам патч-панели."],
+  "Չեղարկել ընտրությունը": ["Clear selection","Снять выделение"],
+  "Ընտրեք պահպանված VLAN ID-ից կամ գրեք նոր ID։ VLAN ID-ն չի փոխում պորտի նշանակությունը։": ["Choose a saved VLAN ID or enter a new one. The VLAN ID does not change the port purpose.","Выберите сохранённый ID VLAN или введите новый. ID VLAN не меняет назначение порта."],
+  "Այլ տվյալներ": ["Other details","Другие данные"],
+  "Սվիչի պորտն ընտրելու համար նախ միացրեք այն փաչ պանելի պորտին։": ["Connect the switch port to a patch panel port before selecting it.","Чтобы выбрать порт коммутатора, сначала соедините его с портом патч-панели."],
+  "Սարքը չի կարող դուրս գալ ռաքի սահմաններից": ["The device must stay within the rack","Устройство не может выходить за пределы стойки"],
+  "Այս դիրքը զբաղված է այլ սարքով": ["This position is occupied by another device","Это место занято другим устройством"],
+  "Բացել արագ մենյուն": ["Open quick menu","Открыть быстрое меню"],
+  "Փակել արագ մենյուն": ["Close quick menu","Закрыть быстрое меню"],
+  "Ջնջել սարքի տեսակը": ["Delete device type","Удалить тип устройства"],
+  "Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։": ["This type will be removed from the menu. Existing devices and their data will be kept.","Этот тип будет удалён из списка. Существующие устройства и их данные сохранятся."],
+  "Ջնջել VLAN ցանցը": ["Delete VLAN network","Удалить сеть VLAN"],
+  "Ցանցը և դրա սարքերի IP գրառումները կհեռացվեն։ Պորտերի VLAN ID-ները չեն փոխվի։": ["The network and its device IP records will be deleted. Port VLAN IDs will remain unchanged.","Сеть и записи IP её устройств будут удалены. ID VLAN портов не изменятся."],
+  "Ջնջել սարքի IP-ն": ["Delete device IP","Удалить IP устройства"],
+  "Այս սարքի IP գրառումը կհեռացվի VLAN ցանցից։": ["This device IP record will be removed from the VLAN network.","Запись IP этого устройства будет удалена из сети VLAN."],
+  "Ավտոմատ պահպանումն անջատված է": ["Autosave is off","Автосохранение отключено"],
+  "Չմիացված սվիչի պորտը բազմակի ընտրության համար հասանելի չէ։ Նախ կապեք փաչ պանելի պորտին։": ["An unconnected switch port cannot be selected in a group. Connect it to a patch panel port first.","Неподключённый порт коммутатора недоступен для группового выбора. Сначала соедините его с портом патч-панели."],
+  "Վերականգնում": ["Recovery","Восстановление"],
+  "Սարքերի տեսակների ցանկը սխալ է": ["Invalid device type list","Некорректный список типов устройств"],
+  "Սարքի տեսակի ձևաչափը սխալ է": ["Invalid device type format","Некорректный формат типа устройства"],
+  "Սարքի տեսակի ID-ն սխալ է": ["Invalid device type ID","Некорректный ID типа устройства"],
+  "Սարքի տեսակի անվանումը սխալ է": ["Invalid device type name","Некорректное название типа устройства"],
+  "Սվիչի մոդելի տեսակը սխալ է": ["Invalid switch model type","Некорректный тип модели коммутатора"],
+  "Ցանցերի ցանկը սխալ է": ["Invalid network list","Некорректный список сетей"],
+  "VLAN համարները պետք է տարբեր լինեն": ["VLAN IDs must be unique","ID VLAN должны быть уникальными"],
+  "VLAN-ի սարքերի տեսակները սխալ են": ["Invalid device types for VLAN","Некорректные типы устройств VLAN"],
+  "VLAN-ի սարքերի տեսակները չպետք է կրկնվեն": ["VLAN device types must not repeat","Типы устройств VLAN не должны повторяться"],
+  "Սարքերի IP ցանկը սխալ է": ["Invalid device IP list","Некорректный список IP устройств"],
+  "Սարքի IP-ն պետք է լինի IPv4 հասցե": ["The device IP must be an IPv4 address","IP устройства должен быть адресом IPv4"],
+  "Նույն ցանցում IP հասցեները պետք է տարբեր լինեն": ["IP addresses within a network must be unique","IP-адреса в одной сети должны быть уникальными"],
+  "Սարքը չի գտնվել": ["Device not found","Устройство не найдено"],
+  "Մուտքագրեք միայն PIN կոդը։ Անձնական PIN-ը կբացի ձեր հաշիվը, իսկ թիմային PIN-ը՝ ընդհանուր բազան։": ["Enter only the PIN. A personal PIN opens your account; a team PIN opens the shared database.","Введите только PIN-код. Личный PIN открывает ваш аккаунт, а командный — общую базу."],
+  "Ցանցեր դեռ չկան": ["There are no networks yet","Сетей пока нет"],
+  "Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։": ["Add a VLAN and its IP address, then enter device IP addresses, usernames, and passwords.","Добавьте VLAN и его IP-адрес, затем укажите IP-адреса устройств, имена пользователей и пароли."],
+  "սարքի IP": ["device IP addresses","IP-адресов устройств"],
+  "Ctrl/⌘ + սեղմում՝ բազմակի ընտրություն": ["Ctrl/⌘ + click to select multiple ports","Ctrl/⌘ + щелчок для выбора нескольких портов"],
+  "Ձախ կոճակով քաշեք՝ պտտելու համար։ Shift-ով կամ աջ կոճակով քաշեք՝ մոդելը տեղափոխելու համար։ Մասշտաբը փոխելիս կենտրոնում մնում է կուրսորի տակ գտնվող հատվածը։": ["Drag with the left mouse button to rotate. Hold Shift or drag with the right button to move the model. Zoom stays centered on the area under the cursor.","Перетаскивайте левой кнопкой мыши для вращения. Удерживайте Shift или перетаскивайте правой кнопкой для перемещения модели. Масштабирование происходит относительно области под курсором."],
+  "Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։": ["For a switch, choose PoE, PoE+, or no PoE.","Для коммутатора выберите PoE, PoE+ или без PoE."],
+  "Իմ Փաչ": ["My Patch","Мой патч"],
+  "Ցանցային ռաքերի, փաչ պանելների, սվիչների և մալուխային կապերի կառավարման համակարգ։": ["A system for managing network racks, patch panels, switches, and cable connections.","Система управления сетевыми стойками, патч-панелями, коммутаторами и кабельными соединениями."],
+  "Ցանցային ռաքեր և փաչ պանելների կառավարում": ["Network racks and patch panel management","Управление сетевыми стойками и патч-панелями"],
+  "ցանցային ռաք": ["network rack","сетевая стойка"],
+  "Իմ Փաչ՝ ցանցային ռաքերի, փաչ պանելների, սվիչների և մալուխային կապերի կառավարման համակարգ։": ["My Patch: a system for managing network racks, patch panels, switches, and cable connections.","Мой патч: система управления сетевыми стойками, патч-панелями, коммутаторами и кабельными соединениями."],
+  "Կապի կարգավորումներ": ["Connection settings","Настройки соединения"],
+  "Պահուստային ֆայլի տեսակը սխալ է": ["Invalid backup file format","Некорректный формат резервного файла"],
+  "Ցանցի տեսակի անվանում": ["Network type name","Название типа сети"],
+  "Ցանցերի տեսակներ և պորտերի նշանակություններ": ["Network types and port purposes","Типы сетей и назначения портов"],
+  "＋ Ավելացնել ցանցի տեսակ": ["＋ Add network type","＋ Добавить тип сети"],
+  "Ավելացրեք ցանցի տեսակ, խմբագրեք անվանումն ու գույնը կամ ջնջեք չօգտագործվող տեսակը։ Փոփոխությունները կիրառվում են «Պահպանել» սեղմելուց հետո։": ["Add a network type, edit its name and color, or delete an unused type. Changes take effect when you save.","Добавьте тип сети, измените название и цвет или удалите неиспользуемый тип. Изменения вступят в силу после сохранения."],
+  "Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։": ["Before deleting a type in use, change it in the networks and ports that use it.","Перед удалением используемого типа замените его в соответствующих сетях и портах."],
+  "Ցանցերի տեսակների ցանկը սխալ է": ["Invalid network type list","Некорректный список типов сетей"],
+  "Ցանցի տեսակի ID-ն սխալ է": ["Invalid network type ID","Некорректный ID типа сети"],
+  "Ցանցի տեսակի անվանումը պարտադիր է": ["Network type name is required","Название типа сети обязательно"],
+  "Ցանցերի տեսակների անվանումները պետք է տարբեր լինեն": ["Network type names must be unique","Названия типов сетей должны быть уникальными"],
+  "Առավելագույնը 100 նոր ցանցի տեսակ": ["You can add up to 100 custom network types","Можно добавить до 100 собственных типов сетей"]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

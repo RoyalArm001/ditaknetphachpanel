@@ -12,7 +12,7 @@ async function fresh(request,key){
     if(response.status<500)return response;
     return await cache.match(key)||response;
   }catch{
-    return await cache.match(key)||new Response('Առաջին բացման համար անհրաժեշտ է ինտերնետ։',{status:503});
+    return await cache.match(key)||new Response('Առաջին բացման համար անհրաժեշտ է ինտերնետ։\nAn internet connection is required to open the app for the first time.\nДля первого запуска приложения необходимо подключение к интернету.',{status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
   }
 }
 self.addEventListener('fetch',event=>{

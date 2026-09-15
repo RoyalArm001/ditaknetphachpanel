@@ -14,12 +14,19 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     phone:{get label(){return tr('Հեռախոս');},color:'#b83878'},
     internet:{get label(){return tr('Ինտերնետ');},color:'#08796b'}
   };
+  const serviceEntries = s => [...Object.entries(services).filter(([key])=>!s.hiddenServices?.includes(key)),...(s.serviceTypes||[]).map(type=>[type.id,{label:type.name,color:type.color}])];
+  const hasService = (s,key) => serviceEntries(s).some(([id])=>id===key);
+  const serviceInUse = (s,key) => ports(s).some(({p})=>p.service===key)||networks(s).some(n=>n.name===key);
+  const applyProjectStyle = (s,style) => {
+    for(const [key] of serviceEntries(s))if(key&&!hasService(style,key)&&serviceInUse(s,key))throw new Error(tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'));
+    Object.assign(s,style);
+  };
   const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
-  const serviceColor = (s,key) => s.serviceColors?.[key] || services[key]?.color || services[''].color;
-  const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || translate(services[key]?.label||'');
+  const serviceColor = (s,key) => s.serviceColors?.[key] || s.serviceTypes?.find(type=>type.id===key)?.color || services[key]?.color || services[''].color;
+  const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || s.serviceTypes?.find(type=>type.id===key)?.name || translate(services[key]?.label||'');
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
-  const projectStyle = s => Object.fromEntries(['backupFormat','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
+  const projectStyle = s => Object.fromEntries(['backupFormat','serviceTypes','hiddenServices','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
   const empty = () => ({schema:2, company:'', floors:[], networks:[],deviceTypes:[]});
   const devices = s => s.floors.flatMap(f => f.racks.flatMap(r => r.devices.map(d => ({f,r,d}))));
   const ports = s => devices(s).flatMap(x => x.d.portList.map(p => ({...x,p})));
@@ -31,10 +38,23 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const assert = (v,m) => {if (!v) throw new Error(m);};
   function validate(s) {
     assert(s && s.schema===2 && typeof s.company==='string' && s.company.length<=200 && Array.isArray(s.floors), tr('Տվյալների ձևաչափը սխալ է'));
-    if(s.backupFormat!==undefined)assert(['json','xlsx'].includes(s.backupFormat),'Invalid backup format');
+    if(s.backupFormat!==undefined)assert(['json','xlsx'].includes(s.backupFormat),tr('Պահուստային ֆայլի տեսակը սխալ է'));
+    if(s.serviceTypes!==undefined){
+      assert(Array.isArray(s.serviceTypes)&&s.serviceTypes.length<=100,tr('Ցանցերի տեսակների ցանկը սխալ է'));
+      const keys=new Set(Object.keys(services));
+      for(const type of s.serviceTypes){
+        assert(type&&typeof type==='object'&&typeof type.id==='string'&&/^custom-[a-z0-9-]{1,64}$/.test(type.id)&&!keys.has(type.id),tr('Ցանցի տեսակի ID-ն սխալ է'));keys.add(type.id);
+        assert(typeof type.name==='string'&&type.name.trim().length>0&&type.name.length<=80,tr('Ցանցի տեսակի անվանումը պարտադիր է'));
+        assert(typeof type.color==='string'&&/^#[0-9a-f]{6}$/i.test(type.color),tr('Գույնը պետք է լինի HEX ձևաչափով'));
+      }
+    }
+    if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>key&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
+    // Validate stored custom names independently of the current interface language.
+    const serviceNames=(s.serviceTypes||[]).map(type=>type.name.trim().toLowerCase());
+    assert(new Set(serviceNames).size===serviceNames.length,tr('Ցանցերի տեսակների անվանումները պետք է տարբեր լինեն'));
     if(s.serviceColors!==undefined){
       assert(s.serviceColors && typeof s.serviceColors==='object' && !Array.isArray(s.serviceColors),tr('Գույների ձևաչափը սխալ է'));
-      for(const [key,value] of Object.entries(s.serviceColors))assert(Object.hasOwn(services,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),tr('Գույնը պետք է լինի HEX ձևաչափով'));
+      for(const [key,value] of Object.entries(s.serviceColors))assert(hasService(s,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),tr('Գույնը պետք է լինի HEX ձևաչափով'));
     }
     assert(s.floors.length<=200,tr('Առավելագույնը 200 հարկ'));
     if(s.deviceTypes!==undefined){
@@ -45,7 +65,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const field of ['serviceLabels','statusLabels','statusColors'])if(s[field]!==undefined){
       assert(s[field]&&typeof s[field]==='object'&&!Array.isArray(s[field]),tr('Տվյալների ձևաչափը սխալ է'));
       for(const [key,value]of Object.entries(s[field])){
-        assert(Object.hasOwn(field==='serviceLabels'?services:statuses,key),tr('Տվյալների ձևաչափը սխալ է'));
+        assert(field==='serviceLabels'?hasService(s,key):Object.hasOwn(statuses,key),tr('Տվյալների ձևաչափը սխալ է'));
         assert(typeof value==='string'&&(field==='statusColors'?/^#[0-9a-f]{6}$/i.test(value):value.trim().length>0&&value.length<=80),tr('Տվյալների ձևաչափը սխալ է'));
       }
     }
@@ -73,7 +93,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
             // Missing fields remain valid for existing databases and older backups.
-            if(p.service!==undefined)assert(typeof p.service==='string'&&Object.hasOwn(services,p.service),tr('Պորտի նշանակությունը սխալ է'));
+            if(p.service!==undefined)assert(typeof p.service==='string'&&hasService(s,p.service),tr('Պորտի նշանակությունը սխալ է'));
             if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
             assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),tr('Մալուխի հարկը չի գտնվել'));
             assert(p.status!=='free'||(!p.cable&&!p.switchPortId),tr('Մալուխով կամ կապով պորտը չի կարող ազատ լինել'));
@@ -126,5 +146,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
   }
-  return {empty,validate,devices,deviceTypes,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
