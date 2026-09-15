@@ -1,5 +1,5 @@
 {
-  "version": "2.3.4",
+  "version": "2.3.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
@@ -8,7 +8,7 @@
       "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
       "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
       "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
-      "Zoom-ը հիմա պահում է կուրսորի դիտվող հատվածը․ Shift/աջ կոճակով քաշելով հնարավոր է տեղափոխել մեծացված մոդելը և դիտել բոլոր հատվածները։"
+      "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։"
     ]
   },
   "en": {
@@ -19,7 +19,7 @@
       "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
       "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
       "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
-      "Zoom now keeps the cursor's viewed area; Shift/right-button dragging pans the enlarged model so every section remains accessible."
+      "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming."
     ]
   },
   "ru": {
@@ -30,7 +30,7 @@
       "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
       "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
       "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
-      "Масштабирование теперь сохраняет область под курсором; перетаскивание с Shift/правой кнопкой перемещает увеличенную модель."
+      "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении."
     ]
   }
 }
