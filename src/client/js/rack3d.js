@@ -22,9 +22,9 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   }
   function curve(link,t){const a=link.a,b=link.b,q=1-t;return [a[0]*q+b[0]*t,a[1]*q+b[1]*t,.34+3*q*t*link.depth];}
   function mount(canvas,scene,onSelect){
-    const ctx=canvas.getContext('2d');let yaw=-.35,pitch=.10,zoom=1,selected='',drag=null,moved=false,hit=[],disposed=false;
+    const ctx=canvas.getContext('2d');let yaw=-.35,pitch=.10,zoom=1,panX=0,panY=0,selected='',drag=null,moved=false,hit=[],disposed=false;
     if(!ctx)return {destroy(){},select(){},rotate(){},zoom(){},reset(){}};
-    const project=p=>{const x=p[0]-(scene.remote ? .8 : 0),y=p[1]-scene.height/2,z=p[2];const rx=x*Math.cos(yaw)+z*Math.sin(yaw),rz=-x*Math.sin(yaw)+z*Math.cos(yaw);const ry=y*Math.cos(pitch)-rz*Math.sin(pitch),depth=y*Math.sin(pitch)+rz*Math.cos(pitch);const scale=Math.min(canvas.clientWidth/(scene.remote?6:3.6),canvas.clientHeight/(scene.height+1.2))*zoom;const perspective=14/(14-depth);return {x:canvas.clientWidth/2+rx*scale*perspective,y:canvas.clientHeight/2-ry*scale*perspective,z:depth};};
+    const project=p=>{const x=p[0]-(scene.remote ? .8 : 0),y=p[1]-scene.height/2,z=p[2];const rx=x*Math.cos(yaw)+z*Math.sin(yaw),rz=-x*Math.sin(yaw)+z*Math.cos(yaw);const ry=y*Math.cos(pitch)-rz*Math.sin(pitch),depth=y*Math.sin(pitch)+rz*Math.cos(pitch);const scale=Math.min(canvas.clientWidth/(scene.remote?6:3.6),canvas.clientHeight/(scene.height+1.2))*zoom;const perspective=14/(14-depth);return {x:canvas.clientWidth/2+rx*scale*perspective+panX,y:canvas.clientHeight/2-ry*scale*perspective+panY,z:depth};};
     function line(points,color,width=1){ctx.beginPath();points.forEach((p,i)=>{const q=project(p);if(i)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y);});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();}
     function polygon(points,color){ctx.beginPath();points.forEach((p,i)=>{const q=project(p);if(i)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y);});ctx.closePath();ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#758d91';ctx.lineWidth=.6;ctx.stroke();}
     function draw(){
@@ -48,13 +48,15 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       if(!scene.links.length){ctx.fillStyle='#bdd3cf';ctx.font='14px Segoe UI';ctx.fillText(tr('Գրանցված միացումներ դեռ չկան'),20,height-24);}
     }
     const pointers=new Map();
-    canvas.onpointerdown=e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});drag={x:e.clientX,y:e.clientY};moved=false;canvas.setPointerCapture?.(e.pointerId);};
-    canvas.onpointermove=e=>{if(!drag)return;const previous=pointers.get(e.pointerId)||drag;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size>1){const [a,b]=[...pointers.values()];const distance=Math.hypot(a.x-b.x,a.y-b.y);if(canvas._pinchDistance){zoom=Math.max(.45,Math.min(4,zoom*distance/canvas._pinchDistance));}canvas._pinchDistance=distance;moved=true;draw();return;}const dx=e.clientX-previous.x,dy=e.clientY-previous.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;yaw+=dx*.008;pitch=Math.max(-.95,Math.min(.95,pitch+dy*.006));drag={x:e.clientX,y:e.clientY};draw();};
+    canvas.onpointerdown=e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});drag={x:e.clientX,y:e.clientY,mode:e.button===2||e.button===1||e.shiftKey?'pan':'rotate'};moved=false;canvas.setPointerCapture?.(e.pointerId);};
+    canvas.onpointermove=e=>{if(!drag)return;const previous=pointers.get(e.pointerId)||drag;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size>1){const [a,b]=[...pointers.values()];const distance=Math.hypot(a.x-b.x,a.y-b.y);if(canvas._pinchDistance){zoomAt((a.x+b.x)/2,(a.y+b.y)/2,distance/canvas._pinchDistance);}canvas._pinchDistance=distance;moved=true;draw();return;}const dx=e.clientX-previous.x,dy=e.clientY-previous.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;if(drag.mode==='pan'){panX+=dx;panY+=dy;}else{yaw+=dx*.008;pitch=Math.max(-.95,Math.min(.95,pitch+dy*.006));}drag={...drag,x:e.clientX,y:e.clientY};draw();};
     canvas.onpointerup=e=>{pointers.delete(e.pointerId);canvas._pinchDistance=0;drag=null;if(moved)return;const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let nearest=null,distance=14;for(const h of hit)for(const p of h.points){const d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;nearest=h.id;}}if(nearest){selected=nearest;draw();onSelect?.(nearest);}};
     canvas.onpointercancel=e=>{pointers.delete(e.pointerId);canvas._pinchDistance=0;drag=null;};
-    canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.45,Math.min(4,zoom*Math.exp(-e.deltaY*.0015)));draw();};
+    const zoomAt=(clientX,clientY,factor)=>{const rect=canvas.getBoundingClientRect(),x=clientX-rect.left,y=clientY-rect.top,old=zoom,next=Math.max(.45,Math.min(4,zoom*factor));if(next===old)return;panX=x-(x-panX)*next/old;panY=y-(y-panY)*next/old;zoom=next;};
+    canvas.onwheel=e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*.0015));draw();};
+    canvas.oncontextmenu=e=>e.preventDefault();
     const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;observer?.observe(canvas);draw();
-    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},tilt(delta){pitch=Math.max(-.95,Math.min(.95,pitch+delta));draw();},zoom(factor){zoom=Math.max(.45,Math.min(4,zoom*factor));draw();},reset(){yaw=-.35;pitch=.10;zoom=1;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=null;pointers.clear();}};
+    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},tilt(delta){pitch=Math.max(-.95,Math.min(.95,pitch+delta));draw();},zoom(factor){zoomAt(canvas.clientWidth/2,canvas.clientHeight/2,factor);draw();},reset(){yaw=-.35;pitch=.10;zoom=1;panX=0;panY=0;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=canvas.oncontextmenu=null;pointers.clear();}};
   }
   return {buildScene,curve,mount};
 });
