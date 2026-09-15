@@ -1,24 +1,27 @@
 {
-  "version": "2.2.9",
+  "version": "2.3.0",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
-      "Ավելացվել են VLAN էջը և սարքերի IP, username ու password տվյալների պահպանումը։"
+      "Ավելացվել է Ctrl/⌘-ով փաչ պանելի պորտերի բազմակի ընտրությունը՝ տեսախցիկ կամ հեռախոս նշանակելու համար։",
+      "Տեսախցիկի կամ հեռախոսի VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ ցանցի անվանումը համապատասխանում է սարքի տեսակին։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
-      "Added a VLAN page with storage for device IP, username, and password details."
+      "Added Ctrl/⌘ multi-selection for patch-panel ports to assign camera or phone purpose in bulk.",
+      "Camera or phone VLAN IDs are filled automatically in the patch-panel field when the network name matches the device type."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
-      "Добавлена страница VLAN с сохранением IP, логина и пароля устройств."
+      "Добавлен выбор нескольких портов патч-панели через Ctrl/⌘ для массового назначения камеры или телефона.",
+      "VLAN камеры или телефона автоматически подставляется в поле патч-панели, если имя сети соответствует типу устройства."
     ]
   }
 }
