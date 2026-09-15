@@ -1,12 +1,13 @@
 {
-  "version": "2.3.2",
+  "version": "2.3.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
       "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
       "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
-      "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։"
+      "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+      "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։"
     ]
   },
   "en": {
@@ -15,7 +16,8 @@
       "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
       "Bulk Ctrl/⌘ selection now supports every available port purpose.",
       "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
-      "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards."
+      "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+      "3D patch panels and switches now use their selected device color, with a clear color field when adding a device."
     ]
   },
   "ru": {
@@ -24,7 +26,8 @@
       "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
       "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
       "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
-      "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений."
+      "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+      "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле."
     ]
   }
 }

@@ -3,6 +3,10 @@
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
   const U=.18;
+  function shade(hex,amount){
+    const value=String(hex||'#397c78').replace('#',''),rgb=value.match(/../g)?.map(x=>parseInt(x,16))||[57,124,120];
+    return '#'+rgb.map(channel=>Math.max(0,Math.min(255,Math.round(channel+(amount<0?channel:255-channel)*amount))).toString(16).padStart(2,'0')).join('');
+  }
   function buildScene(state,rackId){
     const rack=state.floors.flatMap(f=>f.racks).find(r=>r.id===rackId);if(!rack)throw new Error(tr('Ռաքը չի գտնվել'));
     const all=D.ports(state),byId=new Map(all.map(x=>[x.p.id,x]));
@@ -29,11 +33,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       for(const y of [0,scene.height])line([[-1.08,y,.4],[1.08,y,.4]],'#91a6a4',2);
       for(const b of [...scene.boxes].sort((a,b)=>project(a.min).z-project(b.min).z)){
         const [x,y,z]=b.min,[xx,yy,zz]=b.max;
-        polygon([[x,y,z],[xx,y,z],[xx,yy,z],[x,yy,z]],'#274149');
-        polygon([[x,yy,z],[xx,yy,z],[xx,yy,zz],[x,yy,zz]],'#809495');
-        polygon([[xx,y,z],[xx,yy,z],[xx,yy,zz],[xx,y,zz]],'#476569');
-        polygon([[x,y,zz],[xx,y,zz],[xx,yy,zz],[x,yy,zz]],'#d8e3df');
-        const label=project([x,yy+.035,zz]);ctx.font='11px Segoe UI, sans-serif';ctx.fillStyle='#e6eeeb';ctx.fillText(b.label,label.x,label.y-4);
+        polygon([[x,y,z],[xx,y,z],[xx,yy,z],[x,yy,z]],shade(b.color,-.35));
+        polygon([[x,yy,z],[xx,yy,z],[xx,yy,zz],[x,yy,zz]],shade(b.color,.18));
+        polygon([[xx,y,z],[xx,yy,z],[xx,yy,zz],[xx,y,zz]],shade(b.color,-.12));
+        polygon([[x,y,zz],[xx,y,zz],[xx,yy,zz],[x,yy,zz]],b.color);
+        const label=project([x,yy+.035,zz]);ctx.font='bold 11px Segoe UI, sans-serif';ctx.fillStyle='#fff';ctx.fillText(b.label,label.x,label.y-4);
       }
       for(const p of scene.points){const v=project(p.point);ctx.fillStyle='#285957';ctx.fillRect(v.x-2,v.y-2,4,4);}
       for(const link of [...scene.links].sort((a,b)=>(a.id===selected?1:0)-(b.id===selected?1:0))){
@@ -43,13 +47,14 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       }
       if(!scene.links.length){ctx.fillStyle='#bdd3cf';ctx.font='14px Segoe UI';ctx.fillText(tr('Գրանցված միացումներ դեռ չկան'),20,height-24);}
     }
-    canvas.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY};moved=false;canvas.setPointerCapture?.(e.pointerId);};
-    canvas.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;yaw+=dx*.008;pitch=Math.max(-.6,Math.min(.6,pitch+dy*.006));drag={x:e.clientX,y:e.clientY};draw();};
-    canvas.onpointerup=e=>{drag=null;if(moved)return;const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let nearest=null,distance=14;for(const h of hit)for(const p of h.points){const d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;nearest=h.id;}}if(nearest){selected=nearest;draw();onSelect?.(nearest);}};
-    canvas.onpointercancel=()=>{drag=null;};
+    const pointers=new Map();
+    canvas.onpointerdown=e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});drag={x:e.clientX,y:e.clientY};moved=false;canvas.setPointerCapture?.(e.pointerId);};
+    canvas.onpointermove=e=>{if(!drag)return;const previous=pointers.get(e.pointerId)||drag;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size>1){const [a,b]=[...pointers.values()];const distance=Math.hypot(a.x-b.x,a.y-b.y);if(canvas._pinchDistance){zoom=Math.max(.45,Math.min(4,zoom*distance/canvas._pinchDistance));}canvas._pinchDistance=distance;moved=true;draw();return;}const dx=e.clientX-previous.x,dy=e.clientY-previous.y;if(Math.abs(dx)+Math.abs(dy)>2)moved=true;yaw+=dx*.008;pitch=Math.max(-.95,Math.min(.95,pitch+dy*.006));drag={x:e.clientX,y:e.clientY};draw();};
+    canvas.onpointerup=e=>{pointers.delete(e.pointerId);canvas._pinchDistance=0;drag=null;if(moved)return;const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;let nearest=null,distance=14;for(const h of hit)for(const p of h.points){const d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;nearest=h.id;}}if(nearest){selected=nearest;draw();onSelect?.(nearest);}};
+    canvas.onpointercancel=e=>{pointers.delete(e.pointerId);canvas._pinchDistance=0;drag=null;};
     canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.45,Math.min(4,zoom*Math.exp(-e.deltaY*.0015)));draw();};
     const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;observer?.observe(canvas);draw();
-    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},tilt(delta){pitch=Math.max(-.95,Math.min(.95,pitch+delta));draw();},zoom(factor){zoom=Math.max(.45,Math.min(4,zoom*factor));draw();},reset(){yaw=-.35;pitch=.10;zoom=1;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=null;}};
+    return {select(id){selected=id;draw();},rotate(delta){yaw+=delta;draw();},tilt(delta){pitch=Math.max(-.95,Math.min(.95,pitch+delta));draw();},zoom(factor){zoom=Math.max(.45,Math.min(4,zoom*factor));draw();},reset(){yaw=-.35;pitch=.10;zoom=1;selected='';draw();},destroy(){disposed=true;observer?.disconnect();canvas.onpointerdown=canvas.onpointermove=canvas.onpointerup=canvas.onpointercancel=canvas.onwheel=null;pointers.clear();}};
   }
   return {buildScene,curve,mount};
 });
