@@ -243,7 +243,7 @@ function networkModal(id=''){
   const ipFields=ips.map((ip,i)=>`<div class="network-ip-row"><div class="field"><label for="network-ip-${i}">${tr('Ցանցի IP կամ CIDR')} ${i+1}</label><input id="network-ip-${i}" name="ip" type="text" value="${esc(ip)}" maxlength="200" placeholder="192.168.10.0/24" inputmode="decimal"></div>${ips.length>1?button('−','network-ip-remove',String(i),'small danger'):''}</div>`).join('');
   modal(network?tr('Խմբագրել VLAN ցանցը'):tr('Նոր VLAN ցանց'),`<div class="form-grid">${select('name',tr('Ցանցի տեսակ'),typeOptions,network?.name||'')}${input('vlan',tr('VLAN ID'),network?.vlan||'','number','required min="1" max="4094" step="1" placeholder="10"')}</div><div id="networkIpFields">${ipFields}</div>${button(tr('＋ Ավելացնել ևս մեկ IP'),'network-ip-add','','small')}<p class="hint">${tr('Մեկ VLAN-ին կարող եք կցել մի քանի տարբեր IP/CIDR ցանցեր։')}</p><p class="hint">${tr('VLAN ID-ն միայն ցանցի նույնացուցիչ է և ինքնուրույն չի փոխում պորտի նշանակությունը։')}</p>`,fd=>commit(s=>{
     const networks=ensureNetworks(s),name=String(fd.get('name')||'').trim(),vlan=String(fd.get('vlan')||'').trim(),ip=[...new Set(fd.getAll('ip').map(value=>String(value).trim()).filter(Boolean))];
-    if(!name||!vlan)throw new Error(tr('Գրեք ցանցի անվանումը և VLAN ID-ն'));
+    if(!name||!vlan)throw new Error(tr('Ընտրեք ցանցի տեսակը և գրեք VLAN ID-ն'));
     if(networks.some(x=>x.id!==id&&x.name.trim().toLowerCase()===name.toLowerCase()))throw new Error(tr('Այս անունով ցանց արդեն կա'));
     if(networks.some(x=>x.id!==id&&x.vlan===vlan))throw new Error(tr('Այս VLAN ID-ն արդեն օգտագործվում է'));
     const target=networks.find(x=>x.id===id);

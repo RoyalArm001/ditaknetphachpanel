@@ -1867,5 +1867,85 @@
   "Իմ փաչ · Ցանցային ռաքեր": [
     "My Patch · Network racks",
     "Мой патч · Сетевые стойки"
+  ],
+  "Ցանցի տեսակ": [
+    "Network type",
+    "Тип сети"
+  ],
+  "Ցանցի IP կամ CIDR": [
+    "Network IP or CIDR",
+    "IP-адрес сети или CIDR"
+  ],
+  "Ավելացնել ևս մեկ IP": [
+    "Add another IP",
+    "Добавить ещё один IP"
+  ],
+  "Մեկ VLAN-ին կարող եք կցել մի քանի տարբեր IP/CIDR ցանցեր։": [
+    "You can attach multiple different IP/CIDR networks to one VLAN.",
+    "К одному VLAN можно привязать несколько разных IP-/CIDR-сетей."
+  ],
+  "Ընտրեք ցանցի տեսակը և գրեք VLAN ID-ն": [
+    "Select the network type and enter the VLAN ID.",
+    "Выберите тип сети и введите ID VLAN."
+  ],
+  "VLAN IP-ները պետք է տարբեր լինեն": [
+    "VLAN IP addresses must be unique.",
+    "IP-адреса VLAN должны отличаться."
+  ],
+  "VLAN IP-ն պետք է լինի IPv4 հասցե կամ CIDR, կամ դատարկ": [
+    "VLAN IP must be an IPv4 address or CIDR, or empty.",
+    "IP VLAN должен быть IPv4-адресом или CIDR, либо быть пустым."
+  ],
+  "Ցանցերի ինֆորմացիա": [
+    "Network information",
+    "Информация о сетях"
+  ],
+  "Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։": [
+    "Register VLANs, VLAN IPs, and device access details in advance.",
+    "Заранее зарегистрируйте VLAN, IP VLAN и данные доступа к устройствам."
+  ],
+  "＋ Ավելացնել ցանց": [
+    "＋ Add network",
+    "＋ Добавить сеть"
+  ],
+  "Ընտրեք, թե այս ցանցը ինչ սարքերի համար է՝ տեսախցիկ, հեռախոս, Wi-Fi և այլն։": [
+    "Choose which devices this network is for: cameras, phones, Wi-Fi, and more.",
+    "Выберите, для каких устройств предназначена сеть: камеры, телефоны, Wi-Fi и другие."
+  ],
+  "VLAN ID-ն միայն ցանցի նույնացուցիչ է և ինքնուրույն չի փոխում պորտի նշանակությունը։": [
+    "The VLAN ID only identifies the network and does not change a port's purpose by itself.",
+    "ID VLAN только идентифицирует сеть и сам по себе не меняет назначение порта."
+  ],
+  "Սարքի IP և մուտք": [
+    "Device IP and access",
+    "IP и доступ к устройству"
+  ],
+  "Այս VLAN-ի կոնկրետ սարքերի IP-ները, username-ները և password-ները": [
+    "IP addresses, usernames, and passwords for devices in this VLAN",
+    "IP-адреса, имена пользователей и пароли устройств этого VLAN"
+  ],
+  "＋ Պահպանել IP / գաղտնաբառ": [
+    "＋ Save IP / password",
+    "＋ Сохранить IP / пароль"
+  ],
+  "Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։": [
+    "There are no device IP and access details yet. Click “Save IP / password”.",
+    "Данных IP и доступа к устройствам пока нет. Нажмите «Сохранить IP / пароль»."
+  ],
+  "Նոր VLAN ցանց": [
+    "New VLAN network",
+    "Новая сеть VLAN"
+  ],
+  "Խմբագրել VLAN ցանցը": [
+    "Edit VLAN network",
+    "Изменить сеть VLAN"
+  ],
+  "Գրեք ցանցի անվանումը և VLAN ID-ն": [
+    "Enter the network name and VLAN ID.",
+    "Введите название сети и ID VLAN."
+  ],
+  "Ցանցի անվանումը պարտադիր է": [
+    "Network name is required.",
+    "Название сети обязательно."
   ]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);
