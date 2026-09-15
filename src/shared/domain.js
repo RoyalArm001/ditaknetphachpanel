@@ -14,12 +14,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     phone:{get label(){return tr('Հեռախոս');},color:'#b83878'},
     internet:{get label(){return tr('Ինտերնետ');},color:'#08796b'}
   };
+  const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
   const serviceColor = (s,key) => s.serviceColors?.[key] || services[key]?.color || services[''].color;
   const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || translate(services[key]?.label||'');
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
   const projectStyle = s => Object.fromEntries(['backupFormat','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
-  const empty = () => ({schema:2, company:'', floors:[], networks:[]});
+  const empty = () => ({schema:2, company:'', floors:[], networks:[],deviceTypes:[]});
   const devices = s => s.floors.flatMap(f => f.racks.flatMap(r => r.devices.map(d => ({f,r,d}))));
   const ports = s => devices(s).flatMap(x => x.d.portList.map(p => ({...x,p})));
   const networks = s => Array.isArray(s.networks)?s.networks:[];
@@ -36,6 +37,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       for(const [key,value] of Object.entries(s.serviceColors))assert(Object.hasOwn(services,key)&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value),tr('Գույնը պետք է լինի HEX ձևաչափով'));
     }
     assert(s.floors.length<=200,tr('Առավելագույնը 200 հարկ'));
+    if(s.deviceTypes!==undefined){
+      assert(Array.isArray(s.deviceTypes)&&s.deviceTypes.length<=100,tr('Սարքերի տեսակների ցանկը սխալ է'));
+      const typeIds=new Set(['panel','switch']);
+      for(const type of s.deviceTypes){assert(type&&typeof type==='object',tr('Սարքի տեսակի ձևաչափը սխալ է'));assert(typeof type.id==='string'&&/^[a-z][\w-]{1,39}$/.test(type.id)&&!typeIds.has(type.id),tr('Սարքի տեսակի ID-ն սխալ է'));assert(typeof type.name==='string'&&type.name.trim().length>0&&type.name.length<=80,tr('Սարքի տեսակի անվանումը սխալ է'));typeIds.add(type.id);}
+    }
     for(const field of ['serviceLabels','statusLabels','statusColors'])if(s[field]!==undefined){
       assert(s[field]&&typeof s[field]==='object'&&!Array.isArray(s[field]),tr('Տվյալների ձևաչափը սխալ է'));
       for(const [key,value]of Object.entries(s[field])){
@@ -58,7 +64,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(Array.isArray(r.devices)&&r.devices.length<=60,tr('Սարքերի ցանկը սխալ է'));uniqueNames(r.devices);
         const used=new Set();
         for(const d of r.devices) {
-          id(d.id);name(d.name);assert(['panel','switch'].includes(d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);if(d.modelType!==undefined)assert(typeof d.modelType==='string'&&['','poe','poe-plus','none'].includes(d.modelType),tr('Սվիչի մոդելի տեսակը սխալ է'));text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
+          id(d.id);name(d.name);assert(deviceTypes(s).some(([key])=>key===d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);if(d.modelType!==undefined)assert(typeof d.modelType==='string'&&['','poe','poe-plus','none'].includes(d.modelType),tr('Սվիչի մոդելի տեսակը սխալ է'));text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
           integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
           for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
           assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);
@@ -119,5 +125,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
   }
-  return {empty,validate,devices,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,devices,deviceTypes,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
