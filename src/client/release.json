@@ -1,11 +1,12 @@
 {
-  "version": "2.4.9",
+  "version": "2.5.0",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
       "Կարգավորումներում ավելացվել է «Reset · Մաքրել հավելվածը» կոճակը։",
       "Հաստատելուց հետո մաքրվում են այս բրաուզերի տեղային բազան, պատմությունը, չպահված պատճենները և կարգավորումները։",
-      "Cloud-ի, Google Drive-ի և սերվերի բազաները պահպանվում են։ Անցանց մաքրման դեպքում մուտքը փակվում է ինտերնետը վերականգնվելիս։"
+      "Cloud-ի, Google Drive-ի և սերվերի բազաները պահպանվում են։ Անցանց մաքրման դեպքում մուտքը փակվում է ինտերնետը վերականգնվելիս։",
+      "Cloud-ում փոփոխությունները հիմա ուղիղ փոխանցվում են բոլոր միացած օգտատերերին, և վերևում երևում է միացած մարդկանց քանակը։"
     ]
   },
   "en": {
@@ -13,7 +14,8 @@
     "changes": [
       "Added Reset app in Settings.",
       "After confirmation, clears this browser’s local database, history, unsaved copies, and settings.",
-      "Cloud, Google Drive, and server databases stay intact. Offline resets finish signing out when the internet returns."
+      "Cloud, Google Drive, and server databases stay intact. Offline resets finish signing out when the internet returns.",
+      "Cloud changes are now delivered live to all connected users, and the number of connected people is shown in the header."
     ]
   },
   "ru": {
@@ -21,7 +23,8 @@
     "changes": [
       "В настройках добавлена кнопка «Сбросить приложение».",
       "После подтверждения очищаются локальная база, история, несохранённые копии и настройки этого браузера.",
-      "Базы в облаке, Google Диске и на сервере сохраняются. При сбросе без интернета выход завершается после восстановления подключения."
+      "Базы в облаке, Google Диске и на сервере сохраняются. При сбросе без интернета выход завершается после восстановления подключения.",
+      "Изменения в cloud теперь передаются в реальном времени всем подключённым пользователям, а их количество отображается в верхней панели."
     ]
   }
 }

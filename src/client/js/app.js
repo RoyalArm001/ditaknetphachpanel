@@ -5,6 +5,7 @@ const D=RackDomain, $=s=>document.querySelector(s), uid=()=>crypto.randomUUID?cr
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
 let autoSaveEnabled=true,resetInProgress=false;
+let liveSource=null,liveClientId='';
 try{autoSaveEnabled=localStorage.getItem('rackmap-auto-save')!=='false';}catch{}
 let filters={query:'',floor:'',rack:'',status:''},page=0;
 const localHost=/^(localhost$|127\.0\.0\.1$|\[::1\]$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
@@ -46,6 +47,15 @@ let selectedPortId='',selectedPortIds=new Set(),portDraft=null,portDraftDirty=fa
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
 const recoveryKey=()=>accountMode()?'rackmap-account-'+accountUserId+'-'+activeCompanyId:personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
+function liveClient(){if(liveClientId)return liveClientId;try{liveClientId=localStorage.getItem('rackmap-live-client')||'';if(!/^[a-zA-Z0-9_-]{16,80}$/.test(liveClientId)){liveClientId=crypto.randomUUID().replace(/-/g,'');localStorage.setItem('rackmap-live-client',liveClientId);}}catch{liveClientId=crypto.randomUUID().replace(/-/g,'');}return liveClientId;}
+function stopLive(){liveSource?.close();liveSource=null;const badge=$('#onlineCount');if(badge){badge.hidden=true;badge.textContent='';}}
+function startLive(){
+  stopLive();if(personal()||!ready||typeof EventSource==='undefined')return;
+  const source=new EventSource(companyUrl('/api/live?client='+encodeURIComponent(liveClient())));
+  liveSource=source;
+  source.onmessage=event=>{try{const payload=JSON.parse(event.data),badge=$('#onlineCount');if(badge){badge.hidden=false;badge.textContent=tr`Միացած՝ ${payload.online}`;}companies=payload.companies||companies;renderCompanySelect();const current=companies.find(x=>x.id===activeCompanyId);if(current&&current.revision!==revision)refreshCurrentDatabase();}catch{}};
+  source.onerror=()=>{if(liveSource===source){const badge=$('#onlineCount');if(badge){badge.hidden=true;badge.textContent='';}}};
+}
 function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
@@ -584,6 +594,7 @@ async function backupAll(){
   download(await res.blob(),`RackMap-all-companies-${new Date().toISOString().slice(0,10)}.${cloudMode?'json':'sqlite'}`);toast(tr('Բոլոր ընկերությունների պատճենը պատրաստ է'));
 }
 async function switchStorage(mode){
+  stopLive();
   onboardingChoice=mode;onboardingVisible=false;
   try{localStorage.setItem('rackmap-workspace-choice',mode);}catch{}
   if(modeBusy)return;if(storageMode===mode){if(!ready)await init();return;}
@@ -760,7 +771,7 @@ async function init(){
     if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=false;}
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';
-    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
+    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();startLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
       $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ԻՄ ՓԱՉ · ՊԱՀՊԱՆՈՒՄ</div><h1>${personal()?tr('Այս բրաուզերում պահպանումը չբացվեց'):tr('Թիմային բազան այս պահին անհասանելի է')}</h1><p>${personal()?tr('Ստուգեք բրաուզերի պահպանման թույլտվությունը և ազատ տեղը։ Գործող տվյալները չեն ջնջվել։'):tr('Կարող եք կրկին փորձել կամ աշխատել այս սարքի անձնական բազայով։ Թիմի տվյալները մնում են cloud-ում։')}</p><div class="actions"><button class="button primary" data-action="retry">Կրկին փորձել</button>${personal()?'':tr('<button class="button" data-action="personal-mode">Բացել անձնական բազան</button>')}</div><details style="margin-top:20px"><summary>Ստուգման մանրամասներ</summary><p>${esc(tr(e.message))}</p></details></section>`;
     }
 

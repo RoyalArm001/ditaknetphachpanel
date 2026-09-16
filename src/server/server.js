@@ -28,6 +28,7 @@ function createApp(options={}) {
   const authRequired=cloud||!!pinAuth;
   const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
+  const {createPresence,streamLive}=require('./live'),presence=createPresence(store.pool);
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
     if(require('./client-session').clearClientSession(req,res))return;
@@ -39,7 +40,7 @@ function createApp(options={}) {
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
       if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,googleClientId:process.env.GOOGLE_DRIVE_CLIENT_ID||'',maxStateBytes:cloud?4*1024*1024:24*1024*1024});
-      let requestStore=store;
+      let requestStore=store,actorId='';
       const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
       if(accountSpace&&url.pathname.startsWith('/api/')){
         if(!accounts||!personalAuth)return json(res,503,{error:tr('Անձնական cloud-ը հասանելի չէ')});
@@ -68,7 +69,7 @@ function createApp(options={}) {
         if(!user)return json(res,401,{error:tr('Մուտք գործեք ձեր անձնական հաշվով')});
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
         if(req.method==='POST'&&url.pathname==='/api/account/pin/new')return json(res,200,{pin:await accounts.provision(user,true)});
-        requestStore=accounts.scope(user.id);
+        actorId='account:'+user.id;requestStore=accounts.scope(user.id);
       }else if(authRequired&&url.pathname.startsWith('/api/')){
         if(['POST','PUT','DELETE'].includes(req.method)&&req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(url.pathname==='/api/auth/pin'&&req.method==='POST'&&pinAuth){
@@ -85,9 +86,21 @@ function createApp(options={}) {
         if(url.pathname==='/api/auth/logout'&&req.method==='POST'){auth.clear(res);return json(res,200,{ok:true});}
         const user=await auth.authenticate(req,res);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք Իմ փաչ-ի ձեր հաշվով')});
+        actorId=(user.method==='pin'?'pin:':'account:')+user.id;
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
       }
 
+      if(url.pathname==='/api/live'||url.pathname==='/api/live/leave'){
+        const client=url.searchParams.get('client')||'';
+        if(!/^[a-zA-Z0-9_-]{16,80}$/.test(client))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+        const scope=accountSpace?'personal:'+actorId:'team',actor=actorId||'device:'+client;
+        if(url.pathname==='/api/live/leave'&&req.method==='POST'){
+          if(req.headers.origin&&!['http://'+req.headers.host,'https://'+req.headers.host].includes(req.headers.origin))return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
+          await presence.leave(scope,actor,client);return json(res,200,{ok:true});
+        }
+        if(url.pathname==='/api/live'&&req.method==='GET')return streamLive(req,res,{presence,scope,actor,client,store:requestStore});
+        return json(res,405,{error:tr('Գործողությունը չի գտնվել')});
+      }
       const companyId=url.searchParams.get('company')||'default';
       const read=id=>requestStore.read(id),listCompanies=()=>requestStore.list();
       if(req.method==='GET'&&url.pathname==='/api/storage')return json(res,200,{directory:requestStore.directory,database:requestStore.database,backups:requestStore.backups,cloud});

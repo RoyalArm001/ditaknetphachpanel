@@ -14,7 +14,7 @@ async function main(){
     const keys=await Promise.all([...values].map(async(pin,i)=>({id:'pin-'+randomUUID(),label:'PIN '+(i+1),pin,hash:await hashPin(pin)})));
     const directory=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'RackMap');fs.mkdirSync(directory,{recursive:true});
     const stamp=new Date().toISOString().replace(/[:.]/g,'-'),file=path.join(directory,'MyPatch-cloud-PINs-'+stamp+'.json'),textFile=file.replace(/\.json$/,'.txt');
-    const record={site:'https://mypro.smarttechllc.am/',activated:false,createdAt:new Date().toISOString(),keys:keys.map(({id,label,pin})=>({id,label,pin}))};
+    const record={site:'https://patch.ditaknet.com/',activated:false,createdAt:new Date().toISOString(),keys:keys.map(({id,label,pin})=>({id,label,pin}))};
     fs.writeFileSync(file,JSON.stringify(record,null,2),{flag:'wx',mode:0o600});
     client=await pool.connect();await client.query('BEGIN');
     await client.query('INSERT INTO rackmap.pin_session_config(singleton,secret) VALUES(true,$1) ON CONFLICT(singleton) DO NOTHING',[randomBytes(32).toString('hex')]);
