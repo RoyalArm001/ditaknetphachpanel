@@ -87,7 +87,7 @@ test('opening the confirmation does not reset data; confirming resets without sa
   const source=fs.readFileSync(require.resolve('../src/client/js/app'),'utf8');
   const code=source.slice(source.indexOf('function pauseForReset()'),source.indexOf("window.addEventListener('storage'"));
   let submit,resets=0,redirects=0,body='';
-  const context={resetInProgress:false,ready:true,modeBusy:false,dirty:true,portDraftDirty:true,portDraft:{},saving:null,saveTimer:1,portTimer:2,clearTimeout(){},
+  const context={resetInProgress:false,ready:true,modeBusy:false,dirty:true,portDraftDirty:true,portDraft:{},saving:null,saveTimer:1,portTimer:2,clearTimeout(){},stopLive(){},
     modal:(title,html,callback)=>{body=html;submit=callback;},tr:x=>x,$:()=>({}),
     AppReset:{reset:async()=>resets++},D:{empty:()=>({})},location:{pathname:'/',replace:()=>redirects++},save(){throw new Error('Reset must never save to cloud');}};
   vm.createContext(context);vm.runInContext(code,context);context.resetAppDialog();

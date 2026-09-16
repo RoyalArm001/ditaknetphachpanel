@@ -19,11 +19,16 @@ function openCloudStore(options={}){
       D.validate(state);const client=await pool.connect();
       try{await client.query('BEGIN');const {rows}=await client.query('SELECT revision,body FROM rackmap.companies WHERE id=$1 FOR UPDATE',[id]);const current=rows[0];
         if(!current)throw new Error('Company not found');
-        if(Number(current.revision)!==revision){await client.query('ROLLBACK');return {conflict:true,revision:Number(current.revision)};}
+        let merged=false;
+        if(Number(current.revision)!==revision){
+          const base=(await client.query('SELECT body FROM rackmap.company_history WHERE company_id=$1 AND revision=$2',[id,revision])).rows[0];
+          try{if(!base)throw new Error('Missing base');state=require('../shared/merge-state').merge(base.body,state,current.body);D.validate(state);merged=true;revision=Number(current.revision);}
+          catch{await client.query('ROLLBACK');return {conflict:true,revision:Number(current.revision)};}
+        }
         await client.query('INSERT INTO rackmap.company_history(company_id,revision,body) VALUES($1,$2,$3)',[id,revision,JSON.stringify(current.body)]);
         await client.query('DELETE FROM rackmap.company_history WHERE company_id=$1 AND revision < $2',[id,revision-49]);
         await client.query('UPDATE rackmap.companies SET revision=$2,body=$3 WHERE id=$1',[id,revision+1,JSON.stringify(state)]);
-        await client.query('COMMIT');return {revision:revision+1};
+        await client.query('COMMIT');return {revision:revision+1,...(merged?{state}: {})};
       }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
     },
     history:async id=>(await pool.query('SELECT revision,saved_at FROM rackmap.company_history WHERE company_id=$1 ORDER BY revision DESC',[id])).rows.map(x=>({revision:Number(x.revision),saved_at:x.saved_at})),

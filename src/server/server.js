@@ -98,7 +98,7 @@ function createApp(options={}) {
           if(req.headers.origin&&!['http://'+req.headers.host,'https://'+req.headers.host].includes(req.headers.origin))return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
           await presence.leave(scope,actor,client);return json(res,200,{ok:true});
         }
-        if(url.pathname==='/api/live'&&req.method==='GET')return streamLive(req,res,{presence,scope,actor,client,store:requestStore});
+        if(url.pathname==='/api/live'&&req.method==='GET')return await streamLive(req,res,{presence,scope,actor,client,store:requestStore});
         return json(res,405,{error:tr('Գործողությունը չի գտնվել')});
       }
       const companyId=url.searchParams.get('company')||'default';

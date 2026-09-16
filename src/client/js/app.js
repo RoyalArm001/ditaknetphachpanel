@@ -4,8 +4,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
 const D=RackDomain, $=s=>document.querySelector(s), uid=()=>crypto.randomUUID?crypto.randomUUID():`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
-let autoSaveEnabled=true,resetInProgress=false;
-let liveSource=null,liveClientId='';
+let autoSaveEnabled=true,resetInProgress=false,mergedNeedsRender=false;
 try{autoSaveEnabled=localStorage.getItem('rackmap-auto-save')!=='false';}catch{}
 let filters={query:'',floor:'',rack:'',status:''},page=0;
 const localHost=/^(localhost$|127\.0\.0\.1$|\[::1\]$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
@@ -47,15 +46,6 @@ let selectedPortId='',selectedPortIds=new Set(),portDraft=null,portDraftDirty=fa
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
 const recoveryKey=()=>accountMode()?'rackmap-account-'+accountUserId+'-'+activeCompanyId:personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
-function liveClient(){if(liveClientId)return liveClientId;try{liveClientId=localStorage.getItem('rackmap-live-client')||'';if(!/^[a-zA-Z0-9_-]{16,80}$/.test(liveClientId)){liveClientId=crypto.randomUUID().replace(/-/g,'');localStorage.setItem('rackmap-live-client',liveClientId);}}catch{liveClientId=crypto.randomUUID().replace(/-/g,'');}return liveClientId;}
-function stopLive(){liveSource?.close();liveSource=null;const badge=$('#onlineCount');if(badge){badge.hidden=true;badge.textContent='';}}
-function startLive(){
-  stopLive();if(personal()||!ready||typeof EventSource==='undefined')return;
-  const source=new EventSource(companyUrl('/api/live?client='+encodeURIComponent(liveClient())));
-  liveSource=source;
-  source.onmessage=event=>{try{const payload=JSON.parse(event.data),badge=$('#onlineCount');if(badge){badge.hidden=false;badge.textContent=tr`Միացած՝ ${payload.online}`;}companies=payload.companies||companies;renderCompanySelect();const current=companies.find(x=>x.id===activeCompanyId);if(current&&current.revision!==revision)refreshCurrentDatabase();}catch{}};
-  source.onerror=()=>{if(liveSource===source){const badge=$('#onlineCount');if(badge){badge.hidden=true;badge.textContent='';}}};
-}
 function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
@@ -122,9 +112,9 @@ async function save(){
   clearTimeout(saveTimer);
   saving=(async()=>{
     while(dirty&&!resetInProgress){
-      dirty=false;status(tr('Պահպանվում է…'));const body=JSON.stringify({state,revision});
+      dirty=false;status(tr('Պահպանվում է…'));const submitted=structuredClone(state),body=JSON.stringify({state:submitted,revision});
       if(new Blob([body]).size>maxStateBytes){dirty=true;status(tr('Տվյալների չափը գերազանցում է պահպանման սահմանը'),true);recovery();banner(tr('Նվազեցրեք լուսանկարների չափը կամ ներբեռնեք JSON պատճենը։'));return false;}
-      try{const result=await api('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body});revision=result.revision;}
+      try{const result=await api('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body});if(result.state){state=RackMerge.merge(submitted,state,result.state);D.validate(state);mergedNeedsRender=true;}revision=result.revision;}
       catch(e){dirty=true;conflict=e.code===409;status(tr('Չի պահպանվել'),true);recovery();banner(e.message);return false;}
     }
     status(personal()?tr('Պահված է սարքում'):tr('Պահված է'));$('#connectionBanner').hidden=true;
@@ -139,6 +129,7 @@ function render(){
   for(const key of Object.keys(D.statuses))document.documentElement.style.setProperty('--'+key,D.statusColor(state,key));
   document.body.classList.remove('login-view');
   sceneController?.destroy();sceneController=null;
+  $('#storageModeLabel').textContent=personal()?tr('Այս սարքում · առանձին բազա'):accountMode()?tr('Անձնական cloud'):tr('Ընդհանուր cloud · թիմային բազա');
   $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');$('#breadcrumb').textContent=viewNames[view];
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
@@ -152,7 +143,7 @@ function renderSetup(){
 function renderWelcome(){
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Վերականգնման PIN-ով'),'account-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
+  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնման PIN-ով'),'account-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
   $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div><input id="welcomeImport" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
   $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
 }
@@ -166,13 +157,7 @@ function recoverAccountDialog(){
       response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       result=await response.json();
       if(!response.ok)throw new Error(result.error);
-      const cloudStateResponse=await fetch('/api/state?company=default&lang='+(globalThis.RackI18n?.language||'hy'));
-      const cloudState=await cloudStateResponse.json();
-      if(!cloudStateResponse.ok)throw new Error(cloudState.error||tr('Չհաջողվեց բեռնել վերականգնված բազան'));
-      D.validate(cloudState.state);
-      const localState=await PersonalStore.request('/api/state?company=default');
-      await PersonalStore.request('/api/state?company=default',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:cloudState.state,revision:localState.revision})});
-      storageMode='personal';onboardingChoice='personal';onboardingVisible=false;accountUserId='';accountReadOnly=false;
+      storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
       rememberWorkspace();
       activeCompanyId='default';state=D.empty();dirty=false;conflict=false;portDraftDirty=false;portDraft=null;selectedPortId='';
       const teamUrl=new URL(location.href);teamUrl.hash='overview';teamUrl.searchParams.delete('company');history.replaceState(null,'',teamUrl);
@@ -342,7 +327,7 @@ function modal(title,body,onSubmit,extras=''){
   dlg.showModal();
 }
 function pauseForReset(){
-  resetInProgress=true;ready=false;modeBusy=true;
+  stopLive();resetInProgress=true;ready=false;modeBusy=true;
   clearTimeout(saveTimer);clearTimeout(portTimer);
 }
 function resetAppDialog(){
@@ -657,6 +642,7 @@ const actions={
     rows.lastElementChild.querySelector('input[type=text]').focus();
   },
   'style-service-remove':(id,el)=>el.closest('[data-service-style]').remove(),
+  'team-login':async()=>{if(ready&&!await save())return;onboardingChoice='shared';storageMode='shared';onboardingVisible=false;rememberWorkspace();init();},
   'app-reset':resetAppDialog,
   'project-style':()=>modal(tr('Նախագծի անվանումներ և գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
   'device-types':deviceTypesModal,
@@ -771,7 +757,7 @@ async function init(){
     if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=false;}
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';
-    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();startLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
+    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();maintainLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
       $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ԻՄ ՓԱՉ · ՊԱՀՊԱՆՈՒՄ</div><h1>${personal()?tr('Այս բրաուզերում պահպանումը չբացվեց'):tr('Թիմային բազան այս պահին անհասանելի է')}</h1><p>${personal()?tr('Ստուգեք բրաուզերի պահպանման թույլտվությունը և ազատ տեղը։ Գործող տվյալները չեն ջնջվել։'):tr('Կարող եք կրկին փորձել կամ աշխատել այս սարքի անձնական բազայով։ Թիմի տվյալները մնում են cloud-ում։')}</p><div class="actions"><button class="button primary" data-action="retry">Կրկին փորձել</button>${personal()?'':tr('<button class="button" data-action="personal-mode">Բացել անձնական բազան</button>')}</div><details style="margin-top:20px"><summary>Ստուգման մանրամասներ</summary><p>${esc(tr(e.message))}</p></details></section>`;
     }
 
@@ -810,6 +796,38 @@ document.addEventListener('keydown',e=>{
   }
 });
 actions.retry=init;
+let liveConnection=null,liveUrl='',liveConnected=false,liveRevision=null,liveOnline=0;
+const liveSessionId=uid();
+function stopLive(){
+  liveConnection?.close();liveConnection=null;liveConnected=false;
+  if(liveUrl){const leave=new URL(liveUrl,location.href);leave.pathname='/api/live/leave';navigator.sendBeacon?.(leave.pathname+leave.search,new Blob(['{}'],{type:'application/json'}));}
+  liveUrl='';
+}
+function maintainLive(){
+  const label=$('#onlineCount');
+  if(!ready||personal()||resetInProgress||document.visibilityState==='hidden'){
+    stopLive();if(label)label.hidden=true;return;
+  }
+  const url=companyUrl('/api/live?client='+encodeURIComponent(liveSessionId));
+  if(url!==liveUrl){
+    stopLive();liveUrl=url;liveRevision=null;
+    liveConnection=RackLive.connect(url,snapshot=>{
+      if(liveUrl!==url)return;
+      liveOnline=snapshot.online;companies=snapshot.companies;
+      if(document.activeElement!==$('#companySelect'))renderCompanySelect();
+      liveRevision=companies.find(x=>x.id===activeCompanyId)?.revision;
+      if(liveRevision!==undefined&&liveRevision!==revision)refreshCurrentDatabase();
+      updateLiveLabel();
+    },connected=>{if(liveUrl!==url)return;liveConnected=connected;updateLiveLabel();});
+  }
+  updateLiveLabel();
+}
+function updateLiveLabel(){
+  const label=$('#onlineCount');if(!label)return;
+  label.hidden=!ready||personal();label.textContent=liveConnected?tr('LIVE · Միացած՝ ')+liveOnline:tr('Cloud · Կապը վերականգնվում է…');
+}
+window.addEventListener('pagehide',stopLive);
+document.addEventListener('visibilitychange',maintainLive);
 let refreshInFlight=false;
 async function refreshCurrentDatabase(){
   const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
@@ -819,13 +837,13 @@ async function refreshCurrentDatabase(){
   refreshInFlight=true;
   try{
     const head=await api('/api/revision');if(!current())return;
-    if(head.revision===revision){status(tr('Պահված է'));await refreshCompanies();return;}
+    if(head.revision===revision){if(mergedNeedsRender){render();mergedNeedsRender=false;}status(tr('Պահված է'));await refreshCompanies();return;}
     const data=await api('/api/state');if(!current())return;
     D.validate(data.state);state=data.state;revision=data.revision;render();status(tr('Թարմացված է'));
   }catch{if(current())status(tr('Կապը ընդհատված է'),true);}
   finally{refreshInFlight=false;}
 }
-setInterval(refreshCurrentDatabase,5000);
+setInterval(()=>{maintainLive();if(personal()||!liveConnected||liveRevision!==revision||mergedNeedsRender)refreshCurrentDatabase();},1000);
 window.addEventListener('online',refreshCurrentDatabase);
 window.addEventListener('focus',refreshCurrentDatabase);
 window.addEventListener('pageshow',refreshCurrentDatabase);

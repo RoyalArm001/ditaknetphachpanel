@@ -1,30 +1,27 @@
 {
-  "version": "2.5.0",
+  "version": "2.5.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Կարգավորումներում ավելացվել է «Reset · Մաքրել հավելվածը» կոճակը։",
-      "Հաստատելուց հետո մաքրվում են այս բրաուզերի տեղային բազան, պատմությունը, չպահված պատճենները և կարգավորումները։",
-      "Cloud-ի, Google Drive-ի և սերվերի բազաները պահպանվում են։ Անցանց մաքրման դեպքում մուտքը փակվում է ինտերնետը վերականգնվելիս։",
-      "Cloud-ում փոփոխությունները հիմա ուղիղ փոխանցվում են բոլոր միացած օգտատերերին, և վերևում երևում է միացած մարդկանց քանակը։"
+      "Թիմային PIN-ը բացում է ընդհանուր cloud բազան՝ բոլոր նախագծերով, առանց տեղային պատճենի անցնելու։",
+      "Cloud-ի փոփոխությունները կենդանի փոխանցվում են միացած սարքերին, իսկ վերևում երևում են աշխատանքի ռեժիմն ու միացածների քանակը։",
+      "Տարբեր դաշտերի զուգահեռ փոփոխությունները միավորվում են։ Նույն դաշտի հակասող փոփոխության դեպքում աշխատանքը չի վերագրվում լուռ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added Reset app in Settings.",
-      "After confirmation, clears this browser’s local database, history, unsaved copies, and settings.",
-      "Cloud, Google Drive, and server databases stay intact. Offline resets finish signing out when the internet returns.",
-      "Cloud changes are now delivered live to all connected users, and the number of connected people is shown in the header."
+      "Team PINs open the shared cloud with all projects instead of creating a local copy.",
+      "Cloud changes update connected devices live. The current storage mode and connected-user count appear at the top.",
+      "Concurrent changes to different fields are merged. Conflicting edits to the same field are not silently overwritten."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "В настройках добавлена кнопка «Сбросить приложение».",
-      "После подтверждения очищаются локальная база, история, несохранённые копии и настройки этого браузера.",
-      "Базы в облаке, Google Диске и на сервере сохраняются. При сбросе без интернета выход завершается после восстановления подключения.",
-      "Изменения в cloud теперь передаются в реальном времени всем подключённым пользователям, а их количество отображается в верхней панели."
+      "Командный PIN открывает общую облачную базу со всеми проектами вместо создания локальной копии.",
+      "Облачные изменения передаются подключённым устройствам. Вверху показаны режим хранения и количество подключённых пользователей.",
+      "Одновременные изменения разных полей объединяются. Конфликтующие изменения одного поля не перезаписываются молча."
     ]
   }
 }

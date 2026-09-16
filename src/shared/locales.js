@@ -2064,5 +2064,11 @@
   "Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը": ["I confirm clearing local data on this device","Подтверждаю удаление локальных данных на этом устройстве"],
   "Մաքրել և սկսել նորից": ["Clear and start again","Очистить и начать заново"],
   "Հավելվածը մաքրվում է…": ["Resetting app…","Сброс приложения…"],
-  "Մուտքը մաքրելու համար միացեք ինտերնետին և կրկին փորձեք։": ["Connect to the internet to clear the previous sign-in, then try again.","Подключитесь к интернету, чтобы завершить выход, и повторите попытку."]
+  "Մուտքը մաքրելու համար միացեք ինտերնետին և կրկին փորձեք։": ["Connect to the internet to clear the previous sign-in, then try again.","Подключитесь к интернету, чтобы завершить выход, и повторите попытку."],
+  "Բացել ընդհանուր cloud-ը PIN-ով": ["Open shared cloud with PIN","Открыть общее облако по PIN"],
+  "Այս սարքում · առանձին բազա": ["On this device · separate database","На этом устройстве · отдельная база"],
+  "Անձնական cloud": ["Personal cloud","Личное облако"],
+  "Ընդհանուր cloud · թիմային բազա": ["Shared cloud · team database","Общее облако · база команды"],
+  "LIVE · Միացած՝ ": ["LIVE · Connected: ","LIVE · Подключено: "],
+  "Cloud · Կապը վերականգնվում է…": ["Cloud · Reconnecting…","Облако · Восстановление связи…"]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

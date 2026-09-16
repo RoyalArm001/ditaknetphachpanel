@@ -15,11 +15,16 @@ function accountStore(pool,userId){
       try{await client.query('BEGIN');
         const current=(await client.query('SELECT revision,body FROM rackmap.personal_companies WHERE user_id=$1 AND id=$2 FOR UPDATE',[userId,id])).rows[0];
         if(!current)throw new Error('Company not found');
-        if(current.revision!==revision){await client.query('ROLLBACK');return {conflict:true,revision:current.revision};}
+        let merged=false;
+        if(current.revision!==revision){
+          const base=(await client.query('SELECT body FROM rackmap.personal_history WHERE user_id=$1 AND company_id=$2 AND revision=$3',[userId,id,revision])).rows[0];
+          try{if(!base)throw new Error('Missing base');state=require('../shared/merge-state').merge(base.body,state,current.body);D.validate(state);merged=true;revision=current.revision;}
+          catch{await client.query('ROLLBACK');return {conflict:true,revision:current.revision};}
+        }
         await client.query('INSERT INTO rackmap.personal_history(user_id,company_id,revision,body) VALUES($1,$2,$3,$4)',[userId,id,revision,JSON.stringify(current.body)]);
         await client.query('DELETE FROM rackmap.personal_history WHERE user_id=$1 AND company_id=$2 AND revision<$3',[userId,id,revision-49]);
         await client.query('UPDATE rackmap.personal_companies SET body=$3,revision=$4 WHERE user_id=$1 AND id=$2',[userId,id,JSON.stringify(state),revision+1]);
-        await client.query('COMMIT');return {revision:revision+1};
+        await client.query('COMMIT');return {revision:revision+1,...(merged?{state}: {})};
       }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
     },
     history:async id=>(await query('SELECT revision,saved_at FROM rackmap.personal_history WHERE user_id=$1 AND company_id=$2 ORDER BY revision DESC',[id])).rows,
