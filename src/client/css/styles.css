@@ -159,3 +159,6 @@ body.right-collapsed .rack-side{display:none}
 
 .service-style-row{grid-template-columns:minmax(0,1fr) 72px auto}
 @media(max-width:480px){.service-style-row{grid-template-columns:minmax(0,1fr) 72px}.service-style-row>button{grid-column:1 / -1;justify-self:end}}
+
+#storageModeLabel{max-width:240px;overflow-wrap:anywhere}
+@media(max-width:760px){.topbar{flex-wrap:wrap}#storageModeLabel{order:3;flex:1 0 100%;max-width:none;font-size:11px}.topbar .save-tools{flex-wrap:wrap}.online-count{font-size:10px}}
