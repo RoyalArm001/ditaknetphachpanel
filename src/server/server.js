@@ -30,6 +30,7 @@ function createApp(options={}) {
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   const server=http.createServer(async(req,res)=>{
+    if(require('./client-session').clearClientSession(req,res))return;
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
     res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try{

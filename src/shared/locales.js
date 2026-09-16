@@ -2052,5 +2052,13 @@
   "Ցանցի տեսակի ID-ն սխալ է": ["Invalid network type ID","Некорректный ID типа сети"],
   "Ցանցի տեսակի անվանումը պարտադիր է": ["Network type name is required","Название типа сети обязательно"],
   "Ցանցերի տեսակների անվանումները պետք է տարբեր լինեն": ["Network type names must be unique","Названия типов сетей должны быть уникальными"],
-  "Առավելագույնը 100 նոր ցանցի տեսակ": ["You can add up to 100 custom network types","Можно добавить до 100 собственных типов сетей"]
+  "Առավելագույնը 100 նոր ցանցի տեսակ": ["You can add up to 100 custom network types","Можно добавить до 100 собственных типов сетей"],
+  "Reset · Մաքրել հավելվածը": ["Reset app","Сбросить приложение"],
+  "Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի և Google Drive-ի տվյալները չեն ջնջվում։": ["Clear only this browser’s data and sign-in. Cloud and Google Drive data will not be deleted.","Очистить только данные и вход в этом браузере. Данные в облаке и Google Диске не будут удалены."],
+  "Կջնջվեն այս բրաուզերի բոլոր տեղային ընկերությունները, պատմությունը, չպահված փոփոխություններն ու կարգավորումները։ Նախ ներբեռնեք անհրաժեշտ պատճենները։": ["All local companies, history, unsaved changes, and settings in this browser will be deleted. Download any backups you need first.","Все локальные компании, история, несохранённые изменения и настройки этого браузера будут удалены. Сначала скачайте нужные резервные копии."],
+  "Cloud-ի, Google Drive-ի և սերվերի բազաները չեն փոխվի։ Անցանց դեպքում մուտքը կփակվի ինտերնետը վերականգնվելիս։": ["Cloud, Google Drive, and server databases will remain unchanged. If offline, sign-out will finish when the internet connection returns.","Данные в облаке, Google Диске и на сервере останутся без изменений. Без интернета выход будет завершён после восстановления подключения."],
+  "Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը": ["I confirm clearing local data on this device","Подтверждаю удаление локальных данных на этом устройстве"],
+  "Մաքրել և սկսել նորից": ["Clear and start again","Очистить и начать заново"],
+  "Հավելվածը մաքրվում է…": ["Resetting app…","Сброс приложения…"],
+  "Մուտքը մաքրելու համար միացեք ինտերնետին և կրկին փորձեք։": ["Connect to the internet to clear the previous sign-in, then try again.","Подключитесь к интернету, чтобы завершить выход, и повторите попытку."]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

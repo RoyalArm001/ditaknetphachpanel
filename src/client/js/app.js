@@ -4,7 +4,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
 const D=RackDomain, $=s=>document.querySelector(s), uid=()=>crypto.randomUUID?crypto.randomUUID():`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
-let autoSaveEnabled=true;
+let autoSaveEnabled=true,resetInProgress=false;
 try{autoSaveEnabled=localStorage.getItem('rackmap-auto-save')!=='false';}catch{}
 let filters={query:'',floor:'',rack:'',status:''},page=0;
 const localHost=/^(localhost$|127\.0\.0\.1$|\[::1\]$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
@@ -101,16 +101,17 @@ const serviceVlan=service=>{
 const header=(title,sub,actions='')=>tr`<div class="page-head"><div><div class="eyebrow">ԻՄ ՓԱՉ / ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ</div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="actions">${actions}</div></div>`;
 function toast(message){message=tr(message);$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
 function status(message,error=false){$('#saveStatus').textContent=message;$('#saveStatus').dataset.error=error;}
-async function api(url,options){if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),{...options,cache:'no-store'});const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
-function recovery(){try{localStorage.setItem(recoveryKey(),JSON.stringify({schema:2,state,revision,portDraft:portDraftDirty?portDraft:null,savedAt:new Date().toISOString()}));}catch{}}
+async function api(url,options){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(!personal()||url.startsWith('/api/auth/'))await AppReset.ensureSessionCleared();if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),{...options,cache:'no-store'});const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
+function recovery(){if(resetInProgress)return;try{localStorage.setItem(recoveryKey(),JSON.stringify({schema:2,state,revision,portDraft:portDraftDirty?portDraft:null,savedAt:new Date().toISOString()}));}catch{}}
 function banner(message){message=tr(message);$('#connectionBanner').hidden=false;$('#connectionBanner').innerHTML=`${esc(message)} <div>${button(tr('Ներբեռնել իմ տվյալները'),'backup','','small')}${button(tr('Կրկին պահել'),'save','','small')}${button(tr('Բեռնել ընդհանուր տարբերակը'),'reload','','small')}</div>`;}
-function scheduleSave(){dirty=true;status(tr('Չպահված փոփոխություններ'));recovery();clearTimeout(saveTimer);if(autoSaveEnabled)saveTimer=setTimeout(()=>save(),500);}
+function scheduleSave(){if(resetInProgress)return;dirty=true;status(tr('Չպահված փոփոխություններ'));recovery();clearTimeout(saveTimer);if(autoSaveEnabled)saveTimer=setTimeout(()=>save(),500);}
 async function save(){
+  if(resetInProgress)return false;
   if(portDraftDirty&&!flushPortEditor())return false;
   if(!ready||conflict)return false;if(saving)return saving;
   clearTimeout(saveTimer);
   saving=(async()=>{
-    while(dirty){
+    while(dirty&&!resetInProgress){
       dirty=false;status(tr('Պահպանվում է…'));const body=JSON.stringify({state,revision});
       if(new Blob([body]).size>maxStateBytes){dirty=true;status(tr('Տվյալների չափը գերազանցում է պահպանման սահմանը'),true);recovery();banner(tr('Նվազեցրեք լուսանկարների չափը կամ ներբեռնեք JSON պատճենը։'));return false;}
       try{const result=await api('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body});revision=result.revision;}
@@ -122,7 +123,7 @@ async function save(){
   })();
   try{return await saving;}finally{saving=null;}
 }
-function commit(fn,redraw=true){if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
+function commit(fn,redraw=true){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
 function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return {view:viewNames[v]?v:'overview',id};}
 function render(){
   for(const key of Object.keys(D.statuses))document.documentElement.style.setProperty('--'+key,D.statusColor(state,key));
@@ -147,6 +148,7 @@ function renderWelcome(){
 }
 function recoverAccountDialog(){
   modal(tr('Վերականգնել իմ ֆայլը'),tr`<p class="hint">Մուտքագրեք միայն PIN կոդը։ Անձնական PIN-ը կբացի ձեր հաշիվը, իսկ թիմային PIN-ը՝ ընդհանուր բազան։</p>${input('pin',tr('PIN կոդ'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="one-time-code"')}`,async fd=>{
+    await AppReset.ensureSessionCleared();
     const body={pin:fd.get('pin')};
     let response=await fetch('/api/account/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     let result=await response.json();
@@ -187,6 +189,7 @@ function renderAccountLogin(method='login'){
     document.querySelectorAll('[data-action="signup-prev"]').forEach(back=>back.onclick=()=>showStep(Math.max(0,step-1)));showStep(0);
   }
   $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button[type="submit"]');b.disabled=true;try{
+    await AppReset.ensureSessionCleared();
     const fd=new FormData(e.target),res=await fetch('/api/account/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(fd))}),result=await res.json();
     if(!res.ok)throw new Error(result.error);
     if(result.confirmationRequired){renderAccountLogin('login');$('#loginForm input[name=email]').value=fd.get('email');$('#loginForm').insertAdjacentHTML('beforebegin','<p class="hint" role="status">'+esc(tr('Հաստատեք էլ․ փոստը, ապա մուտք գործեք։ Առաջին մուտքի ժամանակ կստեղծվեն ձեր անձնական բազան և PIN-ը։'))+'</p>');return;}
@@ -309,6 +312,7 @@ function renderSettings(){
   $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
   const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>${tr('Սարքերի տեսակներ')}</h2><p class="muted">${tr('Ստեղծեք ձեր սեփական սարքի տեսակները, որոնք կհայտնվեն նոր սարք ավելացնելիս։')}</p><div class="actions">${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div></section><section class="panel storage-mode"><h2>Աշխատանքային տարածք</h2><p>${esc(state.company)}</p><div class="actions">${button(tr('Ինչպե՞ս եք ցանկանում աշխատել'),'workspace-choice')}</div></section>`);
+  $('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel"><h2>${tr('Reset · Մաքրել հավելվածը')}</h2><p class="muted">${tr('Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի և Google Drive-ի տվյալները չեն ջնջվում։')}</p>${button(tr('Reset · Մաքրել հավելվածը'),'app-reset','','danger')}</section>`);
   if(!accountReadOnly)$('[data-action=company]').insertAdjacentHTML('afterend',button(tr('Նախագծի անվանումներ և գույներ'),'project-style'));
   if(accountMode()){
     $('.storage-mode h2').textContent=tr('Անձնական · cloud');
@@ -327,6 +331,26 @@ function modal(title,body,onSubmit,extras=''){
   if(onSubmit)$('#modalForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter||e.target.querySelector('button[type=submit]');b.disabled=true;try{await dialogSubmit(new FormData(e.target));dlg.close();toast(tr('Փոփոխությունն ընդունված է'));}catch(err){$('#formError').hidden=false;$('#formError').textContent=tr(err.message);}finally{b.disabled=false;}};
   dlg.showModal();
 }
+function pauseForReset(){
+  resetInProgress=true;ready=false;modeBusy=true;
+  clearTimeout(saveTimer);clearTimeout(portTimer);
+}
+function resetAppDialog(){
+  modal(tr('Reset · Մաքրել հավելվածը'),`<p>${tr('Կջնջվեն այս բրաուզերի բոլոր տեղային ընկերությունները, պատմությունը, չպահված փոփոխություններն ու կարգավորումները։ Նախ ներբեռնեք անհրաժեշտ պատճենները։')}</p><p>${tr('Cloud-ի, Google Drive-ի և սերվերի բազաները չեն փոխվի։ Անցանց դեպքում մուտքը կփակվի ինտերնետը վերականգնվելիս։')}</p><label><input type="checkbox" name="confirmReset" required> ${tr('Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը')}</label>`,async()=>{
+    pauseForReset();
+    if(saving)await saving;
+    await AppReset.reset();
+    dirty=false;portDraftDirty=false;portDraft=null;state=D.empty();
+    location.replace(location.pathname);
+  });
+  $('#modalForm button[type=submit]').textContent=tr('Մաքրել և սկսել նորից');
+  $('#modalForm button[type=submit]').className='button danger';
+}
+window.addEventListener('storage',event=>{
+  if(event.key===AppReset.startedKey&&event.newValue){pauseForReset();toast(tr('Հավելվածը մաքրվում է…'));}
+  if(event.key===AppReset.finishedKey&&event.newValue){dirty=false;portDraftDirty=false;location.replace(location.pathname);}
+});
+window.addEventListener('online',()=>AppReset.ensureSessionCleared().catch(()=>{}));
 function confirmAction(title,description,action){modal(title,`<p>${esc(description)}</p>`,async()=>action());}
 function floorModal(id){const f=state.floors.find(x=>x.id===id);modal(f?tr('Խմբագրել հարկը'):tr('Նոր հարկ'),input('name',tr('Հարկի անվանում'),f?.name||'','text','required maxlength="200"'),fd=>commit(s=>{if(f)s.floors.find(x=>x.id===id).name=fd.get('name').trim();else s.floors.push({id:uid(),name:fd.get('name').trim(),racks:[]});}),f?button(tr('Ջնջել հարկը'),'floor-delete',id,'danger'):'');}
 function rackModal(id,floorId){const found=findRack(id),r=found?.r;modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),found?.f.id||floorId)}${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div>`,fd=>commit(s=>{const target=s.floors.find(f=>f.id===fd.get('floorId'));if(r){let source=s.floors.find(f=>f.racks.some(x=>x.id===id));const edit=source.racks.find(x=>x.id===id);Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});if(source.id!==target.id){source.racks=source.racks.filter(x=>x.id!==id);target.racks.push(edit);}}else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});}),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');$('#preset').onchange=e=>{if(e.target.value)$('#u').value=e.target.value;};}
@@ -571,12 +595,14 @@ async function switchStorage(mode){
   }finally{modeBusy=false;}
 }
 async function connectCloud(){
+  await AppReset.ensureSessionCleared();
   if(!await save())return;
   const res=await fetch('/api/config');if(!res.ok)throw new Error(tr('Cloud կապ չկա'));
   const config=await res.json();
   if(!config.pinEnabled&&config.accountEnabled){await switchStorage('shared');return;}
   if(!config.pinEnabled)throw new Error(tr('Թիմային կոդը դեռ միացված չէ։ Ադմինիստրատորը պետք է կարգավորի cloud PIN-ը։'));
   modal(tr('Միանալ թիմային cloud-ին'),tr('<p>Կոդով մուտքից հետո կբացվի թիմի ընդհանուր բազան։ Անձնական ընկերությունները կմնան այս սարքում։</p>')+input('cloudPin',tr('Թիմային PIN'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" autocomplete="off"'),async fd=>{
+    await AppReset.ensureSessionCleared();
     const response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:fd.get('cloudPin')})});const result=await response.json();if(!response.ok)throw new Error(result.error);
     await switchStorage('shared');
   });
@@ -620,6 +646,7 @@ const actions={
     rows.lastElementChild.querySelector('input[type=text]').focus();
   },
   'style-service-remove':(id,el)=>el.closest('[data-service-style]').remove(),
+  'app-reset':resetAppDialog,
   'project-style':()=>modal(tr('Նախագծի անվանումներ և գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
   'device-types':deviceTypesModal,
   'device-type-delete':id=>confirmAction(tr('Ջնջել սարքի տեսակը'),tr('Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։'),()=>commit(s=>{s.deviceTypes=(s.deviceTypes||[]).filter(x=>x.id!==id);})),
@@ -683,6 +710,7 @@ const actions={
   'history-restore':async id=>{const {state:old}=await api('/api/history/'+id);D.validate(old);confirmAction(tr('Վերականգնել նախորդ տարբերակը'),tr`Տարբերակ ${id}։ Ներկայիս տվյալներն ավտոմատ կպահվեն պատմության մեջ։`,()=>commit(s=>{Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,old);}));}
 };
 document.addEventListener('click',e=>{
+  if(resetInProgress){if(e.target.closest('#modalForm button[type=submit]'))return;e.preventDefault();return;}
   const port=e.target.closest('.mini-port,.port-overview [data-action="port"]');
   if(port&&(e.ctrlKey||e.metaKey)){
     e.preventDefault();
@@ -698,17 +726,18 @@ document.addEventListener('click',e=>{
   const navigation=e.target.closest('a[href^="#"]');
   if(navigation&&window.matchMedia('(max-width:760px)').matches){panelPrefs.left=false;panelPrefs.right=false;document.body.classList.remove('mobile-nav-open');$('.mobile-nav-handle')?.setAttribute('aria-expanded','false');applyPanels();}
   const control=e.target.closest('[data-action]');
-  if(portDraftDirty&&((navigation)||control&&!['panels-close','login-pin','login-account','toggle-left','toggle-right','backup','reload','port-discard','port-clear-confirm','port-clear-cancel'].includes(control.dataset.action))){
+  if(portDraftDirty&&((navigation)||control&&!['app-reset','panels-close','login-pin','login-account','toggle-left','toggle-right','backup','reload','port-discard','port-clear-confirm','port-clear-cancel'].includes(control.dataset.action))){
     if(!flushPortEditor()){e.preventDefault();return;}
   }
   const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const fn=actions[el.dataset.action];if(fn)Promise.resolve().then(()=>fn(el.dataset.id,el)).catch(err=>toast(err.message));});
 document.addEventListener('input',e=>{if(e.target.dataset.filter==='query'){filters.query=e.target.value;page=0;renderResults();}});
 document.addEventListener('change',e=>{if(e.target.name==='name'&&e.target.closest('#modalForm'))rememberNetworkType(e.target.value);if(e.target.id==='companySelect'){switchCompany(e.target.value).catch(err=>{toast(err.message);renderCompanySelect();});return;}const k=e.target.dataset.filter;if(k&&k!=='query'){filters[k]=e.target.value;if(k==='floor'){filters.rack='';const rs=$('[data-filter=rack]');rs.innerHTML=opts([['',tr('Բոլոր ռաքերը')],...racks().filter(x=>!filters.floor||x.f.id===filters.floor).map(x=>[x.r.id,`${x.f.name} / ${x.r.name}`])],'');}page=0;renderResults();}});
 window.addEventListener('hashchange',()=>{if(ready){$('#dialog').close();render();$('#content').scrollTop=0;window.scrollTo(0,0);}});
-window.addEventListener('beforeunload',e=>{if(dirty||saving||portDraftDirty){recovery();e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||saving||portDraftDirty){recovery();e.preventDefault();e.returnValue='';}});
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 window.matchMedia('(max-width:1150px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 async function init(){
+  await AppReset.ensureSessionCleared().catch(()=>{});
   if(location.protocol==='file:'){
     location.replace('https://patch.ditaknet.com/');
     return;

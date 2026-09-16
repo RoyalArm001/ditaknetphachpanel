@@ -50,5 +50,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       throw error(tr('Գործողությունը չի գտնվել'),404);
     });
   }
-  return {request};
+  async function reset(){
+    await transaction(async(companies,history)=>{
+      await get(companies.clear());await get(history.clear());
+    });
+  }
+  return {request,reset};
 })();

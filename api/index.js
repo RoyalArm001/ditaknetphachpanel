@@ -1,6 +1,7 @@
 'use strict';
 let server,pinStore;
 module.exports=async(req,res)=>{
+  if(require('../src/server/client-session').clearClientSession(req,res))return;
   const config=require('../src/server/env-config').publicConfig();
   if(new URL(req.url,'https://localhost').pathname==='/api/config'){
     if(!config.pinEnabled&&!config.setupRequired){
