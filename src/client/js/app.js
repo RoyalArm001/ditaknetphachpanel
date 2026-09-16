@@ -101,7 +101,7 @@ const serviceVlan=service=>{
 const header=(title,sub,actions='')=>tr`<div class="page-head"><div><div class="eyebrow">ԻՄ ՓԱՉ / ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ</div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div><div class="actions">${actions}</div></div>`;
 function toast(message){message=tr(message);$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
 function status(message,error=false){$('#saveStatus').textContent=message;$('#saveStatus').dataset.error=error;}
-async function api(url,options){if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),options);const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
+async function api(url,options){if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),{...options,cache:'no-store'});const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
 function recovery(){try{localStorage.setItem(recoveryKey(),JSON.stringify({schema:2,state,revision,portDraft:portDraftDirty?portDraft:null,savedAt:new Date().toISOString()}));}catch{}}
 function banner(message){message=tr(message);$('#connectionBanner').hidden=false;$('#connectionBanner').innerHTML=`${esc(message)} <div>${button(tr('Ներբեռնել իմ տվյալները'),'backup','','small')}${button(tr('Կրկին պահել'),'save','','small')}${button(tr('Բեռնել ընդհանուր տարբերակը'),'reload','','small')}</div>`;}
 function scheduleSave(){dirty=true;status(tr('Չպահված փոփոխություններ'));recovery();clearTimeout(saveTimer);if(autoSaveEnabled)saveTimer=setTimeout(()=>save(),500);}
@@ -534,7 +534,7 @@ async function switchCompany(id){
   companyBusy=true;$('#content').inert=true;renderCompanySelect();
   try{
     if(!await save())throw new Error(tr('Նախ պահպանեք կամ լուծեք ընթացիկ ընկերության չպահված փոփոխությունները։'));
-    const data=personal()?await PersonalStore.request(companyUrl('/api/state',id)):await (async()=>{const res=await fetch(companyUrl('/api/state',id));const data=await res.json();if(!res.ok)throw new Error(tr(data.error));return data;})();
+    const data=personal()?await PersonalStore.request(companyUrl('/api/state',id)):await (async()=>{const res=await fetch(companyUrl('/api/state',id),{cache:'no-store'});const data=await res.json();if(!res.ok)throw new Error(tr(data.error));return data;})();
     D.validate(data.state);
     activeCompanyId=id;state=data.state;revision=data.revision;dirty=false;conflict=false;selectedPortId='';portDraft=null;portDraftDirty=false;clearTimeout(portTimer);
     filters={query:'',floor:'',rack:'',status:''};page=0;
@@ -770,5 +770,24 @@ document.addEventListener('keydown',e=>{
   }
 });
 actions.retry=init;
-setInterval(async()=>{if(modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||$('#dialog').open||document.querySelector('input:focus,textarea:focus'))return;try{const pollingCompany=activeCompanyId,pollingMode=storageMode;const head=await api('/api/revision');if(modeBusy||pollingMode!==storageMode||companyBusy||pollingCompany!==activeCompanyId)return;if(head.revision===revision){status(tr('Պահված է'));await refreshCompanies();return;}const data=await api('/api/state');if(modeBusy||pollingMode!==storageMode||companyBusy||pollingCompany!==activeCompanyId||dirty||saving||portDraftDirty||$('#dialog').open)return;D.validate(data.state);state=data.state;revision=data.revision;render();status(tr('Թարմացված է'));}catch{status(tr('Կապը ընդհատված է'),true);}},5000);
+let refreshInFlight=false;
+async function refreshCurrentDatabase(){
+  const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
+  if(refreshInFlight||busy()||document.visibilityState==='hidden')return;
+  const pollingCompany=activeCompanyId,pollingMode=storageMode;
+  const current=()=>pollingMode===storageMode&&pollingCompany===activeCompanyId&&!busy();
+  refreshInFlight=true;
+  try{
+    const head=await api('/api/revision');if(!current())return;
+    if(head.revision===revision){status(tr('Պահված է'));await refreshCompanies();return;}
+    const data=await api('/api/state');if(!current())return;
+    D.validate(data.state);state=data.state;revision=data.revision;render();status(tr('Թարմացված է'));
+  }catch{if(current())status(tr('Կապը ընդհատված է'),true);}
+  finally{refreshInFlight=false;}
+}
+setInterval(refreshCurrentDatabase,5000);
+window.addEventListener('online',refreshCurrentDatabase);
+window.addEventListener('focus',refreshCurrentDatabase);
+window.addEventListener('pageshow',refreshCurrentDatabase);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCurrentDatabase();});
 init();

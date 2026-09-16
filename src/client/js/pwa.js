@@ -3,7 +3,7 @@
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
   let installPrompt=null;
-  let registration=null,updateReady=false,updateBusy=false;
+  let registration=null,updateReady=false,updateBusy=false,reloadPending=false,checkingUpdate=false,lastUpdateCheck=0;
   async function protectLocalData(){
     if(!navigator.storage?.persist)return false;
     try{
@@ -63,10 +63,24 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     if(control)control.textContent=updateReady?tr('↻ Թարմացնել հավելվածը'):standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հեռախոսում');
   }
   function hasUnsavedWork(){return typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty);}
+  function editingForm(){return !!document.querySelector('#dialog[open],#setupForm,#loginForm,input:focus,textarea:focus,select:focus');}
+  function reloadWhenSafe(){
+    if(!reloadPending||updateBusy||hasUnsavedWork()||editingForm()||document.visibilityState==='hidden')return;
+    updateBusy=true;location.reload();
+  }
+  async function checkForUpdates(force=false){
+    reloadWhenSafe();
+    if(updateBusy||checkingUpdate||!registration||navigator.onLine===false||document.visibilityState==='hidden')return;
+    if(!force&&Date.now()-lastUpdateCheck<60000)return;
+    checkingUpdate=true;lastUpdateCheck=Date.now();
+    try{await registration.update();}catch{/* Keep the cached app available when the network is unavailable. */}
+    finally{checkingUpdate=false;}
+  }
   function activateUpdate(){
-    if(!registration?.waiting){updateReady=false;update();return;}
-    if(hasUnsavedWork()){toast(tr('Նախ պահպանեք փոփոխությունները, հետո թարմացրեք հավելվածը։'));return;}
-    updateBusy=true;protectLocalData();registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
+    if(hasUnsavedWork()||editingForm()){toast(tr('Նախ պահպանեք փոփոխությունները, հետո թարմացրեք հավելվածը։'));return;}
+    if(reloadPending){reloadWhenSafe();return;}
+    if(!registration?.waiting){checkForUpdates(true);return;}
+    protectLocalData();registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
   }
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
   window.addEventListener('rackmap-languagechange',update);
@@ -81,8 +95,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       tr('<p><strong>iPhone / iPad․</strong> Safari-ում բացեք ծրագրի հասցեն → Share → Add to Home Screen → Add։</p><p><strong>Android․</strong> Chrome-ի մենյու → Install app կամ Add to Home screen։ Եթե տեղադրումը դեռ հասանելի չէ, թարմացրեք էջը և կրկին փորձեք։</p><p class="hint">Անձնական ռեժիմը առաջին բացումից հետո աշխատում է նաև անցանց։ Թիմային cloud-ի համար ինտերնետ է պետք։</p>'));
   };
   if(location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
-    const hadController=!!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener?.('controllerchange',()=>{if(!hadController||updateBusy){location.reload();return;}if(hasUnsavedWork()){toast(tr('Թարմացումը պատրաստ է։ Պահպանեք աշխատանքը և վերաբացեք էջը։'));return;}location.reload();});
+    navigator.serviceWorker.addEventListener?.('controllerchange',()=>{
+      reloadPending=true;updateReady=true;update();reloadWhenSafe();
+      if(!updateBusy)toast(tr('Թարմացումը պատրաստ է։ Պահպանեք աշխատանքը և վերաբացեք էջը։'));
+    });
     navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{
       registration=reg;
       if(reg.waiting){updateReady=true;update();}
@@ -91,9 +107,15 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         if(!worker)return;
         worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller){updateReady=true;update();}});
       });
-      return reg.update?.();
+      return checkForUpdates(true);
     }).catch(()=>{});
   }
+  window.addEventListener('online',()=>checkForUpdates(true));
+  window.addEventListener('focus',()=>checkForUpdates(true));
+  window.addEventListener('pageshow',()=>checkForUpdates(true));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdates(true);});
+  document.querySelector('#dialog')?.addEventListener('close',()=>setTimeout(reloadWhenSafe,0));
+  setInterval(()=>checkForUpdates(),15000);
   if(window.isSecureContext)protectLocalData();
   update();
 })();
