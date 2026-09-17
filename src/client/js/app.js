@@ -768,13 +768,13 @@ async function init(){
     }
 
 }
-const languageSelect=$('#languageSelect');
-if(languageSelect&&globalThis.RackI18n)languageSelect.addEventListener('change',async()=>{
-  const previous=RackI18n.language,next=languageSelect.value;
-  languageSelect.disabled=true;
+const languageToggle=$('#languageToggle');
+if(languageToggle&&globalThis.RackI18n)languageToggle.addEventListener('click',async()=>{
+  const previous=RackI18n.language,languages=RackI18n.languages,next=languages[(languages.indexOf(previous)+1)%languages.length];
+  languageToggle.disabled=true;
   try{
-    if(modeBusy||companyBusy){languageSelect.value=previous;return;}
-    if(ready&&(dirty||portDraftDirty||saving)&&!await save()){languageSelect.value=previous;return;}
+    if(modeBusy||companyBusy)return;
+    if(ready&&(dirty||portDraftDirty||saving)&&!await save())return;
     // Preserve in-progress setup/sign-in fields without storing credentials.
     const form=$('#setupForm')||$('#loginForm');
     const values=form?[...form.elements].filter(x=>x.name).map(x=>({name:x.name,value:x.value})):[];
@@ -786,8 +786,8 @@ if(languageSelect&&globalThis.RackI18n)languageSelect.addEventListener('change',
     if(ready)status(tr(personal()?'Պահված է սարքում':'Պահված է'));
     const logout=$('[data-action=logout]');if(logout)logout.textContent=tr('Դուրս գալ');
     window.dispatchEvent(new Event('rackmap-languagechange'));
-  }catch(error){languageSelect.value=RackI18n.language;toast(error.message);}
-  finally{languageSelect.disabled=false;}
+  }catch(error){toast(error.message);}
+  finally{languageToggle.disabled=false;}
 });
 document.addEventListener('keydown',e=>{
   if(!window.matchMedia('(max-width:760px)').matches||!ready||$('#dialog').open)return;

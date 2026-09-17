@@ -1,21 +1,21 @@
 {
-  "version": "2.5.4",
+  "version": "2.5.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Մուտքի էջը դարձել է ավելի համաչափ և հարմար հեռախոսների համար, իսկ անձնական ռեժիմի ավելորդ կոճակը հեռացվել է։"
+      "Լեզվի ցուցակը փոխարինվել է սեղմումով փոխվող SVG դրոշով, իսկ գիշեր/ցերեկ կոճակը՝ նոր SVG պատկերակներով։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The sign-in page is now cleaner and better sized for phones, and the extra personal-mode button has been removed."
+      "The language list is replaced by a tap-to-cycle SVG flag, and the theme control now uses new SVG sun and moon icons."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Страница входа стала аккуратнее и удобнее на телефонах, а лишняя кнопка личного режима удалена."
+      "Список языков заменён SVG-флагом с переключением по нажатию, а тема получила новые SVG-значки солнца и луны."
     ]
   }
 }

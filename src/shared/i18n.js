@@ -18,7 +18,7 @@
     if(!root.document)return;
     document.documentElement.lang=language;
     for(const item of shell){if(item.node.isConnected){if(item.attr)item.node.setAttribute(item.attr,t(item.source));else item.node.nodeValue=t(item.source);}}
-    document.querySelectorAll('[data-language]').forEach(select=>{select.value=language;select.setAttribute('aria-label',t('Լեզու'));});
+    document.querySelectorAll('[data-language]').forEach(control=>{if(control.tagName==='SELECT')control.value=language;else control.dataset.languageCurrent=language;control.setAttribute('aria-label',t('Փոխել լեզուն'));});
   }
   function setLanguage(value){
     if(!languages.includes(value))return false;
