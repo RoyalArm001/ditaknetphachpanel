@@ -1,21 +1,21 @@
 {
-  "version": "2.5.5",
+  "version": "2.5.6",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Լեզվի ցուցակը փոխարինվել է սեղմումով փոխվող SVG դրոշով, իսկ գիշեր/ցերեկ կոճակը՝ նոր SVG պատկերակներով։"
+      "Մուտքի էջը հարմարեցվել է էկրանի բարձրությանը՝ առանց ավելորդ scroll-ի, իսկ կրկնվող հեղինակային հատվածը հեռացվել է քարտից։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The language list is replaced by a tap-to-cycle SVG flag, and the theme control now uses new SVG sun and moon icons."
+      "The sign-in page now fits the screen height without unnecessary scrolling, and the duplicate credits were removed from the card."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Список языков заменён SVG-флагом с переключением по нажатию, а тема получила новые SVG-значки солнца и луны."
+      "Страница входа теперь помещается по высоте экрана без лишней прокрутки, а повторяющийся блок авторства удалён из карточки."
     ]
   }
 }
