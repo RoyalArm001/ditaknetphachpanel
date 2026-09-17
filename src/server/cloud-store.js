@@ -43,10 +43,12 @@ function openCloudStore(options={}){
       }catch(error){if(error.code==='42P01')return null;throw error;}
     },
     pinRole:async id=>(await pool.query('SELECT role FROM rackmap.pin_keys WHERE id=$1 AND enabled',[id])).rows[0]?.role||'user',
-    pinUsers:async()=> (await pool.query('SELECT id,label,role,enabled,created_at,updated_at FROM rackmap.pin_keys ORDER BY role DESC,created_at')).rows,
+    pinUsers:async()=> (await pool.query("SELECT k.id,k.label,k.role,k.enabled,k.created_at,k.updated_at,COALESCE(json_agg(a.company_id) FILTER(WHERE a.company_id IS NOT NULL),'[]') AS company_ids FROM rackmap.pin_keys k LEFT JOIN rackmap.pin_company_access a ON a.pin_id=k.id GROUP BY k.id ORDER BY k.role DESC,k.created_at")).rows.map(x=>({...x,companyIds:x.company_ids})),
     pinCreate:(id,label,pinHash)=>pool.query('INSERT INTO rackmap.pin_keys(id,label,pin_hash) VALUES($1,$2,$3)',[id,label,pinHash]),
     pinUpdate:(id,label,enabled,pinHash)=>pool.query("UPDATE rackmap.pin_keys SET label=$2,enabled=CASE WHEN role='admin' THEN true ELSE $3 END,pin_hash=COALESCE($4,pin_hash),updated_at=now() WHERE id=$1 RETURNING id",[id,label,enabled,pinHash]),
     pinDelete:id=>pool.query('DELETE FROM rackmap.pin_keys WHERE id=$1 AND role<>\'admin\' RETURNING id',[id]),
+    pinAccess:async id=>(await pool.query("SELECT k.role,COALESCE(array_agg(a.company_id) FILTER(WHERE a.company_id IS NOT NULL),ARRAY[]::text[]) AS ids FROM rackmap.pin_keys k LEFT JOIN rackmap.pin_company_access a ON a.pin_id=k.id WHERE k.id=$1 GROUP BY k.id",[id])).rows[0]||null,
+    pinSetAccess:async(id,ids)=>{const client=await pool.connect();try{await client.query('BEGIN');await client.query('DELETE FROM rackmap.pin_company_access WHERE pin_id=$1',[id]);for(const companyId of ids)await client.query('INSERT INTO rackmap.pin_company_access(pin_id,company_id) VALUES($1,$2)',[id,companyId]);await client.query('COMMIT');}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}},
     close:()=>pool.end()
   };
 }

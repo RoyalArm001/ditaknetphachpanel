@@ -1,21 +1,21 @@
 {
-  "version": "2.6.1",
+  "version": "2.6.2",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Settings-ը հավաքվել է գեղեցիկ գործիքային էջերով, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
+      "PIN օգտատիրոջ համար այժմ կարելի է ընտրել տեսանելի նախագծերը։ Գոյություն ունեցող PIN-ը չի ցուցադրվում, իսկ նոր կոդը ստեղծելիս երևում է մեկ անգամ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Settings is organized into polished tool pages with main-PIN user management, LIVE names, and duplicate sign-in blocking."
+      "You can now choose which projects each PIN user can access. Existing PINs stay hidden, while a new PIN is shown once when created."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Настройки собраны в удобные страницы инструментов с управлением пользователями, именами в LIVE и блокировкой повторного входа."
+      "Теперь для каждого пользователя PIN можно выбрать доступные проекты. Старые PIN скрыты, а новый код показывается один раз при создании."
     ]
   }
 }

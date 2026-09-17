@@ -40,7 +40,7 @@ function createApp(options={}) {
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
       if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,googleClientId:process.env.GOOGLE_DRIVE_CLIENT_ID||'',maxStateBytes:cloud?4*1024*1024:24*1024*1024});
-      let requestStore=store,actorId='';
+      let requestStore=store,actorId='',pinCompanyIds=null;
       const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
       if(accountSpace&&url.pathname.startsWith('/api/')){
         if(!accounts||!personalAuth)return json(res,503,{error:tr('Անձնական cloud-ը հասանելի չէ')});
@@ -89,6 +89,7 @@ function createApp(options={}) {
         const user=await auth.authenticate(req,res);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք Իմ փաչ-ի ձեր հաշվով')});
         actorId=(user.method==='pin'?'pin:':'account:')+user.id;
+        if(user.method==='pin'){const access=await store.pinAccess?.(user.id);if(access?.role==='user')pinCompanyIds=new Set(access.ids);}
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
         if(url.pathname==='/api/pins'){
           const admin=user.method==='pin'&&await store.pinRole?.(user.id)==='admin';
@@ -99,16 +100,20 @@ function createApp(options={}) {
           if(req.method==='POST'){
             if(!label||label.length>80)return json(res,400,{error:tr('Գրեք օգտատիրոջ անունը')});
             if((await store.pinUsers()).length>=20)return json(res,400,{error:tr('Առավելագույնը 20 PIN օգտատեր')});
-            const pin=String(require('node:crypto').randomInt(1000000000,10000000000)),id='pin-'+randomUUID(),hash=await pinModule.hashPin(pin);await store.pinCreate(id,label,hash);return json(res,201,{id,pin});
+            const pin=String(require('node:crypto').randomInt(1000000000,10000000000)),id='pin-'+randomUUID(),hash=await pinModule.hashPin(pin);await store.pinCreate(id,label,hash);const valid=new Set((await store.list()).map(x=>x.id)),ids=Array.isArray(body.companyIds)?[...new Set(body.companyIds.filter(x=>typeof x==='string'&&valid.has(x)))]:[];await store.pinSetAccess(id,ids);return json(res,201,{id,pin});
           }
           const id=typeof body.id==='string'?body.id:'';
           if(req.method==='PUT'){
             if(!label||label.length>80)return json(res,400,{error:tr('Գրեք օգտատիրոջ անունը')});
-            const pin=body.rotate?String(require('node:crypto').randomInt(1000000000,10000000000)):null,hash=pin?await pinModule.hashPin(pin):null,result=await store.pinUpdate(id,label,body.enabled!==false,hash);return result.rows.length?json(res,200,{ok:true,...(pin?{pin}:{})}):json(res,400,{error:tr('Գլխավոր PIN-ը չի կարող փոփոխվել այստեղ')});
+            const pin=body.rotate?String(require('node:crypto').randomInt(1000000000,10000000000)):null,hash=pin?await pinModule.hashPin(pin):null,result=await store.pinUpdate(id,label,body.enabled!==false,hash);
+            if(result.rows.length&&Array.isArray(body.companyIds)){const valid=new Set((await store.list()).map(x=>x.id)),ids=[...new Set(body.companyIds.filter(x=>typeof x==='string'&&valid.has(x)))];await store.pinSetAccess(id,ids);}
+            return result.rows.length?json(res,200,{ok:true,...(pin?{pin}:{})}):json(res,400,{error:tr('Գլխավոր PIN-ը չի կարող փոփոխվել այստեղ')});
           }
           if(req.method==='DELETE'){const result=await store.pinDelete(id);return result.rows.length?json(res,200,{ok:true}):json(res,400,{error:tr('Գլխավոր PIN-ը չի կարող ջնջվել')});}
         }
       }
+
+      if(pinCompanyIds){const baseStore=requestStore;requestStore={...baseStore,list:async()=>(await baseStore.list()).filter(x=>pinCompanyIds.has(x.id)),read:async id=>pinCompanyIds.has(id)?baseStore.read(id):null};}
 
       if(url.pathname==='/api/live'||url.pathname==='/api/live/leave'){
         const client=url.searchParams.get('client')||'';
@@ -134,6 +139,7 @@ function createApp(options={}) {
         const file=await requestStore.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
       }
       if(req.method==='POST'&&url.pathname==='/api/companies'){
+        if(pinCompanyIds)return json(res,403,{error:tr('Այս PIN-ը նոր նախագիծ ստեղծելու իրավունք չունի')});
         let body;try{body=await readBody(req);}catch(e){return json(res,e.code||400,{error:tr('Հարցման ձևաչափը սխալ է')});}
         const name=typeof body.name==='string'?body.name.trim():'';
         if(!name||name.length>200||!Number.isInteger(body.floorCount)||body.floorCount<1||body.floorCount>200)return json(res,400,{error:tr('Նշեք ընկերության անունը և 1–200 հարկ')});
