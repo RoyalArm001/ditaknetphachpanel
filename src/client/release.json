@@ -1,21 +1,21 @@
 {
-  "version": "2.5.3",
+  "version": "2.5.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "«Վերականգնել կայքից» պատուհանում այժմ կարելի է ընտրել PIN կոդով կամ գրանցված մուտքանունով և գաղտնաբառով մուտքը։"
+      "Մուտքի էջը դարձել է ավելի համաչափ և հարմար հեռախոսների համար, իսկ անձնական ռեժիմի ավելորդ կոճակը հեռացվել է։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The Restore from our website dialog now offers sign-in with a PIN or a registered username and password."
+      "The sign-in page is now cleaner and better sized for phones, and the extra personal-mode button has been removed."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "В окне восстановления с нашего сайта теперь можно войти по PIN-коду или по зарегистрированному логину и паролю."
+      "Страница входа стала аккуратнее и удобнее на телефонах, а лишняя кнопка личного режима удалена."
     ]
   }
 }
