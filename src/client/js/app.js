@@ -42,7 +42,7 @@ try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k 
 function applyPanels(){
   for(const k of ['left','right']){
     document.body.classList.toggle(k+'-collapsed',!panelPrefs[k]);
-    const panel=$('#'+k+'Panel');if(panel)panel.inert=!panelPrefs[k];
+    const panel=$('#'+k+'Panel');if(panel)panel.inert=!panelPrefs[k]&&!(k==='left'&&!window.matchMedia('(max-width:760px)').matches);
     document.querySelectorAll('[data-action="toggle-'+k+'"]').forEach(toggle=>toggle.setAttribute('aria-expanded',String(panelPrefs[k])));
   }
   const rightToggle=$('#rightToggle');if(rightToggle)rightToggle.hidden=route().view!=='rack'||!$('#rightPanel');

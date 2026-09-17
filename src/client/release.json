@@ -1,21 +1,21 @@
 {
-  "version": "2.6.2",
+  "version": "2.6.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "PIN օգտատիրոջ համար այժմ կարելի է ընտրել տեսանելի նախագծերը։ Գոյություն ունեցող PIN-ը չի ցուցադրվում, իսկ նոր կոդը ստեղծելիս երևում է մեկ անգամ։"
+      "Կողային մենյուն ստացել է միասնական SVG պատկերակներ, իսկ փակ վիճակում մնում է նեղ պատկերակների վահանակ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "You can now choose which projects each PIN user can access. Existing PINs stay hidden, while a new PIN is shown once when created."
+      "The sidebar now uses consistent SVG icons and remains as a compact icon rail when collapsed."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Теперь для каждого пользователя PIN можно выбрать доступные проекты. Старые PIN скрыты, а новый код показывается один раз при создании."
+      "Боковое меню теперь использует единые SVG-значки и в свёрнутом виде остаётся компактной панелью иконок."
     ]
   }
 }

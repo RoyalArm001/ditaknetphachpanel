@@ -65,8 +65,8 @@
 @media(max-width:1150px) and (min-width:761px){.rack-layout{grid-template-columns:minmax(0,1fr) 300px}.mini-ports{grid-template-columns:repeat(12,minmax(0,1fr))}.port-tools .form-grid{grid-template-columns:1fr}.mini-port{font-size:8px;min-height:14px;padding:2px 0}}
 @media(max-width:760px){.rack-layout{grid-template-columns:1fr}.rack-side{display:contents;position:static;max-height:none;overflow:visible}.rack-case{grid-row:2}.rack-side>.panel{grid-column:1}.rack-side>.port-tools{grid-row:1}.rack-side>.rack-info{grid-row:3}.rack-side>.panel:last-child{grid-row:4}.port-tools{scroll-margin-top:12px}.port-tools .form-grid{grid-template-columns:1fr 1fr}.port-tools .form-actions{position:static}.service-choices{grid-template-columns:repeat(3,1fr)}}
 /* Collapsible navigation and port inspector. */
-body.left-collapsed .sidebar{display:none}
-body.left-collapsed .workspace{margin-left:0}
+@media(min-width:761px){body.left-collapsed .sidebar{display:flex;width:72px;padding:24px 10px;align-items:center}body.left-collapsed .workspace{margin-left:72px}body.left-collapsed .brand{justify-content:center}body.left-collapsed .brand-text,body.left-collapsed .company-switcher,body.left-collapsed .nav-label,body.left-collapsed .sidebar-bottom{display:none}body.left-collapsed .sidebar nav{width:100%;margin-top:42px;gap:10px}body.left-collapsed .sidebar nav a{justify-content:center;padding:12px 8px}body.left-collapsed .sidebar nav a span.nav-icon{width:24px}body.left-collapsed .sidebar nav a:hover:after{content:attr(title);position:fixed;left:64px;padding:8px 11px;border-radius:7px;background:#102f33;color:#fff;font-size:11px;white-space:nowrap;box-shadow:0 5px 18px #0003;z-index:50}}
+@media(max-width:760px){body.left-collapsed .sidebar{display:none}body.left-collapsed .workspace{margin-left:0}}
 body.right-collapsed .rack-side{display:none}
 .topbar .panel-toggle{white-space:nowrap}
 .topbar #breadcrumb{margin-right:auto}
@@ -74,6 +74,7 @@ body.right-collapsed .rack-side{display:none}
 .color-settings label{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .color-settings input[type=color]{width:64px;height:40px;padding:3px;cursor:pointer}
 .mini-port.service-port{color:var(--port-ink,#fff)}
+.brand-mark{display:grid;place-items:center;flex:none}.brand-mark svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.sidebar nav a span.nav-icon{display:grid;place-items:center;width:22px;flex:none}.nav-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.sidebar nav a.active .nav-icon{color:#153e42}
 @media(min-width:761px){
  .rack-view .rack-side{top:77px;padding-top:8px}
  .rack-view.right-collapsed #content{padding-right:32px}
