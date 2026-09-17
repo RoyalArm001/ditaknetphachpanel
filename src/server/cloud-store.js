@@ -42,6 +42,11 @@ function openCloudStore(options={}){
         return rows.length?{RACKMAP_SESSION_SECRET:rows[0].secret,RACKMAP_PIN_HASHES:JSON.stringify(Object.fromEntries(rows.map(row=>[row.id,row.pin_hash])))}:null;
       }catch(error){if(error.code==='42P01')return null;throw error;}
     },
+    pinRole:async id=>(await pool.query('SELECT role FROM rackmap.pin_keys WHERE id=$1 AND enabled',[id])).rows[0]?.role||'user',
+    pinUsers:async()=> (await pool.query('SELECT id,label,role,enabled,created_at,updated_at FROM rackmap.pin_keys ORDER BY role DESC,created_at')).rows,
+    pinCreate:(id,label,pinHash)=>pool.query('INSERT INTO rackmap.pin_keys(id,label,pin_hash) VALUES($1,$2,$3)',[id,label,pinHash]),
+    pinUpdate:(id,label,enabled,pinHash)=>pool.query("UPDATE rackmap.pin_keys SET label=$2,enabled=CASE WHEN role='admin' THEN true ELSE $3 END,pin_hash=COALESCE($4,pin_hash),updated_at=now() WHERE id=$1 RETURNING id",[id,label,enabled,pinHash]),
+    pinDelete:id=>pool.query('DELETE FROM rackmap.pin_keys WHERE id=$1 AND role<>\'admin\' RETURNING id',[id]),
     close:()=>pool.end()
   };
 }

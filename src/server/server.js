@@ -76,6 +76,8 @@ function createApp(options={}) {
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
           const body=await readBody(req),user=await pinAuth.login(req,res,body.pin);
           if(user?.limited){res.setHeader('Retry-After','900');return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});}
+          const client=typeof body.client==='string'&&/^[a-zA-Z0-9_-]{16,80}$/.test(body.client)?body.client:'';
+          if(user&&client&&await presence.activeOther('team','pin:'+user.id,client)){pinAuth.clear(res);return json(res,409,{error:tr('Այս PIN-ով մեկ այլ սարք արդեն միացած է')});}
           return user?json(res,200,{user}):json(res,401,{error:tr('PIN կոդը սխալ է')});
         }
         if(url.pathname==='/api/auth/login'&&req.method==='POST'){
@@ -88,6 +90,24 @@ function createApp(options={}) {
         if(!user)return json(res,401,{error:tr('Մուտք գործեք Իմ փաչ-ի ձեր հաշվով')});
         actorId=(user.method==='pin'?'pin:':'account:')+user.id;
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
+        if(url.pathname==='/api/pins'){
+          const admin=user.method==='pin'&&await store.pinRole?.(user.id)==='admin';
+          if(!admin)return json(res,403,{error:tr('PIN օգտատերերի կառավարումը հասանելի է միայն գլխավոր PIN-ին')});
+          if(req.method==='GET')return json(res,200,await store.pinUsers());
+          if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
+          const body=await readBody(req),label=typeof body.label==='string'?body.label.trim():'';
+          if(req.method==='POST'){
+            if(!label||label.length>80)return json(res,400,{error:tr('Գրեք օգտատիրոջ անունը')});
+            if((await store.pinUsers()).length>=20)return json(res,400,{error:tr('Առավելագույնը 20 PIN օգտատեր')});
+            const pin=String(require('node:crypto').randomInt(1000000000,10000000000)),id='pin-'+randomUUID(),hash=await pinModule.hashPin(pin);await store.pinCreate(id,label,hash);return json(res,201,{id,pin});
+          }
+          const id=typeof body.id==='string'?body.id:'';
+          if(req.method==='PUT'){
+            if(!label||label.length>80)return json(res,400,{error:tr('Գրեք օգտատիրոջ անունը')});
+            const pin=body.rotate?String(require('node:crypto').randomInt(1000000000,10000000000)):null,hash=pin?await pinModule.hashPin(pin):null,result=await store.pinUpdate(id,label,body.enabled!==false,hash);return result.rows.length?json(res,200,{ok:true,...(pin?{pin}:{})}):json(res,400,{error:tr('Գլխավոր PIN-ը չի կարող փոփոխվել այստեղ')});
+          }
+          if(req.method==='DELETE'){const result=await store.pinDelete(id);return result.rows.length?json(res,200,{ok:true}):json(res,400,{error:tr('Գլխավոր PIN-ը չի կարող ջնջվել')});}
+        }
       }
 
       if(url.pathname==='/api/live'||url.pathname==='/api/live/leave'){

@@ -1,21 +1,21 @@
 {
-  "version": "2.5.7",
+  "version": "2.6.0",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Top bar-ում ավելացվել է էջի չափի կառավարում, իսկ համակարգչում սկզբնական չափը սահմանվել է 90%։"
+      "Settings-ը բաժանվել է էջերի, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Page zoom controls were added to the top bar, with the desktop view starting at 90%."
+      "Settings now has sections, main-PIN user management, LIVE user names, and duplicate sign-in blocking for the same PIN."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "В верхнюю панель добавлено управление масштабом страницы, а начальный масштаб на компьютере установлен на 90%."
+      "Настройки разделены на страницы, добавлены управление пользователями по главному PIN, имена в LIVE и блокировка повторного входа с одним PIN."
     ]
   }
 }

@@ -17,6 +17,7 @@ function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice'
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
 const accountMode=()=>storageMode==='account';
 let authRequired=false,pinEnabled=false,accountEnabled=false;
+let liveSessionId;try{liveSessionId=localStorage.getItem('rackmap-live-client');if(!/^[a-zA-Z0-9_-]{16,80}$/.test(liveSessionId||'')){liveSessionId=uid();localStorage.setItem('rackmap-live-client',liveSessionId);}}catch{liveSessionId=uid();}
 const uiZoomSteps=[.85,.9,.95,1,1.05,1.1];
 let uiZoom=innerWidth<=760?1:.9;
 try{const saved=Number(localStorage.getItem('rackmap-ui-zoom'));if(uiZoomSteps.includes(saved))uiZoom=saved;}catch{}
@@ -34,7 +35,7 @@ function renderLogin(method=pinEnabled?'pin':'account'){
   const usePin=method==='pin'&&pinEnabled;
   $('#content').innerHTML=tr('<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՇԽԱՏԱԿՑԻ ՄՈՒՏՔ</div><h1>Իմ փաչ</h1><p class="login-intro">Բացեք ընկերությունների բազան և խմբագրեք ռաքերն ու միացումները։</p>')+(pinEnabled&&accountEnabled?'<div class="login-tabs">'+button(tr('PIN կոդ'),'login-pin')+button(tr('Թիմային հաշիվ'),'login-account')+'</div>':'')+'<form id="loginForm">'+(usePin?input('pin',tr('Աշխատակցի PIN'),'','password',tr('required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off" placeholder="Մուտքագրեք PIN կոդը"')):input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username"')+input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password"'))+tr('<p id="loginError" role="alert"></p><button class="button primary" type="submit">Բացել աշխատանքային տարածքը →</button></form></section>');
   $('#leftPanel').inert=true;const rightToggle=$('#rightToggle');if(rightToggle)rightToggle.hidden=true;
-  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const fd=new FormData(e.target);await api(usePin?'/api/auth/pin':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(usePin?{pin:fd.get('pin')}:{email:fd.get('email'),password:fd.get('password')})});if(dirty||portDraftDirty){ready=true;render();}else await init();}catch(err){if($('#loginError'))$('#loginError').textContent=tr(err.message);}finally{b.disabled=false;}};
+  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const fd=new FormData(e.target);await api(usePin?'/api/auth/pin':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(usePin?{pin:fd.get('pin'),client:liveSessionId}:{email:fd.get('email'),password:fd.get('password')})});if(dirty||portDraftDirty){ready=true;render();}else await init();}catch(err){if($('#loginError'))$('#loginError').textContent=tr(err.message);}finally{b.disabled=false;}};
 }
 let panelPrefs={left:!window.matchMedia('(max-width:760px)').matches,right:!window.matchMedia('(max-width:760px)').matches};
 try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k of ['left','right'])if(typeof p[k]==='boolean')panelPrefs[k]=p[k];}catch{}
@@ -166,7 +167,7 @@ function recoverAccountDialog(){
     let response=await fetch('/api/account/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     let result=await response.json();
     if(!response.ok){
-      response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,client:liveSessionId})});
       result=await response.json();
       if(!response.ok)throw new Error(result.error);
       storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
@@ -314,6 +315,19 @@ function filterControls(){return tr`<div class="filters"><input aria-label="Որ
 function resultsTable(rows){return tr`<div class="table-wrap"><table><thead><tr><th>Սարք / պորտ</th><th>Վիճակ</th><th>Մալուխ</th><th>Նպատակակետ</th><th>Կապ</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td><strong>${esc(x.device)} / ${x.port}</strong><small>${esc(x.floor)} · ${esc(x.rack)}</small></td><td><span class="status ${x.status}">${esc(D.statusLabel(state,x.status))}</span></td><td>${esc(x.cable||'—')}</td><td>${esc([x.destination,x.room].filter(Boolean).join(' / ')||'—')}<small>${esc([x.door,x.side].filter(Boolean).join(' / '))}</small></td><td>${esc(x.connection||'—')}</td><td>${button(tr('Բացել'),'port',x.p.id,'small')}</td></tr>`).join('')}</tbody></table></div>`;}
 function renderSearch(view){const report=view==='reports';$('#content').innerHTML=header(report?tr('Հաշվետվություններ'):tr('Մալուխներ և որոնում'),report?tr('Արտահանումը ներառում է ընտրված ֆիլտրերին համապատասխան բոլոր պորտերը։'):tr('Գտեք պորտը և բացեք մալուխի ամբողջական քարտը։'),report?button('↓ Excel','xlsx')+button('↓ PDF','pdf','','primary'):'')+filterControls()+'<div id="results"></div>';renderResults();}
 function renderResults(){const all=D.rows(state,filters);page=Math.min(page,Math.max(0,Math.ceil(all.length/50)-1));const slice=all.slice(page*50,page*50+50);$('#results').innerHTML=tr`<div class="result-count">${all.length} պորտ ${all.length>50?`· ${page*50+1}–${Math.min((page+1)*50,all.length)}`:''}</div>${slice.length?resultsTable(slice):tr('<section class="panel empty"><h2>Արդյունքներ չկան</h2><p>Փոխեք որոնման բառը կամ ֆիլտրերը։</p></section>')}${all.length>50?`<div class="actions" style="margin-top:16px">${page?button(tr('← Նախորդը'),'prev'):''}${(page+1)*50<all.length?button(tr('Հաջորդը →'),'next'):''}</div>`:''}`;}
+let settingsPage='project';
+const settingsTabs=()=>`<nav class="settings-tabs">${[['project',tr('Նախագիծ')],['users',tr('Օգտատերեր')],['data',tr('Տվյալներ')],['app',tr('Հավելված')]].map(([id,label])=>button(label,'settings-tab',id,id===settingsPage?'primary':'')).join('')}</nav>`;
+async function loadPinUsers(){
+  const host=$('#pinUsers');if(!host)return;
+  try{const rows=await api('/api/pins');host.dataset.rows=JSON.stringify(rows);host.innerHTML=rows.map(x=>`<div class="pin-user"><span><strong>${esc(x.label)}</strong><small>${x.role==='admin'?tr('Գլխավոր PIN'):x.enabled?tr('Ակտիվ է'):tr('Արգելափակված է')}</small></span>${button(tr('Խմբագրել'),'pin-user-edit',x.id,'small')}</div>`).join('');}catch{host.closest('.panel')?.remove();}
+}
+function pinUserDialog(id=''){
+  const rows=JSON.parse($('#pinUsers')?.dataset.rows||'[]'),row=rows.find(x=>x.id===id),label=row?.label||'';
+  modal(id?tr('Խմբագրել PIN օգտատիրոջը'):tr('Ավելացնել PIN օգտատեր'),input('pinUserName',tr('Օգտատիրոջ անուն'),label,'text','required maxlength="80"')+(id?`<label class="check"><input name="enabled" type="checkbox" ${row.enabled?'checked':''}> ${tr('Ակտիվ է')}</label><label class="check"><input name="rotate" type="checkbox"> ${tr('Ստեղծել նոր PIN կոդ')}</label>`:''),async fd=>{
+    const result=await api('/api/pins',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,label:fd.get('pinUserName'),enabled:id?fd.has('enabled'):true,rotate:fd.has('rotate')})});
+    if(result.pin)setTimeout(()=>modal(tr('Նոր PIN կոդ'),`<div class="personal-pin">${esc(result.pin)}</div><p class="hint">${tr('Պահպանեք կոդը․ այն այլևս չի ցուցադրվի։')}</p>`),0);else setTimeout(loadPinUsers,0);
+  });
+}
 function renderSettings(){
   let hasRecovery=false;try{hasRecovery=!!localStorage.getItem(recoveryKey());}catch{}
   $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
@@ -329,6 +343,9 @@ function renderSettings(){
     if(!accountReadOnly)$('.storage-mode .actions').insertAdjacentHTML('beforeend',button(tr('Փոխարինել անձնական PIN-ը'),'account-pin-new'));
   }
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>Google Drive</h2><p>Պահեք և վերականգնեք ընթացիկ ընկերության պատճենը ձեր սեփական Google Drive-ում։</p><div class="actions">${button(tr('Միացնել Google Drive-ը'),'drive-connect')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</div></section>`);
+  $('#content .page-head')?.insertAdjacentHTML('afterend',settingsTabs());
+  if(!personal()&&cloudMode){$('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel pin-users-panel"><div class="section-head"><h2>${tr('PIN օգտատերեր')}</h2>${button(tr('＋ Ավելացնել օգտատեր'),'pin-user-new','','primary')}</div><p class="muted">${tr('Անվանեք յուրաքանչյուր PIN-ը․ անունները կերևան LIVE ցանկում։')}</p><div id="pinUsers">${tr('Բեռնվում է…')}</div></section>`);loadPinUsers();}
+  const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo,[data-action=drive-connect]'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset]'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}
   api('/api/storage').then(x=>{if(storageInfo.isConnected)storageInfo.innerHTML=tr`<strong>Բազա</strong><div class="storage-path">${esc(x.database)}</div><strong>Ավտոմատ պատճեններ</strong><div class="storage-path">${esc(tr(x.backups))}</div>`;}).catch(()=>{if(storageInfo.isConnected)storageInfo.textContent=tr('Չհաջողվեց ստանալ բազայի տվյալները');});
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
 }
@@ -611,7 +628,7 @@ async function connectCloud(){
   if(!config.pinEnabled)throw new Error(tr('Թիմային կոդը դեռ միացված չէ։ Ադմինիստրատորը պետք է կարգավորի cloud PIN-ը։'));
   modal(tr('Միանալ թիմային cloud-ին'),tr('<p>Կոդով մուտքից հետո կբացվի թիմի ընդհանուր բազան։ Անձնական ընկերությունները կմնան այս սարքում։</p>')+input('cloudPin',tr('Թիմային PIN'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" autocomplete="off"'),async fd=>{
     await AppReset.ensureSessionCleared();
-    const response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:fd.get('cloudPin')})});const result=await response.json();if(!response.ok)throw new Error(result.error);
+    const response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:fd.get('cloudPin'),client:liveSessionId})});const result=await response.json();if(!response.ok)throw new Error(result.error);
     await switchStorage('shared');
   });
 }
@@ -633,6 +650,9 @@ const actions={
   'account-signup':()=>renderAccountLogin('signup'),
   'account-login':()=>renderAccountLogin('login'),
   'account-recover':recoverAccountDialog,
+  'settings-tab':id=>{settingsPage=id;renderSettings();},
+  'pin-user-new':()=>pinUserDialog(),
+  'pin-user-edit':id=>pinUserDialog(id),
   'site-recover':recoverFromSiteDialog,
   'site-recover-pin':recoverAccountDialog,
   'site-recover-login':()=>renderAccountLogin('login'),
@@ -812,8 +832,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 actions.retry=init;
-let liveConnection=null,liveUrl='',liveConnected=false,liveRevision=null,liveOnline=0;
-const liveSessionId=uid();
+let liveConnection=null,liveUrl='',liveConnected=false,liveRevision=null,liveOnline=0,liveUsers=[];
 function stopLive(){
   liveConnection?.close();liveConnection=null;liveConnected=false;
   if(liveUrl){const leave=new URL(liveUrl,location.href);leave.pathname='/api/live/leave';navigator.sendBeacon?.(leave.pathname+leave.search,new Blob(['{}'],{type:'application/json'}));}
@@ -829,7 +848,7 @@ function maintainLive(){
     stopLive();liveUrl=url;liveRevision=null;
     liveConnection=RackLive.connect(url,snapshot=>{
       if(liveUrl!==url)return;
-      liveOnline=snapshot.online;companies=snapshot.companies;
+      liveOnline=snapshot.online;liveUsers=Array.isArray(snapshot.users)?snapshot.users:[];companies=snapshot.companies;
       if(document.activeElement!==$('#companySelect'))renderCompanySelect();
       liveRevision=companies.find(x=>x.id===activeCompanyId)?.revision;
       if(liveRevision!==undefined&&liveRevision!==revision)refreshCurrentDatabase();
@@ -840,7 +859,7 @@ function maintainLive(){
 }
 function updateLiveLabel(){
   const label=$('#onlineCount');if(!label)return;
-  label.hidden=!ready||personal();label.textContent=liveConnected?tr('LIVE · Միացած՝ ')+liveOnline:tr('Cloud · Կապը վերականգնվում է…');
+  label.hidden=!ready||personal();const names=liveUsers.map(x=>x.name).filter(Boolean);label.textContent=liveConnected?'LIVE · '+liveOnline+(names.length?' · '+names.join(', '):''):tr('Cloud · Կապը վերականգնվում է…');label.title=names.join('\n');
 }
 window.addEventListener('pagehide',stopLive);
 document.addEventListener('visibilitychange',maintainLive);
