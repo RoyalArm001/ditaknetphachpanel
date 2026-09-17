@@ -17,6 +17,15 @@ function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice'
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
 const accountMode=()=>storageMode==='account';
 let authRequired=false,pinEnabled=false,accountEnabled=false;
+const uiZoomSteps=[.85,.9,.95,1,1.05,1.1];
+let uiZoom=innerWidth<=760?1:.9;
+try{const saved=Number(localStorage.getItem('rackmap-ui-zoom'));if(uiZoomSteps.includes(saved))uiZoom=saved;}catch{}
+const zoomControls=document.createElement('div');zoomControls.className='zoom-controls';zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.innerHTML=`<button class="button" type="button" data-action="ui-zoom-out" aria-label="${tr('Փոքրացնել էջը')}">−</button><span id="uiZoomValue"></span><button class="button" type="button" data-action="ui-zoom-in" aria-label="${tr('Մեծացնել էջը')}">＋</button>`;$('#breadcrumb')?.after(zoomControls);
+function updateZoomLabels(){zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.querySelector('[data-action=ui-zoom-out]').setAttribute('aria-label',tr('Փոքրացնել էջը'));zoomControls.querySelector('[data-action=ui-zoom-in]').setAttribute('aria-label',tr('Մեծացնել էջը'));}
+window.addEventListener('rackmap-languagechange',updateZoomLabels);
+function applyUiZoom(){document.documentElement.style.setProperty('--ui-zoom',String(uiZoom));const value=$('#uiZoomValue');if(value)value.textContent=Math.round(uiZoom*100)+'%';}
+function changeUiZoom(direction){const index=Math.max(0,uiZoomSteps.indexOf(uiZoom));uiZoom=uiZoomSteps[Math.max(0,Math.min(uiZoomSteps.length-1,index+direction))];try{localStorage.setItem('rackmap-ui-zoom',String(uiZoom));}catch{}applyUiZoom();}
+applyUiZoom();
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
 function renderLogin(method=pinEnabled?'pin':'account'){
@@ -636,6 +645,7 @@ const actions={
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},
   'login-pin':()=>renderLogin('pin'),'login-account':()=>renderLogin('account'),
+  'ui-zoom-out':()=>changeUiZoom(-1),'ui-zoom-in':()=>changeUiZoom(1),
   'panels-close':()=>{panelPrefs.left=false;panelPrefs.right=false;applyPanels();},
   logout:async()=>{if(cloudMode){if(!await save())return;await api('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});await switchStorage('personal');return;}if(!await save())return;await api('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});state=D.empty();selectedPortId='';portDraft=null;companies=[];$('#companyLabel').textContent=tr('Իմ փաչ');$('#companySelect').innerHTML='';renderLogin();},
   'toggle-left':()=>togglePanel('left'),

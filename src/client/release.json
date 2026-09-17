@@ -1,21 +1,21 @@
 {
-  "version": "2.5.6",
+  "version": "2.5.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Մուտքի էջը հարմարեցվել է էկրանի բարձրությանը՝ առանց ավելորդ scroll-ի, իսկ կրկնվող հեղինակային հատվածը հեռացվել է քարտից։"
+      "Top bar-ում ավելացվել է էջի չափի կառավարում, իսկ համակարգչում սկզբնական չափը սահմանվել է 90%։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The sign-in page now fits the screen height without unnecessary scrolling, and the duplicate credits were removed from the card."
+      "Page zoom controls were added to the top bar, with the desktop view starting at 90%."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Страница входа теперь помещается по высоте экрана без лишней прокрутки, а повторяющийся блок авторства удалён из карточки."
+      "В верхнюю панель добавлено управление масштабом страницы, а начальный масштаб на компьютере установлен на 90%."
     ]
   }
 }
