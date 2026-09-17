@@ -1,21 +1,21 @@
 {
-  "version": "2.5.2",
+  "version": "2.5.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հեռախոսում աշխատանքի ռեժիմն ու միացածների հաշվիչը տեղավորվում են վերևի վահանակում՝ առանց կոճակները ծածկելու։"
+      "«Վերականգնել կայքից» պատուհանում այժմ կարելի է ընտրել PIN կոդով կամ գրանցված մուտքանունով և գաղտնաբառով մուտքը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "On phones, the storage mode and connected-user count fit in the top bar without covering the controls."
+      "The Restore from our website dialog now offers sign-in with a PIN or a registered username and password."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "На телефонах режим хранения и счётчик подключённых пользователей помещаются в верхней панели, не перекрывая кнопки."
+      "В окне восстановления с нашего сайта теперь можно войти по PIN-коду или по зарегистрированному логину и паролю."
     ]
   }
 }

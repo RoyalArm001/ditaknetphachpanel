@@ -143,9 +143,12 @@ function renderSetup(){
 function renderWelcome(){
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, բազայի PIN-ով կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնման PIN-ով'),'account-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
+  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, մեր կայքից կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնել կայքից'),'site-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
   $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div><input id="welcomeImport" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
   $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
+}
+function recoverFromSiteDialog(){
+  modal(tr('Վերականգնել կայքից'),tr('<p class="hint">Ընտրեք՝ մուտք գործել PIN կոդով կամ մեր կայքում գրանցված մուտքանունով և գաղտնաբառով։</p>'),null,button(tr('PIN կոդով'),'site-recover-pin','','primary')+button(tr('Մուտքանուն և գաղտնաբառ'),'site-recover-login'));
 }
 function recoverAccountDialog(){
   modal(tr('Վերականգնել իմ ֆայլը'),tr`<p class="hint">Մուտքագրեք միայն PIN կոդը։ Անձնական PIN-ը կբացի ձեր հաշիվը, իսկ թիմային PIN-ը՝ ընդհանուր բազան։</p>${input('pin',tr('PIN կոդ'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="one-time-code"')}`,async fd=>{
@@ -621,6 +624,9 @@ const actions={
   'account-signup':()=>renderAccountLogin('signup'),
   'account-login':()=>renderAccountLogin('login'),
   'account-recover':recoverAccountDialog,
+  'site-recover':recoverFromSiteDialog,
+  'site-recover-pin':recoverAccountDialog,
+  'site-recover-login':()=>renderAccountLogin('login'),
   'account-pin-new':()=>confirmAction(tr('Փոխարինել անձնական PIN-ը'),tr('Հին անձնական PIN-ը կդադարի աշխատել։ Նոր կոդը պետք է նորից պահպանել։'),async()=>{const result=await api('/api/account/pin/new',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});setTimeout(()=>showPersonalPin(result.pin),0);}),
   'drive-connect':()=>driveDialog(false),
   'drive-restore':()=>driveDialog(true),
