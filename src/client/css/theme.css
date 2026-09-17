@@ -21,6 +21,9 @@
   [data-theme=dark] :is(.text-button,.eyebrow,.floor-add,.option-number,.network-address){color:var(--accent)}
   [data-theme=dark] :is(.welcome-options>section,.link-config,.storage-mode,.connection-path,.personal-pin,.rack-icon,.floor-add,th){background:var(--surface-soft);border-color:var(--line)}
   [data-theme=dark] .welcome-options>section{border-top-color:#4eb1a3}
+  [data-theme=dark] .settings-tabs{background:var(--surface-soft);border-color:var(--line)}
+  [data-theme=dark] .settings-tab:hover{background:var(--field)}
+  [data-theme=dark] .settings-tab.active{background:#16796f;color:#fff}
   [data-theme=dark] .storage-mode{border-color:#4eb1a3}
   [data-theme=dark] :is(.field,.link-config legend,.link-heading,.credits,.credits a,th,.close){color:var(--ink)}
   [data-theme=dark] :is(.close,.photo,.mobile-sheet-head){background:var(--surface-soft)}

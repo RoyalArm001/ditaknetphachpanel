@@ -1,21 +1,21 @@
 {
-  "version": "2.6.0",
+  "version": "2.6.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Settings-ը բաժանվել է էջերի, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
+      "Settings-ը հավաքվել է գեղեցիկ գործիքային էջերով, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Settings now has sections, main-PIN user management, LIVE user names, and duplicate sign-in blocking for the same PIN."
+      "Settings is organized into polished tool pages with main-PIN user management, LIVE names, and duplicate sign-in blocking."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Настройки разделены на страницы, добавлены управление пользователями по главному PIN, имена в LIVE и блокировка повторного входа с одним PIN."
+      "Настройки собраны в удобные страницы инструментов с управлением пользователями, именами в LIVE и блокировкой повторного входа."
     ]
   }
 }

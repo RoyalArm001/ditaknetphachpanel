@@ -14,7 +14,7 @@ function createPresence(pool,{now=()=>Date.now()}={}){
     },
     async users(scope){
       if(!pool)return [...new Set([...memory.values()].filter(x=>x.scope===scope&&x.at>now()-30000).map(x=>x.actor))].map(id=>({id,name:id}));
-      const {rows}=await pool.query("SELECT DISTINCT p.actor_id AS id,COALESCE(k.label,a.full_name,NULLIF(a.username,''),a.email,p.actor_id) AS name FROM rackmap.live_presence p LEFT JOIN rackmap.pin_keys k ON p.actor_id='pin:'||k.id LEFT JOIN rackmap.personal_accounts a ON p.actor_id='account:'||a.user_id WHERE p.scope=$1 AND p.seen_at>now()-interval '30 seconds' ORDER BY name",[scope]);return rows;
+      const {rows}=await pool.query("SELECT DISTINCT p.actor_id AS id,COALESCE(k.label,NULLIF(a.full_name,''),NULLIF(a.username,''),a.email,p.actor_id) AS name FROM rackmap.live_presence p LEFT JOIN rackmap.pin_keys k ON p.actor_id='pin:'||k.id LEFT JOIN rackmap.personal_accounts a ON p.actor_id='account:'||a.user_id WHERE p.scope=$1 AND p.seen_at>now()-interval '30 seconds' ORDER BY name",[scope]);return rows;
     },
     async activeOther(scope,actor,client){
       if(pool)return (await pool.query("SELECT EXISTS(SELECT 1 FROM rackmap.live_presence WHERE scope=$1 AND actor_id=$2 AND client_id<>$3 AND seen_at>now()-interval '30 seconds') AS active",[scope,actor,client])).rows[0].active;
