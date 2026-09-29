@@ -25,13 +25,23 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
   const signature=value=>createHmac('sha256',secret).update(value).digest('base64url');
   const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
   function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`${cookieName}=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Strict; Max-Age=${age}`]);}
+  const sessionAge=30*24*60*60;
+  function issue(res,id){
+    const payload=Buffer.from(JSON.stringify({id,exp:now()+sessionAge*1000,version:fingerprint(hashes[id]),nonce:randomBytes(12).toString('hex')})).toString('base64url');
+    cookie(res,payload+'.'+signature(payload),sessionAge);
+  }
   return {
     enabled:async()=>true,
-    authenticate(req){
+    authenticate(req,res){
       const token=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='))?.slice(cookieName.length+1);
       if(!token||token.length>500)return null;
       const [payload,mac]=token.split('.');if(!payload||!mac||!equal(signature(payload),mac))return null;
-      try{const data=JSON.parse(Buffer.from(payload,'base64url')),id=data.id||'staff-pin';return Object.hasOwn(hashes,id)&&data.version===fingerprint(hashes[id])&&data.exp>now()&&data.exp<=now()+8*60*60*1000?{id,method:'pin'}:null;}catch{return null;}
+      try{const data=JSON.parse(Buffer.from(payload,'base64url')),id=data.id||'staff-pin';
+        if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+sessionAge*1000)return null;
+        // Renew at most daily; existing unexpired eight-hour cookies upgrade here too.
+        if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id);
+        return {id,method:'pin'};
+      }catch{return null;}
     },
     async login(req,res,pin){
       const ip=env.VERCEL==='1'?req.headers['x-real-ip']||'unknown':req.socket?.remoteAddress||'unknown';
@@ -41,8 +51,7 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
       const matches=await Promise.all(entries.map(async([id,hash])=>{const [salt,digest]=hash.split(':');return equal((await derive(pin,salt,32)).toString('hex'),digest)?id:null;}));
       const id=matches.find(Boolean);if(!id)return null;
       await store.pinReset(key);
-      const payload=Buffer.from(JSON.stringify({id,exp:now()+8*60*60*1000,version:fingerprint(hashes[id]),nonce:randomBytes(12).toString('hex')})).toString('base64url');
-      cookie(res,payload+'.'+signature(payload),28800);return {id,method:'pin'};
+      issue(res,id);return {id,method:'pin'};
     },
     clear:res=>cookie(res,'',0)
   };
@@ -51,7 +60,7 @@ function createDatabasePinAuth(store,options={}){
   const resolve=async()=>{const config=await store.pinConfiguration();return config?createPinAuth(store,{...options,env:config}):null;};
   return {
     enabled:()=>store.pinEnabled(),
-    authenticate:async req=>{if(!/(?:^|;\s*)rackmap_pin=/.test(req.headers.cookie||''))return null;return (await resolve())?.authenticate(req)||null;},
+    authenticate:async(req,res)=>{if(!/(?:^|;\s*)rackmap_pin=/.test(req.headers.cookie||''))return null;return (await resolve())?.authenticate(req,res)||null;},
     login:async(req,res,pin)=>(await resolve())?.login(req,res,pin)||null,
     clear:res=>{const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`rackmap_pin=; Path=/api; HttpOnly; ${options.secure===false?'':'Secure; '}SameSite=Strict; Max-Age=0`]);}
   };

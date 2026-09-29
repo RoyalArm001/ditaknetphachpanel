@@ -61,13 +61,13 @@ function createAccounts(store){
       const auth=await configure(row),result=await auth?.login(req,res,pin);
       if(result&&!result.limited){await store.pinReset(key);return {...result,method:'recovery'};}return result||null;
     },
-    async authenticate(req){
+    async authenticate(req,res){
       const token=(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);
       if(!token||token.length>500)return null;
       let id;try{id=JSON.parse(Buffer.from(token.split('.')[0],'base64url')).id;}catch{return null;}
       if(typeof id!=='string'||id.length>64)return null;
       const row=(await pool.query('SELECT user_id,pin_hash FROM rackmap.personal_accounts WHERE user_id=$1',[id])).rows[0];
-      const user=(await configure(row))?.authenticate(req);return user?{...user,method:'recovery'}:null;
+      const user=(await configure(row))?.authenticate(req,res);return user?{...user,method:'recovery'}:null;
     },
     clear(res){const current=res.getHeader('Set-Cookie')||[];res.setHeader('Set-Cookie',[...current,`${cookieName}=; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=0`]);},
     scope:userId=>accountStore(pool,userId)

@@ -18,7 +18,7 @@ function createApp(options={}) {
   const databasePinAuth=cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null;
   const pinAuth=(configuredPinAuth||databasePinAuth)?{
     enabled:async()=>!!(await configuredPinAuth?.enabled?.())||!!(await databasePinAuth?.enabled?.()),
-    authenticate:async(req,res)=>await configuredPinAuth?.authenticate(req)||await databasePinAuth?.authenticate(req),
+    authenticate:async(req,res)=>await configuredPinAuth?.authenticate(req,res)||await databasePinAuth?.authenticate(req,res),
     login:async(req,res,pin)=>await configuredPinAuth?.login(req,res,pin)||await databasePinAuth?.login(req,res,pin),
     clear:res=>{configuredPinAuth?.clear(res);databasePinAuth?.clear(res);}
   }:null;
@@ -26,7 +26,7 @@ function createApp(options={}) {
   const personalAuth=cloud?(options.personalAuth||(options.auth?null:require('./cloud-auth').createAuth({...process.env,RACKMAP_AUTH_ACCESS:'all-authenticated'},fetch,{cookiePrefix:'mypatch'}))):null;
   const accounts=cloud&&store.pool?require('./account-store').createAccounts(store):null;
   const authRequired=cloud||!!pinAuth;
-  const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
+  const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req,res)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
   const {createPresence,streamLive}=require('./live'),presence=createPresence(store.pool);
   const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
@@ -65,7 +65,7 @@ function createApp(options={}) {
           return json(res,200,{user:result.user,pin:await accounts.provision(result.user)});
         }
         if(req.method==='POST'&&url.pathname==='/api/auth/logout'){personalAuth.clear(res);accounts.clear(res);return json(res,200,{ok:true});}
-        const user=await personalAuth.authenticate(req,res)||await accounts.authenticate(req);
+        const user=await personalAuth.authenticate(req,res)||await accounts.authenticate(req,res);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք ձեր անձնական հաշվով')});
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
         if(req.method==='POST'&&url.pathname==='/api/account/pin/new')return json(res,200,{pin:await accounts.provision(user,true)});
