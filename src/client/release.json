@@ -1,21 +1,21 @@
 {
-  "version": "2.6.10",
+  "version": "2.6.11",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքերը զտվում են ըստ հարկի։ PDF-ում ընտրեք լեզուն, հարկը, սարքի տեսակը կամ առանձին սարքը։ Ուղղվել են փաչ պանելների և սվիչների սխեմաները։"
+      "Հեռացվել է Google Drive-ի միացումը։ Պահպանումն ու վերականգնումը հասանելի են համակարգչի և մեր կայքի cloud-ի միջոցով։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map devices are filtered by floor. PDF exports let you choose the language, floor, device type or individual device. Improved patch panel and switch diagrams."
+      "Removed the Google Drive integration. Save and restore projects using your computer or our website’s cloud."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Устройства на карте фильтруются по этажу. В PDF можно выбрать язык, этаж, тип или отдельное устройство. Исправлены схемы патч-панелей и коммутаторов."
+      "Интеграция с Google Диском удалена. Сохраняйте и восстанавливайте проекты с компьютера или через облако нашего сайта."
     ]
   }
 }

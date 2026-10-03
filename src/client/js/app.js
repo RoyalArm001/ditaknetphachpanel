@@ -155,7 +155,7 @@ function renderSetup(){
 function renderWelcome(){
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից, մեր կայքից կամ Google Drive-ից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնել կայքից'),'site-recover')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը կամ միացրեք սեփական Google Drive-ը։ Ձեր տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}${button(tr('Միացնել Google Drive-ը'),'drive-connect','','small')}</section>`;
+  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից կամ մեր կայքից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնել կայքից'),'site-recover')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը մեր կայքում։ Ձեր անձնական cloud-ի տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}</section>`;
   $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div><input id="welcomeImport" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
   $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
 }
@@ -213,25 +213,6 @@ function renderAccountLogin(method='login'){
 function showPersonalPin(pin){
   modal(tr('Պահպանեք ձեր անձնական PIN-ը'),tr`<p>Այս կոդը ցուցադրվում է միայն հիմա։ Պահպանեք այն ապահով տեղում՝ ձեր ֆայլերը վերականգնելու համար։</p><output class="personal-pin">${esc(pin)}</output><p class="hint">Թիմային PIN-երը ձեր անձնական հաշիվը չեն բացում։</p>`,null,button(tr('Ներբեռնել PIN-ը'),'download-personal-pin','','primary'));
   $('#dialog [data-action=download-personal-pin]').onclick=()=>download(new Blob(['My Patch\n'+location.origin+'\nPIN: '+pin+'\n'],{type:'text/plain'}),'MyPatch-personal-PIN.txt');
-}
-async function driveDialog(restore=false){
-  if(ready&&!await save())return;
-  if(!globalThis.DriveStore)throw new Error(tr('Google-ի կապը չբեռնվեց։ Կրկին փորձեք։'));
-  if(!DriveStore.connected()){
-    let clientId;try{clientId=await DriveStore.prepare();}catch(error){modal('Google Drive',`<p role="status">${esc(error.message)}</p>`);return;}
-    modal(tr('Միացնել Google Drive-ը'),tr('<p>Թույլատրեք պահել Իմ փաչ-ի պահուստային պատճենները ձեր Google Drive-ում։ Ֆայլերը փոխանցվում են անմիջապես ձեր բրաուզերի և Google-ի միջև։</p>'),null,button(tr('Շարունակել Google-ով'),'drive-authorize','','primary'));
-    $('#dialog [data-action=drive-authorize]').onclick=async e=>{e.target.disabled=true;try{await DriveStore.connect(clientId);await driveDialog(restore);}catch(error){$('#formError').hidden=false;$('#formError').textContent=error.message;}finally{e.target.disabled=false;}};return;
-  }
-  if(!restore){
-    if(!ready){await beginWorkspace('personal');location.hash='settings';}
-    modal('Google Drive',tr('<p>Google Drive-ը միացված է։ «Պահել Drive-ում» կոճակով ստեղծվում է ընթացիկ ընկերության նոր պատճեն։ Նախորդ պատճենները մնում են Drive-ում։</p>'),null,button(tr('Պահել Drive-ում'),'drive-save','','primary')+button(tr('Վերականգնել Google Drive-ից'),'drive-restore')+button(tr('Անջատել կապը'),'drive-disconnect'));
-    return;
-  }
-  const files=await DriveStore.list();
-  modal(tr('Վերականգնել Google Drive-ից'),files.length?select('driveFile',tr('Պահուստային պատճեն'),files.map(f=>[f.id,f.name]))+tr('<p class="hint">Ցուցադրվում են վերջին 100 պատճենները։ Ընտրելուց հետո կհաստատեք վերականգնումը։</p>'):tr('<p>Google Drive-ում Իմ փաչ-ի պատճեններ դեռ չկան։</p>'),files.length?async fd=>{
-    const data=await DriveStore.read(fd.get('driveFile'));
-    setTimeout(()=>restoreFile(new File([JSON.stringify(data)],'MyPatch-drive.json'),{personalWorkspace:true}).catch(e=>toast(e.message)),0);
-  }:null);
 }
 async function beginWorkspace(mode){
   if(modeBusy||companyBusy)return;
@@ -343,7 +324,7 @@ function renderSettings(){
   $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
   const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>${tr('Սարքերի տեսակներ')}</h2><p class="muted">${tr('Ստեղծեք ձեր սեփական սարքի տեսակները, որոնք կհայտնվեն նոր սարք ավելացնելիս։')}</p><div class="actions">${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div></section><section class="panel storage-mode"><h2>Աշխատանքային տարածք</h2><p>${esc(state.company)}</p><div class="actions">${button(tr('Ինչպե՞ս եք ցանկանում աշխատել'),'workspace-choice')}</div></section>`);
-  $('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel"><h2>${tr('Reset · Մաքրել հավելվածը')}</h2><p class="muted">${tr('Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի և Google Drive-ի տվյալները չեն ջնջվում։')}</p>${button(tr('Reset · Մաքրել հավելվածը'),'app-reset','','danger')}</section>`);
+  $('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel"><h2>${tr('Reset · Մաքրել հավելվածը')}</h2><p class="muted">${tr('Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի տվյալները չեն ջնջվում։')}</p>${button(tr('Reset · Մաքրել հավելվածը'),'app-reset','','danger')}</section>`);
   if(!accountReadOnly)$('[data-action=company]').insertAdjacentHTML('afterend',button(tr('Նախագծի անվանումներ և գույներ'),'project-style'));
   if(accountMode()){
     $('.storage-mode h2').textContent=tr('Անձնական · cloud');
@@ -352,10 +333,9 @@ function renderSettings(){
     networkInfo.nextElementSibling.textContent=tr('Վերականգնման համար օգտագործեք ձեր էլ․ փոստը և անձնական PIN-ը։');
     if(!accountReadOnly)$('.storage-mode .actions').insertAdjacentHTML('beforeend',button(tr('Փոխարինել անձնական PIN-ը'),'account-pin-new'));
   }
-  $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>Google Drive</h2><p>Պահեք և վերականգնեք ընթացիկ ընկերության պատճենը ձեր սեփական Google Drive-ում։</p><div class="actions">${button(tr('Միացնել Google Drive-ը'),'drive-connect')}${button(tr('Վերականգնել Google Drive-ից'),'drive-restore')}</div></section>`);
   $('#content .page-head')?.insertAdjacentHTML('afterend',settingsTabs());
   if(!personal()&&cloudMode){$('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel pin-users-panel"><div class="section-head"><h2>${tr('PIN օգտատերեր')}</h2>${button(tr('＋ Ավելացնել օգտատեր'),'pin-user-new','','primary')}</div><p class="muted">${tr('Անվանեք յուրաքանչյուր PIN-ը․ անունները կերևան LIVE ցանկում։')}</p><div id="pinUsers">${tr('Բեռնվում է…')}</div></section>`);loadPinUsers();}
-  const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo,[data-action=drive-connect]'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset]'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}$('.settings-grid').dataset.activePage=settingsPage;
+  const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset]'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}$('.settings-grid').dataset.activePage=settingsPage;
   api('/api/storage').then(x=>{if(storageInfo.isConnected)storageInfo.innerHTML=tr`<strong>Բազա</strong><div class="storage-path">${esc(x.database)}</div><strong>Ավտոմատ պատճեններ</strong><div class="storage-path">${esc(tr(x.backups))}</div>`;}).catch(()=>{if(storageInfo.isConnected)storageInfo.textContent=tr('Չհաջողվեց ստանալ բազայի տվյալները');});
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
 }
@@ -370,7 +350,7 @@ function pauseForReset(){
   clearTimeout(saveTimer);clearTimeout(portTimer);
 }
 function resetAppDialog(){
-  modal(tr('Reset · Մաքրել հավելվածը'),`<p>${tr('Կջնջվեն այս բրաուզերի բոլոր տեղային ընկերությունները, պատմությունը, չպահված փոփոխություններն ու կարգավորումները։ Նախ ներբեռնեք անհրաժեշտ պատճենները։')}</p><p>${tr('Cloud-ի, Google Drive-ի և սերվերի բազաները չեն փոխվի։ Անցանց դեպքում մուտքը կփակվի ինտերնետը վերականգնվելիս։')}</p><label><input type="checkbox" name="confirmReset" required> ${tr('Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը')}</label>`,async()=>{
+  modal(tr('Reset · Մաքրել հավելվածը'),`<p>${tr('Կջնջվեն այս բրաուզերի բոլոր տեղային ընկերությունները, պատմությունը, չպահված փոփոխություններն ու կարգավորումները։ Նախ ներբեռնեք անհրաժեշտ պատճենները։')}</p><p>${tr('Cloud-ի և սերվերի բազաները չեն փոխվի։ Անցանց դեպքում մուտքը կփակվի ինտերնետը վերականգնվելիս։')}</p><label><input type="checkbox" name="confirmReset" required> ${tr('Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը')}</label>`,async()=>{
     pauseForReset();
     if(saving)await saving;
     await AppReset.reset();
@@ -668,10 +648,6 @@ const actions={
   'site-recover-pin':recoverAccountDialog,
   'site-recover-login':()=>renderAccountLogin('login'),
   'account-pin-new':()=>confirmAction(tr('Փոխարինել անձնական PIN-ը'),tr('Հին անձնական PIN-ը կդադարի աշխատել։ Նոր կոդը պետք է նորից պահպանել։'),async()=>{const result=await api('/api/account/pin/new',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});setTimeout(()=>showPersonalPin(result.pin),0);}),
-  'drive-connect':()=>driveDialog(false),
-  'drive-restore':()=>driveDialog(true),
-  'drive-save':async()=>{if(!await save())return;await DriveStore.save(structuredClone(state));toast(tr('Պատճենը պահված է ձեր Google Drive-ում'));$('#dialog').close();},
-  'drive-disconnect':()=>{DriveStore.disconnect();$('#dialog').close();toast(tr('Google Drive-ի կապն անջատված է'));},
   'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';renderWelcome();},
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},

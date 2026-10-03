@@ -34,13 +34,13 @@ function createApp(options={}) {
   const server=http.createServer(async(req,res)=>{
     if(require('./client-session').clearClientSession(req,res))return;
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try{
       const url=new URL(req.url,'http://localhost');
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
-      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,googleClientId:process.env.GOOGLE_DRIVE_CLIENT_ID||'',maxStateBytes:cloud?4*1024*1024:24*1024*1024});
+      if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
       let requestStore=store,actorId='',pinCompanyIds=null;
       const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
       if(accountSpace&&url.pathname.startsWith('/api/')){
