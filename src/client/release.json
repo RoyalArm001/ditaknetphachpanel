@@ -1,21 +1,21 @@
 {
-  "version": "2.6.11",
+  "version": "2.6.12",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հեռացվել է Google Drive-ի միացումը։ Պահպանումն ու վերականգնումը հասանելի են համակարգչի և մեր կայքի cloud-ի միջոցով։"
+      "Քարտեզի հատակագծի խմբագրման տարածքը մեծացվել է՝ ավելի լայն և բարձր աշխատանքային դաշտով։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Removed the Google Drive integration. Save and restore projects using your computer or our website’s cloud."
+      "Enlarged the floor-plan editor in Maps with a wider and taller workspace."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Интеграция с Google Диском удалена. Сохраняйте и восстанавливайте проекты с компьютера или через облако нашего сайта."
+      "Увеличена область редактирования плана в разделе карт: рабочее поле стало шире и выше."
     ]
   }
 }
