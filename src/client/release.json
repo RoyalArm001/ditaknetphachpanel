@@ -1,21 +1,21 @@
 {
-  "version": "2.6.12",
+  "version": "2.6.13",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի հատակագծի խմբագրման տարածքը մեծացվել է՝ ավելի լայն և բարձր աշխատանքային դաշտով։"
+      "Քարտեզի սարքերի ցանկը տեղադրվել է անկյունում՝ բացվող վահանակով և առանձին ոլորմամբ։ Խմբագրելիս հատակագծի դիրքը պահպանվում է։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Enlarged the floor-plan editor in Maps with a wider and taller workspace."
+      "The map device list is now a collapsible corner panel with independent scrolling. The floor-plan scroll position is preserved while editing."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Увеличена область редактирования плана в разделе карт: рабочее поле стало шире и выше."
+      "Список устройств на карте теперь расположен в сворачиваемой угловой панели с отдельной прокруткой. При редактировании сохраняется положение плана."
     ]
   }
 }

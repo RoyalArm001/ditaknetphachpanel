@@ -44,8 +44,15 @@ globalThis.RackMaps=(()=>{
     function button(text,action,extra=''){return `<button type="button" class="button" data-map-action="${action}" ${extra}>${esc(tr(text))}</button>`;}
     root.innerHTML=`<div class="page-head"><div><div class="eyebrow">MY PATCH / ${esc(tr('Քարտեզ'))}</div><h1>${esc(tr('Քարտեզ'))}</h1><p>${esc(tr('Ընտրեք միացված սարքը և նշեք նրա տեղը հատակագծում։'))}</p></div><div class="actions">${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Քարտեզ PDF','map-pdf',plans.length?'':'disabled')}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></div>
       ${plans.length?`<div class="map-toolbar panel"><label>${esc(tr('Հատակագիծ'))}<select data-map-plan>${plans.map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label><label>${esc(tr('Հարկ'))}<select data-map-floor ${h.readOnly?'disabled':''}><option value="">${esc(tr('Բոլոր հարկերը'))}</option>${state.floors.map(f=>`<option value="${esc(f.id)}" ${f.id===plan.floorId?'selected':''}>${esc(f.name)}</option>`).join('')}</select></label><div class="actions">${button('−','zoom-out','aria-label="'+esc(tr('Փոքրացնել'))+'"')}<output data-map-zoom>${Math.round(view.zoom*100)}%</output>${button('+','zoom-in','aria-label="'+esc(tr('Մեծացնել'))+'"')}${button('100%','zoom-reset')}${!h.readOnly?button('Խմբագրել','edit')+button('Ջնջել հատակագիծը','delete'):''}</div></div>
-      <div class="map-layout"><section class="map-workspace panel"><p class="hint" data-map-hint></p><div class="map-scroll"><div class="map-canvas" style="width:${view.zoom*100}%"><img src="${plan.image}" alt="${esc(plan.name)}" draggable="false"><div class="map-markers"></div></div></div></section><aside class="panel map-sidebar"><h2>${esc(tr('Միացված սարքեր'))}</h2><label class="field">${esc(tr('Որոնում'))}<input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint">${esc(tr('Սարքերը խմբավորված են ըստ նշանակության։ Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></aside></div>`:
+      <div class="map-layout"><section class="map-workspace panel"><p class="hint" data-map-hint></p><div class="map-scroll"><div class="map-canvas" style="width:${view.zoom*100}%"><img width="${plan.width}" height="${plan.height}" src="${plan.image}" alt="${esc(plan.name)}" draggable="false"><div class="map-markers"></div></div></div></section><aside class="panel map-sidebar"><button type="button" class="map-sidebar-toggle" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker"><svg class="map-service-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>${esc(tr('Միացված սարքեր'))}</span><svg class="map-picker-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field">${esc(tr('Որոնում'))}<input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint">${esc(tr('Սարքերը խմբավորված են ըստ նշանակության։ Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>`:
       `<section class="panel empty"><h2>${esc(tr('Հատակագիծ դեռ չկա'))}</h2><p>${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}</section>`}`;
+    function showDevices(open){
+      view.devicesOpen=open;
+      const toggle=root.querySelector('[data-map-action="devices-toggle"]');
+      toggle.setAttribute('aria-expanded',String(open));
+      root.querySelector('#map-device-picker').hidden=!open;
+      if(!open)toggle.focus({preventScroll:true});
+    }
     function draw(){
       if(!plan)return;const placed=new Map(mapData.markers.map(m=>[m.portId,m]));
       root.querySelector('.map-markers').innerHTML=mapData.markers.map(m=>`<button type="button" class="map-marker map-device-marker ${m.portId===view.portId?'selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${m.x*100}%;top:${m.y*100}%;--marker-color:${D.serviceColor(state,m.row.service)}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span></button>`).join('');
@@ -99,10 +106,11 @@ globalThis.RackMaps=(()=>{
     const coords=e=>{const rect=root.querySelector('.map-canvas').getBoundingClientRect();return {x:Math.min(1,Math.max(0,(e.clientX-rect.left)/rect.width)),y:Math.min(1,Math.max(0,(e.clientY-rect.top)/rect.height))};};
     async function click(e){
       const port=e.target.closest('[data-map-port]'),remove=e.target.closest('[data-map-remove]'),marker=e.target.closest('[data-map-marker]'),control=e.target.closest('[data-map-action]');
-      if(port){view.portId=port.dataset.mapPort;draw();return;}
+      if(port){view.portId=port.dataset.mapPort;draw();showDevices(false);return;}
       if(remove){change(s=>{const p=findPlan(s);if(!p)return;const data=D.mapDevices(s,p),marker=data.markers.find(m=>m.id===remove.dataset.mapRemove);if(marker)p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);});return;}
       if(marker){if(suppressClick){suppressClick=false;return;}view.portId=mapData.markers.find(m=>m.id===marker.dataset.mapMarker)?.portId||'';draw();return;}
       if(control&&!control.disabled){const action=control.dataset.mapAction;
+        if(action==='devices-toggle'){showDevices(!view.devicesOpen);return;}
         if(action==='upload')return upload();
         if(action==='map-pdf'||action==='panel-pdf')return exportCurrent(action==='map-pdf'?'maps':'devices');
         if(action.startsWith('zoom-')){view.zoom=action==='zoom-reset'?1:Math.max(.5,Math.min(4,view.zoom+(action==='zoom-in'?.25:-.25)));root.querySelector('.map-canvas').style.width=view.zoom*100+'%';root.querySelector('[data-map-zoom]').textContent=Math.round(view.zoom*100)+'%';return;}
@@ -120,7 +128,13 @@ globalThis.RackMaps=(()=>{
     root.addEventListener('pointerup',e=>{if(!dragging)return;const moved=dragging.moved;dragging=null;if(moved){suppressClick=true;const {x,y}=coords(e);try{place(x,y);}catch(err){toast(err.message);draw();}}else draw();},{signal:abort.signal});
     root.addEventListener('pointercancel',()=>{dragging=null;draw();},{signal:abort.signal});
     root.addEventListener('keydown',e=>{const el=e.target.closest('[data-map-marker]');if(!el||h.readOnly||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker),step=e.shiftKey?.02:.005;view.portId=marker.portId;try{place(Math.min(1,Math.max(0,marker.x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0))),Math.min(1,Math.max(0,marker.y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0))));root.querySelector(`[data-map-marker="${CSS.escape(marker.id)}"]`)?.focus();}catch(err){toast(err.message);}},{signal:abort.signal});
-    draw();return {destroy(){abort.abort();}};
+    draw();
+    const scroll=root.querySelector('.map-scroll');
+    if(scroll&&view.scroll?.planId===plan.id){scroll.scrollLeft=view.scroll.left;scroll.scrollTop=view.scroll.top;}
+    return {destroy(){
+      if(scroll)view.scroll={planId:plan.id,left:scroll.scrollLeft,top:scroll.scrollTop};
+      abort.abort();
+    }};
   }
   return {mount,exportPdf};
 })();
