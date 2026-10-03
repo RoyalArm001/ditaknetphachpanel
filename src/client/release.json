@@ -1,21 +1,21 @@
 {
-  "version": "2.6.17",
+  "version": "2.6.20",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի վրա սարքերի նշանների (badge) թվերը այլևս ոչ թե հերթական են, այլ վերցվում են ձեր գրած սենյակի կամ սարքի անվանումից:"
+      "Քարտեզի էջում վերևի վահանակները միավորվել են մեկ կոմպակտ գործիքագոտու (toolbar) մեջ՝ ապահովելով շատ ավելի մեծ աշխատանքային տարածք և հարմարավետություն:"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map marker badges now display the number extracted from your custom room/device name instead of a sequential number."
+      "The top panels on the Map page have been merged into a single compact toolbar, providing much more workspace and convenience when working with the floor plan."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Номера на маркерах карты теперь берутся из введенного вами названия комнаты/устройства, а не проставляются по порядку."
+      "Верхние панели на странице Карты объединены в одну компактную панель инструментов, что обеспечивает гораздо больше рабочего пространства и удобства."
     ]
   }
 }
