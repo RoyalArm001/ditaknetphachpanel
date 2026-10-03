@@ -1,21 +1,21 @@
 {
-  "version": "2.6.13",
+  "version": "2.6.14",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքերի ցանկը տեղադրվել է անկյունում՝ բացվող վահանակով և առանձին ոլորմամբ։ Խմբագրելիս հատակագծի դիրքը պահպանվում է։"
+      "Քարտեզներն ու սարքերի սխեմաները կիսվեք միայն դիտման հղումով՝ ընտրելով հարկը, սարքերը, լեզուն և ժամկետը։ Հղումները կարելի է անջատել «Իմ հղումները» բաժնից։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The map device list is now a collapsible corner panel with independent scrolling. The floor-plan scroll position is preserved while editing."
+      "Share maps and device schematics with view-only links. Choose the floor, devices, language and lifetime; disable links from My view links."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Список устройств на карте теперь расположен в сворачиваемой угловой панели с отдельной прокруткой. При редактировании сохраняется положение плана."
+      "Делитесь картами и схемами устройств по ссылкам только для просмотра. Выбирайте этаж, устройства, язык и срок; отключайте ссылки в разделе «Мои ссылки»."
     ]
   }
 }

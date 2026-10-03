@@ -13,3 +13,5 @@ main:has(.map-layout){max-width:none;padding-inline:20px}
 .map-picker-chevron{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}.map-sidebar-toggle[aria-expanded=true] .map-picker-chevron{transform:rotate(180deg)}
 .map-picker-body{display:flex;flex-direction:column;padding:0 12px 12px;max-height:60vh;max-height:60dvh;overflow:hidden;overscroll-behavior:contain}.map-picker-body>.field{margin-bottom:6px;flex-shrink:0}.map-picker-body>.hint{font-size:11px;margin-bottom:4px;flex-shrink:0}.map-picker-body input{min-width:0;font-size:12px}.map-picker-body .map-device-group{margin-bottom:10px}.map-picker-body .map-port-row>button:first-child{padding:9px}
 @media(max-width:760px){.map-picker-body{max-height:48vh;max-height:48dvh}}
+
+.map-share-list{display:grid;gap:12px;max-height:60vh;overflow:auto;overscroll-behavior:contain}.map-share-item{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:12px}.map-share-item strong{font-size:14px;overflow-wrap:anywhere}.map-share-item small{color:var(--muted)}.map-share-item input{width:100%;min-width:0;font-size:12px}.map-share-item .actions{gap:6px}

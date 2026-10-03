@@ -14,6 +14,7 @@ const exportValue=(r,k,state,tr=x=>x)=>k==='status'?Domain.statusLabel(state,r[k
 function createApp(options={}) {
   const cloud=options.cloud??(process.env.RACKMAP_STORAGE==='supabase'||process.env.VERCEL==='1');
   const store=options.store||(cloud?require('./cloud-store').openCloudStore():require('./local-repository').openLocalRepository(options));
+  const viewLinks=require('./view-links').createViewLinks(store);
   const pinModule=require('./pin-auth');
   const configuredPinAuth=pinModule.createPinAuth(store,{secure:cloud});
   const databasePinAuth=cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null;
@@ -41,6 +42,15 @@ function createApp(options={}) {
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
       if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
+      if(url.pathname.startsWith('/api/shared/')){
+        res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('Referrer-Policy','no-referrer');
+        if(req.method!=='GET')return json(res,405,{error:tr('Միայն դիտում')});
+        const token=url.pathname.slice('/api/shared/'.length);
+        if(!/^[a-f0-9]{64}$/.test(token))return json(res,404,{error:tr('Հղումը չի գտնվել կամ այլևս հասանելի չէ')});
+        const pdf=await viewLinks.get(token);
+        if(!pdf)return json(res,404,{error:tr('Հղումը չի գտնվել կամ այլևս հասանելի չէ')});
+        res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'inline; filename="MyPatch-shared.pdf"','Cache-Control':'private, no-store'});return res.end(pdf);
+      }
       let requestStore=store,actorId='',pinCompanyIds=null;
       const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
       if(accountSpace&&url.pathname.startsWith('/api/')){
@@ -135,6 +145,26 @@ function createApp(options={}) {
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
       }
+      if(url.pathname==='/api/shares'||url.pathname==='/api/shares/revoke'){
+        const current=await read(companyId);
+        if(!current)return json(res,404,{error:tr('Ընկերությունը չի գտնվել')});
+        const scope=accountSpace?'personal:'+actorId:'team';
+        if(req.method==='GET'&&url.pathname==='/api/shares')return json(res,200,await viewLinks.list(scope,companyId));
+        if(req.method!=='POST')return json(res,405,{error:tr('Գործողությունը չի գտնվել')});
+        const body=await readBody(req);
+        if(url.pathname.endsWith('/revoke')){await viewLinks.revoke(scope,companyId,String(body.token||''));return json(res,200,{ok:true});}
+        if(body.revision!==current.revision)return json(res,409,{error:tr('Տվյալները փոփոխվել են այլ աշխատակցի կողմից։ Թարմացրեք էջը։')});
+        if(!['maps','devices','all'].includes(body.kind)||!['hy','en','ru'].includes(body.language)||!['all','panel','switch','router'].includes(body.deviceType)||![7,30,90].includes(body.days)||['floorId','deviceId','planId'].some(k=>typeof body[k]!=='string'||body[k].length>200))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+        const handover=require('../shared/handover-pdf'),selection=handover.select(current.state,body);
+        if(body.kind==='maps'?!selection.plans.length:body.kind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)return json(res,400,{error:tr('Ընտրված պայմաններով տվյալներ չկան')});
+        if((await viewLinks.list(scope,companyId)).length>=100)return json(res,429,{error:tr('Նախ անջատեք հին հղումներից մի քանիսը')});
+        const outputTr=require('../shared/i18n').forLanguage(body.language);
+        const font=options.font||process.env.RACKMAP_FONT||path.join(root,'assets','fonts','DejaVuSans.ttf');
+        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,font,tr:outputTr}));
+        if(pdf.length>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
+        const title=[current.state.company,body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr({switch:'Միայն սվիչներ',panel:'Միայն փաչ պանելներ',router:'Միայն ռաուտերներ'}[body.deviceType])].filter(Boolean).join(' · ');
+        return json(res,201,await viewLinks.create(scope,companyId,title,pdf,body.days));
+      }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
         if(cloud){const data=Buffer.from(JSON.stringify(await requestStore.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
         const file=await requestStore.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
@@ -212,7 +242,7 @@ function createApp(options={}) {
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(file).pipe(res);
       }
       json(res,404,{error:tr('Չի գտնվել')});
-    }catch(e){console.error('RackMap request failed:',e.code||e.name);if(!res.headersSent)json(res,e.code==='23505'?400:500,{error:tr('Չհաջողվեց կատարել գործողությունը')});else res.end();}
+    }catch(e){const tr=require('../shared/i18n').forLanguage('hy');console.error('RackMap request failed:',e.code||e.name);if(!res.headersSent)json(res,e.code==='23505'?400:500,{error:tr('Չհաջողվեց կատարել գործողությունը')});else res.end();}
   });
   let backupDay=new Date().toISOString().slice(0,10);
   const dailyBackup=cloud?null:setInterval(()=>{const today=new Date().toISOString().slice(0,10);if(today!==backupDay){try{store.backup();backupDay=today;}catch(e){console.error('Automatic backup failed:',e.message);}}},60*60*1000);

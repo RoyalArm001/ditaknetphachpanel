@@ -1,6 +1,24 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Կիսվել հղումով":["Share a view link", "Поделиться ссылкой"],
+"Իմ հղումները":["My view links", "Мои ссылки"],
+"Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։":["Anyone with the link can view and download only the selected PDF copy, without editing the database. Later changes do not update this copy.", "По ссылке можно только просмотреть и скачать выбранную PDF-копию, без редактирования базы. Последующие изменения не обновляют эту копию."],
+"Գործում է մինչև":["Available until", "Действует до"],
+"Դիտման հղում":["View-only link", "Ссылка для просмотра"],
+"Պատճենել հղումը":["Copy link", "Копировать ссылку"],
+"Անջատել հղումը":["Disable link", "Отключить ссылку"],
+"Ակտիվ հղումներ չկան":["No active links", "Нет активных ссылок"],
+"Հղումը պատճենված է":["Link copied", "Ссылка скопирована"],
+"Հղումով կիսվելու համար բացեք նախագիծը կայքի cloud-ից":["To share a link, open the project from the website cloud.", "Чтобы поделиться ссылкой, откройте проект из облака сайта."],
+"Հղման ժամկետ":["Link lifetime", "Срок действия ссылки"],
+"7 օր":["7 days", "7 дней"],
+"30 օր":["30 days", "30 дней"],
+"90 օր":["90 days", "90 дней"],
+"Ստեղծել հղումը":["Create link", "Создать ссылку"],
+"Հղումը չի գտնվել կամ այլևս հասանելի չէ":["This link was not found or is no longer available.", "Ссылка не найдена или больше недоступна."],
+"Նախ անջատեք հին հղումներից մի քանիսը":["Disable some older links first.", "Сначала отключите часть старых ссылок."],
+
 "Պահուստային ֆայլի տեսակ":["Backup file format","Формат резервного файла"],
 "Պահուստային ֆայլը վնասված է կամ չի աջակցվում":["The backup file is damaged or unsupported.","Резервный файл повреждён или не поддерживается."],
 "Հաստատեք էլ․ փոստը, ապա մուտք գործեք։ Առաջին մուտքի ժամանակ կստեղծվեն ձեր անձնական բազան և PIN-ը։":["Confirm your email, then sign in. Your personal database and PIN will be created on your first sign-in.","Подтвердите почту и войдите. При первом входе будут созданы личная база и PIN."],

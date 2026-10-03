@@ -139,3 +139,10 @@ RackMap-ը Ditaknet-ի մաս է · © Ditaknet։ Կողքի մենյուում 
 Ամպային տարբերակի տեղադրումը, նույն Ditaknet հաշիվների իրավունքները և տեղական բազայի անվտանգ տեղափոխումը նկարագրված են [DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md)-ում։ Կայքը հրապարակված է https://mypro.smarttechllc.am/ հասցեում։ Աշխատանքի համար անհրաժեշտ են Vercel սերվերային փոփոխականները և Supabase migrations-ը։ Տեղական `npm start` տարբերակը շարունակում է օգտագործել SQLite-ը, եթե `RACKMAP_STORAGE=supabase` միացված չէ։
 
 Ստեղծված է **Սիփան Դանիելյանի** կողմից՝ [royalarm.uk](https://royalarm.uk)։ Սպասարկող՝ [ditaknet.com](https://www.ditaknet.com/en)։
+
+
+### View-only links
+
+In Maps, choose **Share a view link** to publish a PDF copy of selected maps or device schematics, filtered by floor/device and output language. Links last 7, 30 or 90 days. Anyone with a link can view/download that selected copy without signing in; the viewer has no project editing endpoints or credentials. Copies do not update when the project changes. **My view links** lists active links and can revoke them; previously downloaded copies cannot be recalled.
+
+Sharing is available for server/cloud projects, including personal cloud accounts, not browser-only local projects. Local-server links require recipients to reach that server. Run `npm run cloud:migrate` before deploying this feature (schema 9). Shared PDF copies are stored separately in `view_links`; links cannot be used to access the source database. The public viewer fetches copies without cookies, and share responses are not cached by the app's service worker.

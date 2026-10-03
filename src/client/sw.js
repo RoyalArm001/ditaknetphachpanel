@@ -1,6 +1,6 @@
 'use strict';
 const CACHE='ditaknet-shell-v4-__BUILD_ID__';
-const SHELL=['/maps.css','/maps.js','/handover-pdf.js','/pdfkit.js','/pdfjs/pdf.mjs','/pdfjs/pdf.worker.mjs','/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/merge-state.js','/domain.js','/personal-store.js','/project-file.js','/live.js','/app-reset.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
+const SHELL=['/share.html','/share-view.js','/share.css','/maps.css','/maps.js','/handover-pdf.js','/pdfkit.js','/pdfjs/pdf.mjs','/pdfjs/pdf.worker.mjs','/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/merge-state.js','/domain.js','/personal-store.js','/project-file.js','/live.js','/app-reset.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL.map(url=>new Request(url,{cache:'no-store'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const name of await caches.keys())if(name.startsWith('ditaknet-shell-')&&name!==CACHE)await caches.delete(name);await self.clients.claim();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
@@ -18,6 +18,6 @@ async function fresh(request,key){
 self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);
   if(event.request.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
-  if(event.request.mode==='navigate'){event.respondWith(fresh(event.request,'/index.html'));return;}
+  if(event.request.mode==='navigate'){event.respondWith(fresh(event.request,url.pathname==='/share.html'?'/share.html':'/index.html'));return;}
   if(SHELL.includes(url.pathname))event.respondWith(fresh(event.request,url.pathname));
 });
