@@ -1,21 +1,21 @@
 {
-  "version": "2.7.1",
+  "version": "2.7.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի վրա սարքերի նշանների (badge) համարակալումը այժմ կատարվում է առանձին ըստ սարքի տեսակի՝ յուրաքանչյուր տեսակի համար 1-ից (օր. WiFi 1-10, Door 1-6)։"
+      "Ավելացվել է սխալ տեղադրված սարքի նշանը քարտեզից հեշտությամբ ջնջելու հնարավորություն (նշանի վրայի × կոճակով, վերևի վահանակի «Հեռացնել» կոճակով, Delete ստեղնով կամ աջ քլիքով)։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map marker badges are now numbered independently per device type, starting from 1 for each type (e.g. WiFi 1-10, Door 1-6)."
+      "Added easy ways to delete an incorrectly placed device from the map (via the marker × badge, the toolbar remove button, the Delete key, or right-click)."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Нумерация меток на карте теперь ведется отдельно для каждого типа устройств, начиная с 1 (напр. WiFi 1-10, Door 1-6)."
+      "Добавлена возможность легко удалять неверно размещенные метки с карты (через значок × на метке, кнопку на панели, клавишу Delete или правый клик)."
     ]
   }
 }

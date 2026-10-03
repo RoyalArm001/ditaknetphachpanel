@@ -42,10 +42,64 @@ globalThis.RackMaps=(()=>{
     const icon=service=>`<svg class="map-service-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${D.serviceIcon(service)}"/></svg>`;
     function change(fn){if(h.readOnly)throw new Error(tr('Միայն դիտում'));commit(fn);}
     function button(text,action,extra=''){return `<button type="button" class="button" data-map-action="${action}" ${extra}>${esc(tr(text))}</button>`;}
-    root.innerHTML=`<div class="page-head"><div><div class="eyebrow">MY PATCH / ${esc(tr('Քարտեզ'))}</div><h1>${esc(tr('Քարտեզ'))}</h1><p>${esc(tr('Ընտրեք միացված սարքը և նշեք նրա տեղը հատակագծում։'))}</p></div><div class="actions">${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Քարտեզ PDF','map-pdf',plans.length?'':'disabled')}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Կիսվել հղումով','share',plans.length||D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}</div></div>
-      ${plans.length?`<div class="map-toolbar panel"><label>${esc(tr('Հատակագիծ'))}<select data-map-plan>${plans.map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label><label>${esc(tr('Հարկ'))}<select data-map-floor ${h.readOnly?'disabled':''}><option value="">${esc(tr('Բոլոր հարկերը'))}</option>${state.floors.map(f=>`<option value="${esc(f.id)}" ${f.id===plan.floorId?'selected':''}>${esc(f.name)}</option>`).join('')}</select></label><div class="actions">${button('−','zoom-out','aria-label="'+esc(tr('Փոքրացնել'))+'"')}<output data-map-zoom>${Math.round(view.zoom*100)}%</output>${button('+','zoom-in','aria-label="'+esc(tr('Մեծացնել'))+'"')}${button('100%','zoom-reset')}${!h.readOnly?button('Խմբագրել','edit')+button('Ջնջել հատակագիծը','delete'):''}</div></div>
-      <div class="map-layout"><section class="map-workspace panel"><p class="hint" data-map-hint></p><div class="map-scroll"><div class="map-canvas" style="width:${view.zoom*100}%"><img width="${plan.width}" height="${plan.height}" src="${plan.image}" alt="${esc(plan.name)}" draggable="false"><div class="map-markers"></div></div></div></section><aside class="panel map-sidebar"><button type="button" class="map-sidebar-toggle" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker"><svg class="map-service-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>${esc(tr('Միացված սարքեր'))}</span><svg class="map-picker-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field">${esc(tr('Որոնում'))}<input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint">${esc(tr('Սարքերը խմբավորված են ըստ նշանակության։ Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>`:
-      `<section class="panel empty"><h2>${esc(tr('Հատակագիծ դեռ չկա'))}</h2><p>${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}</section>`}`;
+    root.innerHTML=plans.length?
+      `<div class="map-topbar panel">
+        <div class="map-topbar-left">
+          <div class="map-pill-select" title="${esc(tr('Հատակագիծ'))}">
+            <svg class="map-bar-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <select data-map-plan aria-label="${esc(tr('Հատակագիծ'))}">
+              ${plans.map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="map-pill-select" title="${esc(tr('Հարկ'))}">
+            <svg class="map-bar-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <select data-map-floor ${h.readOnly?'disabled':''} aria-label="${esc(tr('Հարկ'))}">
+              <option value="">${esc(tr('Բոլոր հարկերը'))}</option>
+              ${state.floors.map(f=>`<option value="${esc(f.id)}" ${f.id===plan.floorId?'selected':''}>${esc(f.name)}</option>`).join('')}
+            </select>
+          </div>
+          ${!h.readOnly?`
+            <button type="button" class="map-tool-btn" data-map-action="edit" title="${esc(tr('Խմբագրել հատակագիծը'))}" aria-label="${esc(tr('Խմբագրել'))}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button type="button" class="map-tool-btn danger" data-map-action="delete" title="${esc(tr('Ջնջել հատակագիծը'))}" aria-label="${esc(tr('Ջնջել'))}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>`:''}
+        </div>
+        <div class="map-zoom-group">
+          <button type="button" class="map-zoom-btn" data-map-action="zoom-out" title="${esc(tr('Փոքրացնել'))}" aria-label="${esc(tr('Փոքրացնել'))}">−</button>
+          <button type="button" class="map-zoom-val" data-map-action="zoom-reset" title="${esc(tr('100%'))}" data-map-zoom>${Math.round(view.zoom*100)}%</button>
+          <button type="button" class="map-zoom-btn" data-map-action="zoom-in" title="${esc(tr('Մեծացնել'))}" aria-label="${esc(tr('Մեծացնել'))}">+</button>
+        </div>
+        <div class="map-topbar-right">
+          ${!h.readOnly?`<button type="button" class="button primary small map-btn-add" data-map-action="upload" title="${esc(tr('Բեռնել նոր հատակագիծ'))}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>${esc(tr('Ավելացնել'))}</span>
+          </button>`:''}
+          <div class="map-btn-segment">
+            <button type="button" class="map-seg-btn" data-map-action="map-pdf" title="${esc(tr('Քարտեզ PDF'))}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>${esc(tr('Քարտեզ PDF'))}</span>
+            </button>
+            <button type="button" class="map-seg-btn" data-map-action="panel-pdf" ${D.devices(state).length?'':'disabled'} title="${esc(tr('Սարքերի սխեմաներ PDF'))}">
+              <span>${esc(tr('Սխեմաներ'))}</span>
+            </button>
+          </div>
+          <div class="map-btn-segment">
+            <button type="button" class="map-seg-btn" data-map-action="share" ${plans.length||D.devices(state).length?'':'disabled'} title="${esc(tr('Կիսվել հղումով'))}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span>${esc(tr('Կիսվել'))}</span>
+            </button>
+            <button type="button" class="map-seg-btn" data-map-action="shares" title="${esc(tr('Իմ հղումները'))}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>${esc(tr('Հղումներ'))}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="map-layout"><section class="map-workspace panel"><p class="hint map-hint-bar" data-map-hint></p><div class="map-scroll"><div class="map-canvas" style="width:${view.zoom*100}%"><img width="${plan.width}" height="${plan.height}" src="${plan.image}" alt="${esc(plan.name)}" draggable="false"><div class="map-markers"></div></div></div></section><aside class="panel map-sidebar"><button type="button" class="map-sidebar-toggle" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker"><svg class="map-service-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>${esc(tr('Միացված սարքեր'))}</span><svg class="map-picker-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field">${esc(tr('Որոնում'))}<input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint">${esc(tr('Սարքերը խմբավորված են ըստ նշանակության։ Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>`:
+      `<div class="page-head"><div><div class="eyebrow">MY PATCH / ${esc(tr('Քարտեզ'))}</div><h1>${esc(tr('Քարտեզ'))}</h1><p>${esc(tr('Ընտրեք միացված սարքը և նշեք նրա տեղը հատակագծում։'))}</p></div><div class="actions">${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Քարտեզ PDF','map-pdf','disabled')}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Կիսվել հղումով','share',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}</div></div>
+      <section class="panel empty"><h2>${esc(tr('Հատակագիծ դեռ չկա'))}</h2><p>${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}</section>`;
     function showDevices(open){
       view.devicesOpen=open;
       const toggle=root.querySelector('[data-map-action="devices-toggle"]');
@@ -55,8 +109,15 @@ globalThis.RackMaps=(()=>{
     }
     function draw(){
       if(!plan)return;const placed=new Map(mapData.markers.map(m=>[m.portId,m]));
-      root.querySelector('.map-markers').innerHTML=mapData.markers.map(m=>`<button type="button" class="map-marker map-device-marker ${m.portId===view.portId?'selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${m.x*100}%;top:${m.y*100}%;--marker-color:${D.serviceColor(state,m.row.service)}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span></button>`).join('');
-      const selected=byId.get(view.portId);root.querySelector('[data-map-hint]').textContent=selected?tr('Ընտրված սարք')+': '+label(selected):tr('Ընտրեք սարքը ցանկից');
+      root.querySelector('.map-markers').innerHTML=mapData.markers.map(m=>`<button type="button" class="map-marker map-device-marker ${m.portId===view.portId?'selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${m.x*100}%;top:${m.y*100}%;--marker-color:${D.serviceColor(state,m.row.service)}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span>${!h.readOnly?`<span class="map-marker-delete" role="button" data-map-remove="${esc(m.id)}" title="${esc(tr('Հեռացնել նշանը'))}">×</span>`:''}</button>`).join('');
+      const selected=byId.get(view.portId),selectedMarker=mapData.markers.find(m=>m.portId===view.portId),hintEl=root.querySelector('[data-map-hint]');
+      if(hintEl){
+        if(selected){
+          hintEl.innerHTML=`<div class="map-hint-content"><span>${icon(selected.service)} <strong>${esc(tr('Ընտրված սարք'))}:</strong> ${esc(label(selected))}</span>${selectedMarker&&!h.readOnly?`<button type="button" class="button danger small map-hint-delete-btn" data-map-remove="${esc(selectedMarker.id)}" title="${esc(tr('Հեռացնել նշանը'))}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>${esc(tr('Հեռացնել նշանը'))}</span></button>`:''}</div>`;
+        } else {
+          hintEl.textContent=tr('Ընտրեք սարքը ցանկից կամ սեղմեք քարտեզի վրայի նշանին');
+        }
+      }
       const search=view.query.trim().toLocaleLowerCase(),matches=r=>!search||[D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room].join(' ').toLocaleLowerCase().includes(search);
       const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&(!placed.has(r.p.id)||r.p.id===view.portId))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
       function card(r,inactive=false){
@@ -122,7 +183,20 @@ globalThis.RackMaps=(()=>{
     async function click(e){
       const port=e.target.closest('[data-map-port]'),remove=e.target.closest('[data-map-remove]'),marker=e.target.closest('[data-map-marker]'),control=e.target.closest('[data-map-action]');
       if(port){view.portId=port.dataset.mapPort;draw();showDevices(false);return;}
-      if(remove){change(s=>{const p=findPlan(s);if(!p)return;const data=D.mapDevices(s,p),marker=data.markers.find(m=>m.id===remove.dataset.mapRemove);if(marker)p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);});return;}
+      if(remove){
+        e.stopPropagation();
+        change(s=>{
+          const p=findPlan(s);
+          if(!p)return;
+          const data=D.mapDevices(s,p),marker=data.markers.find(m=>m.id===remove.dataset.mapRemove);
+          if(marker){
+            p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);
+            if(view.portId===marker.portId)view.portId='';
+          }
+        });
+        toast(tr('Նշանը հեռացվեց'));
+        return;
+      }
       if(marker){if(suppressClick){suppressClick=false;return;}view.portId=mapData.markers.find(m=>m.id===marker.dataset.mapMarker)?.portId||'';draw();return;}
       if(control&&!control.disabled){const action=control.dataset.mapAction;
         if(action==='devices-toggle'){showDevices(!view.devicesOpen);return;}
@@ -140,11 +214,51 @@ globalThis.RackMaps=(()=>{
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     root.addEventListener('input',e=>{if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
     root.addEventListener('change',e=>{if(e.target.matches('[data-map-plan]')){view.planId=e.target.value;view.zoom=1;view.portId='';h.redraw();}if(e.target.matches('[data-map-floor]')){try{view.portId='';change(s=>{const p=findPlan(s);if(p)p.floorId=e.target.value;});}catch(err){toast(err.message);}}},{signal:abort.signal});
-    root.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-map-marker]');if(!el||h.readOnly||e.button!==0)return;const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker);view.portId=marker.portId;dragging={el,id:marker.id,startX:e.clientX,startY:e.clientY,moved:false};el.setPointerCapture(e.pointerId);e.preventDefault();},{signal:abort.signal});
+    root.addEventListener('pointerdown',e=>{if(e.target.closest('[data-map-remove]'))return;const el=e.target.closest('[data-map-marker]');if(!el||h.readOnly||e.button!==0)return;const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker);view.portId=marker.portId;dragging={el,id:marker.id,startX:e.clientX,startY:e.clientY,moved:false};el.setPointerCapture(e.pointerId);e.preventDefault();},{signal:abort.signal});
     root.addEventListener('pointermove',e=>{if(!dragging)return;const {x,y}=coords(e);dragging.moved||=Math.hypot(e.clientX-dragging.startX,e.clientY-dragging.startY)>4;if(dragging.moved){dragging.el.style.left=x*100+'%';dragging.el.style.top=y*100+'%';}},{signal:abort.signal});
     root.addEventListener('pointerup',e=>{if(!dragging)return;const moved=dragging.moved;dragging=null;if(moved){suppressClick=true;const {x,y}=coords(e);try{place(x,y);}catch(err){toast(err.message);draw();}}else draw();},{signal:abort.signal});
     root.addEventListener('pointercancel',()=>{dragging=null;draw();},{signal:abort.signal});
-    root.addEventListener('keydown',e=>{const el=e.target.closest('[data-map-marker]');if(!el||h.readOnly||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker),step=e.shiftKey?.02:.005;view.portId=marker.portId;try{place(Math.min(1,Math.max(0,marker.x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0))),Math.min(1,Math.max(0,marker.y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0))));root.querySelector(`[data-map-marker="${CSS.escape(marker.id)}"]`)?.focus();}catch(err){toast(err.message);}},{signal:abort.signal});
+    root.addEventListener('keydown',e=>{
+      if(h.readOnly)return;
+      if((e.key==='Delete'||e.key==='Backspace')&&view.portId){
+        const selectedMarker=mapData.markers.find(m=>m.portId===view.portId);
+        if(selectedMarker){
+          e.preventDefault();
+          change(s=>{
+            const p=findPlan(s);if(!p)return;
+            const data=D.mapDevices(s,p);
+            p.markers=p.markers.filter(m=>data.canonical(m.portId)!==selectedMarker.portId);
+            view.portId='';
+          });
+          toast(tr('Նշանը հեռացվեց'));
+          return;
+        }
+      }
+      const el=e.target.closest('[data-map-marker]');
+      if(!el||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+      e.preventDefault();
+      const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker),step=e.shiftKey?.02:.005;
+      view.portId=marker.portId;
+      try{place(Math.min(1,Math.max(0,marker.x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0))),Math.min(1,Math.max(0,marker.y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0))));root.querySelector(`[data-map-marker="${CSS.escape(marker.id)}"]`)?.focus();}catch(err){toast(err.message);}
+    },{signal:abort.signal});
+    root.addEventListener('contextmenu',e=>{
+      const el=e.target.closest('[data-map-marker]');
+      if(!el||h.readOnly)return;
+      e.preventDefault();
+      const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker);
+      if(!marker)return;
+      view.portId=marker.portId;
+      draw();
+      h.confirm(tr('Հեռացնել նշանը'),tr('Հեռացնե՞լ այս նշանը հատակագծից։'),()=>{
+        change(s=>{
+          const p=findPlan(s);if(!p)return;
+          const data=D.mapDevices(s,p);
+          p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);
+          if(view.portId===marker.portId)view.portId='';
+        });
+        toast(tr('Նշանը հեռացվեց'));
+      });
+    },{signal:abort.signal});
     draw();
     const scroll=root.querySelector('.map-scroll');
     if(scroll&&view.scroll?.planId===plan.id){scroll.scrollLeft=view.scroll.left;scroll.scrollTop=view.scroll.top;}
