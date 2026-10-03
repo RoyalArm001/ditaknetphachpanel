@@ -15,7 +15,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const boxes=rack.devices.map(d=>({id:d.id,label:d.name,color:d.color,min:[-1,(d.pos-1)*U+.008,-.32],max:[1,(d.pos-1+d.height)*U-.008,.32],d,remote:false}));
     remote.forEach((x,i)=>{const y=rack.u*U*(i+1)/(remote.length+1);boxes.push({id:x.d.id,label:`${x.r.name} / ${x.d.name}`,color:x.d.color,min:[1.8,y,-.1],max:[3.3,y+.22,.32],d:x.d,remote:true});});
     const boxById=new Map(boxes.map(x=>[x.id,x]));
-    const anchor=x=>{const box=boxById.get(x.d.id),rows=Math.ceil(x.d.portList.length/24);return [box.min[0]+.06+((x.p.number-1)%24+.5)*(box.max[0]-box.min[0]-.12)/24,box.max[1]-.025-(Math.floor((x.p.number-1)/24)+.5)*(box.max[1]-box.min[1]-.04)/rows,.34];};
+    const layouts=new Map(boxes.map(b=>[b.d.id,new Map(D.portLayout(b.d).map(x=>[x.p.id,x]))]));
+    const anchor=x=>{const box=boxById.get(x.d.id),layout=layouts.get(x.d.id).get(x.p.id);return [box.min[0]+.06+(layout.column+.5)*(box.max[0]-box.min[0]-.12)/layout.columns,box.max[1]-.025-(layout.row+.5)*(box.max[1]-box.min[1]-.04)/layout.rows,.34];};
     const points=boxes.flatMap(b=>b.d.portList.map(p=>({id:p.id,label:`${b.label} / ${p.number}`,number:p.number,status:p.status,service:p.service||'',color:p.service?D.serviceColor(state,p.service):'',point:anchor({d:b.d,p}),deviceId:b.id})));
     const links=linked.map(({from,to},i)=>({id:from.p.id,fromId:from.p.id,toId:to.p.id,a:anchor(from),b:anchor(to),depth:.65+(i%7)*.09,color:D.serviceColor(state,from.p.service||''),label:`${from.r.name} / ${from.d.name}:${from.p.number} → ${to.r.name} / ${to.d.name}:${to.p.number}`,cable:from.p.cable,vlan:from.p.vlan||'',service:from.p.service||'',external:from.r.id!==to.r.id}));
     return {rackId,name:rack.name,height:rack.u*U,boxes,points,links,remote:remote.length>0};

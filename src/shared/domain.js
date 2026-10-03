@@ -21,7 +21,16 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const [key] of serviceEntries(s))if(key&&!hasService(style,key)&&serviceInUse(s,key))throw new Error(tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'));
     Object.assign(s,style);
   };
-  const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
+  const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(!s.deviceTypes?.some(x=>x.id==='router')?[['router',tr('Ռաուտեր')]]:[]),...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
+  const isNetworkDevice = d => ['switch','router'].includes(d.type);
+  function portLayout(d){
+    const sfpCount=d.sfpCount||0,copper=d.portList.length-sfpCount;
+    const columns=Math.ceil(copper/2),opticalColumns=Math.ceil(sfpCount/2);
+    return d.portList.map((p,i)=>{
+      const optical=i>=copper,index=optical?i-copper:i;
+      return {p,optical,row:isNetworkDevice(d)?index%2:Math.floor(i/24),column:isNetworkDevice(d)?Math.floor(index/2)+(optical?columns+1:0):i%24,columns:isNetworkDevice(d)?columns+(sfpCount?1+opticalColumns:0):24,rows:isNetworkDevice(d)?2:Math.ceil(d.portList.length/24)};
+    });
+  }
   const serviceColor = (s,key) => s.serviceColors?.[key] || s.serviceTypes?.find(type=>type.id===key)?.color || services[key]?.color || services[''].color;
   const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || s.serviceTypes?.find(type=>type.id===key)?.name || translate(services[key]?.label||'');
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
@@ -89,6 +98,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
           for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
           assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);
           if(d.type==='panel') assert([12,24,48].includes(d.portList.length),tr('Փաչ պանելը պետք է ունենա 12, 24 կամ 48 պորտ'));
+          if(d.sfpCount!==undefined){integer(d.sfpCount,0,Math.min(16,d.portList.length));assert(!d.sfpCount||isNetworkDevice(d),tr('Օպտիկական պորտերը հասանելի են սվիչի և ռաուտերի համար'));}
           d.portList.forEach((p,i)=>{
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
@@ -125,7 +135,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x])), taken=new Set();
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
-      assert(d.type==='panel'&&to&&to.d.type==='switch',tr('Սվիչի պորտը չի գտնվել'));
+      assert(d.type==='panel'&&to&&isNetworkDevice(to.d),tr('Սվիչի պորտը չի գտնվել'));
       assert(!taken.has(p.switchPortId),tr('Սվիչի պորտն արդեն կապված է այլ փաչ պորտի հետ'));taken.add(p.switchPortId);
     }
     return s;
@@ -135,7 +145,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x]));
     const incoming=new Map(all.filter(x=>x.p.switchPortId).map(x=>[x.p.switchPortId,x]));
     return all.map(x=>{
-      const {f,r,d,p}=x, source=d.type==='switch'?incoming.get(p.id):x;
+      const {f,r,d,p}=x, source=isNetworkDevice(d)?incoming.get(p.id):x;
       const info=source?.p||p, peer=byId.get(p.switchPortId)||incoming.get(p.id);
       const switchEnd=d.type==='switch'?x:peer?.d.type==='switch'?peer:null;
       const status=p.status==='fault'?'fault':p.status==='used'||p.switchPortId||incoming.has(p.id)?'used':'free';
@@ -148,5 +158,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
   }
-  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

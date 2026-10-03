@@ -1,21 +1,21 @@
 {
-  "version": "2.6.6",
+  "version": "2.6.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հաշվետվություններում և Excel/PDF արտահանումներում ավելացվել են սվիչի անունն ու պորտի համարը։"
+      "Ավելացվել են ռաուտեր, սարքի մոդել և օպտիկական SFP պորտեր։ Սվիչների պորտերը դասավորված են երկու շարքով՝ SFP պորտերն աջ կողմում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Reports and Excel/PDF exports now show the switch name and port number."
+      "Added routers, device models and optical SFP ports. Switch ports now use two rows with SFP ports on the right."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "В отчёты и экспорт Excel/PDF добавлены имя коммутатора и номер порта."
+      "Добавлены маршрутизаторы, модели устройств и оптические порты SFP. Порты коммутаторов расположены в два ряда, SFP — справа."
     ]
   }
 }
