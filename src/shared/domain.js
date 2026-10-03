@@ -176,10 +176,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free'&&onFloor(row));
     const placed=new Map();
     for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
-    const markers=[...placed.values()].map((marker,i)=>{
-      const m = String(marker.row.room||'').match(/\d+/g);
-      return {...marker,number:m?m.pop():(i+1)};
-    }).filter(marker=>onFloor(marker.row));
+    const serviceCounts=new Map();
+    const markers=[...placed.values()].filter(marker=>onFloor(marker.row)).map(marker=>{
+      const service=marker.row.service||'other';
+      const seq=(serviceCounts.get(service)||0)+1;
+      serviceCounts.set(service,seq);
+      return {...marker,number:seq};
+    });
     return {devices,markers,canonical};
   }
   const serviceIconPaths={

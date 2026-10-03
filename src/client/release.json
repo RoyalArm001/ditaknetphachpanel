@@ -1,21 +1,21 @@
 {
-  "version": "2.6.20",
+  "version": "2.7.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի էջում վերևի վահանակները միավորվել են մեկ կոմպակտ գործիքագոտու (toolbar) մեջ՝ ապահովելով շատ ավելի մեծ աշխատանքային տարածք և հարմարավետություն:"
+      "Քարտեզի վրա սարքերի նշանների (badge) համարակալումը այժմ կատարվում է առանձին ըստ սարքի տեսակի՝ յուրաքանչյուր տեսակի համար 1-ից (օր. WiFi 1-10, Door 1-6)։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The top panels on the Map page have been merged into a single compact toolbar, providing much more workspace and convenience when working with the floor plan."
+      "Map marker badges are now numbered independently per device type, starting from 1 for each type (e.g. WiFi 1-10, Door 1-6)."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Верхние панели на странице Карты объединены в одну компактную панель инструментов, что обеспечивает гораздо больше рабочего пространства и удобства."
+      "Нумерация меток на карте теперь ведется отдельно для каждого типа устройств, начиная с 1 (напр. WiFi 1-10, Door 1-6)."
     ]
   }
 }
