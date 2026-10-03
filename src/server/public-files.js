@@ -1,5 +1,6 @@
 'use strict';
 const path=require('node:path');
+const fs=require('node:fs');
 const root=path.resolve(__dirname,'../..');
 
 // Keep browser URLs stable while sources live in folders by responsibility.
@@ -10,6 +11,13 @@ const sources={
   'sitemap.xml':'src/client/sitemap.xml',
   'open-local.js':'src/client/open-local.js',
   'merge-state.js':'src/shared/merge-state.js',
+  'handover-pdf.js':'src/shared/handover-pdf.js',
+  'maps.js':'src/client/js/maps.js',
+  'maps.css':'src/client/css/maps.css',
+  'pdfkit.js':'node_modules/pdfkit/js/pdfkit.standalone.js',
+  'pdfjs/pdf.mjs':'node_modules/pdfjs-dist/legacy/build/pdf.mjs',
+  'pdfjs/pdf.worker.mjs':'node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',
+  ...Object.fromEntries(['cmaps','standard_fonts'].flatMap(dir=>fs.readdirSync(path.join(root,'node_modules/pdfjs-dist',dir)).map(name=>[`pdfjs/${dir}/${name}`,`node_modules/pdfjs-dist/${dir}/${name}`]))),
   'release.json':'src/client/release.json',
   'manifest.webmanifest':'src/client/manifest.webmanifest',
   'sw.js':'src/client/sw.js',

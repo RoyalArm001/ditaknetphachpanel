@@ -133,6 +133,18 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       }
     }
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x])), taken=new Set();
+    if(s.floorPlans!==undefined){
+      assert(Array.isArray(s.floorPlans)&&s.floorPlans.length<=30,tr('Հատակագծի տվյալները սխալ են'));
+      for(const plan of s.floorPlans){
+        id(plan.id);name(plan.name);text(plan.floorId);
+        assert(!plan.floorId||s.floors.some(f=>f.id===plan.floorId),tr('Հատակագծի տվյալները սխալ են'));
+        integer(plan.width,1,3000);integer(plan.height,1,3000);text(plan.image,2500000);
+        assert(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(plan.image),tr('Հատակագծի տվյալները սխալ են'));
+        assert(Array.isArray(plan.markers)&&plan.markers.length<=10000,tr('Հատակագծի տվյալները սխալ են'));
+        const placed=new Set();
+        for(const marker of plan.markers){id(marker.id);assert(byId.has(marker.portId)&&!placed.has(marker.portId),tr('Հատակագծի տվյալները սխալ են'));placed.add(marker.portId);assert([marker.x,marker.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));}
+      }
+    }
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
       assert(d.type==='panel'&&to&&isNetworkDevice(to.d),tr('Սվիչի պորտը չի գտնվել'));
@@ -157,6 +169,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   }
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
+    for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
   return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

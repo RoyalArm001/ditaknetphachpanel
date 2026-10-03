@@ -1,21 +1,21 @@
 {
-  "version": "2.6.7",
+  "version": "2.6.8",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել են ռաուտեր, սարքի մոդել և օպտիկական SFP պորտեր։ Սվիչների պորտերը դասավորված են երկու շարքով՝ SFP պորտերն աջ կողմում։"
+      "Նոր «Քարտեզ» էջում բեռնեք հատակագիծը, տեղադրեք պորտերը և արտահանեք PDF։ Ավելացվել է նաև փաչ պանելների սխեմաների ու միացումների PDF։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added routers, device models and optical SFP ports. Switch ports now use two rows with SFP ports on the right."
+      "Upload floor plans, place ports and export a PDF from the new Map page. Also export patch panel diagrams and connection schedules as PDF."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлены маршрутизаторы, модели устройств и оптические порты SFP. Порты коммутаторов расположены в два ряда, SFP — справа."
+      "На новой странице «Карта» загружайте планы, размещайте порты и экспортируйте PDF. Добавлен PDF со схемами патч-панелей и подключениями."
     ]
   }
 }

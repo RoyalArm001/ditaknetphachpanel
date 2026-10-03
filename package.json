@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "exceljs": "^4.4.0",
+    "pdfjs-dist": "^6.3.289",
     "pdfkit": "^0.17.2",
     "pg": "^8.23.0"
   },

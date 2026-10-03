@@ -59,7 +59,7 @@ const recoveryKey=()=>accountMode()?'rackmap-account-'+accountUserId+'-'+activeC
 function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
-const viewNames={get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր');},get search(){return tr('Մալուխներ և որոնում');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
+const viewNames={get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր');},get search(){return tr('Մալուխներ և որոնում');},get map(){return tr('Քարտեզ');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
 const button=(label,action,id='',cls='')=>`<button type="button" class="button ${cls}" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
 const input=(name,label,value='',type='text',extra='')=>`<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${esc(value)}" ${extra}></div>`;
 const secretInput=(name,label,value='')=>`<div class="field"><label for="${name}">${label}</label><div class="secret-wrap"><input id="${name}" name="${name}" type="password" value="${esc(value)}" maxlength="200" autocomplete="off" spellcheck="false"><button type="button" class="button small secret-toggle" data-action="toggle-secret" data-id="${esc(name)}">${tr('Ցույց տալ')}</button></div></div>`;
@@ -135,7 +135,9 @@ async function save(){
 }
 function commit(fn,redraw=true){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
 function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return {view:viewNames[v]?v:'overview',id};}
+let mapController=null;
 function render(){
+  mapController?.destroy();mapController=null;
   for(const key of Object.keys(D.statuses))document.documentElement.style.setProperty('--'+key,D.statusColor(state,key));
   document.body.classList.remove('login-view');
   sceneController?.destroy();sceneController=null;
@@ -143,7 +145,7 @@ function render(){
   $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');$('#breadcrumb').textContent=viewNames[view];
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
-  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
+  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
   applyPanels();
 }
 function renderSetup(){
@@ -393,7 +395,7 @@ function deviceModal(id,rackId,position){const found=findDevice(id),d=found?.d,r
   <div class="field full"><p class="hint">${nets.length?tr('Սարքի IP-ն, մուտքանունը և գաղտնաբառը պահվում են ընտրված VLAN ցանցում։'):tr('Նախ «Ցանցեր» բաժնում ավելացրեք VLAN։')}</p></div>
   ${nets.length?select('hostNetworkId',tr('Ցանց'),[['',tr('Չնշել')],...nets.map(n=>[n.id,networkLabel(n)])],first?.n.id||'')+input('hostIp',tr('Սարքի IP'),first?.h.ip||'','text',tr('maxlength="200" placeholder="192.168.10.2" inputmode="decimal" autocomplete="off"'))+input('hostUsername',tr('Մուտքանուն'),first?.h.username||'','text','maxlength="200" autocomplete="off"')+secretInput('hostPassword',tr('Գաղտնաբառ'),first?.h.password||''):''}</div><p class="form-note">Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։</p>`,fd=>commit(s=>{
     const rr=s.floors.flatMap(f=>f.racks).find(x=>x.id===r.id);const edit=d?rr.devices.find(x=>x.id===id):{id:uid(),portList:[]};const count=+fd.get('count'),sfpCount=D.isNetworkDevice({type:fd.get('type')})?+fd.get('sfpCount'):0;const previousSfp=edit.sfpCount||0,split=edit.portList.length-previousSfp,copper=edit.portList.slice(0,split),optical=edit.portList.slice(split);
-    const removed=[...copper.slice(count),...optical.slice(sfpCount)];if(removed.some(p=>p.status!=='free'||p.cable||p.floorId||p.door||p.side||p.room||p.notes||p.service||p.vlan||p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
+    const removed=[...copper.slice(count),...optical.slice(sfpCount)];if(removed.some(p=>p.status!=='free'||p.cable||p.floorId||p.door||p.side||p.room||p.notes||p.service||p.vlan||p.switchPortId||(s.floorPlans||[]).some(plan=>plan.markers.some(m=>m.portId===p.id))||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
     if(d&&d.type!==fd.get('type')&&edit.portList.some(p=>p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Կապված սարքի տեսակը փոխելուց առաջ անջատեք կապերը։'));
     Object.assign(edit,{name:fd.get('name').trim(),type:fd.get('type'),model:String(fd.get('model')||'').trim(),sfpCount,modelType:fd.get('type')==='switch'?String(fd.get('modelType')||''):'',pos:+fd.get('pos'),height:+fd.get('height'),color:fd.get('color')});
     const makePort=()=>({...D.port(1,uid()),...(!d?{status:fd.get('initialStatus'),service:fd.get('initialService')}:{})});
