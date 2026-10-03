@@ -1,21 +1,21 @@
 {
-  "version": "2.6.8",
+  "version": "2.6.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Նոր «Քարտեզ» էջում բեռնեք հատակագիծը, տեղադրեք պորտերը և արտահանեք PDF։ Ավելացվել է նաև փաչ պանելների սխեմաների ու միացումների PDF։"
+      "Քարտեզում միացված սարքերը խմբավորված են ըստ նշանակության՝ Wi-Fi, տեսախցիկ և այլն։ Ավելացվել են սարքերի պատկերակներ և քանակների ամփոփում PDF-ում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Upload floor plans, place ports and export a PDF from the new Map page. Also export patch panel diagrams and connection schedules as PDF."
+      "Map devices are grouped by purpose, including Wi-Fi and cameras. Device icons and a quantity summary are also included in PDF exports."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "На новой странице «Карта» загружайте планы, размещайте порты и экспортируйте PDF. Добавлен PDF со схемами патч-панелей и подключениями."
+      "Устройства на карте сгруппированы по назначению: Wi-Fi, камеры и другие. В PDF добавлены значки устройств и сводка количества."
     ]
   }
 }

@@ -167,9 +167,29 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         connection:peer?`${peer.r.name} / ${peer.d.name} / ${peer.p.number}`:'',...x};
     }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
   }
+  // A panel port and its linked switch port represent one installed endpoint.
+  function mapDevices(s,plan){
+    const all=rows(s),byId=new Map(all.map(row=>[row.p.id,row]));
+    const incoming=new Map(all.filter(row=>row.p.switchPortId).map(row=>[row.p.switchPortId,row.p.id]));
+    const canonical=id=>incoming.get(id)||id;
+    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free');
+    const placed=new Map();
+    for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
+    const markers=[...placed.values()].map((marker,i)=>({...marker,number:i+1}));
+    return {devices,markers,canonical};
+  }
+  const serviceIconPaths={
+    camera:'M3 7h12v10H3Z M15 10l6-3v10l-6-3Z',
+    wifi:'M2 8Q12 -1 22 8 M5 12Q12 5 19 12 M8 16Q12 12 16 16 M11 20h2',
+    access:'M5 21V3h13v18 M2 21h20 M14 12h1',
+    phone:'M6 3l4 4-3 3q2 5 7 7l3-3 4 4q-2 5-7 2Q3 16 3 7Z',
+    internet:'M3 12h18 M12 3C5 8 5 16 12 21 M12 3c7 5 7 13 0 18 M12 3C0 3 0 21 12 21C24 21 24 3 12 3Z',
+    other:'M4 4h16v13H4Z M8 21h8 M12 17v4'
+  };
+  const serviceIcon = key => serviceIconPaths[key]||serviceIconPaths.other;
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,mapDevices,serviceIcon,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
