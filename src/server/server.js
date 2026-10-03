@@ -9,6 +9,7 @@ const Domain=require('../shared/domain');
 const ExcelJS=require('exceljs');
 const PDFDocument=require('pdfkit');
 const columns=[['floor','Հարկ'],['rack','Ռաք'],['device','Սարք'],['port','Պորտ'],['status','Վիճակ'],['cable','Մալուխ'],['destination','Նպատակակետի հարկ'],['room','Սենյակ'],['door','Դուռ'],['side','Կողմ'],['connection','Կապ'],['notes','Նշումներ'],['service','Նշանակություն'],['vlan','VLAN']];
+columns.splice(4,0,['switchName','Սվիչ'],['switchPort','Սվիչի պորտ']);
 const exportValue=(r,k,state,tr=x=>x)=>k==='status'?Domain.statusLabel(state,r[k],tr):k==='service'?Domain.serviceLabel(state,r[k],tr):r[k];
 function createApp(options={}) {
   const cloud=options.cloud??(process.env.RACKMAP_STORAGE==='supabase'||process.env.VERCEL==='1');
@@ -175,7 +176,7 @@ function createApp(options={}) {
           sheet.columns=columns.map(([key,header])=>({header:tr(header),key,width:key==='notes'?45:key==='connection'?36:22}));
           for(const row of rows)sheet.addRow(Object.fromEntries(columns.map(([k])=>[k,exportValue(row,k,state,tr)])));
           sheet.getRow(1).height=30;sheet.getRow(1).eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF174E50'}};c.font={color:{argb:'FFFFFFFF'},bold:true};});
-          sheet.eachRow(r=>{r.alignment={vertical:'middle',wrapText:true};});sheet.autoFilter={from:'A1',to:'N1'};
+          sheet.eachRow(r=>{r.alignment={vertical:'middle',wrapText:true};});sheet.autoFilter={from:'A1',to:'P1'};
           const inventory=book.addWorksheet(tr('Ռաքեր և սարքեր'));inventory.columns=[{header:tr('Հարկ'),key:'floor',width:24},{header:tr('Ռաք'),key:'rack',width:24},{header:tr('Ռաք U'),key:'u',width:12},{header:tr('Սարք'),key:'device',width:24},{header:tr('U դիրք'),key:'pos',width:12},{header:tr('Բարձրություն U'),key:'height',width:18},{header:tr('Պորտեր'),key:'ports',width:12}];
           for(const f of state.floors)for(const r of f.racks)if((!url.searchParams.get('floor')||url.searchParams.get('floor')===f.id)&&(!url.searchParams.get('rack')||url.searchParams.get('rack')===r.id)){
             if(!r.devices.length)inventory.addRow({floor:f.name,rack:r.name,u:r.u});
@@ -194,6 +195,7 @@ function createApp(options={}) {
         if(filterLabels.length)pdf.text(filterLabels.join(' / '));pdf.text(tr`Պորտերի քանակ՝ ${rows.length}`).moveDown();
         for(const row of rows){
           const lines=[`${row.floor} / ${row.rack} / ${row.device} / ${row.port}`,tr`Վիճակ՝ ${Domain.statusLabel(state,row.status,tr)}    Մալուխ՝ ${row.cable||'—'}`,tr`Նշանակություն՝ ${Domain.serviceLabel(state,row.service,tr)}    VLAN՝ ${row.vlan||'—'}`,tr`Տեղադրություն՝ ${[row.destination,row.room,row.door,row.side].filter(Boolean).join(' / ')||'—'}`,tr`Կապ՝ ${row.connection||'—'}`,row.notes?tr`Նշումներ՝ ${row.notes}`:''].filter(Boolean);
+          lines.splice(1,0,`${tr('Սվիչ')}: ${row.switchName||'—'} · ${tr('Սվիչի պորտ')}: ${row.switchPort===''?'—':row.switchPort}`);
           for(let i=0;i<lines.length;i++){
             pdf.fontSize(i===0?11:9);const h=pdf.heightOfString(lines[i],{width:515});
             if(pdf.y+h>785)pdf.addPage();pdf.fillColor(i===0?'#174E50':'#333333').text(lines[i],{width:515});

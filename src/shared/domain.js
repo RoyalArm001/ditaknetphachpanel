@@ -137,9 +137,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     return all.map(x=>{
       const {f,r,d,p}=x, source=d.type==='switch'?incoming.get(p.id):x;
       const info=source?.p||p, peer=byId.get(p.switchPortId)||incoming.get(p.id);
+      const switchEnd=d.type==='switch'?x:peer?.d.type==='switch'?peer:null;
       const status=p.status==='fault'?'fault':p.status==='used'||p.switchPortId||incoming.has(p.id)?'used':'free';
       return {floor:f.name,rack:r.name,device:d.name,type:d.type,port:p.number,status, cable:info.cable,
         destination:s.floors.find(f=>f.id===info.floorId)?.name||'', room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
+        switchName:switchEnd?.d.name||'',switchPort:switchEnd?.p.number??'',switchRack:switchEnd?.r.name||'',
         connection:peer?`${peer.r.name} / ${peer.d.name} / ${peer.p.number}`:'',...x};
     }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
   }

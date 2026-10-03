@@ -1,21 +1,21 @@
 {
-  "version": "2.6.5",
+  "version": "2.6.6",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "PIN-ով մուտքը հիշվում է 30 օր և ակտիվ օգտագործման ընթացքում ավտոմատ երկարացվում է։"
+      "Հաշվետվություններում և Excel/PDF արտահանումներում ավելացվել են սվիչի անունն ու պորտի համարը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "PIN sign-in is remembered for 30 days and renews automatically during active use."
+      "Reports and Excel/PDF exports now show the switch name and port number."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Вход по PIN сохраняется на 30 дней и автоматически продлевается при использовании приложения."
+      "В отчёты и экспорт Excel/PDF добавлены имя коммутатора и номер порта."
     ]
   }
 }
