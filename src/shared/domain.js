@@ -32,8 +32,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     });
   }
   const serviceColor = (s,key) => s.serviceColors?.[key] || s.serviceTypes?.find(type=>type.id===key)?.color || services[key]?.color || services[''].color;
-  const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || s.serviceTypes?.find(type=>type.id===key)?.name || translate(services[key]?.label||'');
-  const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(statuses[key]||'');
+  const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || s.serviceTypes?.find(type=>type.id===key)?.name || translate(({'':'Չնշված',camera:'Տեսախցիկ',wifi:'Wi-Fi',access:'Մուտքի վերահսկում',phone:'Հեռախոս',internet:'Ինտերնետ'})[key]||'');
+  const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(({free:'Ազատ',used:'Զբաղված',fault:'Անսարք'})[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
   const projectStyle = s => Object.fromEntries(['backupFormat','serviceTypes','hiddenServices','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
   const empty = () => ({schema:2, company:'', floors:[], networks:[],deviceTypes:[]});
@@ -172,10 +172,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const all=rows(s),byId=new Map(all.map(row=>[row.p.id,row]));
     const incoming=new Map(all.filter(row=>row.p.switchPortId).map(row=>[row.p.switchPortId,row.p.id]));
     const canonical=id=>incoming.get(id)||id;
-    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free');
+    const onFloor=row=>!plan?.floorId||(row.p.floorId||row.f.id)===plan.floorId;
+    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free'&&onFloor(row));
     const placed=new Map();
     for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
-    const markers=[...placed.values()].map((marker,i)=>({...marker,number:i+1}));
+    const markers=[...placed.values()].map((marker,i)=>({...marker,number:i+1})).filter(marker=>onFloor(marker.row));
     return {devices,markers,canonical};
   }
   const serviceIconPaths={

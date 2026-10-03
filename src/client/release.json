@@ -1,21 +1,21 @@
 {
-  "version": "2.6.9",
+  "version": "2.6.10",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզում միացված սարքերը խմբավորված են ըստ նշանակության՝ Wi-Fi, տեսախցիկ և այլն։ Ավելացվել են սարքերի պատկերակներ և քանակների ամփոփում PDF-ում։"
+      "Քարտեզի սարքերը զտվում են ըստ հարկի։ PDF-ում ընտրեք լեզուն, հարկը, սարքի տեսակը կամ առանձին սարքը։ Ուղղվել են փաչ պանելների և սվիչների սխեմաները։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map devices are grouped by purpose, including Wi-Fi and cameras. Device icons and a quantity summary are also included in PDF exports."
+      "Map devices are filtered by floor. PDF exports let you choose the language, floor, device type or individual device. Improved patch panel and switch diagrams."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Устройства на карте сгруппированы по назначению: Wi-Fi, камеры и другие. В PDF добавлены значки устройств и сводка количества."
+      "Устройства на карте фильтруются по этажу. В PDF можно выбрать язык, этаж, тип или отдельное устройство. Исправлены схемы патч-панелей и коммутаторов."
     ]
   }
 }
