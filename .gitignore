@@ -7,3 +7,6 @@ test-output/
 .vercel/
 dist/
 cloud-backups/
+
+Windows-Release/
+windows-app/artifacts/

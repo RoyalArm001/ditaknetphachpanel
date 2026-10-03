@@ -1,6 +1,7 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Բոլոր համապատասխան սարքերն արդեն տեղադրված են կամ չեն համապատասխանում որոնմանը։":["All matching devices are already placed, or no devices match your search.","Все подходящие устройства уже размещены или не соответствуют поиску."],
 "Կիսվել հղումով":["Share a view link", "Поделиться ссылкой"],
 "Իմ հղումները":["My view links", "Мои ссылки"],
 "Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։":["Anyone with the link can view and download only the selected PDF copy, without editing the database. Later changes do not update this copy.", "По ссылке можно только просмотреть и скачать выбранную PDF-копию, без редактирования базы. Последующие изменения не обновляют эту копию."],

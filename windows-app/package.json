@@ -1,0 +1,48 @@
+{
+  "name": "my-patch-windows",
+  "version": "2.7.4",
+  "private": true,
+  "productName": "My Patch",
+  "description": "My Patch Windows workspace",
+  "author": "RoyalArm",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win nsis portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.ditaknet.mypatch.windows",
+    "productName": "My Patch",
+    "asar": true,
+    "directories": {
+      "output": "../Windows-Release"
+    },
+    "files": [
+      "main.cjs",
+      "offline.html",
+      "offline.css",
+      "icon.ico",
+      "package.json"
+    ],
+    "win": {
+      "icon": "icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "artifactName": "MyPatch-Setup-${version}-${arch}.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "MyPatch-Portable-${version}-${arch}.${ext}"
+    }
+  }
+}

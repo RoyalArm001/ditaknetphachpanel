@@ -41,6 +41,7 @@ function createApp(options={}) {
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
+      if(url.pathname==='/asset-manifest.json'&&req.method==='GET')return json(res,200,require('./asset-manifest').assetManifest());
       if(url.pathname==='/api/config')return json(res,200,{cloud,authRequired,pinEnabled:!!pinAuth&&await pinAuth.enabled(),accountEnabled:!!accountAuth,personalAccountEnabled:!!accounts&&!!personalAuth,maxStateBytes:cloud?4*1024*1024:24*1024*1024});
       if(url.pathname.startsWith('/api/shared/')){
         res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');res.setHeader('Referrer-Policy','no-referrer');
@@ -235,6 +236,11 @@ function createApp(options={}) {
         if(!rows.length)pdf.text(tr('Ընտրված ֆիլտրերով պորտեր չկան։'));
         const range=pdf.bufferedPageRange();for(let i=0;i<range.count;i++){pdf.switchToPage(i);pdf.fontSize(8).fillColor('#777777').text(`${i+1} / ${range.count}`,40,810,{lineBreak:false});}
         pdf.end();return;
+      }
+      if(req.method==='GET'&&url.pathname==='/sw.js'){
+        const manifest=require('./asset-manifest').assetManifest(),id=require('node:crypto').createHash('sha256').update(JSON.stringify(manifest)).digest('hex').slice(0,12);
+        res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-cache'});
+        return res.end(fs.readFileSync(publicFiles['/sw.js'],'utf8').replace('__BUILD_ID__',id));
       }
       const file=publicFiles[url.pathname==='/'?'/index.html':url.pathname];
       if(req.method==='GET'&&file){

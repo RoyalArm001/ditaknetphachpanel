@@ -1,21 +1,27 @@
 {
-  "version": "2.7.3",
+  "version": "2.7.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել է սխալ տեղադրված սարքի նշանը քարտեզից հեշտությամբ ջնջելու հնարավորություն (նշանի վրայի × կոճակով, վերևի վահանակի «Հեռացնել» կոճակով, Delete ստեղնով կամ աջ քլիքով)։"
+      "Քարտեզում տեղադրված սարքերը թաքցվում են ցանկից և վերադառնում նշանը հեռացնելուց հետո։",
+      "Թարմացումները ներբեռնում են միայն փոփոխված ֆայլերը՝ քարտեզներ, հաշվետվություններ, ռաքեր և հիմնական գործիքներ։",
+      "Պատրաստվել է Windows տարբերակ՝ կայքի նույն բաժիններով և ֆունկցիոնալ թարմացումներով։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added easy ways to delete an incorrectly placed device from the map (via the marker × badge, the toolbar remove button, the Delete key, or right-click)."
+      "Placed map devices disappear from the picker and return when their markers are removed.",
+      "Updates reuse unchanged files across maps, reports, racks and core tools.",
+      "A Windows edition is available with the same website sections and feature updates."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлена возможность легко удалять неверно размещенные метки с карты (через значок × на метке, кнопку на панели, клавишу Delete или правый клик)."
+      "Размещённые устройства скрываются из списка и возвращаются после удаления метки.",
+      "Обновления повторно используют неизменённые файлы карт, отчётов, стоек и основных инструментов.",
+      "Подготовлена Windows-версия с теми же разделами сайта и функциональными обновлениями."
     ]
   }
 }

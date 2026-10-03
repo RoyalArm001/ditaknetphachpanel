@@ -119,15 +119,15 @@ globalThis.RackMaps=(()=>{
         }
       }
       const search=view.query.trim().toLocaleLowerCase(),matches=r=>!search||[D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room].join(' ').toLocaleLowerCase().includes(search);
-      const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&(!placed.has(r.p.id)||r.p.id===view.portId))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
+      const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placed.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
       function card(r,inactive=false){
         const marker=placed.get(r.p.id),name=D.serviceLabel(state,r.service,tr)||tr('Չնշված');
         const title=r.room||name;
         return `<div class="map-port-row ${r.p.id===view.portId?'selected':''}"><button type="button" data-map-port="${esc(r.p.id)}"><b class="map-device-name">${icon(r.service)}${esc(title)}${marker?' · #'+marker.number:''}</b><small>${esc([r.room?name:'',r.cable,r.floor].filter(Boolean).join(' · '))}</small><small>${esc(connectionLabel(r))}</small><span>${esc(inactive?tr('Այլևս զբաղված չէ'):marker?tr('Տեղադրված է'):tr('Չտեղադրված'))}${r.status==='fault'?' · '+esc(D.statusLabel(state,r.status,tr)):''}</span></button>${marker&&!h.readOnly?`<button type="button" class="map-unplace" data-map-remove="${esc(marker.id)}" title="${esc(tr('Հեռացնել նշանը'))}" aria-label="${esc(tr('Հեռացնել նշանը')+' · '+label(r))}">×</button>`:''}</div>`;
       }
       const active=[...groups].map(([service,items])=>`<section class="map-device-group"><h3 style="--service-color:${D.serviceColor(state,service)}">${icon(service)}${esc(D.serviceLabel(state,service,tr))}<span>${items.length}</span></h3>${items.map(r=>card(r)).join('')}</section>`).join('');
-      const inactive=mapData.markers.filter(m=>m.row.status==='free'&&matches(m.row));
-      root.querySelector('.map-port-list').innerHTML=(active||`<p class="hint">${esc(tr('Զբաղված միացումներ չկան։ Սարքի տեսակը նշեք պորտի նշանակության դաշտում։'))}</p>`)+(inactive.length?`<section class="map-device-group"><h3>${esc(tr('Նախկին նշումներ'))}</h3>${inactive.map(m=>card(m.row,true)).join('')}</section>`:'');
+
+      root.querySelector('.map-port-list').innerHTML=active||`<p class="hint">${esc(tr(mapData.devices.length?'Բոլոր համապատասխան սարքերն արդեն տեղադրված են կամ չեն համապատասխանում որոնմանը։':'Զբաղված միացումներ չկան։ Սարքի տեսակը նշեք պորտի նշանակության դաշտում։'))}</p>`;
     }
     async function upload(){
       modal(tr('Բեռնել հատակագիծ'),`<div class="form-grid">${input('planName',tr('Անվանում'),'','text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])],'')}${input('pdfPage',tr('PDF էջ'),1,'number','required min="1" max="10000"')}<label class="field">${esc(tr('Հատակագծի ֆայլ'))}<input name="planFile" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" required></label></div><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>`,async fd=>{

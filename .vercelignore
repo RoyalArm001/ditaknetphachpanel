@@ -9,3 +9,7 @@ docs
 scripts/create_plan.py
 scripts/*.cmd
 test-output
+
+desktop
+windows-app
+Windows-Release
