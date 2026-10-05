@@ -1,21 +1,21 @@
 {
-  "version": "2.7.11",
+  "version": "2.7.12",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքի դիրքի կետն այժմ ավելի տեսանելի է և պահպանում է չափը խոշորացման ժամանակ։"
+      "Հատակագծի փոքրացման նվազագույն չափը 27% է, իսկ նշված կետը մնում է տեսանելի։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The device location point on the map is now easier to see and keeps its size while zooming."
+      "Floor plans now remain at or above 27% zoom, and the marked location stays visible."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Точку расположения устройства на карте стало легче видеть; при масштабировании её размер не меняется."
+      "Масштаб плана теперь не опускается ниже 27%, а отмеченная точка остаётся видимой."
     ]
   }
 }
