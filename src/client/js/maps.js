@@ -73,7 +73,7 @@ globalThis.RackMaps=(()=>{
     function showDevices(open){view.devicesOpen=open;const side=root.querySelector('.map-sidebar');if(!side)return;root.querySelector('.map-side-panels').classList.toggle('devices-open',open);side.classList.toggle('is-open',open);root.querySelector('#map-device-picker').hidden=!open;const toggle=side.querySelector('[data-map-action="devices-toggle"]');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-controls','map-device-picker');toggle.innerHTML=svg(open?'minus':'plus');toggle.title=root.querySelector('.map-sidebar').getAttribute('aria-label');toggle.setAttribute('aria-label',toggle.title);root.querySelector('.map-add-devices').setAttribute('aria-expanded',String(open));drawInspector();}
     function drawInspector(){
       const host=root.querySelector('[data-map-inspector]');if(!host)return;
-      const row=byId.get(view.portId),marker=mapData.markers.find(m=>m.portId===view.portId);host.hidden=!row||view.devicesOpen;
+      const row=byId.get(view.portId),marker=mapData.markers.find(m=>m.portId===view.portId);host.hidden=!row;
       if(!row)return;
       const preview=byId.get(view.panelPortId);host.classList.toggle('map-panel-preview',!!preview);
       if(preview){

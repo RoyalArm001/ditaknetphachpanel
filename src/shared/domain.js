@@ -35,7 +35,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const serviceLabel = (s,key,translate=tr) => s.serviceLabels?.[key] || s.serviceTypes?.find(type=>type.id===key)?.name || translate(({'':'Չնշված',camera:'Տեսախցիկ',wifi:'Wi-Fi',access:'Մուտքի վերահսկում',phone:'Հեռախոս',internet:'Ինտերնետ'})[key]||'');
   const statusLabel = (s,key,translate=tr) => s.statusLabels?.[key] || translate(({free:'Ազատ',used:'Զբաղված',fault:'Անսարք'})[key]||'');
   const statusColor = (s,key) => s.statusColors?.[key] || ({free:'#299c72',used:'#397cc4',fault:'#d35352'})[key];
-  const projectStyle = s => Object.fromEntries(['backupFormat','serviceTypes','hiddenServices','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
+  const projectStyle = s => Object.fromEntries(['backupFormat','serviceIcons','serviceTypes','hiddenServices','serviceColors','serviceLabels','statusColors','statusLabels'].filter(key=>s?.[key]!==undefined).map(key=>[key,s[key]]));
   const empty = () => ({schema:2, company:'', floors:[], networks:[],deviceTypes:[]});
   const devices = s => s.floors.flatMap(f => f.racks.flatMap(r => r.devices.map(d => ({f,r,d}))));
   const ports = s => devices(s).flatMap(x => x.d.portList.map(p => ({...x,p})));
@@ -57,6 +57,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(typeof type.color==='string'&&/^#[0-9a-f]{6}$/i.test(type.color),tr('Գույնը պետք է լինի HEX ձևաչափով'));
       }
     }
+    if(s.serviceIcons!==undefined){assert(s.serviceIcons&&typeof s.serviceIcons==='object'&&!Array.isArray(s.serviceIcons),'Invalid service icons');for(const [key,icon] of Object.entries(s.serviceIcons))assert(hasService(s,key)&&typeof icon==='string'&&Object.hasOwn(serviceIconPaths,icon),'Invalid service icon');}
     if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>key&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
     // Validate stored custom names independently of the current interface language.
     const serviceNames=(s.serviceTypes||[]).map(type=>type.name.trim().toLowerCase());
@@ -190,6 +191,24 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     return {devices,markers,canonical};
   }
   const serviceIconPaths={
+    lan:'M3 3h18v18H3Z M6 7h12v7h-3v3H9v-3H6Z M9 7v4 M12 7v4 M15 7v4',
+    computer:'M2 3h20v14H2Z M12 17v4 M7 21h10 M5 6h14',
+    laptop:'M5 3h14v13H5Z M5 16l-3 5h20l-3-5 M10 18h4',
+    cameraIndoor:'M3 11a9 9 0 0 1 18 0Z M5 11a7 7 0 0 0 14 0 M9 12a3 3 0 0 0 6 0',
+    cameraOutdoor:'M3 5l14 2-2 8-14-2Z M17 8l5 1-1 5-5-1 M8 14v5h8 M16 16v6',
+    cameraPtz:'M5 3h14v5H5Z M7 8v8a5 5 0 0 0 10 0V8 M9 14h6v4H9Z M12 1v2',
+    socket:'M3 3h18v18H3Z M8 8v5 M16 8v5 M10 17h4',
+    fiber:'M8 2v8 M16 2v8 M5 10h6v8H5Z M13 10h6v8h-6Z M8 18v4 M16 18v4',
+    switch:'M2 7h20v12H2Z M5 11h3v4H5Z M10 11h3v4h-3Z M15 11h3v4h-3Z M5 4h14',
+    router:'M3 12h18v8H3Z M6 12V3 M18 12V3 M6 16h2 M11 16h2 M16 16h2',
+    server:'M5 2h14v20H5Z M5 8h14 M5 15h14 M8 5h1 M8 11h1 M8 18h1',
+    printer:'M6 8V2h12v6 M6 18H2V8h20v10h-4 M6 14h12v8H6Z M17 11h2',
+    tv:'M2 6h20v14H2Z M7 2l5 4 5-4 M8 23h8',
+    intercom:'M5 2h14v20H5Z M8 5h8v7H8Z M8 16h2 M14 16h2 M8 19h8',
+    alarm:'M5 15V9a7 7 0 0 1 14 0v6l2 3H3Z M9 21h6 M12 5v6',
+    sensor:'M8 8h8v8H8Z M3 6a10 10 0 0 0 0 12 M21 6a10 10 0 0 1 0 12 M6 9a5 5 0 0 0 0 6 M18 9a5 5 0 0 1 0 6',
+    ups:'M5 2h14v20H5Z M8 5h8v4H8Z M13 11l-4 5h4l-2 4 M8 6h1',
+    cable:'M3 2h6v6H3Z M5 2V0 M7 2V0 M6 8v8a5 5 0 0 0 10 0v-2 M13 8h6v6h-6Z M15 8V5 M17 8V5',
     camera:'M3 7h12v10H3Z M15 10l6-3v10l-6-3Z',
     wifi:'M2 8Q12 -1 22 8 M5 12Q12 5 19 12 M8 16Q12 12 16 16 M11 20h2',
     access:'M5 21V3h13v18 M2 21h20 M14 12h1',
@@ -197,10 +216,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     internet:'M3 12h18 M12 3C5 8 5 16 12 21 M12 3c7 5 7 13 0 18 M12 3C0 3 0 21 12 21C24 21 24 3 12 3Z',
     other:'M4 4h16v13H4Z M8 21h8 M12 17v4'
   };
-  const serviceIcon = key => serviceIconPaths[key]||serviceIconPaths.other;
+  const serviceIconNames={lan:'LAN վարդակ',computer:'Համակարգիչ',laptop:'Նոթբուք',cameraIndoor:'Ներքին տեսախցիկ',cameraOutdoor:'Արտաքին տեսախցիկ',cameraPtz:'PTZ տեսախցիկ',camera:'Տեսախցիկ',wifi:'Wi-Fi',access:'Մուտքի վերահսկում',phone:'Հեռախոս',internet:'Ինտերնետ',socket:'Էլեկտրական վարդակ',fiber:'Օպտիկական միացում',switch:'Սվիչ',router:'Ռաուտեր',server:'Սերվեր',printer:'Տպիչ',tv:'Հեռուստացույց',intercom:'Դոմոֆոն',alarm:'Ազդանշանային սարք',sensor:'Սենսոր',ups:'UPS',cable:'Մալուխի միացում',other:'Այլ սարք'};
+  const serviceIcon = (key,state) => serviceIconPaths[state?.serviceIcons?.[key]]||serviceIconPaths[key]||serviceIconPaths.other;
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

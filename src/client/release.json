@@ -1,21 +1,21 @@
 {
-  "version": "2.8.4",
+  "version": "2.8.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի ֆոնի մեղմ անիմացիան ավելի տեսանելի է, իսկ սարքերի ցանկի յուրաքանչյուր սարք կարելի է բացել առանձին։"
+      "Քարտեզի սարքերի ցանկն այժմ բացվում է իր վահանակի տակ՝ առանց ընտրված սարքի մանրամասները թաքցնելու։ Կարգավորումներում ավելացվել է SVG պատկերակների խմբագրիչի հստակ մուտք։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Made the gentle map background animation more visible and added expandable cards for each device."
+      "The map device list now opens below its panel without hiding selected-device details. Added a clear Settings entry for the SVG icon editor."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Анимация фона карты стала заметнее, а карточки устройств теперь можно раскрывать по отдельности."
+      "Список устройств на карте теперь раскрывается под своей панелью, не скрывая сведения о выбранном устройстве. В настройках добавлен понятный вход в редактор SVG-значков."
     ]
   }
 }

@@ -66,11 +66,11 @@ body.map-view{height:100dvh;min-height:0;overflow:hidden}
 @media(prefers-reduced-motion:reduce){.map-editor *{scroll-behavior:auto}}
 .map-side-panels{position:absolute;top:102px;right:20px;bottom:100px;width:320px;max-width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;z-index:6;pointer-events:none}
 .map-side-panels>.map-inspector,.map-side-panels>.map-sidebar{position:relative;inset:auto;width:100%;max-width:none;pointer-events:auto;flex-shrink:0}
-.map-side-panels.devices-open>.map-inspector{display:none!important}
 .map-side-panels>.map-inspector{max-height:55%;overflow:auto}
 .map-side-panels>.map-sidebar{bottom:auto;min-height:50px}
-.map-side-panels>.map-sidebar.is-open{flex:1;min-height:150px}
+.map-side-panels.devices-open>.map-inspector{flex-shrink:0}
+.map-side-panels>.map-sidebar.is-open{flex:1;min-height:0}
 .map-side-panels .map-sidebar-heading{flex-shrink:0}
 .map-side-panels .map-picker-body[hidden]{display:none}
-@media(max-width:760px){.map-side-panels{top:151px;right:12px;bottom:83px;width:300px;max-width:calc(100% - 24px)}.map-side-panels>.map-inspector{max-height:45%}.map-side-panels>.map-sidebar.is-open{min-height:120px}}
+@media(max-width:760px){.map-side-panels{top:151px;right:12px;bottom:83px;width:300px;max-width:calc(100% - 24px)}.map-side-panels>.map-inspector{max-height:45%}.map-side-panels>.map-sidebar.is-open{min-height:0}}
 @media(max-width:360px){.map-filters button>span{display:none}.map-bottom-toolbar .map-command small{display:none}.map-view #onlineCount{display:none!important}}

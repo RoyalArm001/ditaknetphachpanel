@@ -89,10 +89,14 @@ const deviceChoices=()=>[['',tr('Առանց ռաքի սարք')],...D.devices(st
 const opts=(xs,value)=>xs.map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(value)?'selected':''}>${esc(l)}</option>`).join('');
 const select=(name,label,xs,value='')=>{const selected=name==='name'&&!value&&networkTypePreference()&&xs.some(([key])=>key===networkTypePreference())?networkTypePreference():value;return `<div class="field"><label for="${name}">${label}</label><select name="${name}" id="${name}">${opts(xs,selected)}</select></div>`;};
 const legend=()=>'<div class="legend">'+Object.keys(D.statuses).map(key=>`<span class="${key}">${esc(D.statusLabel(state,key))}</span>`).join('')+'</div>';
+function serviceIconPicker(source,key){
+ const selected=source.serviceIcons?.[key]|| (Object.hasOwn(D.serviceIconNames,key)?key:'other');
+ return '<details class="service-icon-picker"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+D.serviceIcon(selected)+'"/></svg>'+esc(tr(D.serviceIconNames[selected]))+'</summary><div class="service-icon-grid">'+Object.entries(D.serviceIconNames).map(([icon,label])=>`<label title="${esc(tr(label))}"><input type="radio" name="style-service-icon-${esc(key||'none')}" value="${icon}" ${icon===selected?'checked':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${D.serviceIcon(icon)}"/></svg><span>${esc(tr(label))}</span></label>`).join('')+'</div></details>';
+}
 function serviceStyleRow(source,key,label){
   const suffix=key||'none',isCustom=key.startsWith('custom-'),value=isCustom?label:source.serviceLabels?.[key]||'';
   const used=key&&D.serviceInUse({...D.empty(),...source},key);
-  return `<div class="project-style-row service-style-row" data-service-style="${esc(key)}"><input type="hidden" name="style-service-key" value="${esc(key)}">${input(`style-service-label-${suffix}`,isCustom?tr('Ցանցի տեսակի անվանում'):label,value,'text',`maxlength="80" ${isCustom?'required':''} placeholder="${esc(label)}"`)}${input(`style-service-color-${suffix}`,tr('Գույն'),D.serviceColor(source,key),'color')}${key?`<button type="button" class="button small danger" data-action="style-service-remove" ${used?'disabled':''} title="${esc(used?tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'):tr('Ջնջել'))}">${tr('Ջնջել')}</button>`:''}</div>`;
+  return `<div class="project-style-row service-style-row" data-service-style="${esc(key)}"><input type="hidden" name="style-service-key" value="${esc(key)}">${input(`style-service-label-${suffix}`,isCustom?tr('Ցանցի տեսակի անվանում'):label,value,'text',`maxlength="80" ${isCustom?'required':''} placeholder="${esc(label)}"`)}${input(`style-service-color-${suffix}`,tr('Գույն'),D.serviceColor(source,key),'color')}${serviceIconPicker(source,key)}${key?`<button type="button" class="button small danger" data-action="style-service-remove" ${used?'disabled':''} title="${esc(used?tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'):tr('Ջնջել'))}">${tr('Ջնջել')}</button>`:''}</div>`;
 }
 function styleFields(source={},open=false){
   const statuses=Object.entries(D.statuses).map(([key,label])=>`<div class="project-style-row">${input(`style-status-label-${key}`,label,source.statusLabels?.[key]||'','text',`maxlength="80" placeholder="${esc(label)}"`)}${input(`style-status-color-${key}`,tr('Գույն'),D.statusColor(source,key),'color')}</div>`).join('');
@@ -101,12 +105,13 @@ function styleFields(source={},open=false){
 }
 function readStyle(fd){
   const keys=fd.getAll('style-service-key').map(String);
-  const result={serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>key&&!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
+  const result={serviceIcons:{},serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>key&&!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
   for(const [kind,entries]of [['service',keys],['status',Object.keys(D.statuses)]])for(const key of entries){
     const suffix=key||'none',label=String(fd.get(`style-${kind}-label-${suffix}`)||'').trim(),color=String(fd.get(`style-${kind}-color-${suffix}`)||'');
     if(kind==='service'&&key.startsWith('custom-'))result.serviceTypes.push({id:key,name:label,color});
     else{if(label)result[kind+'Labels'][key]=label;if(color)result[kind+'Colors'][key]=color;}
   }
+  for(const key of keys){const icon=fd.get('style-service-icon-'+(key||'none'));if(icon)result.serviceIcons[key]=String(icon);}
   D.validate({...D.empty(),...result});return result;
 }
 const racks=()=>state.floors.flatMap(f=>f.racks.map(r=>({f,r})));
@@ -370,6 +375,12 @@ async function loadPinUsers(){
     host.innerHTML=`<div class="pin-users-notice" role="status"><strong>${tr(restricted?'Օգտատերերի կառավարումը սահմանափակված է':'Օգտատերերի ցանկը չբեռնվեց')}</strong><p>${tr(restricted?'Ցանկը տեսնելու և խմբագրելու համար մուտք գործեք այս բազայի գլխավոր PIN-ով։ Աշխատակցի PIN-ը կամ թիմային հաշիվը այս իրավունքը չունի։':'Չհաջողվեց բեռնել օգտատերերին։ Կրկին փորձեք։')}</p><div class="actions">${restricted&&pinEnabled?button(tr('Մուտք գլխավոր PIN-ով'),'pin-admin-login','','primary'):''}${button(tr('Կրկին փորձել'),'pin-users-retry')}</div></div>`;
   }finally{host.setAttribute('aria-busy','false');}
 }
+document.addEventListener('change',event=>{
+  const control=event.target;
+  if(!control.matches('input[type="radio"][name^="style-service-icon-"]'))return;
+  const summary=control.closest('.service-icon-picker').querySelector('summary');
+  summary.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${D.serviceIcon(control.value)}"/></svg>${esc(tr(D.serviceIconNames[control.value]))}`;
+});
 function pinUserDialog(id=''){
   const rows=JSON.parse($('#pinUsers')?.dataset.rows||'[]'),row=rows.find(x=>x.id===id),label=row?.label||'';
   if(id&&!row){loadPinUsers();return;}
@@ -392,6 +403,7 @@ function renderSettings(){
   $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
   const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>${tr('Սարքերի տեսակներ')}</h2><p class="muted">${tr('Ստեղծեք ձեր սեփական սարքի տեսակները, որոնք կհայտնվեն նոր սարք ավելացնելիս։')}</p><div class="actions">${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div></section><section class="panel storage-mode"><h2>Աշխատանքային տարածք</h2><p>${esc(state.company)}</p><div class="actions">${button(tr('Ինչպե՞ս եք ցանկանում աշխատել'),'workspace-choice')}</div></section>`);
+  $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>${tr('SVG պատկերակների խմբագրում')}</h2><p class="muted">${tr('Ընտրեք քարտեզում և պորտերի նշանակությունների ցանկում օգտագործվող SVG պատկերակները։')}</p><div class="actions">${button(tr('Խմբագրել SVG պատկերակները'),'project-style')}</div></section>`);
   $('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel"><h2>${tr('Reset · Մաքրել հավելվածը')}</h2><p class="muted">${tr('Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի տվյալները չեն ջնջվում։')}</p>${button(tr('Reset · Մաքրել հավելվածը'),'app-reset','','danger')}</section>`);
   if(!accountReadOnly)$('[data-action=company]').insertAdjacentHTML('afterend',button(tr('Նախագծի անվանումներ և գույներ'),'project-style'));
   if(accountMode()){
@@ -739,7 +751,7 @@ const actions={
   'style-service-remove':(id,el)=>el.closest('[data-service-style]').remove(),
   'team-login':async()=>{if(ready&&!await save())return;onboardingChoice='shared';storageMode='shared';onboardingVisible=false;rememberWorkspace();init();},
   'app-reset':resetAppDialog,
-  'project-style':()=>modal(tr('Նախագծի անվանումներ և գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
+  'project-style':()=>modal(tr('SVG պատկերակներ և նախագծի անվանումներ ու գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
   'device-types':deviceTypesModal,
   'device-type-delete':id=>confirmAction(tr('Ջնջել սարքի տեսակը'),tr('Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։'),()=>commit(s=>{s.deviceTypes=(s.deviceTypes||[]).filter(x=>x.id!==id);})),
   'network-new':()=>networkModal(),
