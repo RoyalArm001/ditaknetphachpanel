@@ -1,21 +1,21 @@
 {
-  "version": "2.8.3",
+  "version": "2.8.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի ֆոնի մեղմ լուսային անիմացիան դարձել է ավելի տեսանելի։"
+      "Քարտեզի ֆոնի մեղմ անիմացիան ավելի տեսանելի է, իսկ սարքերի ցանկի յուրաքանչյուր սարք կարելի է բացել առանձին։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Enhanced the map background with a more visible, gentle glow animation."
+      "Made the gentle map background animation more visible and added expandable cards for each device."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Усилена мягкая анимация свечения фона карты."
+      "Анимация фона карты стала заметнее, а карточки устройств теперь можно раскрывать по отдельности."
     ]
   }
 }
