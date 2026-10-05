@@ -14,7 +14,7 @@ body.map-view{height:100dvh;min-height:0;overflow:hidden}
 .map-viewport[data-tool=hand],.map-viewport.hand-key{cursor:grab}.map-viewport.panning{cursor:grabbing}.map-viewport[data-tool=place]{cursor:crosshair}
 .map-canvas{position:absolute;top:0;left:0;transform-origin:0 0;box-shadow:0 12px 60px #0006;background:white;user-select:none;will-change:transform}
 .map-canvas>img{display:block;width:100%;height:100%;pointer-events:none;user-select:none}.map-markers{position:absolute;inset:0;pointer-events:none}
-.map-marker{position:absolute;display:grid;place-items:center;transform:translate(-50%,-50%);width:34px;height:34px;min-height:34px;padding:0;border:2px solid var(--marker-color,#2eb7a6);border-radius:50%;background:#f7fcff;color:#274550;box-shadow:0 2px 9px #0006;pointer-events:auto;touch-action:none;cursor:grab;z-index:1}
+.map-marker{position:absolute;display:grid;place-items:center;transform:translate(-50%,-50%) scale(var(--map-symbol-scale,1));width:34px;height:34px;min-height:34px;padding:0;border:2px solid var(--marker-color,#2eb7a6);border-radius:50%;background:#f7fcff;color:#274550;box-shadow:0 2px 9px #0006;pointer-events:auto;touch-action:none;cursor:grab;z-index:1}
 .map-marker svg{width:21px;height:21px}.map-marker.selected{outline:3px solid #66d6ca;outline-offset:3px;z-index:3}.map-marker.inactive{border-style:dashed;opacity:.65}
 .map-marker-number{position:absolute;right:-7px;top:-7px;min-width:17px;line-height:15px;border:1px solid #fff;border-radius:8px;padding:0 3px;background:#264951;color:#fff;font-size:9px;pointer-events:none}
 .map-editor .map-leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;stroke-width:1.5;filter:drop-shadow(0 1px 1px #fff)}
