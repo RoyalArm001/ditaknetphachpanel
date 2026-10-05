@@ -13,7 +13,21 @@ try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal',
 const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
 try{const choice=localStorage.getItem('rackmap-workspace-choice');if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
-function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}}
+if(!onboardingChoice)try{const choice=document.cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('mypatch_workspace='))?.split('=')[1];if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
+function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}try{document.cookie=`mypatch_workspace=${storageMode}; Path=/; SameSite=Lax; Max-Age=15552000${location.protocol==='https:'?'; Secure':''}`;}catch{}}
+async function restoreRememberedWorkspace(){
+  if(onboardingChoice)return;
+  await AppReset.ensureSessionCleared();
+  // The HttpOnly session can outlive browser preferences. Recover its workspace
+  // without reading or storing the PIN, and never switch an explicit choice.
+  const modes=storageMode==='account'?['account','shared']:['shared','account'];
+  const sessions=await Promise.all(modes.map(async mode=>{
+    try{const response=await fetch('/api/auth/session'+(mode==='account'?'?space=account':''),{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(8000)});if(!response.ok)return null;const result=await response.json();return result.user?.id?mode:null;}catch{return null;}
+  }));
+  if(onboardingChoice)return;
+  const valid=sessions.filter(Boolean);if(valid.length!==1)return;const restored=valid[0];
+  storageMode=restored;onboardingChoice=restored;rememberWorkspace();
+}
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
 const accountMode=()=>storageMode==='account';
 let authRequired=false,pinEnabled=false,accountEnabled=false;
@@ -35,7 +49,7 @@ function renderLogin(method=pinEnabled?'pin':'account'){
   const usePin=method==='pin'&&pinEnabled;
   $('#content').innerHTML=tr('<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՇԽԱՏԱԿՑԻ ՄՈՒՏՔ</div><h1>Իմ փաչ</h1><p class="login-intro">Բացեք ընկերությունների բազան և խմբագրեք ռաքերն ու միացումները։</p>')+(pinEnabled&&accountEnabled?'<div class="login-tabs">'+button(tr('PIN կոդ'),'login-pin')+button(tr('Թիմային հաշիվ'),'login-account')+'</div>':'')+'<form id="loginForm">'+(usePin?input('pin',tr('Աշխատակցի PIN'),'','password',tr('required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off" placeholder="Մուտքագրեք PIN կոդը"')):input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username"')+input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password"'))+tr('<p id="loginError" role="alert"></p><button class="button primary" type="submit">Բացել աշխատանքային տարածքը →</button></form></section>');
   $('#leftPanel').inert=true;const rightToggle=$('#rightToggle');if(rightToggle)rightToggle.hidden=true;
-  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const fd=new FormData(e.target);await api(usePin?'/api/auth/pin':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(usePin?{pin:fd.get('pin'),client:liveSessionId}:{email:fd.get('email'),password:fd.get('password')})});if(dirty||portDraftDirty){ready=true;render();}else await init();}catch(err){if($('#loginError'))$('#loginError').textContent=tr(err.message);}finally{b.disabled=false;}};
+  $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const fd=new FormData(e.target);await api(usePin?'/api/auth/pin':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(usePin?{pin:fd.get('pin'),client:liveSessionId}:{email:fd.get('email'),password:fd.get('password')})});onboardingChoice=storageMode;rememberWorkspace();if(dirty||portDraftDirty){ready=true;render();}else await init();}catch(err){if($('#loginError'))$('#loginError').textContent=tr(err.message);}finally{b.disabled=false;}};
 }
 let panelPrefs={left:!window.matchMedia('(max-width:760px)').matches,right:!window.matchMedia('(max-width:760px)').matches};
 try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k of ['left','right'])if(typeof p[k]==='boolean')panelPrefs[k]=p[k];}catch{}
@@ -763,6 +777,7 @@ async function init(){
     return;
   }
   try{
+    if(!onboardingChoice)await restoreRememberedWorkspace();
     if(!onboardingChoice){renderWelcome();return;}
     onboardingVisible=false;
     let config;

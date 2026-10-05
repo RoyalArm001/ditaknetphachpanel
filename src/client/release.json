@@ -1,27 +1,27 @@
 {
-  "version": "2.7.4",
+  "version": "2.7.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզում տեղադրված սարքերը թաքցվում են ցանկից և վերադառնում նշանը հեռացնելուց հետո։",
-      "Թարմացումները ներբեռնում են միայն փոփոխված ֆայլերը՝ քարտեզներ, հաշվետվություններ, ռաքեր և հիմնական գործիքներ։",
-      "Պատրաստվել է Windows տարբերակ՝ կայքի նույն բաժիններով և ֆունկցիոնալ թարմացումներով։"
+      "PIN-ով մուտքը պահվում է մինչև 180 օր և ակտիվ օգտագործման ընթացքում ինքնաշխատ երկարաձգվում է։",
+      "Պահպանված մուտքից աշխատանքային տարածքի վերականգնումը բարելավվել է՝ անձնական և թիմային բազաները տարանջատելով։",
+      "Պատրաստվել է առանձին Windows ծրագրի առաջին տարբերակը՝ տեղային բազայով, քարտեզներով և PDF արտահանմամբ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Placed map devices disappear from the picker and return when their markers are removed.",
-      "Updates reuse unchanged files across maps, reports, racks and core tools.",
-      "A Windows edition is available with the same website sections and feature updates."
+      "PIN sign-in lasts up to 180 days and renews during active use.",
+      "Workspace recovery from a saved session is improved while keeping personal and team databases separate.",
+      "The first native Windows build includes a local database, maps and PDF export."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Размещённые устройства скрываются из списка и возвращаются после удаления метки.",
-      "Обновления повторно используют неизменённые файлы карт, отчётов, стоек и основных инструментов.",
-      "Подготовлена Windows-версия с теми же разделами сайта и функциональными обновлениями."
+      "Вход по PIN сохраняется до 180 дней и продлевается при активном использовании.",
+      "Улучшено восстановление рабочего пространства из сохранённого сеанса с разделением личной и командной баз.",
+      "Первая нативная версия для Windows включает локальную базу, карты и экспорт PDF."
     ]
   }
 }

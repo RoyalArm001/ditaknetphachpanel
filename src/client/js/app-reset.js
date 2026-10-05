@@ -23,6 +23,7 @@ globalThis.AppReset=(()=>{
   }
   async function reset(){
     const token=crypto.randomUUID();
+    document.cookie='mypatch_workspace=; Path=/; SameSite=Lax; Max-Age=0';
     localStorage.setItem(pendingKey,'1');
     localStorage.setItem(startedKey,token);
     await PersonalStore.reset();

@@ -10,3 +10,8 @@ cloud-backups/
 
 Windows-Release/
 windows-app/artifacts/
+
+.tools/
+**/bin/
+**/obj/
+Native-Windows-Release/

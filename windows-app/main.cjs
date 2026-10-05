@@ -4,7 +4,7 @@ const path=require('node:path');
 const SITE='https://patch.ditaknet.com';
 const preview=app.commandLine.hasSwitch('hidden-preview');
 if(preview)app.setPath('userData',path.join(app.getPath('temp'),'MyPatch-preview-'+process.pid));
-let mainWindow;
+let mainWindow,profile,flushingSession=false,sessionFlushed=false;
 const trusted=url=>{try{return new URL(url).origin===SITE;}catch{return false;}};
 function external(url){try{const parsed=new URL(url);if(['https:','http:'].includes(parsed.protocol))void shell.openExternal(parsed.href);}catch{}}
 if(!app.requestSingleInstanceLock())app.quit();
@@ -13,7 +13,7 @@ else {
   app.on('second-instance',()=>{if(mainWindow){if(mainWindow.isMinimized())mainWindow.restore();mainWindow.show();mainWindow.focus();}});
   app.whenReady().then(()=>{
     // The cloud UI never receives Node, filesystem, or IPC access.
-    const profile=session.fromPartition('persist:mypatch-workspace');
+    profile=session.fromPartition('persist:mypatch-workspace');
     profile.setPermissionCheckHandler((_contents,permission,origin)=>trusted(origin)&&['persistent-storage','clipboard-sanitized-write','fullscreen'].includes(permission));
     profile.setPermissionRequestHandler((contents,permission,callback)=>{
       if(!trusted(contents.getURL()))return callback(false);
@@ -43,6 +43,12 @@ else {
       {label:'Օգնություն / Help',submenu:[{label:'My Patch '+app.getVersion(),click:()=>dialog.showMessageBox(mainWindow,{type:'info',message:'My Patch · Windows',detail:'Windows '+app.getVersion()+'\n'+SITE+'\n\nՖունկցիոնալ թարմացումները գալիս են կայքից։\nFeature updates are delivered from the website.'})}]}
     ]));
     void mainWindow.loadURL(SITE).catch(()=>{});
+  });
+  app.on('before-quit',event=>{
+    if(!profile||sessionFlushed)return;
+    event.preventDefault();if(flushingSession)return;flushingSession=true;
+    profile.flushStorageData();
+    profile.cookies.flushStore().catch(()=>{}).finally(()=>{sessionFlushed=true;app.quit();});
   });
   app.on('window-all-closed',()=>app.quit());
 }

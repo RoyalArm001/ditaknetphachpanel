@@ -24,8 +24,8 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
   const fingerprint=hash=>createHash('sha256').update(hash).digest('hex').slice(0,16);
   const signature=value=>createHmac('sha256',secret).update(value).digest('base64url');
   const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
-  function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`${cookieName}=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Strict; Max-Age=${age}`]);}
-  const sessionAge=30*24*60*60;
+  function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];const expires=new Date(age?now()+age*1000:0).toUTCString();res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`${cookieName}=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Lax; Max-Age=${age}; Expires=${expires}`]);}
+  const sessionAge=180*24*60*60;
   function issue(res,id){
     const payload=Buffer.from(JSON.stringify({id,exp:now()+sessionAge*1000,version:fingerprint(hashes[id]),nonce:randomBytes(12).toString('hex')})).toString('base64url');
     cookie(res,payload+'.'+signature(payload),sessionAge);
@@ -37,8 +37,10 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
       if(!token||token.length>500)return null;
       const [payload,mac]=token.split('.');if(!payload||!mac||!equal(signature(payload),mac))return null;
       try{const data=JSON.parse(Buffer.from(payload,'base64url')),id=data.id||'staff-pin';
-        if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+sessionAge*1000)return null;
-        // Renew at most daily; existing unexpired eight-hour cookies upgrade here too.
+        // Different cloud instances may have slightly different clocks. This only
+        // permits small future issuance skew; expired tokens remain invalid.
+        if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+(sessionAge+300)*1000)return null;
+        // Renew daily while active; older valid sessions upgrade automatically.
         if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id);
         return {id,method:'pin'};
       }catch{return null;}

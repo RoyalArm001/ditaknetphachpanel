@@ -9,6 +9,7 @@ function clearClientSession(req,res){
   if(status===200){
     const secure=req.headers['x-forwarded-proto']==='https'||req.socket?.encrypted||origin?.startsWith('https:');
     headers['Set-Cookie']=['rackmap_access','rackmap_refresh','rackmap_pin','mypatch_access','mypatch_refresh','mypatch_recovery'].map(name=>`${name}=; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Lax; Max-Age=0`);
+    headers['Set-Cookie'].push(`mypatch_workspace=; Path=/; ${secure?'Secure; ':''}SameSite=Lax; Max-Age=0`);
   }
   res.writeHead(status,headers);res.end(JSON.stringify({ok:status===200}));return true;
 }

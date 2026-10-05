@@ -13,3 +13,7 @@ test-output
 desktop
 windows-app
 Windows-Release
+
+.tools
+native-windows
+Native-Windows-Release
