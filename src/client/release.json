@@ -1,21 +1,21 @@
 {
-  "version": "2.8.2",
+  "version": "2.8.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի ֆոնն այժմ ունի նուրբ շարժվող լուսային անիմացիա։"
+      "Քարտեզի ֆոնի մեղմ լուսային անիմացիան դարձել է ավելի տեսանելի։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added a subtle animated glow to the map background."
+      "Enhanced the map background with a more visible, gentle glow animation."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлена мягкая анимация свечения фона карты."
+      "Усилена мягкая анимация свечения фона карты."
     ]
   }
 }

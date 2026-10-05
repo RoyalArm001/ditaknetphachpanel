@@ -10,8 +10,8 @@ body.map-view{height:100dvh;min-height:0;overflow:hidden}
 .map-editor [hidden]{display:none!important}.map-editor button,.map-editor select,.map-editor input,.map-editor summary{font:inherit;letter-spacing:normal}
 .map-editor :is(button,summary,select):focus-visible{outline:2px solid #62baee;outline-offset:3px}
 .map-editor svg{display:block;width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.map-viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;background-color:#090e12;background-image:radial-gradient(ellipse at 18% 24%,#126c7224,transparent 44%),radial-gradient(ellipse at 82% 78%,#41647b1c,transparent 46%),radial-gradient(#78848e26 .7px,transparent .7px);background-size:180% 180%,160% 160%,22px 22px;background-position:0 0,100% 100%,0 0;animation:map-ambient-drift 42s ease-in-out infinite alternate;cursor:default;outline:none}
-@keyframes map-ambient-drift{to{background-position:100% 85%,0 15%,0 0}}
+.map-viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;background-color:#0b1217;background-image:radial-gradient(ellipse at 18% 24%,#0b7d7048,transparent 46%),radial-gradient(ellipse at 82% 76%,#275b7b38,transparent 44%),radial-gradient(ellipse at 58% 8%,#5a43771f,transparent 40%),radial-gradient(#a4bac51a .7px,transparent .7px);background-size:155% 155%,150% 150%,165% 165%,22px 22px;background-position:0 0,100% 100%,48% 0,0 0;animation:map-ambient-drift 34s ease-in-out infinite alternate;cursor:default;outline:none}
+@keyframes map-ambient-drift{to{background-position:100% 78%,0 22%,100% 90%,0 0}}
 @media(prefers-reduced-motion:reduce){.map-viewport{animation:none}}
 .map-viewport[data-tool=hand],.map-viewport.hand-key{cursor:grab}.map-viewport.panning{cursor:grabbing}.map-viewport[data-tool=place]{cursor:crosshair}
 .map-canvas{position:absolute;top:0;left:0;transform-origin:0 0;box-shadow:0 12px 60px #0006;background:white;user-select:none;will-change:transform}
