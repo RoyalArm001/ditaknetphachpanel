@@ -44,6 +44,7 @@ applyUiZoom();
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
 function renderLogin(method=pinEnabled?'pin':'account'){
+  mapController?.destroy();mapController=null;
   if(accountMode())return renderAccountLogin(accountMethod);
   ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const usePin=method==='pin'&&pinEnabled;
@@ -52,12 +53,14 @@ function renderLogin(method=pinEnabled?'pin':'account'){
   $('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const fd=new FormData(e.target);await api(usePin?'/api/auth/pin':'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(usePin?{pin:fd.get('pin'),client:liveSessionId}:{email:fd.get('email'),password:fd.get('password')})});onboardingChoice=storageMode;rememberWorkspace();if(dirty||portDraftDirty){ready=true;render();}else await init();}catch(err){if($('#loginError'))$('#loginError').textContent=tr(err.message);}finally{b.disabled=false;}};
 }
 let panelPrefs={left:!window.matchMedia('(max-width:760px)').matches,right:!window.matchMedia('(max-width:760px)').matches};
+let mapNavOpen=false;
 try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k of ['left','right'])if(typeof p[k]==='boolean')panelPrefs[k]=p[k];}catch{}
 function applyPanels(){
   for(const k of ['left','right']){
-    document.body.classList.toggle(k+'-collapsed',!panelPrefs[k]);
+    const open=k==='left'&&document.body.classList.contains('map-view')&&!window.matchMedia('(max-width:760px)').matches?mapNavOpen:panelPrefs[k];
+    document.body.classList.toggle(k+'-collapsed',!open);
     const panel=$('#'+k+'Panel');if(panel)panel.inert=!panelPrefs[k]&&!(k==='left'&&!window.matchMedia('(max-width:760px)').matches);
-    document.querySelectorAll('[data-action="toggle-'+k+'"]').forEach(toggle=>toggle.setAttribute('aria-expanded',String(panelPrefs[k])));
+    document.querySelectorAll('[data-action="toggle-'+k+'"]').forEach(toggle=>toggle.setAttribute('aria-expanded',String(open)));
   }
   const rightToggle=$('#rightToggle');if(rightToggle)rightToggle.hidden=route().view!=='rack'||!$('#rightPanel');
   const mobile=window.matchMedia('(max-width:760px)').matches;
@@ -65,7 +68,7 @@ function applyPanels(){
   const panelBackdrop=$('#panelBackdrop');if(panelBackdrop)panelBackdrop.hidden=!overlay||!ready;
   document.body.classList.toggle('mobile-panel-open',!!overlay&&ready);
 }
-function togglePanel(k){panelPrefs[k]=!panelPrefs[k];if(window.matchMedia('(max-width:760px)').matches&&panelPrefs[k])panelPrefs[k==='left'?'right':'left']=false;applyPanels();try{localStorage.setItem('rackmap-panels',JSON.stringify(panelPrefs));}catch{}}
+function togglePanel(k){if(k==='left'&&document.body.classList.contains('map-view')&&!window.matchMedia('(max-width:760px)').matches){mapNavOpen=!mapNavOpen;applyPanels();return;}panelPrefs[k]=!panelPrefs[k];if(window.matchMedia('(max-width:760px)').matches&&panelPrefs[k])panelPrefs[k==='left'?'right':'left']=false;applyPanels();try{localStorage.setItem('rackmap-panels',JSON.stringify(panelPrefs));}catch{}}
 let selectedPortId='',selectedPortIds=new Set(),portDraft=null,portDraftDirty=false,portTimer;
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
@@ -167,6 +170,7 @@ function renderSetup(){
   $('#setupForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);try{commit(s=>{Object.assign(s,readStyle(f));s.backupFormat=f.get('backupFormat');s.company=f.get('company').trim();if(!s.company)throw new Error(tr('Գրեք ընկերության անվանումը'));s.floors=Array.from({length:+f.get('count')},(_,i)=>({id:uid(),name:tr`${i+1}-րդ հարկ`,racks:[]}));});toast(tr('Շենքը ստեղծված է'));}catch(err){$('#setupError').hidden=false;$('#setupError').textContent=tr(err.message);}};
 }
 function renderWelcome(){
+  mapController?.destroy();mapController=null;
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից կամ մեր կայքից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնել կայքից'),'site-recover')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը մեր կայքում։ Ձեր անձնական cloud-ի տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}</section>`;
@@ -201,6 +205,7 @@ function recoverAccountDialog(){
   $('#modalForm button[type=submit]').textContent=tr('Բացել իմ պահուստային պատճենը');
 }
 function renderAccountLogin(method='login'){
+  mapController?.destroy();mapController=null;
   accountMethod=method;onboardingVisible=false;ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
   const recovery=method==='recover',signup=method==='signup';
   const fields=signup?`<div class="signup-step" data-step="0">${input('firstName',tr('Անուն'),'','text','required maxlength="80" autocomplete="given-name"')}${input('lastName',tr('Ազգանուն'),'','text','required maxlength="80" autocomplete="family-name"')}<button class="button primary" type="button" data-signup-next>${tr('Հաջորդը')} →</button></div><div class="signup-step" data-step="1" hidden>${input('phone',tr('Հեռախոսահամար'),'','tel','required maxlength="40" autocomplete="tel"')}${input('username',tr('Username'),'','text','required pattern="[A-Za-z0-9._-]{3,40}" maxlength="40" autocomplete="username"')}<div class="actions">${button(tr('← Հետ'),'signup-prev')}<button class="button primary" type="button" data-signup-next>${tr('Հաջորդը')} →</button></div></div><div class="signup-step" data-step="2" hidden>${input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="email" maxlength="320"')}${input('password',tr('Գաղտնաբառ'),'','password','required minlength="12" autocomplete="new-password" maxlength="1024"')}<p class="hint">${tr('Վերջում կստեղծվի և կցուցադրվի ձեր անձնական PIN կոդը։')}</p><div class="actions">${button(tr('← Հետ'),'signup-prev')}<button class="button primary" type="submit">${tr('Ստեղծել հաշիվ')}</button></div></div>`:`${input('email',tr('Էլ․ փոստ կամ մուտքանուն'),'','text','required autocomplete="username" maxlength="320"')}${recovery?input('pin',tr('Անձնական PIN'),'','password','required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="one-time-code"'):input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password" maxlength="1024"')}<button class="button primary" type="submit">${recovery?tr('Բացել իմ պահուստային պատճենը'):tr('Մուտք գործել')}</button>`;
@@ -867,7 +872,7 @@ window.addEventListener('pagehide',stopLive);
 document.addEventListener('visibilitychange',maintainLive);
 let refreshInFlight=false;
 async function refreshCurrentDatabase(){
-  const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
+  const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||mapController?.busy?.()||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
   if(refreshInFlight||busy()||document.visibilityState==='hidden')return;
   const pollingCompany=activeCompanyId,pollingMode=storageMode;
   const current=()=>pollingMode===storageMode&&pollingCompany===activeCompanyId&&!busy();
