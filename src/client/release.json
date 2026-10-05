@@ -1,21 +1,21 @@
 {
-  "version": "2.7.8",
+  "version": "2.7.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Մեկնարկային էջը վերադասավորված է․ PIN մուտքը, անձնական հաշիվը և այս սարքում աշխատանքը ներկայացված են պարզ բացատրություններով։ Պահուստային պատճենի վերականգնումն ունի առանձին բաժին։"
+      "PIN օգտատերերի բաժինն այլևս չի անհետանում սխալի դեպքում․ ցուցադրվում է գլխավոր PIN-ի պահանջը կամ կրկին բեռնելու կոճակը։ Նոր PIN ստեղծելուց հետո ցանկն անմիջապես թարմացվում է։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The welcome page now clearly separates PIN sign-in, your personal account and work on this device. Backup recovery has its own section."
+      "The PIN users section now explains access restrictions and offers retry when loading fails. The list refreshes after a new PIN is created."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "На стартовой странице понятнее представлены вход по PIN-коду, личный аккаунт и работа на устройстве. Восстановление резервной копии вынесено в отдельный раздел."
+      "Раздел пользователей PIN теперь объясняет ограничения доступа и предлагает повторную загрузку при ошибке. Список обновляется после создания нового PIN."
     ]
   }
 }

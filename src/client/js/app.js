@@ -352,15 +352,38 @@ function renderResults(){const all=D.rows(state,filters);page=Math.min(page,Math
 let settingsPage='project';
 const settingsTabs=()=>{const pages=[['project','▦',tr('Նախագիծ'),tr('Շենքի և սարքերի կարգավորումներ')],['users','●',tr('Օգտատերեր'),tr('PIN-եր և թիմի հասանելիություն')],['data','↧',tr('Տվյալներ'),tr('Պատճեններ և պահպանում')],['app','⚙',tr('Հավելված'),tr('Աշխատանքային ռեժիմ և reset')]],current=pages.find(x=>x[0]===settingsPage);return `<nav class="settings-tabs" aria-label="${tr('Կարգավորումների բաժիններ')}">${pages.map(([id,icon,label])=>`<button type="button" class="settings-tab ${id===settingsPage?'active':''}" data-action="settings-tab" data-id="${id}"><span>${icon}</span>${label}</button>`).join('')}</nav><div class="settings-page-heading"><h2>${current[2]}</h2><p>${current[3]}</p></div>`;};
 async function loadPinUsers(){
-  const host=$('#pinUsers');if(!host)return;
-  try{const rows=await api('/api/pins');host.dataset.rows=JSON.stringify(rows);host.innerHTML=rows.map(x=>{const names=x.role==='admin'?tr('Բոլոր նախագծերը'):(x.companyIds||[]).map(id=>companies.find(c=>c.id===id)?.name).filter(Boolean).join(', ')||tr('Ոչ մի նախագիծ');return `<div class="pin-user"><span><strong>${esc(x.label)}</strong><small>${x.role==='admin'?tr('Գլխավոր PIN'):x.enabled?tr('Ակտիվ է'):tr('Արգելափակված է')} · ${esc(names)}</small><small>PIN՝ ••••••••••</small></span>${button(tr('Խմբագրել'),'pin-user-edit',x.id,'small')}</div>`;}).join('');}catch{host.closest('.panel')?.remove();}
+  const host=$('#pinUsers');if(!host||host.getAttribute('aria-busy')==='true')return;
+  const add=host.closest('.panel').querySelector('[data-action=pin-user-new]');add.hidden=true;host.dataset.rows='[]';
+  if(accountMode()){
+    host.innerHTML=`<div class="pin-users-notice"><p>${tr('Դուք անձնական հաշվի տարածքում եք։ Թիմի PIN օգտատերերը կառավարվում են ընդհանուր բազայում՝ գլխավոր PIN-ով։')}</p>${button(tr('Բացել թիմի մուտքը'),'team-login')}</div>`;return;
+  }
+  host.setAttribute('aria-busy','true');host.textContent=tr('Բեռնվում է…');
+  try{
+    const rows=await api('/api/pins');if(!host.isConnected)return;
+    if(!Array.isArray(rows))throw new Error(tr('Չհաջողվեց բեռնել օգտատերերին։ Կրկին փորձեք։'));
+    host.dataset.rows=JSON.stringify(rows);add.hidden=false;
+    host.innerHTML=rows.map(x=>{const names=x.role==='admin'?tr('Բոլոր նախագծերը'):(x.companyIds||[]).map(id=>companies.find(c=>c.id===id)?.name).filter(Boolean).join(', ')||tr('Ոչ մի նախագիծ');return `<div class="pin-user"><span><strong>${esc(x.label)}</strong><small>${x.role==='admin'?tr('Գլխավոր PIN'):x.enabled?tr('Ակտիվ է'):tr('Արգելափակված է')} · ${esc(names)}</small><small>PIN՝ ••••••••••</small></span>${button(tr('Խմբագրել'),'pin-user-edit',x.id,'small')}</div>`;}).join('')||`<p class="hint">${tr('PIN օգտատերեր դեռ չկան։ Ավելացրեք առաջին օգտատիրոջը։')}</p>`;
+  }catch(error){
+    if(!host.isConnected)return;
+    const restricted=error.code===403;
+    host.innerHTML=`<div class="pin-users-notice" role="status"><strong>${tr(restricted?'Օգտատերերի կառավարումը սահմանափակված է':'Օգտատերերի ցանկը չբեռնվեց')}</strong><p>${tr(restricted?'Ցանկը տեսնելու և խմբագրելու համար մուտք գործեք այս բազայի գլխավոր PIN-ով։ Աշխատակցի PIN-ը կամ թիմային հաշիվը այս իրավունքը չունի։':'Չհաջողվեց բեռնել օգտատերերին։ Կրկին փորձեք։')}</p><div class="actions">${restricted&&pinEnabled?button(tr('Մուտք գլխավոր PIN-ով'),'pin-admin-login','','primary'):''}${button(tr('Կրկին փորձել'),'pin-users-retry')}</div></div>`;
+  }finally{host.setAttribute('aria-busy','false');}
 }
 function pinUserDialog(id=''){
   const rows=JSON.parse($('#pinUsers')?.dataset.rows||'[]'),row=rows.find(x=>x.id===id),label=row?.label||'';
+  if(id&&!row){loadPinUsers();return;}
   const selected=new Set(row?.companyIds||companies.map(x=>x.id)),projectAccess=row?.role==='admin'?'':`<fieldset class="pin-projects"><legend>${tr('Տեսանելի նախագծեր')}</legend>${companies.map(c=>`<label class="check"><input name="companyId" value="${esc(c.id)}" type="checkbox" ${selected.has(c.id)?'checked':''}> ${esc(c.name)}</label>`).join('')}</fieldset>`;
   modal(id?tr('Խմբագրել PIN օգտատիրոջը'):tr('Ավելացնել PIN օգտատեր'),input('pinUserName',tr('Օգտատիրոջ անուն'),label,'text','required maxlength="80"')+projectAccess+(id?`<label class="check"><input name="enabled" type="checkbox" ${row.enabled?'checked':''}> ${tr('Ակտիվ է')}</label><label class="check"><input name="rotate" type="checkbox"> ${tr('Ստեղծել նոր PIN կոդ')}</label>`:''),async fd=>{
     const result=await api('/api/pins',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,label:fd.get('pinUserName'),enabled:id?fd.has('enabled'):true,rotate:fd.has('rotate'),companyIds:fd.getAll('companyId')})});
-    if(result.pin)setTimeout(()=>modal(tr('Նոր PIN կոդ'),`<div class="personal-pin">${esc(result.pin)}</div><p class="hint">${tr('Պահպանեք կոդը․ այն այլևս չի ցուցադրվի։')}</p>`),0);else setTimeout(loadPinUsers,0);
+    setTimeout(()=>{
+      if(result.pin){
+        modal(tr('Նոր PIN կոդ'),`<div class="personal-pin">${esc(result.pin)}</div><p class="hint">${tr('Պահպանեք կոդը․ այն այլևս չի ցուցադրվի։')}</p>`);
+        // Rotating the current PIN expires its session. Keep the new code visible
+        // until dismissed, before a refresh can require sign-in again.
+        if(id){const dialog=$('#dialog'),refresh=()=>{if(dialog.open)return;dialog.removeEventListener('close',refresh);loadPinUsers();};dialog.addEventListener('close',refresh);return;}
+      }
+      loadPinUsers();
+    },0);
   });
 }
 function renderSettings(){
@@ -377,8 +400,9 @@ function renderSettings(){
     networkInfo.nextElementSibling.textContent=tr('Վերականգնման համար օգտագործեք ձեր էլ․ փոստը և անձնական PIN-ը։');
     if(!accountReadOnly)$('.storage-mode .actions').insertAdjacentHTML('beforeend',button(tr('Փոխարինել անձնական PIN-ը'),'account-pin-new'));
   }
+  if(!personal()&&!accountMode()&&cloudMode&&pinEnabled)networkInfo.nextElementSibling.textContent=tr('Թիմի նախագծերը բացվում են աշխատակցի PIN-ով։ PIN օգտատերերին կառավարելու համար անհրաժեշտ է գլխավոր PIN-ը։');
   $('#content .page-head')?.insertAdjacentHTML('afterend',settingsTabs());
-  if(!personal()&&cloudMode){$('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel pin-users-panel"><div class="section-head"><h2>${tr('PIN օգտատերեր')}</h2>${button(tr('＋ Ավելացնել օգտատեր'),'pin-user-new','','primary')}</div><p class="muted">${tr('Անվանեք յուրաքանչյուր PIN-ը․ անունները կերևան LIVE ցանկում։')}</p><div id="pinUsers">${tr('Բեռնվում է…')}</div></section>`);loadPinUsers();}
+  if(!personal()&&cloudMode){$('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel pin-users-panel"><div class="section-head"><h2>${tr('PIN օգտատերեր')}</h2><button type="button" class="button primary" data-action="pin-user-new" hidden>${tr('＋ Ավելացնել օգտատեր')}</button></div><p class="muted">${tr('Անվանեք յուրաքանչյուր PIN-ը․ անունները կերևան LIVE ցանկում։')}</p><div id="pinUsers">${tr('Բեռնվում է…')}</div></section>`);loadPinUsers();}
   const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset]'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}$('.settings-grid').dataset.activePage=settingsPage;
   api('/api/storage').then(x=>{if(storageInfo.isConnected)storageInfo.innerHTML=tr`<strong>Բազա</strong><div class="storage-path">${esc(x.database)}</div><strong>Ավտոմատ պատճեններ</strong><div class="storage-path">${esc(tr(x.backups))}</div>`;}).catch(()=>{if(storageInfo.isConnected)storageInfo.textContent=tr('Չհաջողվեց ստանալ բազայի տվյալները');});
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
@@ -688,6 +712,8 @@ const actions={
   'settings-tab':id=>{settingsPage=id;renderSettings();},
   'pin-user-new':()=>pinUserDialog(),
   'pin-user-edit':id=>pinUserDialog(id),
+  'pin-users-retry':loadPinUsers,
+  'pin-admin-login':async()=>{if(personal()||accountMode()||!pinEnabled)return;if(ready&&!await save())return;renderLogin('pin');},
   'site-recover':recoverFromSiteDialog,
   'site-recover-pin':recoverAccountDialog,
   'site-recover-login':()=>renderAccountLogin('login'),

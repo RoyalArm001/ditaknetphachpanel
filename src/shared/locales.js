@@ -1,6 +1,15 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Դուք անձնական հաշվի տարածքում եք։ Թիմի PIN օգտատերերը կառավարվում են ընդհանուր բազայում՝ գլխավոր PIN-ով։":["You are in your personal account. Team PIN users are managed in the shared database with its main PIN.","Вы в личном аккаунте. Пользователи PIN команды управляются в общей базе с помощью главного PIN-кода."],
+"Բացել թիմի մուտքը":["Open team sign-in","Открыть вход в команду"],
+"Օգտատերերի կառավարումը սահմանափակված է":["User management is restricted","Управление пользователями ограничено"],
+"Օգտատերերի ցանկը չբեռնվեց":["The user list could not load","Не удалось загрузить список пользователей"],
+"Ցանկը տեսնելու և խմբագրելու համար մուտք գործեք այս բազայի գլխավոր PIN-ով։ Աշխատակցի PIN-ը կամ թիմային հաշիվը այս իրավունքը չունի։":["Sign in with this database's main PIN to view and edit the list. Employee PINs and team accounts do not have this permission.","Для просмотра и изменения списка войдите с главным PIN-кодом этой базы. PIN сотрудника и командный аккаунт не дают этого права."],
+"Մուտք գլխավոր PIN-ով":["Sign in with main PIN","Войти с главным PIN"],
+"Չհաջողվեց բեռնել օգտատերերին։ Կրկին փորձեք։":["Users could not be loaded. Please try again.","Не удалось загрузить пользователей. Попробуйте ещё раз."],
+"PIN օգտատերեր դեռ չկան։ Ավելացրեք առաջին օգտատիրոջը։":["There are no PIN users yet. Add the first user.","Пользователей PIN пока нет. Добавьте первого пользователя."],
+"Թիմի նախագծերը բացվում են աշխատակցի PIN-ով։ PIN օգտատերերին կառավարելու համար անհրաժեշտ է գլխավոր PIN-ը։":["Open team projects with an employee PIN. Managing PIN users requires the main PIN.","Откройте проекты команды с PIN-кодом сотрудника. Для управления пользователями PIN нужен главный PIN."],
 "Բարի գալուստ":["Welcome","Добро пожаловать"],
 "Բացեք ձեր նախագծերը կամ սկսեք նոր աշխատանք։":["Open your projects or start something new.","Откройте свои проекты или начните новый."],
 "Թիմային աշխատանք":["For your team","Для команды"],
