@@ -443,7 +443,7 @@ function deviceModal(id,rackId,position){const found=findDevice(id),d=found?.d,r
   <div class="field full"><p class="hint">${nets.length?tr('Սարքի IP-ն, մուտքանունը և գաղտնաբառը պահվում են ընտրված VLAN ցանցում։'):tr('Նախ «Ցանցեր» բաժնում ավելացրեք VLAN։')}</p></div>
   ${nets.length?select('hostNetworkId',tr('Ցանց'),[['',tr('Չնշել')],...nets.map(n=>[n.id,networkLabel(n)])],first?.n.id||'')+input('hostIp',tr('Սարքի IP'),first?.h.ip||'','text',tr('maxlength="200" placeholder="192.168.10.2" inputmode="decimal" autocomplete="off"'))+input('hostUsername',tr('Մուտքանուն'),first?.h.username||'','text','maxlength="200" autocomplete="off"')+secretInput('hostPassword',tr('Գաղտնաբառ'),first?.h.password||''):''}</div><p class="form-note">Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։</p>`,fd=>commit(s=>{
     const rr=s.floors.flatMap(f=>f.racks).find(x=>x.id===r.id);const edit=d?rr.devices.find(x=>x.id===id):{id:uid(),portList:[]};const count=+fd.get('count'),sfpCount=D.isNetworkDevice({type:fd.get('type')})?+fd.get('sfpCount'):0;const previousSfp=edit.sfpCount||0,split=edit.portList.length-previousSfp,copper=edit.portList.slice(0,split),optical=edit.portList.slice(split);
-    const removed=[...copper.slice(count),...optical.slice(sfpCount)];if(removed.some(p=>p.status!=='free'||p.cable||p.floorId||p.door||p.side||p.room||p.notes||p.service||p.vlan||p.switchPortId||(s.floorPlans||[]).some(plan=>plan.markers.some(m=>m.portId===p.id))||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
+    const removed=[...copper.slice(count),...optical.slice(sfpCount)];if(removed.some(p=>p.status!=='free'||p.endpointName||p.cable||p.floorId||p.door||p.side||p.room||p.notes||p.service||p.vlan||p.switchPortId||(s.floorPlans||[]).some(plan=>plan.markers.some(m=>m.portId===p.id))||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
     if(d&&d.type!==fd.get('type')&&edit.portList.some(p=>p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Կապված սարքի տեսակը փոխելուց առաջ անջատեք կապերը։'));
     Object.assign(edit,{name:fd.get('name').trim(),type:fd.get('type'),model:String(fd.get('model')||'').trim(),sfpCount,modelType:fd.get('type')==='switch'?String(fd.get('modelType')||''):'',pos:+fd.get('pos'),height:+fd.get('height'),color:fd.get('color')});
     const makePort=()=>({...D.port(1,uid()),...(!d?{status:fd.get('initialStatus'),service:fd.get('initialService')}:{})});
@@ -506,6 +506,7 @@ function renderPortTools(){
   const choices=all.filter(x=>D.isNetworkDevice(x.d)&&!usedTargets.has(x.p.id)).map(x=>[x.p.id,`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}${D.portLayout(x.d).find(y=>y.p.id===x.p.id)?.optical?' SFP':''}${x.p.status==='fault'?tr(' · ԱՆՍԱՐՔ'):''}`]);
   host.innerHTML=tr`<div class="port-editor-heading"><div><div class="eyebrow">ԸՆՏՐՎԱԾ ՊՈՐՏ</div><h2>${esc(d.name)} / ${p.number}</h2></div>${button('×','port-deselect','','small')}</div><p class="port-title">${esc(r.name)} · ${d.type==='panel'?tr('Փաչ պանել'):tr('Սվիչ')}</p>
   <form id="portForm">
+    ${input('endpointName',tr('Միացված սարքի անվանում'),v.endpointName||'','text','maxlength="200" placeholder="WiFi B zone"')}
     <fieldset class="link-config"><legend>Կապի կարգավորումներ</legend>
       <div class="service-choices">${D.serviceEntries(state).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${(v.service||'')===key?'checked':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
       ${input('vlan','VLAN',v.vlan||'','number',tr('min="1" max="4094" step="1" list="vlanChoices" placeholder="Օրինակ՝ 20"'))}<datalist id="vlanChoices">${D.networks(state).map(n=>`<option value="${esc(n.vlan)}">${esc(networkName(n))}</option>`).join('')}</datalist>
@@ -552,7 +553,7 @@ function flushPortEditor(){
     commit(s=>{
       const entry=D.ports(s).find(x=>x.p.id===id);if(!entry)throw new Error(tr('Պորտը չի գտնվել'));
       const current=entry.p,source=D.ports(s).find(x=>x.p.switchPortId===id)?.p||current;
-      for(const key of ['cable','floorId','room','door','side','notes','service','vlan'])source[key]=String(v[key]||'').trim();
+      for(const key of ['endpointName','cable','floorId','room','door','side','notes','service','vlan'])source[key]=String(v[key]||'').trim();
       if(source.vlan)source.vlan=String(Number(source.vlan));
       if(source===current){
         current.status=v.status;current.switchPortId=v.switchPortId||'';

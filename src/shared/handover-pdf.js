@@ -31,7 +31,8 @@
       head();
       for(const item of items){
         const row=byId.get(item.portId);if(!row)continue;
-        const values={number:item.number,service:D.serviceLabel(state,row.service,tr),port:row.device+' / '+row.port+'\n'+row.floor+' / '+row.rack,location:[row.destination,row.room,row.door,row.side].filter(Boolean).join(' / ')||'—',cable:row.cable||'—',connection:(row.connection||'—')+(row.vlan?'\nVLAN '+row.vlan:''),status:D.statusLabel(state,row.status,tr)};
+        const service=D.serviceLabel(state,row.service,tr),name=D.endpointLabel(state,row,tr);
+        const values={number:item.number,service:name===service?service:name+'\n'+service,port:row.device+' / '+row.port+'\n'+row.floor+' / '+row.rack,location:[row.destination,row.room,row.door,row.side].filter(Boolean).join(' / ')||'—',cable:row.cable||'—',connection:(row.connection||'—')+(row.vlan?'\nVLAN '+row.vlan:''),status:D.statusLabel(state,row.status,tr)};
         let size=9;const height=()=>Math.max(42,...cols.map(c=>pdf.font('Project').fontSize(size).heightOfString(String(values[c.key]),{width:c.w-12,lineGap:2})+16));
         while(height()>370&&size>6)size-=.5;const h=height();
         if(y+h>bottom){page(title,subtitle);y=121;head();}
@@ -49,7 +50,12 @@
         const scale=Math.min((W-24)/plan.width,410/plan.height),w=plan.width*scale,h=plan.height*scale,x=32+(W-w)/2,y=121+(410-h)/2;
         pdf.image(plan.image,x,y,{width:w,height:h});
         const markers=plan.selectedMarkers;
-        for(const m of markers){const px=x+m.x*w,py=y+m.y*h,color=D.serviceColor(state,m.row.service);pdf.circle(px,py,12).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-8,py-8,16,ink);pdf.roundedRect(px+7,py+6,18,12,3).fill(ink);text(m.number,px+7,py+6,18,7,'#ffffff',12,'center');}
+        for(const m of markers){const p=D.mapMarkerLayout(m),color=D.serviceColor(state,m.row.service);pdf.moveTo(x+p.x*w,y+p.y*h).lineTo(x+p.iconX*w,y+p.iconY*h).lineWidth(1).strokeColor(color).stroke();pdf.circle(x+p.x*w,y+p.y*h,3).fillAndStroke(color,'#ffffff');}
+        for(const m of markers){
+          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=D.serviceColor(state,m.row.service);pdf.circle(px,py,12).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-8,py-8,16,ink);pdf.roundedRect(px+7,py-13,18,12,3).fill(ink);text(m.number,px+7,py-13,18,7,'#ffffff',12,'center');
+          const name=D.endpointLabel(state,m.row,tr),width=Math.min(130,Math.max(32,pdf.font('Project').fontSize(7).widthOfString(name)+10)),lx=Math.max(32,Math.min(810-width,px-width/2)),ly=py+15>bottom-16?py-32:py+15;
+          pdf.roundedRect(lx,ly,width,15,3).fill(ink);text(name,lx+4,ly+2,width-8,7,'#ffffff',12,'center');
+        }
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}
         page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);let index=0;
         for(const [service,items] of groups){const count=items.filter(m=>m.row.status!=='free').length;if(!count)continue;if(index&&index%18===0)page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);const at=index%18,gx=32+(at%3)*259,gy=126+Math.floor(at/3)*66;pdf.roundedRect(gx,gy,247,56,5).fill('#edf4f1');serviceSymbol(service,gx+10,gy+14,25,D.serviceColor(state,service));text(D.serviceLabel(state,service,tr),gx+46,gy+10,160,10,ink,30);text(count,gx+211,gy+17,28,14,ink,22,'center');index++;}

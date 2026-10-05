@@ -13,7 +13,7 @@ globalThis.ProjectFile=(()=>{
     overview.addRows([['My Patch',state.company],[tr('Հարկեր'),state.floors.length],[tr('Վերականգնում'),tr('Աղյուսակը դիտելու համար է։ Վերականգնումն օգտագործում է ֆայլում պահված ամբողջական պատճենը։')]]);
     overview.columns=[{width:24},{width:100}];
     const sheet=book.addWorksheet('Connections');
-    const fields=['floor','rack','device','port','status','cable','destination','room','door','side','connection','service','vlan','notes'];
+    const fields=['floor','rack','device','port','endpointName','status','cable','destination','room','door','side','connection','service','vlan','notes'];
     sheet.addRow(fields.map(k=>k));
     for(const row of RackDomain.rows(state))sheet.addRow(fields.map(k=>k==='status'?RackDomain.statusLabel(state,row[k],tr):k==='service'?RackDomain.serviceLabel(state,row[k],tr):row[k]));
     sheet.columns.forEach(c=>c.width=24);sheet.views=[{state:'frozen',ySplit:1}];

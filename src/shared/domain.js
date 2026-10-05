@@ -43,7 +43,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const hostsForDevice = (s,deviceId) => networks(s).flatMap(n=>n.hosts.filter(h=>h.deviceId===deviceId).map(h=>({n,h})));
   const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
   const vlanIp = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\/(?:3[0-2]|[12]?\d))?$/;
-  const port = (number, id) => ({id,number,status:'free',cable:'',floorId:'',room:'',door:'',side:'',notes:'',switchPortId:'',service:'',vlan:''});
+  const port = (number, id) => ({id,number,status:'free',endpointName:'',cable:'',floorId:'',room:'',door:'',side:'',notes:'',switchPortId:'',service:'',vlan:''});
   const assert = (v,m) => {if (!v) throw new Error(m);};
   function validate(s) {
     assert(s && s.schema===2 && typeof s.company==='string' && s.company.length<=200 && Array.isArray(s.floors), tr('Տվյալների ձևաչափը սխալ է'));
@@ -103,6 +103,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
             // Missing fields remain valid for existing databases and older backups.
+            if(p.endpointName!==undefined)text(p.endpointName);
             if(p.service!==undefined)assert(typeof p.service==='string'&&hasService(s,p.service),tr('Պորտի նշանակությունը սխալ է'));
             if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
             assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),tr('Մալուխի հարկը չի գտնվել'));
@@ -142,7 +143,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(plan.image),tr('Հատակագծի տվյալները սխալ են'));
         assert(Array.isArray(plan.markers)&&plan.markers.length<=10000,tr('Հատակագծի տվյալները սխալ են'));
         const placed=new Set();
-        for(const marker of plan.markers){id(marker.id);assert(byId.has(marker.portId)&&!placed.has(marker.portId),tr('Հատակագծի տվյալները սխալ են'));placed.add(marker.portId);assert([marker.x,marker.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));}
+        for(const marker of plan.markers){id(marker.id);assert(byId.has(marker.portId)&&!placed.has(marker.portId),tr('Հատակագծի տվյալները սխալ են'));placed.add(marker.portId);assert([marker.x,marker.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));if(marker.iconX!==undefined||marker.iconY!==undefined)assert([marker.iconX,marker.iconY].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));}
       }
     }
     for(const {d,p} of all) if(p.switchPortId){
@@ -162,11 +163,14 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       const switchEnd=d.type==='switch'?x:peer?.d.type==='switch'?peer:null;
       const status=p.status==='fault'?'fault':p.status==='used'||p.switchPortId||incoming.has(p.id)?'used':'free';
       return {floor:f.name,rack:r.name,device:d.name,type:d.type,port:p.number,status, cable:info.cable,
-        destination:s.floors.find(f=>f.id===info.floorId)?.name||'', room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
+        destination:s.floors.find(f=>f.id===info.floorId)?.name||'', endpointName:info.endpointName||'',room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
         switchName:switchEnd?.d.name||'',switchPort:switchEnd?.p.number??'',switchRack:switchEnd?.r.name||'',
         connection:peer?`${peer.r.name} / ${peer.d.name} / ${peer.p.number}`:'',...x};
-    }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
+    }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.endpointName,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
   }
+  const endpointLabel=(s,row,translate=tr)=>row.endpointName||row.room||row.cable||serviceLabel(s,row.service,translate);
+  // x/y remains the exact floor-plan point. The icon can move independently.
+  const mapMarkerLayout=marker=>({x:marker.x,y:marker.y,iconX:marker.iconX??marker.x+(marker.x>.92?-.04:.04),iconY:marker.iconY??marker.y+(marker.y<.08?.05:-.05)});
   // A panel port and its linked switch port represent one installed endpoint.
   function mapDevices(s,plan){
     const all=rows(s),byId=new Map(all.map(row=>[row.p.id,row]));
@@ -198,5 +202,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,mapDevices,serviceIcon,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

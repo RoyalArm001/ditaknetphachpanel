@@ -1,6 +1,10 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Միացված սարքի անվանում":["Connected device name","Название подключённого устройства"],
+"Ճշգրիտ դիրք":["Exact position","Точное положение"],
+"Քաշեք կետը՝ ճշգրիտ դիրքը նշելու, իսկ պատկերակը՝ անվանումը կողք տեղափոխելու համար։":["Drag the point to mark the exact location. Drag the icon to move its label aside.","Перетащите точку, чтобы указать точное положение, а значок — чтобы отвести название в сторону."],
+"Կետը՝ սարքի դիրք · Պատկերակը՝ անվանման տեղը":["Point: device location · Icon: label position","Точка — положение устройства · Значок — положение названия"],
 "Դուք անձնական հաշվի տարածքում եք։ Թիմի PIN օգտատերերը կառավարվում են ընդհանուր բազայում՝ գլխավոր PIN-ով։":["You are in your personal account. Team PIN users are managed in the shared database with its main PIN.","Вы в личном аккаунте. Пользователи PIN команды управляются в общей базе с помощью главного PIN-кода."],
 "Բացել թիմի մուտքը":["Open team sign-in","Открыть вход в команду"],
 "Օգտատերերի կառավարումը սահմանափակված է":["User management is restricted","Управление пользователями ограничено"],
