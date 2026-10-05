@@ -1,24 +1,21 @@
 {
-  "version": "2.7.10",
+  "version": "2.7.11",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզից պորտը բացելիս փաչ պանելը ցուցադրվում է փոքր աջ վահանակում։ Ուղղված է մենյուի համընկնումը։",
-      "Միացված սարքերին կարող եք տալ անվանումներ, որոնք երևում են քարտեզում և PDF-ում։ Դիրքի կետն ու պատկերակը տեղափոխվում են առանձին՝ կապող գծով։"
+      "Քարտեզի սարքի դիրքի կետն այժմ ավելի տեսանելի է և պահպանում է չափը խոշորացման ժամանակ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Opening a port on the map now shows its patch panel in a compact right panel. The tools menu no longer overlaps it.",
-      "Connected devices can have names shown on the map and in PDFs. Move the exact location point and the icon separately, joined by a leader line."
+      "The device location point on the map is now easier to see and keeps its size while zooming."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Порт на карте теперь открывает патч-панель в компактном правом окне. Исправлено наложение меню инструментов.",
-      "Подключённым устройствам можно задать названия для карты и PDF. Точная точка размещения и значок перемещаются отдельно, сохраняя соединительную линию."
+      "Точку расположения устройства на карте стало легче видеть; при масштабировании её размер не меняется."
     ]
   }
 }
