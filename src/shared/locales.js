@@ -1,6 +1,21 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Բարի գալուստ":["Welcome","Добро пожаловать"],
+"Բացեք ձեր նախագծերը կամ սկսեք նոր աշխատանք։":["Open your projects or start something new.","Откройте свои проекты или начните новый."],
+"Թիմային աշխատանք":["For your team","Для команды"],
+"Ունե՞ք PIN կոդ":["Have a PIN code?","Есть PIN-код?"],
+"Բացեք ձեր թիմի նախագծերը ղեկավարից ստացած PIN կոդով։":["Open your team's projects with the PIN code provided by your manager.","Откройте проекты команды с PIN-кодом, полученным от руководителя."],
+"Թիմի փոփոխությունները հասանելի են բոլոր միացած աշխատակիցներին։":["Changes are shared with everyone connected to your team.","Изменения видны всем подключённым сотрудникам команды."],
+"Մուտք PIN-ով":["Sign in with PIN","Войти по PIN-коду"],
+"Իմ հաշիվը":["My account","Мой аккаунт"],
+"Ձեր անձնական նախագծերը՝ էլ․ փոստով կամ մուտքանունով և գաղտնաբառով։":["Access your personal projects with your email or username and password.","Доступ к личным проектам по почте или логину и паролю."],
+"Աշխատել այս սարքում":["Work on this device","Работать на устройстве"],
+"Առանց գրանցման։ Նախագծերը պահվում են միայն այս բրաուզերում։ Պահպանեք նաև պահուստային ֆայլ։":["No account needed. Projects stay in this browser. Keep a backup file too.","Без регистрации. Проекты хранятся только в этом браузере. Сохраняйте резервную копию."],
+"Եթե արդեն ունեք պահուստային պատճեն":["If you already have a backup","Если у вас уже есть резервная копия"],
+"Բացեք նախկինում պահած JSON կամ Excel ֆայլը, կամ վերականգնեք կայքից։":["Open a saved JSON or Excel file, or restore from the website.","Откройте сохранённый файл JSON или Excel либо восстановите данные с сайта."],
+"Ընտրել ֆայլը":["Choose a file","Выбрать файл"],
+"Ընտրությունը կարող եք փոխել կարգավորումներում։":["You can change your workspace in Settings.","Рабочее пространство можно изменить в настройках."],
 "Անվանում":["Name","Название"],
 "Բոլորը":["All","Все"],
 "Կիսվել":["Share","Поделиться"],

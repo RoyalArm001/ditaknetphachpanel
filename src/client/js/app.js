@@ -173,8 +173,33 @@ function renderWelcome(){
   mapController?.destroy();mapController=null;
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
-  const choices=tr`<section><span class="option-number">01 · LOCAL</span><h2>Այս սարքում</h2><p>Ստեղծեք կամ շարունակեք ձեր նախագիծը։ Տվյալները պահվում են այս բրաուզերում։ Գրանցում պետք չէ։</p>${button(tr('Շարունակել այս սարքում'),'welcome-personal','','primary')}</section><section><span class="option-number">02 · RESTORE</span><h2>Վերականգնել նախագիծը</h2><p>Ընտրեք՝ վերականգնել համակարգչից կամ մեր կայքից։</p>${button(tr('Վերականգնել համակարգչից'),'welcome-file')}${button(tr('Բացել ընդհանուր cloud-ը PIN-ով'),'team-login','','primary')}${button(tr('Վերականգնել կայքից'),'site-recover')}</section><section><span class="option-number">03 · ACCOUNT</span><h2>Հաշիվ և անձնական cloud</h2><p>Ստեղծեք ձեր հաշիվը մեր կայքում։ Ձեր անձնական cloud-ի տվյալները չեն ցուցադրվի թիմի ընդհանուր բազայում։</p>${button(tr('Ստեղծել հաշիվ'),'account-signup')}${button(tr('Մուտք գործել'),'account-login')}</section>`;
-  $('#content').innerHTML=tr`<section class="welcome panel"><div class="welcome-heading"><div class="login-mark">▤</div><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1>${tr('Ինչպե՞ս եք ցանկանում աշխատել')}</h1></div></div><p class="muted">Ընտրեք ձեր աշխատանքային տարածքը։ Հետագայում կարող եք փոխել ընտրությունը կարգավորումներից։</p><div class="welcome-options">${choices}</div><input id="welcomeImport" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden><p class="hint">Անձնական աշխատանքի համար գրանցում պետք չէ։ Պահպանեք նաև պահուստային պատճեն։</p></section>`;
+  const icon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+  const rack=icon('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h8"/>');
+  const pin=icon('<rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 6h6M9 10h.01M15 10h.01M9 14h.01M15 14h.01M9 18h6"/>');
+  const account=icon('<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>');
+  const computer=icon('<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>');
+  const backup=icon('<path d="M14 2H5v20h14V7Zm0 0v6h5M8 14h8m-4-3-3 3 3 3"/>');
+  const arrow=icon('<path d="M5 12h14m-5-5 5 5-5 5"/>');
+  $('#content').innerHTML=tr`<section class="welcome" aria-labelledby="welcomeTitle">
+    <header class="welcome-heading"><span class="welcome-logo">${rack}</span><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1 id="welcomeTitle">Բարի գալուստ</h1><p>Բացեք ձեր նախագծերը կամ սկսեք նոր աշխատանք։</p></div></header>
+    <div class="welcome-options">
+      <section class="welcome-choice welcome-team" aria-labelledby="welcomeTeamTitle">
+        <div class="welcome-card-top"><span class="welcome-icon">${pin}</span><span class="welcome-tag">Թիմային աշխատանք</span></div>
+        <h2 id="welcomeTeamTitle">Ունե՞ք PIN կոդ</h2><p>Բացեք ձեր թիմի նախագծերը ղեկավարից ստացած PIN կոդով։</p>
+        <div class="welcome-team-note">${icon('<circle cx="8" cy="7" r="3"/><path d="M2 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 4 4v3"/')}<span>Թիմի փոփոխությունները հասանելի են բոլոր միացած աշխատակիցներին։</span></div>
+        <button type="button" class="button primary welcome-pin-button" data-action="team-login">Մուտք PIN-ով ${arrow}</button>
+      </section>
+      <section class="welcome-choice welcome-account" aria-labelledby="welcomeAccountTitle">
+        <span class="welcome-icon">${account}</span><div class="welcome-choice-copy"><h2 id="welcomeAccountTitle">Իմ հաշիվը</h2><p>Ձեր անձնական նախագծերը՝ էլ․ փոստով կամ մուտքանունով և գաղտնաբառով։</p><div class="welcome-choice-actions">${button(tr('Մուտք գործել'),'account-login')}${button(tr('Ստեղծել հաշիվ'),'account-signup','','welcome-link')}</div></div>
+      </section>
+      <section class="welcome-choice welcome-local" aria-labelledby="welcomeLocalTitle">
+        <span class="welcome-icon">${computer}</span><div class="welcome-choice-copy"><h2 id="welcomeLocalTitle">Աշխատել այս սարքում</h2><p>Առանց գրանցման։ Նախագծերը պահվում են միայն այս բրաուզերում։ Պահպանեք նաև պահուստային ֆայլ։</p><div class="welcome-choice-actions">${button(tr('Շարունակել այս սարքում'),'welcome-personal')}</div></div>
+      </section>
+    </div>
+    <details class="welcome-restore"><summary>${backup}<span><strong>Վերականգնել նախագիծը</strong><small>Եթե արդեն ունեք պահուստային պատճեն</small></span>${icon('<path d="m6 9 6 6 6-6"/>')}</summary><div class="welcome-restore-body"><p>Բացեք նախկինում պահած JSON կամ Excel ֆայլը, կամ վերականգնեք կայքից։</p><div class="welcome-choice-actions">${button(tr('Ընտրել ֆայլը'),'welcome-file')}${button(tr('Վերականգնել կայքից'),'site-recover')}</div></div></details>
+    <input id="welcomeImport" type="file" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+    <p class="welcome-footnote">Ընտրությունը կարող եք փոխել կարգավորումներում։</p>
+  </section>`;
   $('#welcomeImport').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await restoreFile(file,{personalWorkspace:true});}catch(error){toast(error.message);}finally{e.target.value='';}};
 }
 function recoverFromSiteDialog(){
