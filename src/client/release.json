@@ -1,21 +1,21 @@
 {
-  "version": "2.8.6",
+  "version": "2.8.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզում նոր տեղադրվող սարքի նշիչն այժմ հայտնվում է հենց սեղմված կետում։"
+      "Քարտեզի հին սարքի նշիչներն այլևս չեն շեղվում իրենց նշված տեղից։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Newly placed device markers now appear exactly at the clicked point on the map."
+      "Existing map device markers now stay on their marked locations."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Новые отметки устройств на карте теперь появляются точно в месте щелчка."
+      "Существующие отметки устройств на карте больше не смещаются от указанного места."
     ]
   }
 }

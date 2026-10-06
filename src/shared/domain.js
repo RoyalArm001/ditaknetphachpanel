@@ -171,7 +171,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   }
   const endpointLabel=(s,row,translate=tr)=>row.endpointName||row.room||row.cable||serviceLabel(s,row.service,translate);
   // x/y remains the exact floor-plan point. The icon can move independently.
-  const mapMarkerLayout=marker=>({x:marker.x,y:marker.y,iconX:marker.iconX??marker.x+(marker.x>.92?-.04:.04),iconY:marker.iconY??marker.y+(marker.y<.08?.05:-.05)});
+  const mapMarkerLayout=marker=>({x:marker.x,y:marker.y,iconX:marker.iconX??marker.x,iconY:marker.iconY??marker.y});
   // A panel port and its linked switch port represent one installed endpoint.
   function mapDevices(s,plan){
     const all=rows(s),byId=new Map(all.map(row=>[row.p.id,row]));
