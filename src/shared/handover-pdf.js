@@ -50,30 +50,53 @@
         const scale=Math.min((W-24)/plan.width,410/plan.height),w=plan.width*scale,h=plan.height*scale,x=32+(W-w)/2,y=121+(410-h)/2;
         pdf.image(plan.image,x,y,{width:w,height:h});
         const markers=plan.selectedMarkers;
-        for(const m of markers){const p=D.mapMarkerLayout(m),color=D.serviceColor(state,m.row.service);pdf.moveTo(x+p.x*w,y+p.y*h).lineTo(x+p.iconX*w,y+p.iconY*h).lineWidth(1).strokeColor(color).stroke();pdf.circle(x+p.x*w,y+p.y*h,3).fillAndStroke(color,'#ffffff');}
+        for(const m of markers){
+          if(!m.anchorVisible)continue;
+          const p=D.mapMarkerLayout(m),color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
+          const ax=x+p.x*w,ay=y+p.y*h,ix=x+p.iconX*w,iy=y+p.iconY*h;
+          if(Math.hypot(ax-ix,ay-iy)>3){
+            pdf.moveTo(ax,ay).lineTo(ix,iy).lineWidth(1).strokeColor(color).stroke();
+            pdf.circle(ax,ay,2.5).fillAndStroke(color,'#ffffff');
+          }
+        }
         const markerLabels=markers.map(m=>{
-          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=D.serviceColor(state,m.row.service);
-          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-6,py-6,12,ink);pdf.roundedRect(px+5,py-10,15,10,3).fill(ink);text(m.number,px+5,py-10,15,7,'#ffffff',10,'center');
-          const name=D.endpointLabel(state,m.row,tr),size=8,width=Math.min(150,Math.max(38,pdf.font('Project').fontSize(size).widthOfString(name)+12));
-          return {m,px,py,color,name,size,width,height:17};
+          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
+          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5,py-5,10,ink);pdf.roundedRect(px+3,py-9,12,8,2).fill(ink);text(m.number,px+3,py-8.5,12,6,'#ffffff',8,'center');
+          const name=D.endpointLabel(state,m.row,tr),size=5.5;
+          const textW=pdf.font('Project').fontSize(size).widthOfString(name);
+          const width=Math.min(72,Math.max(18,Math.round(textW+5)));
+          return {m,px,py,color,name,size,width,height:9};
         });
-        const occupied=[],obstacles=markerLabels.flatMap(({px,py})=>[{x:px-10,y:py-10,width:20,height:20},{x:px+4,y:py-11,width:17,height:12}]);
-        const directions=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+        const occupied=[],obstacles=markerLabels.flatMap(({px,py})=>[{x:px-9,y:py-9,width:18,height:18},{x:px+2,y:py-10,width:14,height:10}]);
         for(const item of markerLabels){
           const candidates=[];
-          for(const distance of [16,28,42,58,76,98])for(const [dx,dy] of directions){
-            const rawX=item.px+dx*distance+(dx>0?10:dx<0?-item.width-10:-item.width/2);
-            const rawY=item.py+dy*distance+(dy>0?10:dy<0?-item.height-10:-item.height/2);
+          const offsets=[
+            {dx:0,dy:10},
+            {dx:0,dy:-10-item.height},
+            {dx:10,dy:-item.height/2},
+            {dx:-10-item.width,dy:-item.height/2},
+            {dx:8,dy:8},
+            {dx:-8-item.width,dy:8},
+            {dx:8,dy:-8-item.height},
+            {dx:-8-item.width,dy:-8-item.height},
+            {dx:0,dy:15},
+            {dx:0,dy:-15-item.height},
+            {dx:14,dy:5},
+            {dx:-14-item.width,dy:5}
+          ];
+          for(const {dx,dy} of offsets){
+            const rawX = dx === 0 ? item.px - item.width/2 : item.px + dx;
+            const rawY = dy === 0 ? item.py - item.height/2 : item.py + dy;
             const lx=Math.max(32,Math.min(810-item.width,rawX)),ly=Math.max(121,Math.min(531-item.height,rawY));
-            if(!candidates.some(box=>box.x===lx&&box.y===ly))candidates.push({x:lx,y:ly,width:item.width,height:item.height});
+            if(!candidates.some(box=>box.x===lx&&box.y===ly))candidates.push({x:lx,y:ly,width:item.width,height:item.height,dist:Math.hypot(lx+item.width/2-item.px,ly+item.height/2-item.py)});
           }
-          const overlaps=(a,b,gap=2)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;
-          const score=box=>occupied.filter(other=>overlaps(box,other,3)).length*1000+obstacles.filter(other=>overlaps(box,other,1)).length*100;
+          const overlaps=(a,b,gap=1)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;
+          const score=box=>occupied.filter(other=>overlaps(box,other,2)).length*1000+obstacles.filter(other=>overlaps(box,other,1)).length*100+box.dist;
           candidates.sort((a,b)=>score(a)-score(b));
-          const box=candidates[0];occupied.push(box);
-          const tx=Math.max(box.x,Math.min(item.px,box.x+box.width)),ty=Math.max(box.y,Math.min(item.py,box.y+box.height));
-          pdf.moveTo(item.px,item.py).lineTo(tx,ty).lineWidth(.6).strokeColor(item.color).stroke();
-          pdf.roundedRect(box.x,box.y,box.width,box.height,3).fill(ink);text(item.name,box.x+5,box.y+3,box.width-10,item.size,'#ffffff',12,'center');
+          const box=candidates[0]||{x:item.px-item.width/2,y:item.py+10,width:item.width,height:item.height};
+          occupied.push(box);
+          pdf.roundedRect(box.x,box.y,box.width,box.height,2).fill(ink);
+          text(item.name,box.x+2,box.y+1.5,box.width-4,item.size,'#ffffff',8,'center');
         }
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}
         page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);let index=0;
@@ -91,7 +114,7 @@
         pdf.roundedRect(32,130,W,faceHeight,10).fill('#20383e');
         text(d.name,48,145,W-32,14,'#ffffff',24);
         layout.forEach(({p,column,row:portRow,optical})=>{const row=byId.get(p.id),x=48+column*cell,y=183+portRow*53;
-          const color=D.serviceColor(state,row.service),rgb=color.slice(1).match(/../g).map(v=>parseInt(v,16));
+          const color=row.status==='fault'?'#d35352':D.serviceColor(state,row.service),rgb=color.slice(1).match(/../g).map(v=>parseInt(v,16));
           pdf.roundedRect(x+1,y,cell-3,32,3).fill(color);
           text(p.number,x+1,y+8,cell-3,9,rgb[0]*.299+rgb[1]*.587+rgb[2]*.114>155?ink:'#ffffff',20,'center');
           pdf.rect(x+3,y+35,cell-7,3).fill(D.statusColor(state,row.status));
@@ -100,7 +123,7 @@
         const legendY=130+faceHeight+18;
         text(tr('Վիճակ'),32,legendY,120,10,muted);
         Object.keys(D.statuses).forEach((key,i)=>{const x=32+i*230;pdf.circle(x+5,legendY+31,4).fill(D.statusColor(state,key));text(D.statusLabel(state,key,tr),x+17,legendY+24,210,10,ink,24);});
-        const services=[...new Set(d.portList.map(p=>byId.get(p.id).service))];
+        const services=[...new Set(d.portList.map(p=>byId.get(p.id)).filter(r=>r.status!=='fault').map(r=>r.service))];
         services.forEach((key,i)=>{const rowsPerPage=Math.max(1,Math.floor((bottom-(legendY+60))/27)),perPage=rowsPerPage*3;if(i&&i%perPage===0)page(title+' · '+d.name,tr('Նշանակություն'));const at=i%perPage,x=32+(at%3)*259,y=(i<perPage?legendY+60:126)+Math.floor(at/3)*27;pdf.roundedRect(x,y,10,10,2).fill(D.serviceColor(state,key));text(D.serviceLabel(state,key,tr),x+17,y-2,230,9,ink,24);});
         table(tr('Պորտերի միացումներ'),d.name+' · '+f.name+' / '+r.name,d.portList.map(p=>({portId:p.id,number:p.number})));
       }

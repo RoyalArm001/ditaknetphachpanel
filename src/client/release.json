@@ -1,21 +1,33 @@
 {
-  "version": "2.8.11",
+  "version": "2.9.0",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի PDF-ում սարքերի անունները տեղադրվում են ավելի ընթեռնելի դիրքերում։ Նշիչի չափը կարգավորվում է 0–50%։"
+      "Ctrl+Z / Ctrl+Y — Հետ/Կրկին գործողություն քարտեզի խմբագրիչում (մինչև 50 քայլ)։",
+      "Քարտեզի նշիչների անունները ավտոմատ ուղղվում են դեպի ազատ կողմ՝ հելնելը կանխելու համար։",
+      "Անսարք պորտն ամբողջությամբ մաքրվում է՝ ծառայություն, գույն, PDF-ում ճիշտ է ցուցադրվում։",
+      "UI-ն ձեռք բերելու ժամանակ կապույտ ընդգծում չի լինում (user-select:none)։",
+      "PDF քարտեզի անունները ֆիքս տեղերում են, չեն հայտնվում հեռու կամ հսկայական։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Device names in map PDFs are positioned for better readability. Adjust marker size from 0–50%."
+      "Ctrl+Z / Ctrl+Y — Undo/Redo in the map editor (up to 50 steps).",
+      "Map marker labels automatically flip to avoid overlapping neighbours.",
+      "Faulty ports are fully cleared of service data and shown correctly in PDF.",
+      "No accidental blue text selection when clicking UI elements.",
+      "PDF map labels are compact and stay close to their markers."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Названия устройств в PDF карты размещаются удобнее для чтения. Размер отметок настраивается от 0 до 50%."
+      "Ctrl+Z / Ctrl+Y — Отмена/Повтор действий в редакторе карты (до 50 шагов).",
+      "Подписи маркеров на карте автоматически выбирают направление, чтобы не перекрываться.",
+      "Неисправный порт полностью очищается от сервисных данных и корректно отображается в PDF.",
+      "При клике по интерфейсу больше не появляется синяя рамка выделения текста.",
+      "Подписи на PDF-карте компактны и расположены рядом с маркерами."
     ]
   }
 }

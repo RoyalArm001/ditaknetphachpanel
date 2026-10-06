@@ -32,14 +32,14 @@ let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=fa
 const accountMode=()=>storageMode==='account';
 let authRequired=false,pinEnabled=false,accountEnabled=false;
 let liveSessionId;try{liveSessionId=localStorage.getItem('rackmap-live-client');if(!/^[a-zA-Z0-9_-]{16,80}$/.test(liveSessionId||'')){liveSessionId=uid();localStorage.setItem('rackmap-live-client',liveSessionId);}}catch{liveSessionId=uid();}
-const uiZoomSteps=[.85,.9,.95,1,1.05,1.1];
+const uiZoomSteps=[.7,.75,.8,.85,.9,.95,1,1.05,1.1];
 let uiZoom=innerWidth<=760?1:.9;
 try{const saved=Number(localStorage.getItem('rackmap-ui-zoom'));if(uiZoomSteps.includes(saved))uiZoom=saved;}catch{}
 const zoomControls=document.createElement('div');zoomControls.className='zoom-controls';zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.innerHTML=`<button class="button" type="button" data-action="ui-zoom-out" aria-label="${tr('Փոքրացնել էջը')}">−</button><span id="uiZoomValue"></span><button class="button" type="button" data-action="ui-zoom-in" aria-label="${tr('Մեծացնել էջը')}">＋</button>`;$('#breadcrumb')?.after(zoomControls);
 function updateZoomLabels(){zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.querySelector('[data-action=ui-zoom-out]').setAttribute('aria-label',tr('Փոքրացնել էջը'));zoomControls.querySelector('[data-action=ui-zoom-in]').setAttribute('aria-label',tr('Մեծացնել էջը'));}
 window.addEventListener('rackmap-languagechange',updateZoomLabels);
-function applyUiZoom(){document.documentElement.style.setProperty('--ui-zoom',String(uiZoom));const value=$('#uiZoomValue');if(value)value.textContent=Math.round(uiZoom*100)+'%';}
-function changeUiZoom(direction){const index=Math.max(0,uiZoomSteps.indexOf(uiZoom));uiZoom=uiZoomSteps[Math.max(0,Math.min(uiZoomSteps.length-1,index+direction))];try{localStorage.setItem('rackmap-ui-zoom',String(uiZoom));}catch{}applyUiZoom();}
+function applyUiZoom(){document.documentElement.style.setProperty('--ui-zoom',String(uiZoom));const value=$('#uiZoomValue');if(value)value.textContent=Math.round(uiZoom*100)+'%';const outBtn=zoomControls.querySelector('[data-action=ui-zoom-out]');if(outBtn)outBtn.disabled=uiZoom<=uiZoomSteps[0]+0.001;const inBtn=zoomControls.querySelector('[data-action=ui-zoom-in]');if(inBtn)inBtn.disabled=uiZoom>=uiZoomSteps[uiZoomSteps.length-1]-0.001;}
+function changeUiZoom(direction){let index=uiZoomSteps.findIndex(s=>Math.abs(s-uiZoom)<0.001);if(index===-1)index=Math.max(0,uiZoomSteps.indexOf(uiZoom));uiZoom=uiZoomSteps[Math.max(0,Math.min(uiZoomSteps.length-1,index+direction))];try{localStorage.setItem('rackmap-ui-zoom',String(uiZoom));}catch{}applyUiZoom();}
 applyUiZoom();
 let cloudMode=!localHost,maxStateBytes=24*1024*1024;
 let sceneController=null;
@@ -336,7 +336,7 @@ function devicePorts(d,byId,detail=false){
 function renderRack(id){const found=findRack(id);if(!found){$('#content').innerHTML=header(tr('Ռաքը չի գտնվել'),tr('Ընտրեք ռաքը հարկերի ցանկից'))+tr('<a class="button" href="#floors">← Հարկեր և ռաքեր</a>');return;}const {f,r}=found;
   const rows=D.rows(state),byPort=new Map(rows.map(x=>[x.p.id,x]));const mobile=window.matchMedia('(max-width:760px)').matches;const narrow=window.matchMedia('(max-width:1150px)').matches;const unit=Math.max(mobile?248:88,...r.devices.map(d=>Math.ceil(((D.isNetworkDevice(d)?2:Math.ceil(d.portList.length/(mobile?6:narrow?12:24)))*(mobile?46:30)+60)/d.height)));let grid='';
   for(let u=r.u;u>=1;u--){const row=r.u-u+1,occupied=r.devices.some(d=>u>=d.pos&&u<d.pos+d.height);grid+=`<div class="rack-tick" style="grid-row:${row};grid-column:1">${u}</div><div class="rack-hole" style="grid-row:${row};grid-column:3">▪</div>`;if(!occupied)grid+=tr`<button class="rack-blank" data-action="device-new" data-id="${r.id}" data-pos="${u}" style="grid-row:${row};grid-column:2" title="Ավելացնել սարք U${u}">＋ Ազատ դիրք · ${u}U</button>`;}
-  for(const d of r.devices){grid+=tr`<section class="rack-device" style="grid-column:2;grid-row:${r.u-(d.pos+d.height-1)+1} / span ${d.height};--device:${d.color}"><div class="device-head"><button data-action="device-detail" data-id="${d.id}">${esc(d.name)} · ${esc(D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||d.type)}</button><span class="device-move">${button('↑','device-move-up',d.id,'small')}${button('↓','device-move-down',d.id,'small')}<small>${d.portList.length} պորտ · ${d.height}U</small></span></div>${devicePorts(d,byPort)}</section>`;}
+  for(const d of r.devices){grid+=tr`<section class="rack-device" style="grid-column:2;grid-row:${r.u-(d.pos+d.height-1)+1} / span ${d.height};--device:${d.color}"><div class="device-head"><button data-action="device-detail" data-id="${d.id}"><span class="rack-device-name">${esc(d.name)}</span><span class="rack-device-kind">${esc(D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||d.type)}</span></button><span class="device-move">${button('↑','device-move-up',d.id,'small')}${button('↓','device-move-down',d.id,'small')}<small>${d.portList.length} պորտ · ${d.height}U</small></span></div>${devicePorts(d,byPort)}</section>`;}
   $('#breadcrumb').textContent=`${f.name} / ${r.name}`;
   $('#content').innerHTML=header(r.name,`${f.name} · ${r.location||tr('Ռաքի առջևի տեսք')}`,tr`<a class="button" href="#floors">← Հարկեր</a><a class="button" href="#connections/${r.id}">3D կապեր</a>${button(tr('Խմբագրել ռաքը'),'rack',r.id)}${button(tr('＋ Սարք'),'device-new',r.id,'primary')}`)+tr`<div class="section-head">${legend()}<span class="hint">U1՝ ներքևում · ${r.u}U · Ctrl/⌘ + սեղմում՝ բազմակի ընտրություն</span></div><div class="rack-layout"><div class="rack-case"><div class="rack-rails" style="grid-template-rows:repeat(${r.u},${unit}px)">${grid}</div></div><aside class="rack-side" id="rightPanel"><div class="mobile-sheet-head"><strong>Պորտի գործիքներ</strong><button class="button small" data-action="toggle-right" aria-label="Փակել գործիքները">Փակել ×</button></div><section id="portTools" class="panel port-tools" aria-label="Պորտի գործիքներ"></section><details class="panel rack-info"><summary>Ռաքի տվյալներ և լուսանկար</summary><h2>Ռաքի տվյալներ</h2><div class="rack-detail"><div><small>Չափ</small>${r.u}U</div><div><small>Զբաղեցված է</small>${r.devices.reduce((n,d)=>n+d.height,0)}U</div><div><small>Սարքեր</small>${r.devices.length}</div><div><small>Պորտեր</small>${r.devices.reduce((n,d)=>n+d.portList.length,0)}</div></div>${r.photo?tr`<button class="text-button" data-action="photo" data-id="${r.id}" aria-label="Բացել ռաքի լուսանկարը"><img class="photo" src="${esc(r.photo)}" alt="${esc(r.name)} լուսանկար"></button>`:tr('<div class="empty" style="padding:18px 0">Լուսանկար չկա</div>')}${button(r.photo?tr('Փոխել լուսանկարը'):tr('＋ Ավելացնել լուսանկար'),'photo-upload',r.id,'small')}${r.photo?button(tr('Հեռացնել'),'photo-remove',r.id,'small'):''}<input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" hidden></details><section class="panel"><h2>Սարքերի ցանկ</h2>${[...r.devices].sort((a,b)=>b.pos-a.pos).map(d=>`<div class="device-item"><div><strong>${esc(d.name)}</strong><small>U${d.pos} · ${d.height}U ·   </small></div><span class="device-move">${button('↑','device-move-up',d.id,'small')}${button('↓','device-move-down',d.id,'small')}${button(tr('Բացել'),'device-detail',d.id,'small')}</span></div>`).join('')||tr('<p class="hint">Սեղմեք ռաքի ազատ U դիրքի վրա՝ սարք ավելացնելու համար։</p>')}</section></aside></div>`;
   renderPortTools();paintPorts();
@@ -487,14 +487,21 @@ function paintPorts(){
   const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));
   document.querySelectorAll('.mini-port,.port-overview [data-action="port"]').forEach(el=>{
     const row=byId.get(el.dataset.id);if(!row)return;
-    el.classList.remove('free','used','fault');el.classList.add(row.status,'service-port');
+    el.classList.remove('free','used','fault','service-port');
+    el.classList.add(row.status);
     el.classList.toggle('port-selected',row.p.id===selectedPortId||selectedPortIds.has(row.p.id));
-    const color=D.serviceColor(state,row.service);
-    el.style.setProperty('--port-color',color);
-    const rgb=color.slice(1).match(/../g).map(x=>{const v=parseInt(x,16)/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
-    el.style.setProperty('--port-ink',rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722>.179?'#10242a':'#ffffff');
+    if(row.status==='fault'){
+      el.style.setProperty('--port-color','var(--fault)');
+      el.style.setProperty('--port-ink','#ffffff');
+    }else{
+      if(row.service)el.classList.add('service-port');
+      const color=D.serviceColor(state,row.service);
+      el.style.setProperty('--port-color',color);
+      const rgb=color.slice(1).match(/../g).map(x=>{const v=parseInt(x,16)/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
+      el.style.setProperty('--port-ink',rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722>.179?'#10242a':'#ffffff');
+    }
     el.setAttribute('aria-pressed',String(row.p.id===selectedPortId||selectedPortIds.has(row.p.id)));
-    const description=`${row.device} / ${row.port}${el.classList.contains('optical-port')?' SFP':''} · ${D.serviceLabel(state,row.service)} · VLAN ${row.vlan||'—'} · ${D.statusLabel(state,row.status)} · ${row.cable} ${row.room}`;
+    const description=`${row.device} / ${row.port}${el.classList.contains('optical-port')?' SFP':''} · ${row.status==='fault'?D.statusLabel(state,'fault'):D.serviceLabel(state,row.service)} · VLAN ${row.vlan||'—'} · ${D.statusLabel(state,row.status)} · ${row.cable} ${row.room}`;
     el.title=description;el.setAttribute('aria-label',description);
   });
 }
@@ -514,6 +521,7 @@ function renderPortTools(){
   const incoming=D.ports(state).find(x=>x.p.switchPortId===p.id);
   const info=incoming?.p||p;
   const v=portDraft?.id===p.id?portDraft.values:{...info,status:incoming?(p.status==='fault'?'fault':'used'):p.status};
+  if(v.status==='fault')v.service='';
   if(!v.vlan&&v.service)v.vlan=serviceVlan(v.service);
   const all=D.ports(state),usedTargets=new Set(all.filter(x=>x.p.id!==p.id&&x.p.switchPortId).map(x=>x.p.switchPortId));
   const choices=all.filter(x=>D.isNetworkDevice(x.d)&&!usedTargets.has(x.p.id)).map(x=>[x.p.id,`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}${D.portLayout(x.d).find(y=>y.p.id===x.p.id)?.optical?' SFP':''}${x.p.status==='fault'?tr(' · ԱՆՍԱՐՔ'):''}`]);
@@ -521,7 +529,7 @@ function renderPortTools(){
   <form id="portForm">
     ${input('endpointName',tr('Միացված սարքի անվանում'),v.endpointName||'','text','maxlength="200" placeholder="WiFi B zone"')}
     <fieldset class="link-config"><legend>Կապի կարգավորումներ</legend>
-      <div class="service-choices">${D.serviceEntries(state).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${(v.service||'')===key?'checked':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
+      <div class="service-choices ${v.status==='fault'?'is-fault':''}">${D.serviceEntries(state).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${v.status!=='fault'&&(v.service||'')===key?'checked':''} ${v.status==='fault'?'disabled':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
       ${input('vlan','VLAN',v.vlan||'','number',tr('min="1" max="4094" step="1" list="vlanChoices" placeholder="Օրինակ՝ 20"'))}<datalist id="vlanChoices">${D.networks(state).map(n=>`<option value="${esc(n.vlan)}">${esc(networkName(n))}</option>`).join('')}</datalist>
       <p class="hint">${tr('Ընտրեք պահպանված VLAN ID-ից կամ գրեք նոր ID։ VLAN ID-ն չի փոխում պորտի նշանակությունը։')}</p>
     </fieldset>
@@ -544,14 +552,36 @@ function renderPortTools(){
     <div class="form-actions">${button(tr('Չեղարկել'),'port-discard','','small')}${button(tr('Մաքրել'),'port-clear',p.id,'danger')}<button type="submit" class="button primary">Պահպանել</button></div>
   </form>`;
   const form=$('#portForm');
+  const syncFaultState=()=>{
+    const isFault=form.elements.status?.value==='fault';
+    const choices=form.querySelector('.service-choices');
+    if(choices){
+      choices.classList.toggle('is-fault',isFault);
+      choices.querySelectorAll('input[name="service"]').forEach(r=>{
+        if(isFault)r.checked=false;
+        r.disabled=isFault;
+      });
+    }
+  };
   form.addEventListener('input',stagePortDraft);
-  form.addEventListener('change',stagePortDraft);
-  form.addEventListener('change',e=>{if(e.target.name==='service'&&!form.elements.vlan.value){form.elements.vlan.value=serviceVlan(e.target.value);stagePortDraft();}});
+  form.addEventListener('change',e=>{
+    if(e.target.name==='status'){
+      syncFaultState();
+      stagePortDraft();
+      paintPorts();
+    }
+    if(e.target.name==='service'&&!form.elements.vlan.value){
+      form.elements.vlan.value=serviceVlan(e.target.value);
+    }
+    stagePortDraft();
+  });
   form.onsubmit=async e=>{e.preventDefault();stagePortDraft();if(flushPortEditor()&&await save())toast(tr('Պորտը պահպանված է'));};
 }
 function stagePortDraft(){
   const form=$('#portForm');if(!form)return;
-  portDraft={id:selectedPortId,values:Object.fromEntries(new FormData(form))};
+  const values=Object.fromEntries(new FormData(form));
+  if(values.status==='fault')values.service='';
+  portDraft={id:selectedPortId,values};
   portDraftDirty=true;clearTimeout(portTimer);
   if($('#portSaveStatus'))$('#portSaveStatus').textContent=tr('Փոփոխվում է…');
   recovery();
@@ -570,10 +600,18 @@ function flushPortEditor(){
       if(source.vlan)source.vlan=String(Number(source.vlan));
       if(source===current){
         current.status=v.status;current.switchPortId=v.switchPortId||'';
-        if(current.status==='free'&&(current.cable||current.switchPortId||current.service))current.status='used';
+        if(current.status==='fault'){
+          current.service='';source.service='';
+        }else if(current.status==='free'&&(current.cable||current.switchPortId||current.service)){
+          current.status='used';
+        }
       }else{
         current.status=v.status==='fault'?'fault':'free';
-        if(source.status==='free'&&(source.cable||source.service))source.status='used';
+        if(current.status==='fault'){
+          current.service='';source.service='';
+        }else if(source.status==='free'&&(source.cable||source.service)){
+          source.status='used';
+        }
       }
     },false);
     portDraftDirty=false;portDraft=null;
