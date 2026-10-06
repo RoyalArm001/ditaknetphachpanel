@@ -1,21 +1,21 @@
 {
-  "version": "2.8.9",
+  "version": "2.8.11",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "«Չնշված» պորտի նշանակությունը նույնպես կարելի է հեռացնել ցանկից՝ առանց պորտերի տվյալները վնասելու։"
+      "Քարտեզի PDF-ում սարքերի անունները տեղադրվում են ավելի ընթեռնելի դիրքերում։ Նշիչի չափը կարգավորվում է 0–50%։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "You can now remove the Unassigned port purpose from the list without affecting port data."
+      "Device names in map PDFs are positioned for better readability. Adjust marker size from 0–50%."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Назначение порта «Не указано» теперь можно убрать из списка без потери данных портов."
+      "Названия устройств в PDF карты размещаются удобнее для чтения. Размер отметок настраивается от 0 до 50%."
     ]
   }
 }

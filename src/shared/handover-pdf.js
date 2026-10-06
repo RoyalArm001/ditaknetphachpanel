@@ -51,10 +51,29 @@
         pdf.image(plan.image,x,y,{width:w,height:h});
         const markers=plan.selectedMarkers;
         for(const m of markers){const p=D.mapMarkerLayout(m),color=D.serviceColor(state,m.row.service);pdf.moveTo(x+p.x*w,y+p.y*h).lineTo(x+p.iconX*w,y+p.iconY*h).lineWidth(1).strokeColor(color).stroke();pdf.circle(x+p.x*w,y+p.y*h,3).fillAndStroke(color,'#ffffff');}
-        for(const m of markers){
-          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=D.serviceColor(state,m.row.service);pdf.circle(px,py,12).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-8,py-8,16,ink);pdf.roundedRect(px+7,py-13,18,12,3).fill(ink);text(m.number,px+7,py-13,18,7,'#ffffff',12,'center');
-          const name=D.endpointLabel(state,m.row,tr),width=Math.min(130,Math.max(32,pdf.font('Project').fontSize(7).widthOfString(name)+10)),lx=Math.max(32,Math.min(810-width,px-width/2)),ly=py+15>bottom-16?py-32:py+15;
-          pdf.roundedRect(lx,ly,width,15,3).fill(ink);text(name,lx+4,ly+2,width-8,7,'#ffffff',12,'center');
+        const markerLabels=markers.map(m=>{
+          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=D.serviceColor(state,m.row.service);
+          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-6,py-6,12,ink);pdf.roundedRect(px+5,py-10,15,10,3).fill(ink);text(m.number,px+5,py-10,15,7,'#ffffff',10,'center');
+          const name=D.endpointLabel(state,m.row,tr),size=8,width=Math.min(150,Math.max(38,pdf.font('Project').fontSize(size).widthOfString(name)+12));
+          return {m,px,py,color,name,size,width,height:17};
+        });
+        const occupied=[],obstacles=markerLabels.flatMap(({px,py})=>[{x:px-10,y:py-10,width:20,height:20},{x:px+4,y:py-11,width:17,height:12}]);
+        const directions=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+        for(const item of markerLabels){
+          const candidates=[];
+          for(const distance of [16,28,42,58,76,98])for(const [dx,dy] of directions){
+            const rawX=item.px+dx*distance+(dx>0?10:dx<0?-item.width-10:-item.width/2);
+            const rawY=item.py+dy*distance+(dy>0?10:dy<0?-item.height-10:-item.height/2);
+            const lx=Math.max(32,Math.min(810-item.width,rawX)),ly=Math.max(121,Math.min(531-item.height,rawY));
+            if(!candidates.some(box=>box.x===lx&&box.y===ly))candidates.push({x:lx,y:ly,width:item.width,height:item.height});
+          }
+          const overlaps=(a,b,gap=2)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;
+          const score=box=>occupied.filter(other=>overlaps(box,other,3)).length*1000+obstacles.filter(other=>overlaps(box,other,1)).length*100;
+          candidates.sort((a,b)=>score(a)-score(b));
+          const box=candidates[0];occupied.push(box);
+          const tx=Math.max(box.x,Math.min(item.px,box.x+box.width)),ty=Math.max(box.y,Math.min(item.py,box.y+box.height));
+          pdf.moveTo(item.px,item.py).lineTo(tx,ty).lineWidth(.6).strokeColor(item.color).stroke();
+          pdf.roundedRect(box.x,box.y,box.width,box.height,3).fill(ink);text(item.name,box.x+5,box.y+3,box.width-10,item.size,'#ffffff',12,'center');
         }
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}
         page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);let index=0;
