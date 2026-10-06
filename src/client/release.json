@@ -1,21 +1,21 @@
 {
-  "version": "2.8.8",
+  "version": "2.8.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքերի նշիչները փոքր են մնում մեծացնելիս, իսկ հին նշիչներն ուղղվում են դեպի իրենց նշված կետը։"
+      "«Չնշված» պորտի նշանակությունը նույնպես կարելի է հեռացնել ցանկից՝ առանց պորտերի տվյալները վնասելու։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map device markers stay small when zooming in, and existing markers are aligned with their marked locations."
+      "You can now remove the Unassigned port purpose from the list without affecting port data."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Отметки устройств на карте остаются маленькими при увеличении, а существующие отметки выравниваются по указанному месту."
+      "Назначение порта «Не указано» теперь можно убрать из списка без потери данных портов."
     ]
   }
 }

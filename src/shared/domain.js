@@ -58,7 +58,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       }
     }
     if(s.serviceIcons!==undefined){assert(s.serviceIcons&&typeof s.serviceIcons==='object'&&!Array.isArray(s.serviceIcons),'Invalid service icons');for(const [key,icon] of Object.entries(s.serviceIcons))assert(hasService(s,key)&&typeof icon==='string'&&Object.hasOwn(serviceIconPaths,icon),'Invalid service icon');}
-    if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>key&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
+    if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>typeof key==='string'&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
     // Validate stored custom names independently of the current interface language.
     const serviceNames=(s.serviceTypes||[]).map(type=>type.name.trim().toLowerCase());
     assert(new Set(serviceNames).size===serviceNames.length,tr('Ցանցերի տեսակների անվանումները պետք է տարբեր լինեն'));

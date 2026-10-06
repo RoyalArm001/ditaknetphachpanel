@@ -95,8 +95,8 @@ function serviceIconPicker(source,key){
 }
 function serviceStyleRow(source,key,label){
   const suffix=key||'none',isCustom=key.startsWith('custom-'),value=isCustom?label:source.serviceLabels?.[key]||'';
-  const used=key&&D.serviceInUse({...D.empty(),...source},key);
-  return `<div class="project-style-row service-style-row" data-service-style="${esc(key)}"><input type="hidden" name="style-service-key" value="${esc(key)}">${input(`style-service-label-${suffix}`,isCustom?tr('Ցանցի տեսակի անվանում'):label,value,'text',`maxlength="80" ${isCustom?'required':''} placeholder="${esc(label)}"`)}${input(`style-service-color-${suffix}`,tr('Գույն'),D.serviceColor(source,key),'color')}${serviceIconPicker(source,key)}${key?`<button type="button" class="button small danger" data-action="style-service-remove" ${used?'disabled':''} title="${esc(used?tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'):tr('Ջնջել'))}">${tr('Ջնջել')}</button>`:''}</div>`;
+  const used=key!==''&&D.serviceInUse({...D.empty(),...source},key);
+  return `<div class="project-style-row service-style-row" data-service-style="${esc(key)}"><input type="hidden" name="style-service-key" value="${esc(key)}">${input(`style-service-label-${suffix}`,isCustom?tr('Ցանցի տեսակի անվանում'):label,value,'text',`maxlength="80" ${isCustom?'required':''} placeholder="${esc(label)}"`)}${input(`style-service-color-${suffix}`,tr('Գույն'),D.serviceColor(source,key),'color')}${serviceIconPicker(source,key)}<button type="button" class="button small danger" data-action="style-service-remove" ${used?'disabled':''} title="${esc(used?tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'):tr('Ջնջել'))}">${tr('Ջնջել')}</button></div>`;
 }
 function styleFields(source={},open=false){
   const statuses=Object.entries(D.statuses).map(([key,label])=>`<div class="project-style-row">${input(`style-status-label-${key}`,label,source.statusLabels?.[key]||'','text',`maxlength="80" placeholder="${esc(label)}"`)}${input(`style-status-color-${key}`,tr('Գույն'),D.statusColor(source,key),'color')}</div>`).join('');
@@ -105,7 +105,7 @@ function styleFields(source={},open=false){
 }
 function readStyle(fd){
   const keys=fd.getAll('style-service-key').map(String);
-  const result={serviceIcons:{},serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>key&&!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
+  const result={serviceIcons:{},serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
   for(const [kind,entries]of [['service',keys],['status',Object.keys(D.statuses)]])for(const key of entries){
     const suffix=key||'none',label=String(fd.get(`style-${kind}-label-${suffix}`)||'').trim(),color=String(fd.get(`style-${kind}-color-${suffix}`)||'');
     if(kind==='service'&&key.startsWith('custom-'))result.serviceTypes.push({id:key,name:label,color});
