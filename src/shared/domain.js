@@ -84,14 +84,16 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const text=(x,max=200)=>assert(typeof x==='string' && x.length<=max,tr('Տեքստային դաշտը սխալ է կամ չափազանց երկար'));
     const name=x=>{text(x);assert(x.trim(),tr('Անվանումը պարտադիր է'));};
     const integer=(x,min,max)=>assert(Number.isInteger(x)&&x>=min&&x<=max,tr('Չափը կամ պորտի համարը սխալ է'));
-    const uniqueNames=xs=>assert(new Set(xs.map(x=>x.name.trim().toLowerCase())).size===xs.length,tr('Անվանումները պետք է տարբեր լինեն'));
+    const normalizeName=value=>String(value??'').trim().replace(/\s+/g,' ').toLowerCase();
+    const uniqueNames=xs=>{const names=xs.map(x=>normalizeName(x.name));assert(new Set(names).size===names.length,tr('Անվանումները պետք է տարբեր լինեն'));};
+    const allDevices=[],allEndpoints=[];
     uniqueNames(s.floors);
     for (const f of s.floors) {
       id(f.id); name(f.name); assert(Array.isArray(f.racks)&&f.racks.length<=100,tr('Ռաքերի ցանկը սխալ է'));uniqueNames(f.racks);
       for(const r of f.racks) {
         id(r.id);name(r.name);integer(r.u,1,60);text(r.location);text(r.photo,3000000);
         assert(!r.photo || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo),tr('Լուսանկարի ձևաչափը սխալ է'));
-        assert(Array.isArray(r.devices)&&r.devices.length<=60,tr('Սարքերի ցանկը սխալ է'));uniqueNames(r.devices);
+        assert(Array.isArray(r.devices)&&r.devices.length<=60,tr('Սարքերի ցանկը սխալ է'));uniqueNames(r.devices);allDevices.push(...r.devices);
         const used=new Set();
         for(const d of r.devices) {
           id(d.id);name(d.name);assert(deviceTypes(s).some(([key])=>key===d.type),tr('Սարքի տեսակը սխալ է'));text(d.model);if(d.modelType!==undefined)assert(typeof d.modelType==='string'&&['','poe','poe-plus','none'].includes(d.modelType),tr('Սվիչի մոդելի տեսակը սխալ է'));text(d.color,7);assert(/^#[0-9a-f]{6}$/i.test(d.color),tr('Սարքի գույնը սխալ է'));
@@ -104,7 +106,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
             // Missing fields remain valid for existing databases and older backups.
-            if(p.endpointName!==undefined)text(p.endpointName);
+            if(p.endpointName!==undefined){text(p.endpointName);if(normalizeName(p.endpointName))allEndpoints.push({name:p.endpointName});}
             if(p.service!==undefined)assert(typeof p.service==='string'&&hasService(s,p.service),tr('Պորտի նշանակությունը սխալ է'));
             if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
             assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),tr('Մալուխի հարկը չի գտնվել'));
@@ -114,6 +116,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         }
       }
     }
+    // Device and endpoint names identify physical items on the map, so they
+    // must stay unique across the whole project even across floors/racks.
+    uniqueNames(allDevices);
+    uniqueNames(allEndpoints);
     if(s.networks!==undefined){
       assert(Array.isArray(s.networks)&&s.networks.length<=400,tr('Ցանցերի ցանկը սխալ է'));
       uniqueNames(s.networks);
