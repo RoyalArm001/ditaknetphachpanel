@@ -1,4 +1,4 @@
-(function(root,factory){if(typeof module==='object')module.exports=factory(require('./domain'));else root.RackHandover=factory(root.RackDomain);})(globalThis,function(D){
+(function(root,factory){if(typeof module==='object')module.exports=factory(require('./domain'),require('./map-label-layout'));else root.RackHandover=factory(root.RackDomain,root.RackMapLabels);})(globalThis,function(D,Labels){
   'use strict';
   function select(state,{planId='',floorId='',deviceType='all',deviceId=''}={}){
     const all=D.ports(state),byPort=new Map(all.map(x=>[x.p.id,x]));
@@ -62,41 +62,24 @@
         const markerLabels=markers.map(m=>{
           const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
           pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5,py-5,10,ink);pdf.roundedRect(px+3,py-9,12,8,2).fill(ink);text(m.number,px+3,py-8.5,12,6,'#ffffff',8,'center');
-          const name=D.endpointLabel(state,m.row,tr),size=5.5;
+          const name=D.endpointLabel(state,m.row,tr),size=7;
           const textW=pdf.font('Project').fontSize(size).widthOfString(name);
-          const width=Math.min(72,Math.max(18,Math.round(textW+5)));
-          return {m,px,py,color,name,size,width,height:9};
+          const width=Math.min(104,Math.max(22,Math.ceil(textW+8)));
+          const height=Math.max(13,Math.ceil(pdf.font('Project').fontSize(size).heightOfString(name,{width:width-6,lineGap:2}))+5);
+          return {m,px,py,color,name,size,width,height};
         });
-        const occupied=[],obstacles=markerLabels.flatMap(({px,py})=>[{x:px-9,y:py-9,width:18,height:18},{x:px+2,y:py-10,width:14,height:10}]);
+        const obstacles=markerLabels.flatMap(({px,py})=>[{x:px-9,y:py-9,width:18,height:18},{x:px+2,y:py-10,width:14,height:10}]);
+        const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:33,y:122,width:776,height:408},obstacles,2);
         for(const item of markerLabels){
-          const candidates=[];
-          const offsets=[
-            {dx:0,dy:10},
-            {dx:0,dy:-10-item.height},
-            {dx:10,dy:-item.height/2},
-            {dx:-10-item.width,dy:-item.height/2},
-            {dx:8,dy:8},
-            {dx:-8-item.width,dy:8},
-            {dx:8,dy:-8-item.height},
-            {dx:-8-item.width,dy:-8-item.height},
-            {dx:0,dy:15},
-            {dx:0,dy:-15-item.height},
-            {dx:14,dy:5},
-            {dx:-14-item.width,dy:5}
-          ];
-          for(const {dx,dy} of offsets){
-            const rawX = dx === 0 ? item.px - item.width/2 : item.px + dx;
-            const rawY = dy === 0 ? item.py - item.height/2 : item.py + dy;
-            const lx=Math.max(32,Math.min(810-item.width,rawX)),ly=Math.max(121,Math.min(531-item.height,rawY));
-            if(!candidates.some(box=>box.x===lx&&box.y===ly))candidates.push({x:lx,y:ly,width:item.width,height:item.height,dist:Math.hypot(lx+item.width/2-item.px,ly+item.height/2-item.py)});
-          }
-          const overlaps=(a,b,gap=1)=>a.x<b.x+b.width+gap&&a.x+a.width+gap>b.x&&a.y<b.y+b.height+gap&&a.y+a.height+gap>b.y;
-          const score=box=>occupied.filter(other=>overlaps(box,other,2)).length*1000+obstacles.filter(other=>overlaps(box,other,1)).length*100+box.dist;
-          candidates.sort((a,b)=>score(a)-score(b));
-          const box=candidates[0]||{x:item.px-item.width/2,y:item.py+10,width:item.width,height:item.height};
-          occupied.push(box);
+          const box=boxes.get(item.m.id);if(!box)continue; // Full names remain in the numbered device table.
+          const end=Labels.connector({x:item.px,y:item.py},box),length=Math.hypot(end.x-item.px,end.y-item.py);
+          if(length>12){const ratio=9/length;pdf.moveTo(item.px+(end.x-item.px)*ratio,item.py+(end.y-item.py)*ratio).lineTo(end.x,end.y).lineWidth(.5).strokeColor('#647a83').stroke();}
+        }
+        // Draw label backgrounds last so connectors cannot cross the text.
+        for(const item of markerLabels){
+          const box=boxes.get(item.m.id);if(!box)continue;
           pdf.roundedRect(box.x,box.y,box.width,box.height,2).fill(ink);
-          text(item.name,box.x+2,box.y+1.5,box.width-4,item.size,'#ffffff',8,'center');
+          text(item.name,box.x+3,box.y+2,box.width-6,item.size,'#ffffff',box.height-3,'center');
         }
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}
         page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);let index=0;

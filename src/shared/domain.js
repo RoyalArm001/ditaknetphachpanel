@@ -15,7 +15,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     internet:{get label(){return tr('Ինտերնետ');},color:'#08796b'}
   };
   const serviceEntries = s => [...Object.entries(services).filter(([key])=>!s.hiddenServices?.includes(key)),...(s.serviceTypes||[]).map(type=>[type.id,{label:type.name,color:type.color}])];
-  const hasService = (s,key) => serviceEntries(s).some(([id])=>id===key);
+  const hasService = (s,key) => key==='' || serviceEntries(s).some(([id])=>id===key);
   const serviceInUse = (s,key) => ports(s).some(({p})=>p.service===key)||networks(s).some(n=>n.name===key);
   const applyProjectStyle = (s,style) => {
     for(const [key] of serviceEntries(s))if(key&&!hasService(style,key)&&serviceInUse(s,key))throw new Error(tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'));
@@ -58,7 +58,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       }
     }
     if(s.serviceIcons!==undefined){assert(s.serviceIcons&&typeof s.serviceIcons==='object'&&!Array.isArray(s.serviceIcons),'Invalid service icons');for(const [key,icon] of Object.entries(s.serviceIcons))assert(hasService(s,key)&&typeof icon==='string'&&Object.hasOwn(serviceIconPaths,icon),'Invalid service icon');}
-    if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>typeof key==='string'&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
+    if(s.hiddenServices!==undefined)assert(Array.isArray(s.hiddenServices)&&s.hiddenServices.every(key=>typeof key==='string'&&key!==''&&Object.hasOwn(services,key))&&new Set(s.hiddenServices).size===s.hiddenServices.length,tr('Ցանցերի տեսակների ցանկը սխալ է'));
     // Validate stored custom names independently of the current interface language.
     const serviceNames=(s.serviceTypes||[]).map(type=>type.name.trim().toLowerCase());
     assert(new Set(serviceNames).size===serviceNames.length,tr('Ցանցերի տեսակների անվանումները պետք է տարբեր լինեն'));

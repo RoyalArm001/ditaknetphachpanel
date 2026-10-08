@@ -66,7 +66,7 @@ test('invalid names, IDs, colors, duplicates and excess custom types are rejecte
 
 test('editor opens directly, localizes controls and parses add/edit/delete fields',()=>{
   const source=fs.readFileSync(require.resolve('../src/client/js/app'),'utf8');
-  const code=source.slice(source.indexOf('function serviceStyleRow('),source.indexOf('const racks='));
+  const code=source.slice(source.indexOf('function serviceIconPicker('),source.indexOf('const racks='));
   const esc=x=>String(x).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
   for(const lang of ['hy','en','ru']){
     const ctx={RackI18n:{t:I.forLanguage(lang)},tr:I.forLanguage(lang),esc,input:(name,label,value)=>`<label>${esc(label)}</label><input name="${name}" value="${esc(value)}">`,button:(label,action)=>`<button data-action="${action}">${label}</button>`};
@@ -77,7 +77,7 @@ test('editor opens directly, localizes controls and parses add/edit/delete field
     ctx.D.validate({...ctx.D.empty(),serviceTypes:[{...custom,name:'Internet'}]});
     const state=project();state.serviceTypes[0].name='<Office>';
     const html=ctx.styleFields(state,true);
-    assert.ok(!html.includes('<details'));
+    assert.ok(!html.includes('<details class="project-style">'));
     assert.ok(html.includes('style-service-add'));
     assert.ok(html.includes('style-service-remove'));
     assert.ok(html.includes('&lt;Office>'));
@@ -91,4 +91,37 @@ test('editor opens directly, localizes controls and parses add/edit/delete field
     assert.equal(style.serviceTypes[0].color,'#abcdef');
     assert.ok(style.hiddenServices.includes('camera'));
   }
+});
+
+test('deleting a customized default service removes customization even if passive ports had it',()=>{
+  const state=project();
+  state.serviceLabels={'':'պասիվ'};
+  state.serviceColors={'':'#8c7b75'};
+  const portList=Array.from({length:12},(_,i)=>D.port(i+1,'port-'+(i+1)));
+  state.floors=[{id:'floor-1',name:'Floor',racks:[{id:'rack-1',name:'Rack',u:10,location:'',photo:'',devices:[{id:'device-1',name:'PP-01',type:'panel',model:'',color:'#123456',pos:1,height:1,portList}]}]}];
+  D.validate(state);
+  assert.equal(D.serviceLabel(state,''),'պասիվ');
+  assert.equal(D.serviceColor(state,''),'#8c7b75');
+
+  const source=fs.readFileSync(require.resolve('../src/client/js/app'),'utf8');
+  const code=source.slice(source.indexOf('function serviceIconPicker('),source.indexOf('const racks='));
+  const ctx={RackI18n:{t:I.forLanguage('hy')},tr:I.forLanguage('hy'),esc:x=>x,input:()=>'',button:()=>''};
+  vm.createContext(ctx);
+  vm.runInContext(fs.readFileSync(require.resolve('../src/shared/domain'),'utf8'),ctx);
+  ctx.D=ctx.RackDomain;
+  vm.runInContext(code,ctx);
+
+  // Form submitted after user deleted the '' ("պասիվ") row:
+  const fd=new FormData();
+  fd.append('style-service-key','custom-office');fd.append('style-service-label-custom-office','Office LAN');fd.append('style-service-color-custom-office','#123456');
+  const style=ctx.readStyle(fd);
+  assert.ok(!style.hiddenServices.includes(''));
+  assert.equal(style.serviceLabels[''],undefined);
+
+  D.applyProjectStyle(state,style);
+  D.validate(state);
+  assert.equal(D.serviceLabel(state,''),'Չնշված');
+  assert.equal(D.serviceColor(state,''),'#64748b');
+  assert.equal(state.serviceLabels[''],undefined);
+  assert.equal(D.hasService(state,''),true);
 });

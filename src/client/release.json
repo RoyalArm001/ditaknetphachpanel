@@ -1,33 +1,30 @@
 {
-  "version": "2.9.0",
+  "version": "2.9.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ctrl+Z / Ctrl+Y — Հետ/Կրկին գործողություն քարտեզի խմբագրիչում (մինչև 50 քայլ)։",
-      "Քարտեզի նշիչների անունները ավտոմատ ուղղվում են դեպի ազատ կողմ՝ հելնելը կանխելու համար։",
-      "Անսարք պորտն ամբողջությամբ մաքրվում է՝ ծառայություն, գույն, PDF-ում ճիշտ է ցուցադրվում։",
-      "UI-ն ձեռք բերելու ժամանակ կապույտ ընդգծում չի լինում (user-select:none)։",
-      "PDF քարտեզի անունները ֆիքս տեղերում են, չեն հայտնվում հեռու կամ հսկայական։"
+      "Դուրս գալուց մուտքն ու բացված աշխատանքային վիճակը մաքրվում են, և բացվում է սկզբնական մուտքի էջը։ Նախագծերը պահպանվում են։",
+      "Քարտեզի և PDF-ի սարքերի անունները դասավորվում են առանց իրար ծածկելու՝ գծով ցույց տալով համապատասխան սարքը։",
+      "Քարտեզի գործիքներից կարող եք կարգավորել հատակագծի թափանցիկությունը։",
+      "Ուղղվել է պորտը մաքրելիս նշանակության հեռացումը և «Չնշված» տեսակի փոփոխությունների պահպանումը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Ctrl+Z / Ctrl+Y — Undo/Redo in the map editor (up to 50 steps).",
-      "Map marker labels automatically flip to avoid overlapping neighbours.",
-      "Faulty ports are fully cleared of service data and shown correctly in PDF.",
-      "No accidental blue text selection when clicking UI elements.",
-      "PDF map labels are compact and stay close to their markers."
+      "Signing out clears your session and open workspace and returns to the welcome screen. Saved projects are preserved.",
+      "Device labels on maps and in PDF exports avoid overlapping, with lines pointing to their devices.",
+      "Adjust floor plan transparency from the map tools.",
+      "Fixed purpose removal when clearing ports and saving changes to the Unassigned purpose."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Ctrl+Z / Ctrl+Y — Отмена/Повтор действий в редакторе карты (до 50 шагов).",
-      "Подписи маркеров на карте автоматически выбирают направление, чтобы не перекрываться.",
-      "Неисправный порт полностью очищается от сервисных данных и корректно отображается в PDF.",
-      "При клике по интерфейсу больше не появляется синяя рамка выделения текста.",
-      "Подписи на PDF-карте компактны и расположены рядом с маркерами."
+      "Выход очищает сеанс и открытое рабочее пространство и возвращает на начальный экран входа. Сохранённые проекты остаются.",
+      "Названия устройств на карте и в PDF размещаются без наложений, а линии указывают на соответствующие устройства.",
+      "Прозрачность плана этажа можно настроить в инструментах карты.",
+      "Исправлены удаление назначения при очистке порта и сохранение изменений типа «Не указано»."
     ]
   }
 }

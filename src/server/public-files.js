@@ -14,6 +14,7 @@ const sources={
   'sitemap.xml':'src/client/sitemap.xml',
   'open-local.js':'src/client/open-local.js',
   'merge-state.js':'src/shared/merge-state.js',
+  'map-label-layout.js':'src/shared/map-label-layout.js',
   'handover-pdf.js':'src/shared/handover-pdf.js',
   'maps.js':'src/client/js/maps.js',
   'maps.css':'src/client/css/maps.css',

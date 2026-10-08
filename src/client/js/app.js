@@ -14,9 +14,9 @@ const personal=()=>storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
 try{const choice=localStorage.getItem('rackmap-workspace-choice');if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
 if(!onboardingChoice)try{const choice=document.cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('mypatch_workspace='))?.split('=')[1];if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
-function rememberWorkspace(){try{localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}try{document.cookie=`mypatch_workspace=${storageMode}; Path=/; SameSite=Lax; Max-Age=15552000${location.protocol==='https:'?'; Secure':''}`;}catch{}}
+function rememberWorkspace(){try{localStorage.removeItem(AppReset.logoutKey);localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}try{document.cookie=`mypatch_workspace=${storageMode}; Path=/; SameSite=Lax; Max-Age=15552000${location.protocol==='https:'?'; Secure':''}`;}catch{}}
 async function restoreRememberedWorkspace(){
-  if(onboardingChoice)return;
+  if(onboardingChoice||AppReset.isLoggedOut())return;
   await AppReset.ensureSessionCleared();
   // The HttpOnly session can outlive browser preferences. Recover its workspace
   // without reading or storing the PIN, and never switch an explicit choice.
@@ -105,7 +105,7 @@ function styleFields(source={},open=false){
 }
 function readStyle(fd){
   const keys=fd.getAll('style-service-key').map(String);
-  const result={serviceIcons:{},serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
+  const result={serviceIcons:{},serviceTypes:[],hiddenServices:Object.keys(D.services).filter(key=>key!==''&&!keys.includes(key)),serviceLabels:{},serviceColors:{},statusLabels:{},statusColors:{}};
   for(const [kind,entries]of [['service',keys],['status',Object.keys(D.statuses)]])for(const key of entries){
     const suffix=key||'none',label=String(fd.get(`style-${kind}-label-${suffix}`)||'').trim(),color=String(fd.get(`style-${kind}-color-${suffix}`)||'');
     if(kind==='service'&&key.startsWith('custom-'))result.serviceTypes.push({id:key,name:label,color});
@@ -441,7 +441,26 @@ function resetAppDialog(){
   $('#modalForm button[type=submit]').textContent=tr('Մաքրել և սկսել նորից');
   $('#modalForm button[type=submit]').className='button danger';
 }
+async function logoutWorkspace(){
+  if(modeBusy||companyBusy||resetInProgress)return;
+  if(ready&&!await save())return;
+  if(resetInProgress)return;
+  if(dirty||portDraftDirty)recovery();
+  pauseForReset();
+  mapController?.destroy();mapController=null;sceneController?.destroy();sceneController=null;
+  dirty=false;portDraftDirty=false;portDraft=null;state=D.empty();
+  selectedPortId='';selectedPortIds.clear();companies=[];accountUserId='';accountReadOnly=false;
+  $('#companyLabel').textContent=tr('Իմ փաչ');$('#companySelect').innerHTML='';
+  $('#breadcrumb').textContent='';$('#connectionBanner').hidden=true;$('#onlineCount').hidden=true;
+  renderWelcome();$('#content').inert=true;
+  await AppReset.logout();
+  location.replace(location.pathname);
+}
 window.addEventListener('storage',event=>{
+  if(event.key===AppReset.logoutKey&&event.newValue){
+    if(dirty||portDraftDirty)recovery();
+    pauseForReset();location.replace(location.pathname);return;
+  }
   if(event.key===AppReset.startedKey&&event.newValue){pauseForReset();toast(tr('Հավելվածը մաքրվում է…'));}
   if(event.key===AppReset.finishedKey&&event.newValue){dirty=false;portDraftDirty=false;location.replace(location.pathname);}
 });
@@ -770,13 +789,13 @@ const actions={
   'site-recover-pin':recoverAccountDialog,
   'site-recover-login':()=>renderAccountLogin('login'),
   'account-pin-new':()=>confirmAction(tr('Փոխարինել անձնական PIN-ը'),tr('Հին անձնական PIN-ը կդադարի աշխատել։ Նոր կոդը պետք է նորից պահպանել։'),async()=>{const result=await api('/api/account/pin/new',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});setTimeout(()=>showPersonalPin(result.pin),0);}),
-  'workspace-choice':async()=>{if(ready&&!await save())return;welcomeStep='home';renderWelcome();},
+  'workspace-choice':logoutWorkspace,
   'connect-cloud':connectCloud,
   'personal-mode':async()=>{await switchStorage('personal');navigator.storage?.persist?.().catch(()=>{});},
   'login-pin':()=>renderLogin('pin'),'login-account':()=>renderLogin('account'),
   'ui-zoom-out':()=>changeUiZoom(-1),'ui-zoom-in':()=>changeUiZoom(1),
   'panels-close':()=>{panelPrefs.left=false;panelPrefs.right=false;applyPanels();},
-  logout:async()=>{if(cloudMode){if(!await save())return;await api('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});await switchStorage('personal');return;}if(!await save())return;await api('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});state=D.empty();selectedPortId='';portDraft=null;companies=[];$('#companyLabel').textContent=tr('Իմ փաչ');$('#companySelect').innerHTML='';renderLogin();},
+  logout:logoutWorkspace,
   'toggle-left':()=>togglePanel('left'),
   'toggle-right':()=>togglePanel('right'),
   'style-service-add':(id,el)=>{
@@ -835,8 +854,15 @@ const actions={
   'port-clear-cancel':()=>{$('#portError').hidden=true;},
   'port-clear-confirm':id=>{
     clearTimeout(portTimer);portDraft=null;portDraftDirty=false;
-    commit(s=>{const current=D.ports(s).find(x=>x.p.id===id).p;const incoming=D.ports(s).find(x=>x.p.switchPortId===id)?.p;
-      if(incoming)incoming.switchPortId='';
+    commit(s=>{
+      const current=D.ports(s).find(x=>x.p.id===id)?.p;
+      if(!current)return;
+      const incoming=D.ports(s).find(x=>x.p.switchPortId===id)?.p;
+      if(incoming){incoming.switchPortId='';incoming.service='';}
+      if(current.switchPortId){
+        const peer=D.ports(s).find(x=>x.p.id===current.switchPortId)?.p;
+        if(peer)peer.service='';
+      }
       Object.assign(current,D.port(current.number,current.id));
     });
   },
@@ -880,7 +906,6 @@ window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||s
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 window.matchMedia('(max-width:1150px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 async function init(){
-  await AppReset.ensureSessionCleared().catch(()=>{});
   if(location.protocol==='file:'){
     location.replace('https://patch.ditaknet.com/');
     return;
@@ -888,6 +913,7 @@ async function init(){
   try{
     if(!onboardingChoice)await restoreRememberedWorkspace();
     if(!onboardingChoice){renderWelcome();return;}
+    await AppReset.ensureSessionCleared().catch(()=>{});
     onboardingVisible=false;
     let config;
     if(personal()){config={cloud:!localHost,authRequired:false};}
@@ -900,7 +926,7 @@ async function init(){
     if(!personal()&&config.setupRequired)throw new Error(tr('Vercel-ում բացակայում են՝ ')+config.missing.join(', '));
     maxStateBytes=personal()?24*1024*1024:config.maxStateBytes||maxStateBytes;
     $('[data-action=logout]')?.remove();
-    if(authRequired)$('.save-tools').insertAdjacentHTML('beforeend',button(tr('Դուրս գալ'),'logout','','small'));
+    $('.save-tools').insertAdjacentHTML('beforeend',button(tr('Դուրս գալ'),'logout','','small'));
     if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=false;}
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';

@@ -33,7 +33,7 @@ globalThis.RackMaps=(()=>{
   }
   function mount(root,h){
     const {tr,esc,commit,getState,modal,input,select,toast,download,save}=h,abort=new AbortController();
-    const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1};ui.set(key,view);}const collapsedDeviceGroups=new Set(),expandedDeviceCards=new Set();
+    const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1,imageOpacity:0};ui.set(key,view);}const collapsedDeviceGroups=new Set(),expandedDeviceCards=new Set();
     const state=getState(),plans=state.floorPlans||[];let plan=plans.find(p=>p.id===view.planId)||plans[0];view.planId=plan?.id||'';
     const rows=D.rows(state),byId=new Map(rows.map(r=>[r.p.id,r]));const mapData=D.mapDevices(state,plan);view.portId=mapData.canonical(view.portId);if(!mapData.devices.some(r=>r.p.id===view.portId)&&!mapData.markers.some(m=>m.portId===view.portId)){view.portId='';view.placing=false;}let dragging=null;
     const findPlan=s=>(s.floorPlans||[]).find(p=>p.id===view.planId);
@@ -61,7 +61,7 @@ globalThis.RackMaps=(()=>{
     const paths={select:'m5 3 14 10-7 1-3 7Z',hand:'M8 13V6a2 2 0 0 1 4 0v6M12 5a2 2 0 0 1 4 0v7M16 8a2 2 0 0 1 4 0v7c0 4-3 7-7 7h-1c-2 0-3-1-4-3l-4-6c-1-2 1-4 3-2l1 2',fit:'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',plus:'M12 5v14M5 12h14',minus:'M5 12h14',close:'m6 6 12 12M18 6 6 18',layers:'m3 7 9-5 9 5-9 5Zm0 5 9 5 9-5M3 17l9 5 9-5',plan:'M3 3h18v18H3ZM3 9h18M9 9v12',devices:'M3 3h7v7H3Zm11 0h7v7h-7ZM3 14h7v7H3Zm11 0h7v7h-7Z',labels:'M4 5h16M12 5v15M8 20h8',pdf:'M14 2H5v20h14V7Zm0 0v6h5M8 13h8M8 17h6',share:'M8 12 17 6M8 12l9 6M3 9h5v6H3ZM17 3h5v5h-5Zm0 13h5v5h-5Z',more:'M5 11v2M12 11v2M19 11v2',edit:'m4 16 12-12 4 4L8 20l-5 1Z',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7',fullscreen:'M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6',eye:'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',eyeOff:'m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.9M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8'};
     const svg=name=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}"/></svg>`;
     const tool=(text,action,image,extra='')=>`<button type="button" class="map-tool" data-map-action="${action}" title="${esc(tr(text))}" aria-label="${esc(tr(text))}" ${extra}>${svg(image)}</button>`;
-    view.tool||='select';view.filter||='all';view.labels??=true;view.markerSize=Math.min(50,Math.max(0,Number(view.markerSize)||0));
+    view.tool||='select';view.filter||='all';view.labels??=true;view.markerSize=Math.min(50,Math.max(0,Number(view.markerSize)||0));view.imageOpacity=Math.min(90,Math.max(0,Number(view.imageOpacity)||0));
     const floorName=id=>state.floors.find(f=>f.id===id)?.name||tr('Առանց հարկի');
     const mapFloors=[...new Set(plans.map(p=>p.floorId))];
     document.body.classList.add('map-view');
@@ -75,7 +75,7 @@ globalThis.RackMaps=(()=>{
             ${!h.readOnly?tool('Բեռնել հատակագիծ','upload','plus'):''}
           </div></div>
           <div class="map-top-actions"><button type="button" class="map-command" data-map-action="map-pdf" aria-label="${esc(tr('Քարտեզ PDF'))}">${svg('pdf')}<span>PDF</span></button><button type="button" class="map-command" data-map-action="share" aria-label="${esc(tr('Կիսվել հղումով'))}">${svg('share')}<span>${esc(tr('Կիսվել'))}</span></button>
-            <details class="map-more"><summary class="map-tool" title="${esc(tr('Լրացուցիչ գործիքներ'))}" aria-label="${esc(tr('Լրացուցիչ գործիքներ'))}">${svg('more')}</summary><div class="map-more-menu"><label class="map-marker-size"><span>${esc(tr('Նշիչի մեծացում'))}</span><output data-marker-size-value>+${view.markerSize}%</output><input type="range" min="0" max="50" step="5" value="${view.markerSize}" data-map-marker-size aria-label="${esc(tr('Նշիչի մեծացում'))}"></label>${!h.readOnly?button('Խմբագրել հատակագիծը','edit'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}${!h.readOnly?button('Ջնջել հատակագիծը','delete'):''}</div></details>
+            <details class="map-more"><summary class="map-tool" title="${esc(tr('Լրացուցիչ գործիքներ'))}" aria-label="${esc(tr('Լրացուցիչ գործիքներ'))}">${svg('more')}</summary><div class="map-more-menu"><label class="map-marker-size"><span>${esc(tr('Նշիչի մեծացում'))}</span><output data-marker-size-value>+${view.markerSize}%</output><input type="range" min="0" max="50" step="5" value="${view.markerSize}" data-map-marker-size aria-label="${esc(tr('Նշիչի մեծացում'))}"></label><label class="map-marker-size"><span>${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</span><output data-image-opacity-value>${view.imageOpacity}%</output><input type="range" min="0" max="90" step="10" value="${view.imageOpacity}" data-map-image-opacity aria-label="${esc(tr('Հատ. ֆոնի մաղձոտ.'))}"></label>${!h.readOnly?button('Խմբագրել հատակագիծը','edit'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}${!h.readOnly?button('Ջնջել հատակագիծը','delete'):''}</div></details>
           </div>
         </div>
         <div class="map-filters" role="group" aria-label="${esc(tr('Սարքի տեսակ'))}">${[['all','Բոլորը','devices'],['wifi','Wi-Fi'],['camera','Տեսախցիկ']].map(([id,name,shape])=>`<button type="button" data-map-filter="${id}" aria-label="${esc(tr(name))}" aria-pressed="${view.filter===id}">${shape?svg(shape):icon(id)}<span>${esc(tr(name))}</span><small>${id==='all'?mapData.markers.length:mapData.markers.filter(m=>m.row.service===id).length}</small></button>`).join('')}</div>
@@ -87,6 +87,7 @@ globalThis.RackMaps=(()=>{
       </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
     function showDevices(open){view.devicesOpen=open;const side=root.querySelector('.map-sidebar');if(!side)return;root.querySelector('.map-side-panels')?.classList.toggle('devices-open',open);side.classList.toggle('is-open',open);const picker=root.querySelector('#map-device-picker');if(picker)picker.hidden=!open;const toggle=side.querySelector('[data-map-action="devices-toggle"]');if(toggle){toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-controls','map-device-picker');toggle.innerHTML=svg(open?'close':'plus');toggle.title=esc(tr(open?'Փակել':'Միացված սարքեր'));toggle.setAttribute('aria-label',toggle.title);}root.querySelector('.map-add-devices')?.setAttribute('aria-expanded',String(open));drawInspector();}
     function drawInspector(){
+      scheduleLabels();
       const host=root.querySelector('[data-map-inspector]');if(!host)return;
       const row=byId.get(view.portId),marker=mapData.markers.find(m=>m.portId===view.portId);host.hidden=!row;
       if(!row)return;
@@ -104,22 +105,41 @@ globalThis.RackMaps=(()=>{
       modal(tr('Խմբագրել պորտը')+' · '+row.device+' / '+row.port,`<div class="form-grid">${input('endpointName',tr('Միացված սարքի անվանում'),row.endpointName,'text','maxlength="200" placeholder="WiFi B zone"')}${select('service',tr('Նշանակություն'),D.serviceEntries(state).map(([key])=>[key,D.serviceLabel(state,key,tr)]),row.service)}${input('room',tr('Սենյակ'),row.room,'text','maxlength="200"')}${input('cable',tr('Մալուխի համար'),row.cable,'text','maxlength="200"')}${select('status',tr('Վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key,tr)]),row.p.status)}${input('vlan','VLAN',row.vlan,'number','min="1" max="4094" step="1"')}</div>`,fd=>change(s=>{const current=D.ports(s).find(x=>x.p.id===row.p.id);if(!current)throw new Error(tr('Պորտը չի գտնվել'));for(const key of ['endpointName','room','cable','service','vlan'])current.p[key]=String(fd.get(key)||'').trim();if(current.p.vlan)current.p.vlan=String(Number(current.p.vlan));current.p.status=String(fd.get('status'));if(current.p.status==='fault')current.p.service='';else if(current.p.status==='free'&&(current.p.cable||current.p.switchPortId||current.p.service))current.p.status='used';}));
     }
     const visibleService=service=>view.filter==='all'||view.filter===service;
+    let labelFrame=0;
+    function scheduleLabels(){cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(arrangeLabels);}
+    function arrangeLabels(){
+      const viewport=root.querySelector('.map-viewport');if(!viewport)return;
+      let leaders=viewport.querySelector('.map-label-leaders');
+      if(!leaders){leaders=document.createElementNS('http://www.w3.org/2000/svg','svg');leaders.classList.add('map-label-leaders');leaders.setAttribute('aria-hidden','true');viewport.append(leaders);}
+      leaders.replaceChildren();if(!view.labels)return;
+      const origin=viewport.getBoundingClientRect(),items=[],obstacles=[];
+      for(const marker of root.querySelectorAll('.map-marker')){
+        const label=marker.querySelector('.map-marker-label'),rect=marker.getBoundingClientRect();
+        label.style.visibility='';label.removeAttribute('data-dir');label.style.transform='none';
+        const x=rect.left-origin.left+rect.width/2,y=rect.top-origin.top+rect.height/2;
+        if(x<0||y<0||x>origin.width||y>origin.height){label.style.visibility='hidden';continue;}
+        const size=label.getBoundingClientRect();obstacles.push({x:x-rect.width/2-2,y:y-rect.height/2-2,width:rect.width+4,height:rect.height+4});
+        items.push({id:marker.dataset.mapMarker,x,y,width:size.width,height:size.height,radius:rect.width/2+3,priority:marker.classList.contains('selected')?1:0,label,rect,marker});
+      }
+      for(const el of root.querySelectorAll('.map-anchor,.map-topbar,.map-filters,.map-side-panels>aside,.map-bottom-toolbar,.map-view-tools,.map-more-menu')){
+        if(!el.getClientRects().length||getComputedStyle(el).visibility==='hidden')continue;const r=el.getBoundingClientRect();obstacles.push({x:r.left-origin.left,y:r.top-origin.top,width:r.width,height:r.height});
+      }
+      const boxes=RackMapLabels.layout(items,{x:5,y:5,width:Math.max(0,origin.width-10),height:Math.max(0,origin.height-10)},obstacles,3);
+      const maskId='label-lines-'+crypto.randomUUID();
+      leaders.innerHTML=`<defs><mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${origin.width}" height="${origin.height}"><rect width="${origin.width}" height="${origin.height}" fill="white" stroke="none"/>${[...obstacles,...[...boxes.values()].filter(Boolean)].map(box=>`<rect x="${box.x-1}" y="${box.y-1}" width="${box.width+2}" height="${box.height+2}" fill="black" stroke="none"/>`).join('')}</mask></defs>`;
+      for(const item of items){
+        const box=boxes.get(item.id);if(!box){item.label.style.visibility='hidden';continue;}
+        const scale=item.rect.width/item.marker.offsetWidth;
+        item.label.style.left=((box.x-(item.rect.left-origin.left))/scale-item.marker.clientLeft)+'px';
+        item.label.style.top=((box.y-(item.rect.top-origin.top))/scale-item.marker.clientTop)+'px';
+        const end=RackMapLabels.connector(item,box),length=Math.hypot(end.x-item.x,end.y-item.y);
+        if(length>item.radius+2){const line=document.createElementNS(leaders.namespaceURI,'line'),ratio=item.radius/length;for(const [key,value] of Object.entries({x1:item.x+(end.x-item.x)*ratio,y1:item.y+(end.y-item.y)*ratio,x2:end.x,y2:end.y}))line.setAttribute(key,value);line.setAttribute('mask',`url(#${maskId})`);leaders.append(line);}
+      }
+    }
     function draw(){
       if(!plan)return;const placed=new Map(mapData.markers.map(m=>[m.portId,m]));
       const visible=mapData.markers.filter(m=>visibleService(m.row.service));
-      // Compute label direction per marker to avoid overlaps
-      const labelDir=m=>{
-        const p=D.mapMarkerLayout(m);
-        // Near bottom → label above; near right edge → label left; default → below
-        if(p.iconY>0.75)return 'up';
-        if(p.iconX>0.82)return 'left';
-        if(p.iconX<0.18)return 'right';
-        // If there is a neighbour very close below, prefer up
-        const closeBelow=visible.some(n=>n.portId!==m.portId&&(()=>{const q=D.mapMarkerLayout(n);return Math.abs(q.iconX-p.iconX)<0.08&&q.iconY>p.iconY&&q.iconY-p.iconY<0.07;})());
-        if(closeBelow)return 'up';
-        return 'down';
-      };
-      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId,color=D.serviceColor(state,m.row.service),dir=labelDir(m);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="${dir}" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
+      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
       const selected=byId.get(view.portId);root.querySelector('[data-map-hint]').textContent=view.placing&&selected?tr('Սեղմեք հատակագծի վրա՝ սարքը տեղադրելու համար։'):tr('Անիվ՝ խոշորացում · Space + քաշել՝ տեղաշարժում');
       const search=view.query.trim().toLocaleLowerCase(),matches=r=>visibleService(r.service)&&(!search||[name(r),D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room].join(' ').toLocaleLowerCase().includes(search));
       const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placed.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
@@ -149,7 +169,28 @@ globalThis.RackMaps=(()=>{
     function exportCurrent(kind,sharing=false){
       if(sharing&&!h.canShare)throw new Error(tr('Հղումով կիսվելու համար բացեք նախագիծը կայքի cloud-ից'));
       const current=getState(),defaultFloor=plan?.floorId||'',language=globalThis.RackI18n?.language||'hy';
-      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],['switch',tr('Միայն սվիչներ')],['panel',tr('Միայն փաչ պանելներ')],['router',tr('Միայն ռաուտերներ')]],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Հատակագիծ'),[],'')}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը և սարքերը։'))}</p>`,async fd=>{
+      // Build preview summary HTML of what will be included
+      function buildPreview(floorId,deviceType,deviceId,planId,outputKind){
+        const snap=getState();
+        const sel=RackHandover.select(snap,{floorId,deviceType,deviceId,planId});
+        const planCount=sel.plans.length,devCount=sel.devices.length;
+        if((outputKind==='maps'&&!planCount)||(outputKind==='devices'&&!devCount)||(outputKind==='all'&&!planCount&&!devCount))return `<p class="hint map-pdf-empty">${esc(tr('Ընտրված պայմաններով տվյալներ չկան'))}</p>`;
+        let html='<div class="map-pdf-preview">';
+        if(outputKind!=='devices'&&planCount){
+          const totalMarkers=sel.plans.reduce((s,p)=>s+p.selectedMarkers.length,0);
+          html+=`<div class="map-pdf-section"><strong>${esc(tr('Քարտեզ'))}</strong><span>${planCount} ${esc(tr('հատակ.'))} · ${totalMarkers} ${esc(tr('սարք'))}</span></div>`;
+          for(const p of sel.plans){
+            const groups=new Map();for(const m of p.selectedMarkers){const k=D.serviceLabel(snap,m.row.service,tr)||tr('Չնշված');groups.set(k,(groups.get(k)||0)+1);}
+            html+=`<div class="map-pdf-plan"><em>${esc(p.name)}</em><span>${[...groups.entries()].map(([k,n])=>esc(k)+': '+n).join(' · ')||esc(tr('Դատարկ'))}</span></div>`;
+          }
+        }
+        if(outputKind!=='maps'&&devCount){
+          html+=`<div class="map-pdf-section"><strong>${esc(tr('Սարքերի սխեմաներ'))}</strong><span>${devCount} ${esc(tr('սարք'))}</span></div>`;
+        }
+        html+='</div>';
+        return html;
+      }
+      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],['switch',tr('Միայն սվիչներ')],['panel',tr('Միայն փաչ պանելներ')],['router',tr('Միայն ռաուտերներ')]],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Հատակագիծ'),[],'')}${!sharing?`<div class="field full"><label for="pdfImageOpacity">${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</label><input id="pdfImageOpacity" name="pdfImageOpacity" type="range" min="0" max="90" step="10" value="${view.imageOpacity}" style="width:100%;accent-color:#137f79"></div>`:''}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը և սարքերը։'))}</p><div data-pdf-preview>${buildPreview(defaultFloor,'all','','',kind)}</div>`,async fd=>{
         const outputKind=String(fd.get('pdfKind')),floorId=String(fd.get('pdfFloor')),deviceType=String(fd.get('pdfType')),deviceId=String(fd.get('pdfDevice')),planId=outputKind==='devices'?'':String(fd.get('pdfPlan')),snapshot=structuredClone(getState());
         const selection=RackHandover.select(snapshot,{floorId,deviceType,deviceId,planId});
         if(outputKind==='maps'?!selection.plans.length:outputKind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
@@ -158,8 +199,9 @@ globalThis.RackMaps=(()=>{
           await h.api('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:outputKind,floorId,deviceType,deviceId,planId,language:String(fd.get('pdfLanguage')),days:Number(fd.get('shareDays')),revision:h.getRevision()})});
           setTimeout(()=>manageShares().catch(err=>toast(err.message)),0);return;
         }
+        const imgOpacity=Math.min(90,Math.max(0,Number(fd.get('pdfImageOpacity'))||0));
         const outputTr=RackI18n.forLanguage(String(fd.get('pdfLanguage')));
-        const blob=await exportPdf(snapshot,outputKind,planId,outputTr,{floorId,deviceType,deviceId});
+        const blob=await exportPdf(snapshot,outputKind,planId,outputTr,{floorId,deviceType,deviceId,imageOpacity:imgOpacity});
         download(blob,outputKind==='maps'?'MyPatch-map.pdf':'MyPatch-devices.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));
       });
       const form=document.querySelector('#modalForm');
@@ -176,7 +218,11 @@ globalThis.RackMaps=(()=>{
         if(availablePlans.some(p=>p.id===selectedPlan))form.elements.pdfPlan.value=selectedPlan;
         form.elements.pdfPlan.closest('.field').hidden=form.elements.pdfKind.value==='devices';
       };
-      update(true);form.elements.pdfFloor.onchange=()=>{form.elements.pdfDevice.value='';form.elements.pdfPlan.value='';update();};form.elements.pdfType.onchange=()=>{form.elements.pdfDevice.value='';update();};form.elements.pdfKind.onchange=()=>update();
+      function refreshPreview(){
+        const previewEl=document.querySelector('[data-pdf-preview]');if(!previewEl)return;
+        previewEl.innerHTML=buildPreview(form.elements.pdfFloor.value,form.elements.pdfType.value,form.elements.pdfDevice.value,form.elements.pdfKind.value==='devices'?'':form.elements.pdfPlan.value,form.elements.pdfKind.value);
+      }
+      update(true);form.elements.pdfFloor.onchange=()=>{form.elements.pdfDevice.value='';form.elements.pdfPlan.value='';update();refreshPreview();};form.elements.pdfType.onchange=()=>{form.elements.pdfDevice.value='';update();refreshPreview();};form.elements.pdfKind.onchange=()=>{update();refreshPreview();};form.elements.pdfDevice?.addEventListener('change',refreshPreview);form.elements.pdfPlan?.addEventListener('change',refreshPreview);
       form.querySelector('button[type="submit"]').textContent=tr(sharing?'Ստեղծել հղումը':'Ներբեռնել PDF');
     }
     function place(x,y){if(!view.portId||h.readOnly)return;view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});});}
@@ -185,7 +231,7 @@ globalThis.RackMaps=(()=>{
     const viewport=root.querySelector('.map-viewport'),canvas=root.querySelector('.map-canvas');
     let camera=view.camera?.planId===plan?.id?view.camera:null,pan=null,pinch=null,space=false;
     const pointers=new Map();
-    function paintCamera(){if(!camera||!canvas)return;canvas.style.width=plan.width*camera.scale+'px';canvas.style.height=plan.height*camera.scale+'px';canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
+    function paintCamera(){if(!camera||!canvas)return;canvas.style.width=plan.width*camera.scale+'px';canvas.style.height=plan.height*camera.scale+'px';canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));view.camera=camera;scheduleLabels();root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
     function fit(){if(!viewport)return;const w=viewport.clientWidth,h=viewport.clientHeight,right=view.devicesOpen&&w>800?340:0,pad=w<600?28:130;const scale=Math.max(.27,Math.min((w-right-pad)/plan.width,(h-200)/plan.height,2));camera={planId:plan.id,scale,x:(w-right-plan.width*scale)/2,y:100+(h-200-plan.height*scale)/2,w,h};paintCamera();}
     function zoom(factor,point){if(!camera)return;point||={x:viewport.clientWidth/2,y:viewport.clientHeight/2};const next=Math.max(.27,Math.min(6,camera.scale*factor)),ratio=next/camera.scale;camera.x=point.x-(point.x-camera.x)*ratio;camera.y=point.y-(point.y-camera.y)*ratio;camera.scale=next;paintCamera();}
     function setTool(tool){view.tool=tool;view.placing=false;root.querySelectorAll('[data-map-action="select"],[data-map-action="hand"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapAction===tool)));draw();}
@@ -222,7 +268,8 @@ globalThis.RackMaps=(()=>{
     }
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     root.addEventListener('pointerdown',e=>{const more=root.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
-    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Number(e.target.value);root.querySelector('[data-marker-size-value]').textContent='+'+view.markerSize+'%';root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
+    root.addEventListener('toggle',e=>{if(e.target.matches('.map-more'))scheduleLabels();},{capture:true,signal:abort.signal});
+    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Number(e.target.value);root.querySelector('[data-marker-size-value]').textContent='+'+view.markerSize+'%';root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));scheduleLabels();return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
     root.addEventListener('change',e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.placing=false;view.camera=null;h.redraw();}},{signal:abort.signal});
     if(viewport){
       viewport.addEventListener('wheel',e=>{e.preventDefault();const rect=viewport.getBoundingClientRect();zoom(Math.exp(-Math.max(-200,Math.min(200,e.deltaY))*.002),{x:e.clientX-rect.left,y:e.clientY-rect.top});},{passive:false,signal:abort.signal});
@@ -276,8 +323,9 @@ globalThis.RackMaps=(()=>{
     if(plans.length)showDevices(!!view.devicesOpen);
     draw();
     const resize=viewport?new ResizeObserver(()=>{if(!camera)fit();else{camera.x+=(viewport.clientWidth-camera.w)/2;camera.y+=(viewport.clientHeight-camera.h)/2;camera.w=viewport.clientWidth;camera.h=viewport.clientHeight;paintCamera();}}):null;
+    document.fonts?.ready.then(()=>{if(!abort.signal.aborted)scheduleLabels();});
     if(viewport){if(!camera)fit();else paintCamera();resize.observe(viewport);}
-    return {busy:()=>pointers.size>0,destroy(){resize?.disconnect();abort.abort();document.body.classList.remove('map-view');}};
+    return {busy:()=>pointers.size>0,destroy(){cancelAnimationFrame(labelFrame);resize?.disconnect();abort.abort();document.body.classList.remove('map-view');}};
   }
   return {mount,exportPdf};
 })();

@@ -12,7 +12,7 @@ function resetApp({offline=false,failedDatabase=false}={}){
   const requests=[];let resets=0;
   const localStorage=storage({'rackmap-workspace-choice':'account','rackmap-personal-recovery-default':'draft','rackmap-account-user-company':'cloud draft','mypatch-theme':'dark','another-app':'keep'});
   const sessionStorage=storage({'rackmap-temporary':'secret','another-app':'keep'});
-  const context={localStorage,sessionStorage,crypto:{randomUUID:()=> 'reset-id'},AbortSignal,
+  const context={localStorage,sessionStorage,document:{cookie:''},crypto:{randomUUID:()=> 'reset-id'},AbortSignal,
     PersonalStore:{async reset(){if(failedDatabase)throw new Error('database unavailable');resets++;}},
     fetch:async(url,options)=>{requests.push({url,...options});if(offline)throw new Error('offline');return {ok:true};}};
   vm.createContext(context);vm.runInContext(fs.readFileSync(require.resolve('../src/client/js/app-reset'),'utf8'),context);
@@ -50,12 +50,43 @@ test('blocked browser storage does not break ordinary cloud requests',async()=>{
   const app=resetApp();app.context.localStorage.getItem=()=>{throw new Error('storage blocked');};
   await app.context.AppReset.ensureSessionCleared();assert.equal(app.requests.length,0);
 });
+test('logout clears both workspace modes but preserves projects, recovery drafts and appearance',async()=>{
+  for(const mode of ['shared','account','personal']){
+    const app=resetApp(),{localStorage,sessionStorage,AppReset,document}=app.context;
+    localStorage.setItem('rackmap-workspace-choice',mode);
+    for(const key of ['rackmap-storage-mode','rackmap-active-company','rackmap-live-client','rackmap-panels','rackmap-network-type'])localStorage.setItem(key,'old value');
+    await AppReset.logout();
+    assert.equal(app.resets(),0,'Logging out must not reset the local database');
+    for(const key of ['rackmap-workspace-choice','rackmap-storage-mode','rackmap-active-company','rackmap-live-client','rackmap-panels','rackmap-network-type'])assert.equal(localStorage.getItem(key),null);
+    assert.equal(localStorage.getItem('rackmap-personal-recovery-default'),'draft');
+    assert.equal(localStorage.getItem('rackmap-account-user-company'),'cloud draft');
+    assert.equal(localStorage.getItem('mypatch-theme'),'dark');
+    assert.equal(sessionStorage.getItem('rackmap-temporary'),null);
+    assert.equal(sessionStorage.getItem('another-app'),'keep');
+    assert.match(document.cookie,/mypatch_workspace=;.*Max-Age=0/);
+    assert.equal(AppReset.isLoggedOut(),true);
+    assert.equal(localStorage.getItem('mypatch-reset-pending'),null);
+    assert.deepEqual(app.requests.map(r=>r.url),['/api/auth/reset-device']);
+  }
+});
+test('offline logout stays signed out and clears old cookies before the next cloud login',async()=>{
+  const app=resetApp({offline:true});await app.context.AppReset.logout();
+  assert.equal(app.context.AppReset.isLoggedOut(),true);
+  assert.equal(app.context.localStorage.getItem('rackmap-workspace-choice'),null);
+  assert.equal(app.context.localStorage.getItem('mypatch-reset-pending'),'1');
+  assert.equal(app.resets(),0);
+  await assert.rejects(app.context.AppReset.ensureSessionCleared());
+  app.online();await app.context.AppReset.ensureSessionCleared();
+  assert.equal(app.context.localStorage.getItem('mypatch-reset-pending'),null);
+  assert.equal(app.context.AppReset.isLoggedOut(),true);
+});
 test('session reset expires only browser cookies, without requiring authentication or a database',()=>{
   const request={url:'/api/auth/reset-device',method:'POST',headers:{host:'patch.example',origin:'https://patch.example','content-type':'application/json'}};
   const res={writeHead(status,headers){this.status=status;this.headers=headers;},end(body){this.body=body;}};
   assert.equal(clearClientSession(request,res),true);assert.equal(res.status,200);
-  const cookies=res.headers['Set-Cookie'];assert.equal(cookies.length,6);
+  const cookies=res.headers['Set-Cookie'];assert.equal(cookies.length,7);
   for(const name of ['rackmap_access','rackmap_refresh','rackmap_pin','mypatch_access','mypatch_refresh','mypatch_recovery'])assert.ok(cookies.some(cookie=>cookie.startsWith(name+'=;')&&cookie.includes('Max-Age=0')&&cookie.includes('Path=/api')&&cookie.includes('Secure')));
+  assert.ok(cookies.some(cookie=>cookie.startsWith('mypatch_workspace=; Path=/;')&&cookie.includes('Max-Age=0')));
   assert.equal(res.headers['Cache-Control'],'no-store');
   assert.equal(clearClientSession({...request,url:'/api/state'},res),false);
   for(const [method,headers,expected] of [['GET',request.headers,405],['POST',{...request.headers,origin:'https://attacker.example'},403],['POST',{...request.headers,'content-type':'text/plain'},415]]){
@@ -80,7 +111,7 @@ test('the serverless reset endpoint works before cloud configuration or database
   const handler=require('../api');
   const res={writeHead(status,headers){this.status=status;this.headers=headers;},end(){}};
   await handler({url:'/api/auth/reset-device',method:'POST',headers:{host:'example.test','content-type':'application/json'}},res);
-  assert.equal(res.status,200);assert.equal(res.headers['Set-Cookie'].length,6);
+  assert.equal(res.status,200);assert.equal(res.headers['Set-Cookie'].length,7);
 });
 
 test('opening the confirmation does not reset data; confirming resets without saving',async()=>{
