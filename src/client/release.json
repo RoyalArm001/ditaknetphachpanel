@@ -1,28 +1,53 @@
 {
-  "version": "2.10.1",
+  "version": "2.10.2",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Topbar-ը և կողային մենյուն թարմացվել են՝ SVG պատկերակներով, կոմպակտ վիճակով և ավելի հստակ պահման/Live վիճակով։",
-      "Live մասնակիցների ցուցիչը, հավելվածի տեղադրման կոճակը և ավտոմատ պահուստավորման հիմքը պատրաստվել են ընդհանուր հրապարակման համար։"
+      "Քարտեզի գործիքագոտում ավելացվել են Undo (Ctrl+Z), Redo (Ctrl+Y) և դաշտի կողպման (Lock) կոճակներ։",
+      "Սարքի Inspector-ում այժմ ամբողջությամբ երևում են սարքի մոդելը, U դիրքը, պորտերի քանակը, IP և VLAN տվյալները։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The top bar and sidebar now use clearer SVG icons, compact states and save/Live status feedback.",
-      "Live presence, the app install control and the automatic backup foundation are included in the complete release."
+      "Added visible Undo (Ctrl+Z), Redo (Ctrl+Y), and Canvas Lock/Unlock controls to the map toolbar.",
+      "The device inspector now shows complete metadata including model, U position, port count, IP, and VLAN details."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Верхняя панель и боковое меню обновлены: добавлены понятные SVG-значки, компактный вид и статусы сохранения/Live.",
-      "В релиз включены Live-присутствие, кнопка установки приложения и основа автоматических резервных копий."
+      "На панель карты добавлены кнопки Отменить (Ctrl+Z), Повторить (Ctrl+Y) и Блокировка холста.",
+      "Инспектор устройства теперь отображает полную информацию: модель, позицию U, количество портов, IP и VLAN."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.1",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Topbar-ը և կողային մենյուն թարմացվել են՝ SVG պատկերակներով, կոմպակտ վիճակով և ավելի հստակ պահման/Live վիճակով։",
+          "Live մասնակիցների ցուցիչը, հավելվածի տեղադրման կոճակը և ավտոմատ պահուստավորման հիմքը պատրաստվել են ընդհանուր հրապարակման համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The top bar and sidebar now use clearer SVG icons, compact states and save/Live status feedback.",
+          "Live presence, the app install control and the automatic backup foundation are included in the complete release."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Верхняя панель и боковое меню обновлены: добавлены понятные SVG-значки, компактный вид и статусы сохранения/Live.",
+          "В релиз включены Live-присутствие, кнопка установки приложения и основа автоматических резервных копий."
+        ]
+      }
+    },
     {
       "version": "2.10.0",
       "date": "2026-10-09",
