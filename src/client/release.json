@@ -1,21 +1,27 @@
 {
-  "version": "2.9.3",
+  "version": "2.9.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Վերևի «Մենյու» կոճակը փոխարինվել է երեք գծիկով SVG պատկերակով՝ մենյուն բացելու և փակելու համար։"
+      "Հաշվետվությունները տեղափոխվել են Կարգավորումների առանձին բաժին՝ պահպանելով Excel և PDF արտահանումը։",
+      "«Ցանցեր ու Սարքեր» բաժնից կարող եք կառավարել սարքերի տեսակները, նշել մոդելը և սարքն անմիջապես ավելացնել ընտրված ռաքում։",
+      "Կարող եք ավելացնել նույն մոդելի նոր սարք և սարքերի ցանկից բացել ռաքի միացումների քարտեզը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Replaced the top bar Menu button with a compact three-line SVG icon for opening and closing navigation."
+      "Reports now have their own section in Settings, with Excel and PDF exports preserved.",
+      "In Networks & Devices, manage device types, enter a model and add the device directly to a selected rack.",
+      "Add another device of the same model and open a rack’s connection map from the device list."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Кнопка «Меню» в верхней панели заменена компактным SVG-значком из трёх линий для открытия и закрытия навигации."
+      "Отчёты перенесены в отдельный раздел настроек с сохранением экспорта в Excel и PDF.",
+      "В разделе «Сети и устройства» можно управлять типами, указать модель и добавить устройство сразу в выбранную стойку.",
+      "Добавляйте новые устройства той же модели и открывайте карту соединений стойки из списка устройств."
     ]
   }
 }

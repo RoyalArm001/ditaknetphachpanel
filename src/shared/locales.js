@@ -1,6 +1,13 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Ցանցեր ու Սարքեր":["Networks & Devices","Сети и устройства"],
+"Կառավարեք ցանցերը, սարքերի տեսակները և մոդելները։ Սարքն ավելացրեք անմիջապես ընտրված ռաքում։":["Manage networks, device types and models. Add a device directly to the selected rack.","Управляйте сетями, типами и моделями устройств. Добавляйте устройство сразу в выбранную стойку."],
+"Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։":["Choose a type, enter the model and select a rack.","Выберите тип, укажите модель и выберите стойку."],
+"Սարք ավելացնելու համար նախ ստեղծեք ռաք։":["Create a rack before adding a device.","Перед добавлением устройства создайте стойку."],
+"Ավելացնել ռաքում":["Add to rack","Добавить в стойку"],
+"Ավելացնել նույն մոդելը":["Add the same model","Добавить такую же модель"],
+"Միացումների քարտեզ":["Connection map","Карта соединений"],
 "Պատկերակ":["Icon","Значок"],
 "LAN վարդակ":["LAN outlet","Розетка LAN"],
 "Համակարգիչ":["Computer","Компьютер"],
