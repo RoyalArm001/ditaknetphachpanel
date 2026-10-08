@@ -1,28 +1,53 @@
 {
-  "version": "2.10.2",
+  "version": "2.10.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի գործիքագոտում ավելացվել են Undo (Ctrl+Z), Redo (Ctrl+Y) և դաշտի կողպման (Lock) կոճակներ։",
-      "Սարքի Inspector-ում այժմ ամբողջությամբ երևում են սարքի մոդելը, U դիրքը, պորտերի քանակը, IP և VLAN տվյալները։"
+      "Քարտեզի inspector-ը և սարքերի վահանակը mobile տարբերակում դարձել են հարմարավետ bottom sheet՝ ամբողջական տվյալներով և scroll-ով։",
+      "Tablet և mobile սարքերում բարելավվել են կոճակների հպման չափերը (40–42px) և կողային drawer-ի տեղադրությունը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added visible Undo (Ctrl+Z), Redo (Ctrl+Y), and Canvas Lock/Unlock controls to the map toolbar.",
-      "The device inspector now shows complete metadata including model, U position, port count, IP, and VLAN details."
+      "The map device inspector and picker now adapt as smooth mobile bottom sheets displaying full details and scrolling.",
+      "Tablet and mobile touch targets have been upgraded to 40–42px alongside improved side drawer docking."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "На панель карты добавлены кнопки Отменить (Ctrl+Z), Повторить (Ctrl+Y) и Блокировка холста.",
-      "Инспектор устройства теперь отображает полную информацию: модель, позицию U, количество портов, IP и VLAN."
+      "Инспектор карты и панель устройств на мобильных устройствах теперь открываются в виде удобного bottom sheet с полными данными.",
+      "Для планшетов и мобильных устройств увеличены сенсорные кнопки (40–42px) и оптимизировано отображение боковой шторки."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.2",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի գործիքագոտում ավելացվել են Undo (Ctrl+Z), Redo (Ctrl+Y) և դաշտի կողպման (Lock) կոճակներ։",
+          "Սարքի Inspector-ում այժմ ամբողջությամբ երևում են սարքի մոդելը, U դիրքը, պորտերի քանակը, IP և VLAN տվյալները։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added visible Undo (Ctrl+Z), Redo (Ctrl+Y), and Canvas Lock/Unlock controls to the map toolbar.",
+          "The device inspector now shows complete metadata including model, U position, port count, IP, and VLAN details."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "На панель карты добавлены кнопки Отменить (Ctrl+Z), Повторить (Ctrl+Y) и Блокировка холста.",
+          "Инспектор устройства теперь отображает полную информацию: модель, позицию U, количество портов, IP и VLAN."
+        ]
+      }
+    },
     {
       "version": "2.10.1",
       "date": "2026-10-09",

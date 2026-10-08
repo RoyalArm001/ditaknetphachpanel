@@ -74,8 +74,7 @@ body.map-view .topbar #breadcrumb{display:inline-flex;margin-right:0;flex:none;m
  .map-view .workspace{padding:0}.map-view .topbar{min-height:54px;height:54px;flex-basis:54px;flex-wrap:nowrap;padding:0 8px;gap:6px}.map-view .topbar .save-tools{flex-wrap:nowrap;gap:5px}.map-view #saveStatus{display:none}.map-view .topbar #onlineCount{max-width:90px;overflow:hidden}.map-view .topbar [data-action=logout]{display:none!important}.map-view .topbar .panel-toggle{font-size:11px}.map-view .topbar .language-toggle{width:35px;flex-basis:35px}.map-view .mobile-nav{display:none}
  .map-topbar{top:12px;left:12px;right:12px;gap:6px;flex-wrap:wrap}.map-project{width:100%;min-width:0}.map-project-name{max-width:100%;font-size:10px;margin-bottom:7px}.map-plan-controls{gap:5px}.map-plan-select{flex:1;min-width:0}.map-plan-select select{max-width:100%;width:100%;min-width:0}.map-pill-select{height:36px;padding:0 8px}.map-pill-select select{height:32px;font-size:11px}.map-plan-controls>.map-tool{width:36px;height:36px;min-height:36px}
  .map-top-actions{position:absolute;top:89px;right:0;padding:0;gap:4px}.map-top-actions>.map-command{width:34px;height:34px;min-height:34px;padding:0}.map-top-actions>.map-command>span{display:none}.map-top-actions .map-tool{width:34px;height:34px;min-height:34px}.map-filters{top:101px;left:12px;gap:1px;padding:3px;border-radius:8px}.map-filters button{padding:6px;gap:4px;min-height:26px;font-size:10px}.map-filters svg{width:15px;height:15px}.map-filters small{display:none}
- .map-sidebar{top:151px;right:12px;bottom:83px;width:min(300px,calc(100% - 24px));max-width:none}.map-inspector{top:151px;right:12px;width:250px;max-width:calc(100% - 24px);max-height:calc(100% - 245px);overflow:auto}.map-inspector dl{display:none}.map-inspector.map-panel-preview{width:290px}.map-panel-preview dl{display:block}.map-inspector-heading{padding:6px 10px}.map-selected-device{padding:3px 12px 10px}.map-selected-device strong{font-size:12px}
- .map-view-tools{left:10px;bottom:80px;padding:3px}.map-view-tools .map-tool{width:30px;height:30px;min-height:30px}.map-view-tools svg{width:17px;height:17px}.map-bottom-toolbar{bottom:22px;gap:3px;max-width:calc(100% - 20px);padding:4px}.map-bottom-toolbar .map-command{font-size:11px!important;padding:0 7px}.map-bottom-toolbar .map-tool{width:33px}.map-bottom-toolbar i{margin:0 1px}.map-status{left:12px;right:12px;bottom:4px;font-size:8px}.map-marker-label{font-size:9px;max-width:95px}.map-empty-editor{padding:18px}
+ .map-view-tools{left:10px;bottom:76px;padding:3px}.map-view-tools .map-tool{width:40px;height:40px;min-height:40px}.map-view-tools svg{width:18px;height:18px}.map-bottom-toolbar{bottom:16px;gap:4px;max-width:calc(100% - 16px);padding:4px}.map-bottom-toolbar .map-command{font-size:12px!important;padding:0 9px;height:40px;min-height:40px}.map-bottom-toolbar .map-tool{width:40px;height:40px;min-height:40px}.map-bottom-toolbar i{margin:0 1px}.map-status{left:12px;right:12px;bottom:4px;font-size:8px}.map-marker-label{font-size:9px;max-width:95px}.map-empty-editor{padding:18px}
 }
 @media(prefers-reduced-motion:reduce){.map-editor *{scroll-behavior:auto}}
 .map-side-panels{position:absolute;top:102px;right:20px;bottom:100px;width:320px;max-width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;z-index:6;pointer-events:none}
@@ -86,7 +85,35 @@ body.map-view .topbar #breadcrumb{display:inline-flex;margin-right:0;flex:none;m
 .map-side-panels>.map-sidebar.is-open{flex:1;min-height:0}
 .map-side-panels .map-sidebar-heading{flex-shrink:0}
 .map-side-panels .map-picker-body[hidden]{display:none}
-@media(max-width:760px){.map-side-panels{top:151px;right:12px;bottom:83px;width:300px;max-width:calc(100% - 24px)}.map-side-panels>.map-inspector{max-height:45%}.map-side-panels>.map-sidebar.is-open{min-height:0}}
+@media(max-width:760px){
+ .map-side-panels{position:fixed;inset:auto 0 0 0;top:auto;right:0;bottom:0;left:0;width:100%;max-width:100%;z-index:25;pointer-events:none;display:flex;flex-direction:column;gap:0}
+ .map-side-panels>.map-inspector,.map-side-panels>.map-sidebar.is-open{position:relative;inset:auto;width:100%;max-width:100%;max-height:62dvh;border-radius:18px 18px 0 0;border:1px solid var(--map-border);border-bottom:0;box-shadow:0 -8px 32px rgba(0,0,0,0.4);background:var(--map-surface);pointer-events:auto;display:flex;flex-direction:column;overflow:hidden}
+ .map-side-panels>:is(.map-inspector,.map-sidebar.is-open)::before{content:'';display:block;width:38px;height:4px;border-radius:2px;background:var(--map-border);margin:8px auto 4px;flex-shrink:0}
+ .map-side-panels>.map-sidebar:not(.is-open){display:none!important}
+ .map-inspector dl{display:block!important;padding:0 16px 14px;max-height:36dvh;overflow-y:auto;overscroll-behavior:contain}
+ .map-inspector dl>div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px;margin-top:7px;font-size:11px}
+ .map-inspector dt{color:var(--map-muted)}
+ .map-inspector dd{color:var(--map-text);text-align:right;overflow-wrap:anywhere}
+ .map-inspector-heading{padding:8px 14px;font-size:12px}
+ .map-selected-device{padding:4px 14px 10px}
+ .map-selected-device strong{font-size:13px}
+ .map-selected-device>div>span{font-size:11px;max-width:none}
+ .map-inspector-actions{padding:10px 14px;gap:8px}
+ .map-inspector-actions>.map-command{height:42px;min-height:42px;font-size:12px}
+ .map-inspector-actions>.map-tool{width:42px;height:42px;min-height:42px}
+ .map-panel-preview{width:100%!important;max-width:100%!important}
+ .map-panel-scroll{margin:0 12px 10px;padding:8px}
+ .map-panel-port{min-height:32px}
+}
+@media(min-width:761px) and (max-width:1024px){
+ .map-side-panels{top:74px;right:14px;bottom:80px;width:315px;max-width:calc(46% - 20px);z-index:8}
+ .map-side-panels>.map-inspector{max-height:58%;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.25);overflow-y:auto}
+ .map-inspector dl{display:block!important}
+ .map-inspector dl>div{grid-template-columns:100px minmax(0,1fr)}
+ .map-side-panels>.map-sidebar.is-open{border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
+ .map-bottom-toolbar .map-tool{width:38px;height:38px;min-height:38px}
+ .map-bottom-toolbar .map-command{height:38px;min-height:38px}
+}
 @media(max-width:360px){.map-filters button>span{display:none}.map-bottom-toolbar .map-command small{display:none}.map-view #onlineCount{display:none!important}}
 
 /* The map export/share controls live in the application top bar while the map is open. */
