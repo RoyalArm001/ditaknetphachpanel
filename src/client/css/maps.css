@@ -88,3 +88,11 @@ body.map-view .topbar #breadcrumb{display:inline-flex;margin-right:0;flex:none;m
 .map-side-panels .map-picker-body[hidden]{display:none}
 @media(max-width:760px){.map-side-panels{top:151px;right:12px;bottom:83px;width:300px;max-width:calc(100% - 24px)}.map-side-panels>.map-inspector{max-height:45%}.map-side-panels>.map-sidebar.is-open{min-height:0}}
 @media(max-width:360px){.map-filters button>span{display:none}.map-bottom-toolbar .map-command small{display:none}.map-view #onlineCount{display:none!important}}
+
+/* The map export/share controls live in the application top bar while the map is open. */
+.map-view .topbar .map-top-actions-global{--map-border:var(--line);--map-surface:var(--surface,#fff);--map-field:var(--surface-soft,#f3f6f6);--map-text:var(--ink);--map-muted:var(--muted);--map-active:var(--accent);position:static;display:flex;align-items:center;gap:6px;padding:0;margin:0;z-index:auto}
+.map-view .topbar .map-top-actions-global>.map-command,.map-view .topbar .map-top-actions-global>.map-more>.map-tool{width:40px;height:40px;min-height:40px;padding:0;border:1px solid var(--map-border);border-radius:8px;background:var(--map-surface);color:var(--map-text);display:inline-flex;align-items:center;justify-content:center}
+.map-view .topbar .map-top-actions-global svg{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.map-view .topbar .map-top-actions-global .map-more-menu{top:48px;right:0;z-index:30}
+.map-view .topbar [data-action=logout]{display:none!important}
+@media(max-width:760px){.map-view .topbar .map-top-actions-global{gap:4px}.map-view .topbar .map-top-actions-global>.map-command,.map-view .topbar .map-top-actions-global>.map-more>.map-tool{width:36px;height:36px;min-height:36px}.map-view .topbar .map-top-actions-global svg{width:18px;height:18px}}
