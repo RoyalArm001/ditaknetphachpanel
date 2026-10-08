@@ -2338,5 +2338,7 @@
   "Պորտերի քանակ": ["Port count","Количество портов"],
   "Միացված սարքի IP": ["Connected device IP","IP подключенного устройства"],
   "Հետ վերցվեց": ["Undone","Отменено"],
-  "Կրկին կատարվեց": ["Redone","Повторено"]
+  "Կրկին կատարվեց": ["Redone","Повторено"],
+  "Մաքրել ֆիլտրերը": ["Clear filters","Сбросить фильтры"],
+  "Մաքրել": ["Clear","Очистить"]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

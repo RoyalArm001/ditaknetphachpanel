@@ -1,28 +1,53 @@
 {
-  "version": "2.10.4",
+  "version": "2.10.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հավելվածի թեստային ամբողջ փաթեթը (36 թեստ) հաջողությամբ անցել է ստուգումը։",
-      "Ուղղվել են ցանցի վերաթարմացման, live սեսիայի և PWA թարմացման ստուգումները, ավելացվել է npm test հրամանը։"
+      "Քարտեզի և սարքերի ցանկի որոնումն այժմ աշխատում է համաժամանակյա՝ մոդելով, անունով, տեսակով, պորտով, սենյակով և VLAN-ով։",
+      "Ավելացվել է ակտիվ ֆիլտրերի և որոնման մաքրման արագ կոճակ («Մաքրել»)։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "All 36 automated unit and integration tests successfully verified and passed.",
-      "Hardened live session recovery, database refresh handlers, and added the standard npm test runner script."
+      "Map markers and device list now filter synchronously by model, name, type, port, room, and VLAN.",
+      "Added a quick one-click reset button ('Clear') for active filters and search queries."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Полный комплект из 36 автоматических тестов успешно прошёл проверку без ошибок.",
-      "Исправлены обработчики фонового обновления базы данных и сессий, добавлен скрипт npm test."
+      "Метки на карте и список устройств теперь синхронно фильтруются по модели, имени, типу, порту, комнате и VLAN.",
+      "Добавлена быстрая кнопка сброса активных фильтров и поиска («Очистить»)."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.4",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հավելվածի թեստային ամբողջ փաթեթը (36 թեստ) հաջողությամբ անցել է ստուգումը։",
+          "Ուղղվել են ցանցի վերաթարմացման, live սեսիայի և PWA թարմացման ստուգումները, ավելացվել է npm test հրամանը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "All 36 automated unit and integration tests successfully verified and passed.",
+          "Hardened live session recovery, database refresh handlers, and added the standard npm test runner script."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Полный комплект из 36 автоматических тестов успешно прошёл проверку без ошибок.",
+          "Исправлены обработчики фонового обновления базы данных и сессий, добавлен скрипт npm test."
+        ]
+      }
+    },
     {
       "version": "2.10.3",
       "date": "2026-10-09",
