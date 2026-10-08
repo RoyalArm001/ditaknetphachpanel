@@ -1,27 +1,21 @@
 {
-  "version": "2.9.2",
+  "version": "2.9.3",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Գիշերային ռեժիմը ավտոմատ միանում է 20:00–07:00՝ սարքի տեղական ժամով, իսկ առավոտյան վերադառնում է բաց տեսքը։",
-      "Կարգավորումներում կարող եք ընտրել ավտոմատ, միշտ բաց կամ միշտ մուգ տեսք։",
-      "Ավտոմատ ռեժիմում վերևի կոճակով փոխած տեսքը պահպանվում է մինչև հաջորդ առավոտյան կամ երեկոյան անցումը։"
+      "Վերևի «Մենյու» կոճակը փոխարինվել է երեք գծիկով SVG պատկերակով՝ մենյուն բացելու և փակելու համար։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Night mode turns on automatically from 20:00 to 07:00 in your device’s local time, returning to light mode in the morning.",
-      "Choose automatic, always light or always dark appearance in Settings.",
-      "In automatic mode, changes made with the top button last until the next morning or evening switch."
+      "Replaced the top bar Menu button with a compact three-line SVG icon for opening and closing navigation."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Ночной режим автоматически включается с 20:00 до 07:00 по местному времени устройства, а утром возвращается светлая тема.",
-      "В настройках можно выбрать автоматическую, всегда светлую или всегда тёмную тему.",
-      "В автоматическом режиме выбор верхней кнопкой действует до следующего утреннего или вечернего переключения."
+      "Кнопка «Меню» в верхней панели заменена компактным SVG-значком из трёх линий для открытия и закрытия навигации."
     ]
   }
 }

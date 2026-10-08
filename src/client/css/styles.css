@@ -83,6 +83,9 @@
 @media(max-width:760px){body.left-collapsed .sidebar{display:none}body.left-collapsed .workspace{margin-left:0}}
 body.right-collapsed .rack-side{display:none}
 .topbar .panel-toggle{white-space:nowrap}
+.topbar .menu-toggle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:8px;border:0;border-radius:10px;background:transparent;box-shadow:none}
+.topbar .menu-toggle:hover{background:var(--surface-soft,#edf3f3)}
+.topbar .menu-toggle svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .topbar #breadcrumb{margin-right:auto}
 .color-settings{display:grid;gap:10px;margin:18px 0}
 .color-settings label{display:flex;align-items:center;justify-content:space-between;gap:16px}
