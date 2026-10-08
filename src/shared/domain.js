@@ -100,7 +100,6 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
           integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
           for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
           assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);
-          if(d.type==='panel') assert([12,24,48].includes(d.portList.length),tr('Փաչ պանելը պետք է ունենա 12, 24 կամ 48 պորտ'));
           if(d.sfpCount!==undefined){integer(d.sfpCount,0,Math.min(16,d.portList.length));assert(!d.sfpCount||isNetworkDevice(d),tr('Օպտիկական պորտերը հասանելի են սվիչի և ռաուտերի համար'));}
           d.portList.forEach((p,i)=>{
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));

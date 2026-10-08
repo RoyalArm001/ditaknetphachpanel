@@ -2313,5 +2313,7 @@
   "Անձնական cloud": ["Personal cloud","Личное облако"],
   "Ընդհանուր cloud · թիմային բազա": ["Shared cloud · team database","Общее облако · база команды"],
   "LIVE · Միացած՝ ": ["LIVE · Connected: ","LIVE · Подключено: "],
-  "Cloud · Կապը վերականգնվում է…": ["Cloud · Reconnecting…","Облако · Восстановление связи…"]
+  "Cloud · Կապը վերականգնվում է…": ["Cloud · Reconnecting…","Облако · Восстановление связи…"],
+  "Այլ քանակ / ձեռքով": ["Other count / manual","Другое количество / вручную"],
+  "Պորտերի քանակը պետք է լինի 1–96": ["Port count must be between 1 and 96","Количество портов должно быть от 1 до 96"],
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);
