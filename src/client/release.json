@@ -1,28 +1,53 @@
 {
-  "version": "2.10.0",
+  "version": "2.10.1",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի PDF և կիսվելու գործիքները տեղափոխվել են վերևի topbar։",
-      "Գործիքների տեքստերը հանվել են՝ թողնելով միայն կոմպակտ SVG պատկերակներ և tooltip-ներ։"
+      "Topbar-ը և կողային մենյուն թարմացվել են՝ SVG պատկերակներով, կոմպակտ վիճակով և ավելի հստակ պահման/Live վիճակով։",
+      "Live մասնակիցների ցուցիչը, հավելվածի տեղադրման կոճակը և ավտոմատ պահուստավորման հիմքը պատրաստվել են ընդհանուր հրապարակման համար։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map PDF and sharing controls are now placed in the top bar.",
-      "Control text labels are hidden, leaving compact SVG icons with tooltips."
+      "The top bar and sidebar now use clearer SVG icons, compact states and save/Live status feedback.",
+      "Live presence, the app install control and the automatic backup foundation are included in the complete release."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Кнопки PDF и общего доступа карты перенесены в верхнюю панель.",
-      "Текстовые подписи скрыты, оставлены компактные SVG-значки с подсказками."
+      "Верхняя панель и боковое меню обновлены: добавлены понятные SVG-значки, компактный вид и статусы сохранения/Live.",
+      "В релиз включены Live-присутствие, кнопка установки приложения и основа автоматических резервных копий."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.0",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի PDF և կիսվելու գործիքները տեղափոխվել են վերևի topbar։",
+          "Գործիքների տեքստերը հանվել են՝ թողնելով միայն կոմպակտ SVG պատկերակներ և tooltip-ներ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map PDF and sharing controls are now placed in the top bar.",
+          "Control text labels are hidden, leaving compact SVG icons with tooltips."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Кнопки PDF и общего доступа карты перенесены в верхнюю панель.",
+          "Текстовые подписи скрыты, оставлены компактные SVG-значки с подсказками."
+        ]
+      }
+    },
     {
       "version": "2.9.9",
       "date": "2026-10-09",
