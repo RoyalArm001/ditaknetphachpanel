@@ -1,27 +1,2401 @@
 {
-  "version": "2.9.4",
+  "version": "2.9.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Հաշվետվությունները տեղափոխվել են Կարգավորումների առանձին բաժին՝ պահպանելով Excel և PDF արտահանումը։",
-      "«Ցանցեր ու Սարքեր» բաժնից կարող եք կառավարել սարքերի տեսակները, նշել մոդելը և սարքն անմիջապես ավելացնել ընտրված ռաքում։",
-      "Կարող եք ավելացնել նույն մոդելի նոր սարք և սարքերի ցանկից բացել ռաքի միացումների քարտեզը։"
+      "Մենյուն վերադասավորվել է աշխատանքային և կառավարման բաժիններով՝ հավասար չափերով ու հստակ ակտիվ վիճակով։",
+      "Կարգավորումներում ավելացվել է տարբերակների պատմությունը՝ ամսաթվերով և հայերեն, անգլերեն ու ռուսերեն նկարագրություններով։",
+      "Ցուցադրվում են գրանցված տարբերակների ու դրանցում նկարագրված փոփոխությունների քանակները։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Reports now have their own section in Settings, with Excel and PDF exports preserved.",
-      "In Networks & Devices, manage device types, enter a model and add the device directly to a selected rack.",
-      "Add another device of the same model and open a rack’s connection map from the device list."
+      "Navigation now groups workspace and management tools with consistent spacing and clear active states.",
+      "Settings now includes version history with dates and Armenian, English and Russian release notes.",
+      "See the number of recorded versions and changes described in their release notes."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Отчёты перенесены в отдельный раздел настроек с сохранением экспорта в Excel и PDF.",
-      "В разделе «Сети и устройства» можно управлять типами, указать модель и добавить устройство сразу в выбранную стойку.",
-      "Добавляйте новые устройства той же модели и открывайте карту соединений стойки из списка устройств."
+      "Меню разделено на рабочие инструменты и управление с ровными отступами и чётким выделением активного раздела.",
+      "В настройки добавлена история версий с датами и описаниями на армянском, английском и русском языках.",
+      "Показывается количество сохранённых версий и изменений, описанных в выпусках."
     ]
-  }
+  },
+  "date": "2026-10-08",
+  "history": [
+    {
+      "version": "2.9.4",
+      "date": "2026-10-08",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հաշվետվությունները տեղափոխվել են Կարգավորումների առանձին բաժին՝ պահպանելով Excel և PDF արտահանումը։",
+          "«Ցանցեր ու Սարքեր» բաժնից կարող եք կառավարել սարքերի տեսակները, նշել մոդելը և սարքն անմիջապես ավելացնել ընտրված ռաքում։",
+          "Կարող եք ավելացնել նույն մոդելի նոր սարք և սարքերի ցանկից բացել ռաքի միացումների քարտեզը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Reports now have their own section in Settings, with Excel and PDF exports preserved.",
+          "In Networks & Devices, manage device types, enter a model and add the device directly to a selected rack.",
+          "Add another device of the same model and open a rack’s connection map from the device list."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Отчёты перенесены в отдельный раздел настроек с сохранением экспорта в Excel и PDF.",
+          "В разделе «Сети и устройства» можно управлять типами, указать модель и добавить устройство сразу в выбранную стойку.",
+          "Добавляйте новые устройства той же модели и открывайте карту соединений стойки из списка устройств."
+        ]
+      }
+    },
+    {
+      "version": "2.9.3",
+      "date": "2026-10-08",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Վերևի «Մենյու» կոճակը փոխարինվել է երեք գծիկով SVG պատկերակով՝ մենյուն բացելու և փակելու համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Replaced the top bar Menu button with a compact three-line SVG icon for opening and closing navigation."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Кнопка «Меню» в верхней панели заменена компактным SVG-значком из трёх линий для открытия и закрытия навигации."
+        ]
+      }
+    },
+    {
+      "version": "2.9.2",
+      "date": "2026-10-08",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Գիշերային ռեժիմը ավտոմատ միանում է 20:00–07:00՝ սարքի տեղական ժամով, իսկ առավոտյան վերադառնում է բաց տեսքը։",
+          "Կարգավորումներում կարող եք ընտրել ավտոմատ, միշտ բաց կամ միշտ մուգ տեսք։",
+          "Ավտոմատ ռեժիմում վերևի կոճակով փոխած տեսքը պահպանվում է մինչև հաջորդ առավոտյան կամ երեկոյան անցումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Night mode turns on automatically from 20:00 to 07:00 in your device’s local time, returning to light mode in the morning.",
+          "Choose automatic, always light or always dark appearance in Settings.",
+          "In automatic mode, changes made with the top button last until the next morning or evening switch."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Ночной режим автоматически включается с 20:00 до 07:00 по местному времени устройства, а утром возвращается светлая тема.",
+          "В настройках можно выбрать автоматическую, всегда светлую или всегда тёмную тему.",
+          "В автоматическом режиме выбор верхней кнопкой действует до следующего утреннего или вечернего переключения."
+        ]
+      }
+    },
+    {
+      "version": "2.9.1",
+      "date": "2026-10-08",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Դուրս գալուց մուտքն ու բացված աշխատանքային վիճակը մաքրվում են, և բացվում է սկզբնական մուտքի էջը։ Նախագծերը պահպանվում են։",
+          "Քարտեզի և PDF-ի սարքերի անունները դասավորվում են առանց իրար ծածկելու՝ գծով ցույց տալով համապատասխան սարքը։",
+          "Քարտեզի գործիքներից կարող եք կարգավորել հատակագծի թափանցիկությունը։",
+          "Ուղղվել է պորտը մաքրելիս նշանակության հեռացումը և «Չնշված» տեսակի փոփոխությունների պահպանումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Signing out clears your session and open workspace and returns to the welcome screen. Saved projects are preserved.",
+          "Device labels on maps and in PDF exports avoid overlapping, with lines pointing to their devices.",
+          "Adjust floor plan transparency from the map tools.",
+          "Fixed purpose removal when clearing ports and saving changes to the Unassigned purpose."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Выход очищает сеанс и открытое рабочее пространство и возвращает на начальный экран входа. Сохранённые проекты остаются.",
+          "Названия устройств на карте и в PDF размещаются без наложений, а линии указывают на соответствующие устройства.",
+          "Прозрачность плана этажа можно настроить в инструментах карты.",
+          "Исправлены удаление назначения при очистке порта и сохранение изменений типа «Не указано»."
+        ]
+      }
+    },
+    {
+      "version": "2.9.0",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ctrl+Z / Ctrl+Y — Հետ/Կրկին գործողություն քարտեզի խմբագրիչում (մինչև 50 քայլ)։",
+          "Քարտեզի նշիչների անունները ավտոմատ ուղղվում են դեպի ազատ կողմ՝ հելնելը կանխելու համար։",
+          "Անսարք պորտն ամբողջությամբ մաքրվում է՝ ծառայություն, գույն, PDF-ում ճիշտ է ցուցադրվում։",
+          "UI-ն ձեռք բերելու ժամանակ կապույտ ընդգծում չի լինում (user-select:none)։",
+          "PDF քարտեզի անունները ֆիքս տեղերում են, չեն հայտնվում հեռու կամ հսկայական։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Ctrl+Z / Ctrl+Y — Undo/Redo in the map editor (up to 50 steps).",
+          "Map marker labels automatically flip to avoid overlapping neighbours.",
+          "Faulty ports are fully cleared of service data and shown correctly in PDF.",
+          "No accidental blue text selection when clicking UI elements.",
+          "PDF map labels are compact and stay close to their markers."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Ctrl+Z / Ctrl+Y — Отмена/Повтор действий в редакторе карты (до 50 шагов).",
+          "Подписи маркеров на карте автоматически выбирают направление, чтобы не перекрываться.",
+          "Неисправный порт полностью очищается от сервисных данных и корректно отображается в PDF.",
+          "При клике по интерфейсу больше не появляется синяя рамка выделения текста.",
+          "Подписи на PDF-карте компактны и расположены рядом с маркерами."
+        ]
+      }
+    },
+    {
+      "version": "2.8.11",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի PDF-ում սարքերի անունները տեղադրվում են ավելի ընթեռնելի դիրքերում։ Նշիչի չափը կարգավորվում է 0–50%։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Device names in map PDFs are positioned for better readability. Adjust marker size from 0–50%."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Названия устройств в PDF карты размещаются удобнее для чтения. Размер отметок настраивается от 0 до 50%."
+        ]
+      }
+    },
+    {
+      "version": "2.8.9",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "«Չնշված» պորտի նշանակությունը նույնպես կարելի է հեռացնել ցանկից՝ առանց պորտերի տվյալները վնասելու։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "You can now remove the Unassigned port purpose from the list without affecting port data."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Назначение порта «Не указано» теперь можно убрать из списка без потери данных портов."
+        ]
+      }
+    },
+    {
+      "version": "2.8.8",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքերի նշիչները փոքր են մնում մեծացնելիս, իսկ հին նշիչներն ուղղվում են դեպի իրենց նշված կետը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map device markers stay small when zooming in, and existing markers are aligned with their marked locations."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Отметки устройств на карте остаются маленькими при увеличении, а существующие отметки выравниваются по указанному месту."
+        ]
+      }
+    },
+    {
+      "version": "2.8.7",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի հին սարքի նշիչներն այլևս չեն շեղվում իրենց նշված տեղից։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Existing map device markers now stay on their marked locations."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Существующие отметки устройств на карте больше не смещаются от указанного места."
+        ]
+      }
+    },
+    {
+      "version": "2.8.6",
+      "date": "2026-10-06",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզում նոր տեղադրվող սարքի նշիչն այժմ հայտնվում է հենց սեղմված կետում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Newly placed device markers now appear exactly at the clicked point on the map."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Новые отметки устройств на карте теперь появляются точно в месте щелчка."
+        ]
+      }
+    },
+    {
+      "version": "2.8.5",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքերի ցանկն այժմ բացվում է իր վահանակի տակ՝ առանց ընտրված սարքի մանրամասները թաքցնելու։ Կարգավորումներում ավելացվել է SVG պատկերակների խմբագրիչի հստակ մուտք։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The map device list now opens below its panel without hiding selected-device details. Added a clear Settings entry for the SVG icon editor."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Список устройств на карте теперь раскрывается под своей панелью, не скрывая сведения о выбранном устройстве. В настройках добавлен понятный вход в редактор SVG-значков."
+        ]
+      }
+    },
+    {
+      "version": "2.8.4",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի ֆոնի մեղմ անիմացիան ավելի տեսանելի է, իսկ սարքերի ցանկի յուրաքանչյուր սարք կարելի է բացել առանձին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Made the gentle map background animation more visible and added expandable cards for each device."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Анимация фона карты стала заметнее, а карточки устройств теперь можно раскрывать по отдельности."
+        ]
+      }
+    },
+    {
+      "version": "2.8.3",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի ֆոնի մեղմ լուսային անիմացիան դարձել է ավելի տեսանելի։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Enhanced the map background with a more visible, gentle glow animation."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Усилена мягкая анимация свечения фона карты."
+        ]
+      }
+    },
+    {
+      "version": "2.8.2",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի ֆոնն այժմ ունի նուրբ շարժվող լուսային անիմացիա։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added a subtle animated glow to the map background."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлена мягкая анимация свечения фона карты."
+        ]
+      }
+    },
+    {
+      "version": "2.8.1",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "3D ռաքի տեսքը դարձել է ավելի իրատեսական, իսկ կառավարումը՝ ավելի հեշտ ու հասանելի։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Made the 3D rack view more realistic and easier to control."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "3D-вид стойки стал реалистичнее, а управление — удобнее и доступнее."
+        ]
+      }
+    },
+    {
+      "version": "2.7.15",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզում ավելացվել է յուրաքանչյուր կետի տեսանելիությունն առանձին անջատելու կոճակ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added an individual visibility toggle for each map point."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлена отдельная кнопка видимости для каждой точки на карте."
+        ]
+      }
+    },
+    {
+      "version": "2.7.14",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի նշանները չեն մեծանում հատակագիծը փոքրացնելիս, իսկ խոշորացնելիս աճում են առավելագույնը 10%-ով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map markers stay the same size when zooming out and grow by at most 10% when zooming in."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Метки карты не увеличиваются при уменьшении плана и растут максимум на 10% при увеличении."
+        ]
+      }
+    },
+    {
+      "version": "2.7.13",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի նշաններն այլևս չափազանց չեն մեծանում․ առավելագույնը մեծանում են 10%-ով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map markers no longer grow excessively and enlarge by at most 10%."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Метки на карте больше не увеличиваются чрезмерно и растут максимум на 10%."
+        ]
+      }
+    },
+    {
+      "version": "2.7.12",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հատակագծի փոքրացման նվազագույն չափը 27% է, իսկ նշված կետը մնում է տեսանելի։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Floor plans now remain at or above 27% zoom, and the marked location stays visible."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Масштаб плана теперь не опускается ниже 27%, а отмеченная точка остаётся видимой."
+        ]
+      }
+    },
+    {
+      "version": "2.7.11",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքի դիրքի կետն այժմ ավելի տեսանելի է և պահպանում է չափը խոշորացման ժամանակ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The device location point on the map is now easier to see and keeps its size while zooming."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Точку расположения устройства на карте стало легче видеть; при масштабировании её размер не меняется."
+        ]
+      }
+    },
+    {
+      "version": "2.7.10",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզից պորտը բացելիս փաչ պանելը ցուցադրվում է փոքր աջ վահանակում։ Ուղղված է մենյուի համընկնումը։",
+          "Միացված սարքերին կարող եք տալ անվանումներ, որոնք երևում են քարտեզում և PDF-ում։ Դիրքի կետն ու պատկերակը տեղափոխվում են առանձին՝ կապող գծով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Opening a port on the map now shows its patch panel in a compact right panel. The tools menu no longer overlaps it.",
+          "Connected devices can have names shown on the map and in PDFs. Move the exact location point and the icon separately, joined by a leader line."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Порт на карте теперь открывает патч-панель в компактном правом окне. Исправлено наложение меню инструментов.",
+          "Подключённым устройствам можно задать названия для карты и PDF. Точная точка размещения и значок перемещаются отдельно, сохраняя соединительную линию."
+        ]
+      }
+    },
+    {
+      "version": "2.7.9",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "PIN օգտատերերի բաժինն այլևս չի անհետանում սխալի դեպքում․ ցուցադրվում է գլխավոր PIN-ի պահանջը կամ կրկին բեռնելու կոճակը։ Նոր PIN ստեղծելուց հետո ցանկն անմիջապես թարմացվում է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The PIN users section now explains access restrictions and offers retry when loading fails. The list refreshes after a new PIN is created."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Раздел пользователей PIN теперь объясняет ограничения доступа и предлагает повторную загрузку при ошибке. Список обновляется после создания нового PIN."
+        ]
+      }
+    },
+    {
+      "version": "2.7.8",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Մեկնարկային էջը վերադասավորված է․ PIN մուտքը, անձնական հաշիվը և այս սարքում աշխատանքը ներկայացված են պարզ բացատրություններով։ Պահուստային պատճենի վերականգնումն ունի առանձին բաժին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The welcome page now clearly separates PIN sign-in, your personal account and work on this device. Backup recovery has its own section."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "На стартовой странице понятнее представлены вход по PIN-коду, личный аккаунт и работа на устройстве. Восстановление резервной копии вынесено в отдельный раздел."
+        ]
+      }
+    },
+    {
+      "version": "2.7.7",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Նեղացված կողային մենյուն ավելի կոմպակտ է․ կոճակներն ունեն հավասար չափեր, իսկ պատկերակներն ու բացատները՝ համաչափ դասավորություն։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The collapsed sidebar is more compact, with equal-sized buttons, a smaller logo and consistent icon spacing."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Свёрнутое боковое меню стало компактнее: кнопки одинакового размера, уменьшенный логотип и равномерные отступы между значками."
+        ]
+      }
+    },
+    {
+      "version": "2.7.6",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզն ունի առանձին աշխատանքային դաշտ՝ քաշելով տեղաշարժելու, խոշորացնելու և ամբողջ էկրանով բացելու գործիքներով։",
+          "Սարքերի ցանկն ու ընտրված սարքի տվյալները բացվում են կողային վահանակներում։ Ավելացվել են Wi-Fi-ի և տեսախցիկների զտիչներ։",
+          "Հարկի ընտրիչը բացում է համապատասխան հատակագիծը։ PDF արտահանումը և դիտման հղումները հասանելի են խմբագրիչից։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Maps now have a dedicated workspace with pan, zoom and full-screen tools.",
+          "Device lists and selected-device details open in side panels, with Wi-Fi and camera filters.",
+          "The floor selector opens the matching plan. PDF export and view-only links remain available in the editor."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "У карты появилась отдельная рабочая область с перемещением, масштабированием и полноэкранным режимом.",
+          "Список устройств и сведения о выбранном устройстве открываются в боковых панелях. Добавлены фильтры Wi-Fi и камер.",
+          "Выбор этажа открывает соответствующий план. Экспорт PDF и ссылки для просмотра доступны из редактора."
+        ]
+      }
+    },
+    {
+      "version": "2.7.5",
+      "date": "2026-10-05",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "PIN-ով մուտքը պահվում է մինչև 180 օր և ակտիվ օգտագործման ընթացքում ինքնաշխատ երկարաձգվում է։",
+          "Պահպանված մուտքից աշխատանքային տարածքի վերականգնումը բարելավվել է՝ անձնական և թիմային բազաները տարանջատելով։",
+          "Պատրաստվել է առանձին Windows ծրագրի առաջին տարբերակը՝ տեղային բազայով, քարտեզներով և PDF արտահանմամբ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "PIN sign-in lasts up to 180 days and renews during active use.",
+          "Workspace recovery from a saved session is improved while keeping personal and team databases separate.",
+          "The first native Windows build includes a local database, maps and PDF export."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Вход по PIN сохраняется до 180 дней и продлевается при активном использовании.",
+          "Улучшено восстановление рабочего пространства из сохранённого сеанса с разделением личной и командной баз.",
+          "Первая нативная версия для Windows включает локальную базу, карты и экспорт PDF."
+        ]
+      }
+    },
+    {
+      "version": "2.7.4",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզում տեղադրված սարքերը թաքցվում են ցանկից և վերադառնում նշանը հեռացնելուց հետո։",
+          "Թարմացումները ներբեռնում են միայն փոփոխված ֆայլերը՝ քարտեզներ, հաշվետվություններ, ռաքեր և հիմնական գործիքներ։",
+          "Պատրաստվել է Windows տարբերակ՝ կայքի նույն բաժիններով և ֆունկցիոնալ թարմացումներով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Placed map devices disappear from the picker and return when their markers are removed.",
+          "Updates reuse unchanged files across maps, reports, racks and core tools.",
+          "A Windows edition is available with the same website sections and feature updates."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Размещённые устройства скрываются из списка и возвращаются после удаления метки.",
+          "Обновления повторно используют неизменённые файлы карт, отчётов, стоек и основных инструментов.",
+          "Подготовлена Windows-версия с теми же разделами сайта и функциональными обновлениями."
+        ]
+      }
+    },
+    {
+      "version": "2.7.3",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել է սխալ տեղադրված սարքի նշանը քարտեզից հեշտությամբ ջնջելու հնարավորություն (նշանի վրայի × կոճակով, վերևի վահանակի «Հեռացնել» կոճակով, Delete ստեղնով կամ աջ քլիքով)։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added easy ways to delete an incorrectly placed device from the map (via the marker × badge, the toolbar remove button, the Delete key, or right-click)."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлена возможность легко удалять неверно размещенные метки с карты (через значок × на метке, кнопку на панели, клавишу Delete или правый клик)."
+        ]
+      }
+    },
+    {
+      "version": "2.7.1",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի վրա սարքերի նշանների (badge) համարակալումը այժմ կատարվում է առանձին ըստ սարքի տեսակի՝ յուրաքանչյուր տեսակի համար 1-ից (օր. WiFi 1-10, Door 1-6)։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map marker badges are now numbered independently per device type, starting from 1 for each type (e.g. WiFi 1-10, Door 1-6)."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Нумерация меток на карте теперь ведется отдельно для каждого типа устройств, начиная с 1 (напр. WiFi 1-10, Door 1-6)."
+        ]
+      }
+    },
+    {
+      "version": "2.6.20",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի էջում վերևի վահանակները միավորվել են մեկ կոմպակտ գործիքագոտու (toolbar) մեջ՝ ապահովելով շատ ավելի մեծ աշխատանքային տարածք և հարմարավետություն:"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The top panels on the Map page have been merged into a single compact toolbar, providing much more workspace and convenience when working with the floor plan."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Верхние панели на странице Карты объединены в одну компактную панель инструментов, что обеспечивает гораздо больше рабочего пространства и удобства."
+        ]
+      }
+    },
+    {
+      "version": "2.6.17",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի վրա սարքերի նշանների (badge) թվերը այլևս ոչ թե հերթական են, այլ վերցվում են ձեր գրած սենյակի կամ սարքի անվանումից:"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map marker badges now display the number extracted from your custom room/device name instead of a sequential number."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Номера на маркерах карты теперь берутся из введенного вами названия комнаты/устройства, а не проставляются по порядку."
+        ]
+      }
+    },
+    {
+      "version": "2.6.15",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի վրա տեղադրված սարքերն այլևս չեն երևում ընդհանուր ցանկում՝ որոնումը հեշտացնելու համար: Դրանք կցուցադրվեն միայն, եթե ընտրեք դրանք քարտեզի վրայից:"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Placed devices are now hidden from the list to make searching easier. They will only appear if you select them from the map."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Размещенные на карте устройства больше не отображаются в общем списке. Они появятся, только если выбрать их на карте."
+        ]
+      }
+    },
+    {
+      "version": "2.6.14",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզներն ու սարքերի սխեմաները կիսվեք միայն դիտման հղումով՝ ընտրելով հարկը, սարքերը, լեզուն և ժամկետը։ Հղումները կարելի է անջատել «Իմ հղումները» բաժնից։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Share maps and device schematics with view-only links. Choose the floor, devices, language and lifetime; disable links from My view links."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Делитесь картами и схемами устройств по ссылкам только для просмотра. Выбирайте этаж, устройства, язык и срок; отключайте ссылки в разделе «Мои ссылки»."
+        ]
+      }
+    },
+    {
+      "version": "2.6.13",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքերի ցանկը տեղադրվել է անկյունում՝ բացվող վահանակով և առանձին ոլորմամբ։ Խմբագրելիս հատակագծի դիրքը պահպանվում է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The map device list is now a collapsible corner panel with independent scrolling. The floor-plan scroll position is preserved while editing."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Список устройств на карте теперь расположен в сворачиваемой угловой панели с отдельной прокруткой. При редактировании сохраняется положение плана."
+        ]
+      }
+    },
+    {
+      "version": "2.6.12",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի հատակագծի խմբագրման տարածքը մեծացվել է՝ ավելի լայն և բարձր աշխատանքային դաշտով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Enlarged the floor-plan editor in Maps with a wider and taller workspace."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Увеличена область редактирования плана в разделе карт: рабочее поле стало шире и выше."
+        ]
+      }
+    },
+    {
+      "version": "2.6.11",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հեռացվել է Google Drive-ի միացումը։ Պահպանումն ու վերականգնումը հասանելի են համակարգչի և մեր կայքի cloud-ի միջոցով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Removed the Google Drive integration. Save and restore projects using your computer or our website’s cloud."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Интеграция с Google Диском удалена. Сохраняйте и восстанавливайте проекты с компьютера или через облако нашего сайта."
+        ]
+      }
+    },
+    {
+      "version": "2.6.10",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքերը զտվում են ըստ հարկի։ PDF-ում ընտրեք լեզուն, հարկը, սարքի տեսակը կամ առանձին սարքը։ Ուղղվել են փաչ պանելների և սվիչների սխեմաները։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map devices are filtered by floor. PDF exports let you choose the language, floor, device type or individual device. Improved patch panel and switch diagrams."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Устройства на карте фильтруются по этажу. В PDF можно выбрать язык, этаж, тип или отдельное устройство. Исправлены схемы патч-панелей и коммутаторов."
+        ]
+      }
+    },
+    {
+      "version": "2.6.9",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզում միացված սարքերը խմբավորված են ըստ նշանակության՝ Wi-Fi, տեսախցիկ և այլն։ Ավելացվել են սարքերի պատկերակներ և քանակների ամփոփում PDF-ում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map devices are grouped by purpose, including Wi-Fi and cameras. Device icons and a quantity summary are also included in PDF exports."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Устройства на карте сгруппированы по назначению: Wi-Fi, камеры и другие. В PDF добавлены значки устройств и сводка количества."
+        ]
+      }
+    },
+    {
+      "version": "2.6.8",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Նոր «Քարտեզ» էջում բեռնեք հատակագիծը, տեղադրեք պորտերը և արտահանեք PDF։ Ավելացվել է նաև փաչ պանելների սխեմաների ու միացումների PDF։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Upload floor plans, place ports and export a PDF from the new Map page. Also export patch panel diagrams and connection schedules as PDF."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "На новой странице «Карта» загружайте планы, размещайте порты и экспортируйте PDF. Добавлен PDF со схемами патч-панелей и подключениями."
+        ]
+      }
+    },
+    {
+      "version": "2.6.7",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են ռաուտեր, սարքի մոդել և օպտիկական SFP պորտեր։ Սվիչների պորտերը դասավորված են երկու շարքով՝ SFP պորտերն աջ կողմում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added routers, device models and optical SFP ports. Switch ports now use two rows with SFP ports on the right."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены маршрутизаторы, модели устройств и оптические порты SFP. Порты коммутаторов расположены в два ряда, SFP — справа."
+        ]
+      }
+    },
+    {
+      "version": "2.6.6",
+      "date": "2026-10-03",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հաշվետվություններում և Excel/PDF արտահանումներում ավելացվել են սվիչի անունն ու պորտի համարը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Reports and Excel/PDF exports now show the switch name and port number."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "В отчёты и экспорт Excel/PDF добавлены имя коммутатора и номер порта."
+        ]
+      }
+    },
+    {
+      "version": "2.6.5",
+      "date": "2026-09-29",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "PIN-ով մուտքը հիշվում է 30 օր և ակտիվ օգտագործման ընթացքում ավտոմատ երկարացվում է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "PIN sign-in is remembered for 30 days and renews automatically during active use."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Вход по PIN сохраняется на 30 дней и автоматически продлевается при использовании приложения."
+        ]
+      }
+    },
+    {
+      "version": "2.6.4",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել են կողային մենյուի տեքստերի չափերն ու տողերի դասավորությունը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed sidebar label sizes and text wrapping."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлены размеры текста и переносы строк в боковом меню."
+        ]
+      }
+    },
+    {
+      "version": "2.6.3",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Կողային մենյուն ստացել է միասնական SVG պատկերակներ, իսկ փակ վիճակում մնում է նեղ պատկերակների վահանակ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The sidebar now uses consistent SVG icons and remains as a compact icon rail when collapsed."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Боковое меню теперь использует единые SVG-значки и в свёрнутом виде остаётся компактной панелью иконок."
+        ]
+      }
+    },
+    {
+      "version": "2.6.2",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "PIN օգտատիրոջ համար այժմ կարելի է ընտրել տեսանելի նախագծերը։ Գոյություն ունեցող PIN-ը չի ցուցադրվում, իսկ նոր կոդը ստեղծելիս երևում է մեկ անգամ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "You can now choose which projects each PIN user can access. Existing PINs stay hidden, while a new PIN is shown once when created."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Теперь для каждого пользователя PIN можно выбрать доступные проекты. Старые PIN скрыты, а новый код показывается один раз при создании."
+        ]
+      }
+    },
+    {
+      "version": "2.6.1",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Settings-ը հավաքվել է գեղեցիկ գործիքային էջերով, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Settings is organized into polished tool pages with main-PIN user management, LIVE names, and duplicate sign-in blocking."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Настройки собраны в удобные страницы инструментов с управлением пользователями, именами в LIVE и блокировкой повторного входа."
+        ]
+      }
+    },
+    {
+      "version": "2.6.0",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Settings-ը բաժանվել է էջերի, ավելացել է գլխավոր PIN-ով օգտատերերի կառավարում, LIVE անունների ցանկ և նույն PIN-ի կրկնակի մուտքի արգելք։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Settings now has sections, main-PIN user management, LIVE user names, and duplicate sign-in blocking for the same PIN."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Настройки разделены на страницы, добавлены управление пользователями по главному PIN, имена в LIVE и блокировка повторного входа с одним PIN."
+        ]
+      }
+    },
+    {
+      "version": "2.5.7",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Top bar-ում ավելացվել է էջի չափի կառավարում, իսկ համակարգչում սկզբնական չափը սահմանվել է 90%։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Page zoom controls were added to the top bar, with the desktop view starting at 90%."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "В верхнюю панель добавлено управление масштабом страницы, а начальный масштаб на компьютере установлен на 90%."
+        ]
+      }
+    },
+    {
+      "version": "2.5.6",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Մուտքի էջը հարմարեցվել է էկրանի բարձրությանը՝ առանց ավելորդ scroll-ի, իսկ կրկնվող հեղինակային հատվածը հեռացվել է քարտից։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The sign-in page now fits the screen height without unnecessary scrolling, and the duplicate credits were removed from the card."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Страница входа теперь помещается по высоте экрана без лишней прокрутки, а повторяющийся блок авторства удалён из карточки."
+        ]
+      }
+    },
+    {
+      "version": "2.5.5",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Լեզվի ցուցակը փոխարինվել է սեղմումով փոխվող SVG դրոշով, իսկ գիշեր/ցերեկ կոճակը՝ նոր SVG պատկերակներով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The language list is replaced by a tap-to-cycle SVG flag, and the theme control now uses new SVG sun and moon icons."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Список языков заменён SVG-флагом с переключением по нажатию, а тема получила новые SVG-значки солнца и луны."
+        ]
+      }
+    },
+    {
+      "version": "2.5.4",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Մուտքի էջը դարձել է ավելի համաչափ և հարմար հեռախոսների համար, իսկ անձնական ռեժիմի ավելորդ կոճակը հեռացվել է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The sign-in page is now cleaner and better sized for phones, and the extra personal-mode button has been removed."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Страница входа стала аккуратнее и удобнее на телефонах, а лишняя кнопка личного режима удалена."
+        ]
+      }
+    },
+    {
+      "version": "2.5.3",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "«Վերականգնել կայքից» պատուհանում այժմ կարելի է ընտրել PIN կոդով կամ գրանցված մուտքանունով և գաղտնաբառով մուտքը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The Restore from our website dialog now offers sign-in with a PIN or a registered username and password."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "В окне восстановления с нашего сайта теперь можно войти по PIN-коду или по зарегистрированному логину и паролю."
+        ]
+      }
+    },
+    {
+      "version": "2.5.2",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հեռախոսում աշխատանքի ռեժիմն ու միացածների հաշվիչը տեղավորվում են վերևի վահանակում՝ առանց կոճակները ծածկելու։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "On phones, the storage mode and connected-user count fit in the top bar without covering the controls."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "На телефонах режим хранения и счётчик подключённых пользователей помещаются в верхней панели, не перекрывая кнопки."
+        ]
+      }
+    },
+    {
+      "version": "2.5.1",
+      "date": "2026-09-17",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Թիմային PIN-ը բացում է ընդհանուր cloud բազան՝ բոլոր նախագծերով, առանց տեղային պատճենի անցնելու։",
+          "Cloud-ի փոփոխությունները կենդանի փոխանցվում են միացած սարքերին, իսկ վերևում երևում են աշխատանքի ռեժիմն ու միացածների քանակը։",
+          "Տարբեր դաշտերի զուգահեռ փոփոխությունները միավորվում են։ Նույն դաշտի հակասող փոփոխության դեպքում աշխատանքը չի վերագրվում լուռ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Team PINs open the shared cloud with all projects instead of creating a local copy.",
+          "Cloud changes update connected devices live. The current storage mode and connected-user count appear at the top.",
+          "Concurrent changes to different fields are merged. Conflicting edits to the same field are not silently overwritten."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Командный PIN открывает общую облачную базу со всеми проектами вместо создания локальной копии.",
+          "Облачные изменения передаются подключённым устройствам. Вверху показаны режим хранения и количество подключённых пользователей.",
+          "Одновременные изменения разных полей объединяются. Конфликтующие изменения одного поля не перезаписываются молча."
+        ]
+      }
+    },
+    {
+      "version": "2.5.0",
+      "date": "2026-09-16",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Կարգավորումներում ավելացվել է «Reset · Մաքրել հավելվածը» կոճակը։",
+          "Հաստատելուց հետո մաքրվում են այս բրաուզերի տեղային բազան, պատմությունը, չպահված պատճենները և կարգավորումները։",
+          "Cloud-ի, Google Drive-ի և սերվերի բազաները պահպանվում են։ Անցանց մաքրման դեպքում մուտքը փակվում է ինտերնետը վերականգնվելիս։",
+          "Cloud-ում փոփոխությունները հիմա ուղիղ փոխանցվում են բոլոր միացած օգտատերերին, և վերևում երևում է միացած մարդկանց քանակը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added Reset app in Settings.",
+          "After confirmation, clears this browser’s local database, history, unsaved copies, and settings.",
+          "Cloud, Google Drive, and server databases stay intact. Offline resets finish signing out when the internet returns.",
+          "Cloud changes are now delivered live to all connected users, and the number of connected people is shown in the header."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "В настройках добавлена кнопка «Сбросить приложение».",
+          "После подтверждения очищаются локальная база, история, несохранённые копии и настройки этого браузера.",
+          "Базы в облаке, Google Диске и на сервере сохраняются. При сбросе без интернета выход завершается после восстановления подключения.",
+          "Изменения в cloud теперь передаются в реальном времени всем подключённым пользователям, а их количество отображается в верхней панели."
+        ]
+      }
+    },
+    {
+      "version": "2.4.9",
+      "date": "2026-09-16",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Կարգավորումներում ավելացվել է «Reset · Մաքրել հավելվածը» կոճակը։",
+          "Հաստատելուց հետո մաքրվում են այս բրաուզերի տեղային բազան, պատմությունը, չպահված պատճենները և կարգավորումները։",
+          "Cloud-ի, Google Drive-ի և սերվերի բազաները պահպանվում են։ Անցանց մաքրման դեպքում մուտքը փակվում է ինտերնետը վերականգնվելիս։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added Reset app in Settings.",
+          "After confirmation, clears this browser’s local database, history, unsaved copies, and settings.",
+          "Cloud, Google Drive, and server databases stay intact. Offline resets finish signing out when the internet returns."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "В настройках добавлена кнопка «Сбросить приложение».",
+          "После подтверждения очищаются локальная база, история, несохранённые копии и настройки этого браузера.",
+          "Базы в облаке, Google Диске и на сервере сохраняются. При сбросе без интернета выход завершается после восстановления подключения."
+        ]
+      }
+    },
+    {
+      "version": "2.4.8",
+      "date": "2026-09-16",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հավելվածի նոր տարբերակը ստուգվում է նաև ինտերնետը վերականգնվելիս և հավելվածին վերադառնալիս՝ առանց cloud մուտքի։",
+          "Առցանց ֆայլերն ու ընտրված առցանց բազայի տվյալները բեռնվում են առանց բրաուզերի հին պատճենի օգտագործման։",
+          "Թարմացումը սպասում է չպահված աշխատանքին և բաց ձևերին։ Անցանց աշխատանքի համար պահպանվում է հավելվածի պատճենը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "App updates are checked on reconnect and when returning to the app, without requiring cloud sign-in.",
+          "App files and the selected online database are fetched without using stale browser cache.",
+          "Reloads wait for unsaved work and open forms. A cached app remains available offline."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Обновления проверяются при восстановлении интернета и возвращении в приложение, без входа в облако.",
+          "Файлы приложения и выбранная онлайн-база загружаются без устаревшего кеша браузера.",
+          "Перезагрузка откладывается при несохранённых изменениях и открытых формах. Копия приложения остаётся доступной офлайн."
+        ]
+      }
+    },
+    {
+      "version": "2.4.7",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Կարող եք ավելացնել ցանցերի տեսակներ, խմբագրել դրանց անվանումներն ու գույները և ջնջել չօգտագործվող տեսակները։",
+          "Նոր տեսակները հասանելի են VLAN-ի և պորտերի ընտրացանկերում։",
+          "Հեռացվել է «Ավելացնել ևս մեկ IP» կոճակը։",
+          "Ուղղվել և լրացվել են հայերեն, անգլերեն և ռուսերեն թարգմանությունները։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Add network types, edit their names and colors, and delete unused types.",
+          "Custom types are available in VLAN and port selectors.",
+          "Removed the Add another IP button.",
+          "Corrected and completed Armenian, English, and Russian translations."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавляйте типы сетей, меняйте их названия и цвета и удаляйте неиспользуемые типы.",
+          "Собственные типы доступны при выборе VLAN и назначения портов.",
+          "Убрана кнопка «Добавить ещё один IP».",
+          "Исправлены и дополнены переводы на армянский, английский и русский языки."
+        ]
+      }
+    },
+    {
+      "version": "2.4.6",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
+          "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։",
+          "Մեկ VLAN-ին այժմ կարող եք կցել մի քանի տարբեր IP կամ CIDR ցանցեր։ Ավելացվել են նաև VLAN բաժնի հայերեն, անգլերեն և ռուսերեն թարգմանությունները։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
+          "Settings now lets you create custom device types that are immediately available when adding a device.",
+          "A VLAN can now contain multiple different IP or CIDR networks. VLAN section labels are now translated correctly in Armenian, English, and Russian."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
+          "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства.",
+          "Теперь к одному VLAN можно привязать несколько разных IP- или CIDR-сетей. Подписи раздела VLAN теперь корректно переведены на армянский, английский и русский языки."
+        ]
+      }
+    },
+    {
+      "version": "2.4.5",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
+          "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։",
+          "Մեկ VLAN-ին այժմ կարող եք կցել մի քանի տարբեր IP կամ CIDR ցանցեր։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
+          "Settings now lets you create custom device types that are immediately available when adding a device.",
+          "A VLAN can now contain multiple different IP or CIDR networks."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
+          "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства.",
+          "Теперь к одному VLAN можно привязать несколько разных IP- или CIDR-сетей."
+        ]
+      }
+    },
+    {
+      "version": "2.4.4",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
+          "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։",
+          "VLAN-ի ձևում ցանցի անվանումը փոխարինվել է հստակ սարքի տեսակի ընտրությամբ՝ տեսախցիկ, հեռախոս, Wi-Fi և այլ նշանակություններ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
+          "Settings now lets you create custom device types that are immediately available when adding a device.",
+          "The VLAN form now uses a clear device-type selector for the network, such as camera, phone, Wi-Fi, and other purposes."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
+          "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства.",
+          "В форме VLAN теперь есть понятный выбор типа устройств сети: камера, телефон, Wi-Fi и другие назначения."
+        ]
+      }
+    },
+    {
+      "version": "2.4.3",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
+          "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։",
+          "VLAN ավելացնելիս կարող եք ընտրել, թե որ սարքի տեսակների համար է նախատեսված տվյալ VLAN-ը, և ընտրված տեսակները ցուցադրվում են ցանցի քարտում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
+          "Settings now lets you create custom device types that are immediately available when adding a device.",
+          "When adding a VLAN, you can select the device types it is intended for; selected types are shown on the network card."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
+          "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства.",
+          "При добавлении VLAN можно выбрать типы устройств, для которых предназначена сеть; выбранные типы отображаются на карточке сети."
+        ]
+      }
+    },
+    {
+      "version": "2.4.2",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։",
+          "Կարգավորումներում կարող եք ստեղծել ձեր սեփական սարքի տեսակները, որոնք անմիջապես հասանելի են նոր սարք ավելացնելիս։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction.",
+          "Settings now lets you create custom device types that are immediately available when adding a device."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния.",
+          "В настройках можно создавать собственные типы устройств, доступные сразу при добавлении устройства."
+        ]
+      }
+    },
+    {
+      "version": "2.4.1",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։",
+          "3D պորտերը հիմա ցուցադրում են իրենց նշանակության ընտրված գույնը, իսկ վիճակի գույնը պահպանվում է ազատ/զբաղված/անսարք տարբերակման համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers.",
+          "3D ports now display their selected purpose color while retaining free, used, and faulty state distinction."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов.",
+          "3D-порты теперь показывают выбранный цвет назначения, сохраняя различие свободного, занятого и неисправного состояния."
+        ]
+      }
+    },
+    {
+      "version": "2.4.0",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման հորիզոնական ուղղանկյուն վարդակներով՝ տեսանելի համարներով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with horizontal rectangular sockets matching a real patch panel, including visible port numbers."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены горизонтальными прямоугольными разъёмами, как на настоящей патч-панели, с видимыми номерами портов."
+        ]
+      }
+    },
+    {
+      "version": "2.3.9",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։",
+          "3D պորտերի շրջանաձև նշումները փոխարինվել են իրական փաչ պանելի նման ուղղանկյուն վարդակներով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports.",
+          "Circular 3D port markers are replaced with rectangular sockets that match a real patch panel."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча.",
+          "Круглые 3D-метки портов заменены прямоугольными разъёмами, как на настоящей патч-панели."
+        ]
+      }
+    },
+    {
+      "version": "2.3.8",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։",
+          "Սվիչի պորտը հիմա բացում է իրեն միացված փաչ պանելի պորտը, իսկ Ctrl/⌘ ընտրությունը աշխատում է նաև սվիչի միացված պորտի վրա։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states.",
+          "A switch port now opens its connected patch-panel port, and Ctrl/⌘ selection also works on connected switch ports."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния.",
+          "Порт свитча теперь открывает подключённый порт патч-панели, а выбор через Ctrl/⌘ работает и для подключённых портов свитча."
+        ]
+      }
+    },
+    {
+      "version": "2.3.7",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։",
+          "3D դիմային հատվածում պորտերը հիմա ցուցադրվում են հստակ վարդակներով՝ ազատ, զբաղված և անսարք վիճակների գույներով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner.",
+          "Front 3D ports now use clear socket markers with colors for free, used, and faulty states."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства.",
+          "Порты на передней стороне 3D теперь показаны чёткими разъёмами с цветами свободного, занятого и неисправного состояния."
+        ]
+      }
+    },
+    {
+      "version": "2.3.6",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։",
+          "3D սարքերի կորպուսները հիմա թափանցիկ են, իսկ ընտրված գույնը նշում է միայն սարքի աջ եզրը/անկյունը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming.",
+          "3D device bodies are now transparent, while the selected color marks only the device's right edge/corner."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении.",
+          "Корпуса 3D-устройств теперь прозрачные, а выбранный цвет отмечает только правый край/угол устройства."
+        ]
+      }
+    },
+    {
+      "version": "2.3.5",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ի հաշվարկը շտկվել է, որպեսզի մոտեցնելիս մոդելը չկորչի տեսադաշտից և պահպանի ընտրված հատվածը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom calculations are fixed so the model stays visible and keeps the selected area while zooming."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Исправлено масштабирование: модель остаётся видимой и сохраняет выбранную область при увеличении."
+        ]
+      }
+    },
+    {
+      "version": "2.3.4",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։",
+          "Zoom-ը հիմա պահում է կուրսորի դիտվող հատվածը․ Shift/աջ կոճակով քաշելով հնարավոր է տեղափոխել մեծացված մոդելը և դիտել բոլոր հատվածները։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device.",
+          "Zoom now keeps the cursor's viewed area; Shift/right-button dragging pans the enlarged model so every section remains accessible."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле.",
+          "Масштабирование теперь сохраняет область под курсором; перетаскивание с Shift/правой кнопкой перемещает увеличенную модель."
+        ]
+      }
+    },
+    {
+      "version": "2.3.3",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։",
+          "3D մոդելում փաչ պանելներն ու սվիչները հիմա օգտագործում են սարքի ընտրված գույնը, իսկ սարք ավելացնելիս գույնը հստակ ընտրվում է առանձին դաշտում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards.",
+          "3D patch panels and switches now use their selected device color, with a clear color field when adding a device."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений.",
+          "В 3D патч-панели и свитчи теперь используют выбранный цвет устройства; при добавлении устройства цвет выбирается в отдельном поле."
+        ]
+      }
+    },
+    {
+      "version": "2.3.2",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։",
+          "Բարելավվել է 3D կապերի կառավարումը՝ աջ/ձախ/վերև/ներքև, մոտեցում և ավելի հստակ կապերի ցուցադրում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose.",
+          "Improved 3D link controls with left/right/up/down movement, zoom, and clearer connection cards."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению.",
+          "Улучшено управление 3D-связями: движение влево/вправо/вверх/вниз, масштабирование и более понятные карточки подключений."
+        ]
+      }
+    },
+    {
+      "version": "2.3.1",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ctrl/⌘-ով բազմակի ընտրության ժամանակ այժմ կարելի է կիրառել ցանկացած հասանելի պորտի նշանակություն։",
+          "Ընտրված նշանակության համապատասխան VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ VLAN ցանցի անվանումը համապատասխանում է նշանակությանը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Bulk Ctrl/⌘ selection now supports every available port purpose.",
+          "The matching VLAN ID is filled automatically in the patch-panel field when the VLAN network name matches the selected purpose."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "При массовом выборе через Ctrl/⌘ теперь доступно любое назначение порта.",
+          "Подходящий VLAN автоматически подставляется в поле патч-панели, если имя VLAN-сети соответствует назначению."
+        ]
+      }
+    },
+    {
+      "version": "2.3.0",
+      "date": "2026-09-15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ավելացվել է Ctrl/⌘-ով փաչ պանելի պորտերի բազմակի ընտրությունը՝ տեսախցիկ կամ հեռախոս նշանակելու համար։",
+          "Տեսախցիկի կամ հեռախոսի VLAN-ը ավտոմատ լրացվում է փաչ պանելի դաշտում, երբ ցանցի անվանումը համապատասխանում է սարքի տեսակին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Added Ctrl/⌘ multi-selection for patch-panel ports to assign camera or phone purpose in bulk.",
+          "Camera or phone VLAN IDs are filled automatically in the patch-panel field when the network name matches the device type."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "Добавлен выбор нескольких портов патч-панели через Ctrl/⌘ для массового назначения камеры или телефона.",
+          "VLAN камеры или телефона автоматически подставляется в поле патч-панели, если имя сети соответствует типу устройства."
+        ]
+      }
+    },
+    {
+      "version": "2.2.9",
+      "date": "2026-09-11",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Ավելացվել են VLAN էջը և սարքերի IP, username ու password տվյալների պահպանումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "Added a VLAN page with storage for device IP, username, and password details."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "Добавлена страница VLAN с сохранением IP, логина и пароля устройств."
+        ]
+      }
+    },
+    {
+      "version": "2.2.8",
+      "date": "2026-09-10",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Վերականգնված բազան պահվում է բրաուզերի live cache-ում և հաջորդ անգամ PIN չի պահանջում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "A restored database is saved in the browser live cache and does not request the PIN again."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "Восстановленная база сохраняется в live-кэше браузера и больше не запрашивает PIN."
+        ]
+      }
+    },
+    {
+      "version": "2.2.7",
+      "date": "2026-09-10",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են robots.txt, sitemap.xml և որոնիչների համար բարելավված SEO տվյալներ։",
+          "Վերականգնումից կամ մուտքից հետո հավելվածը հիշում է ձեր աշխատանքային տարածքը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added robots.txt, sitemap.xml, and improved SEO metadata for search engines.",
+          "The app remembers your workspace after recovery or sign-in."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены robots.txt, sitemap.xml и улучшенные SEO-метаданные для поисковых систем.",
+          "Приложение запоминает рабочее пространство после восстановления или входа."
+        ]
+      }
+    },
+    {
+      "version": "2.2.6",
+      "date": "2026-09-10",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Վերականգնումից կամ մուտքից հետո հավելվածը հիշում է ձեր աշխատանքային տարածքը․ վերաբացելիս setup-ը կրկին չի ցուցադրվում։",
+          "Ֆայլի վերականգնումն ավարտվում է տվյալները պահպանելուց հետո։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The app remembers your workspace after recovery or sign-in, so reopening skips setup.",
+          "File restoration now waits for the data to be saved."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Приложение запоминает рабочее пространство после восстановления или входа и при повторном открытии пропускает настройку.",
+          "Восстановление файла теперь завершается после сохранения данных."
+        ]
+      }
+    },
+    {
+      "version": "2.2.5",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել է անվտանգ բջջային թարմացում և սարքի տվյալների պաշտպանություն՝ առանց ձեր բազայի ու հաշվի տվյալների ջնջման։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added safe mobile updates and device storage protection without deleting your databases or account data."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены безопасное мобильное обновление и защита хранилища без удаления баз и данных аккаунта."
+        ]
+      }
+    },
+    {
+      "version": "2.2.4",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել է անվտանգ բջջային թարմացում՝ առանց ձեր բազայի և հաշվի տվյալները ջնջելու, ինչպես նաև թարգմանությունների թարմացումներ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added a safe mobile app update flow that preserves your databases and account data, plus translation updates."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлено безопасное мобильное обновление приложения без удаления баз и данных аккаунта, а также обновлены переводы."
+        ]
+      }
+    },
+    {
+      "version": "2.2.2",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղված է. ֆայլը վերականգնելուց հետո էջը թարմացնելիս այլևս չի վերադառնում setup էջին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed: after restoring a file and refreshing the page, the app no longer returns to the setup screen."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлено: после восстановления файла и обновления страницы приложение больше не возвращается на экран настройки."
+        ]
+      }
+    },
+    {
+      "version": "2.2.1",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Հավելվածի տարբերակը՝ v2.2.1։ Այն ցուցադրվում է նաև էջի ներքևում։",
+          "Նախագծի սեփական անվանումներն ու գույները և տեղադրումից հետո ծանուցումների թույլտվության առաջարկը ներառված են այս տարբերակում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "App version v2.2.1 is also displayed in the page footer.",
+          "This release includes custom project labels and colors, and a notification permission offer after installation."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Версия приложения v2.2.1 также отображается внизу страницы.",
+          "Версия включает собственные названия и цвета проекта, а также предложение разрешить уведомления после установки."
+        ]
+      }
+    },
+    {
+      "version": "2026.09.09.2",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Տեղադրումից հետո կամ տեղադրված հավելվածն առաջին անգամ բացելիս առաջարկվում է միացնել ծանուցումները։",
+          "Թույլտվությունը տրվում է ձեր սեղմումով։ Արգելված կամ չաջակցվող ծանուցումների համար ցուցադրվում են հուշումներ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "After installation or the first installed-app launch, you are prompted to enable notifications.",
+          "Permission is requested only when you tap the button. Blocked and unsupported notifications show guidance."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "После установки или при первом запуске установленного приложения предлагается включить уведомления.",
+          "Разрешение запрашивается только после нажатия кнопки. Для заблокированных и неподдерживаемых уведомлений показаны подсказки."
+        ]
+      }
+    },
+    {
+      "version": "2026.09.09.1",
+      "date": "2026-09-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Նախագծի setup-ում ընտրեք պորտերի նշանակությունների ու վիճակների անուններն ու գույները։",
+          "Սարք ավելացնելիս ընտրեք նոր պորտերի սկզբնական վիճակն ու նշանակությունը։",
+          "Նոր տարբերակների փոփոխությունները կցուցադրվեն այս պատուհանում՝ մեկ անգամ յուրաքանչյուր տարբերակի համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Choose port purpose and status labels and colors in project setup.",
+          "Choose the initial status and purpose of new ports when adding a device.",
+          "Release notes will appear here once for each new version."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Выбирайте названия и цвета назначений и состояний портов при создании проекта.",
+          "Выбирайте начальное состояние и назначение новых портов при добавлении устройства.",
+          "Список изменений будет показываться здесь один раз для каждой новой версии."
+        ]
+      }
+    }
+  ]
 }

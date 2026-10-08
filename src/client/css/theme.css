@@ -52,3 +52,39 @@
   [data-theme=dark] dialog::backdrop{background:#000a}
   [data-theme=dark] .welcome-options .button:focus-visible{outline-color:#f5d879}
 }
+/* Navigation keeps the same geometry in both themes and in the collapsed rail. */
+.sidebar{width:260px;padding:24px 16px 16px;background:#122b31;border-right:1px solid #29434a;gap:0;overflow-y:auto}
+.workspace{margin-left:260px}
+.sidebar .brand{gap:12px;padding:0 8px 20px;font-size:24px;letter-spacing:-.4px;flex:none}
+.sidebar .brand-mark{width:40px;height:44px;border-radius:12px;background:#203f46;color:#b2e4d8}
+.sidebar .brand-mark svg{width:28px;height:28px}.sidebar .brand small{font-size:8px;letter-spacing:1.5px;color:#93b8bc}
+.sidebar .company-switcher{margin:0 0 22px;padding:14px 12px;border:1px solid #355159;border-radius:14px;background:#1b363d}
+.sidebar .company-label{display:block;margin:0 0 9px;color:#a5c2c6;font-size:9px;letter-spacing:1px}
+.sidebar .company-switcher select{width:100%;height:40px;min-height:40px;padding:8px 9px;color:#f0f8f7;background:#122b31;border:1px solid #49676d;font-size:12px;text-overflow:ellipsis}
+.sidebar .company-add{width:100%;margin-top:9px;padding:8px;border:0;background:transparent;color:#a9dbd1;font-size:11px;min-height:34px}.sidebar .company-add:hover{background:#284c52}
+.sidebar .company-name{display:none}
+.sidebar nav{display:flex;flex-direction:column;gap:5px;margin:0;overflow:visible}
+.sidebar .nav-group-label{padding:0 12px 8px;font-size:9px;color:#8bafb5;letter-spacing:1px;font-weight:600}
+.sidebar .nav-management{margin-top:22px}
+#leftPanel nav a{gap:12px;min-height:46px;padding:11px 12px;border:1px solid transparent;border-radius:10px;color:#bfd1d5;font-weight:500;transition:background .15s,color .15s}
+#leftPanel nav a .nav-label{font-size:12px;line-height:1.45;overflow-wrap:break-word}
+#leftPanel nav a .nav-icon{width:20px;height:20px;flex:0 0 20px;color:inherit}
+#leftPanel nav a .nav-icon svg{width:20px;height:20px;stroke-width:1.65}
+#leftPanel nav a:hover{color:#fff;background:#203e46}
+#leftPanel nav a.active{color:#e1fff5;background:#245349;border-color:#3d796b;font-weight:650;box-shadow:inset 3px 0 #8fe0c9}
+.sidebar .sidebar-bottom{margin-top:auto;padding:24px 4px 0;font-size:11px;color:#a7c6cb}
+.sidebar-release,.sidebar-bottom [data-action=install-app]{display:flex;align-items:center;gap:10px;width:100%;padding:11px 8px;font-size:11px;border:0;background:transparent;color:#a7c6cb;text-align:left;white-space:normal}
+.sidebar-release:hover,.sidebar-bottom [data-action=install-app]:hover{color:#fff;background:#203e46;border-radius:8px}
+.sidebar-bottom svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.settings-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:7px}
+.settings-tab{min-height:44px;font-size:12px}.settings-tab.active{background:#16796f;color:white}
+.release-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.release-summary>div{padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--surface,#fff)}
+.release-summary span{display:block;color:var(--muted);font-size:12px;line-height:1.5}.release-summary strong{display:block;font-size:28px;letter-spacing:-.5px;margin-top:8px}
+.release-list{display:grid;gap:10px}.release-entry{border:1px solid var(--line);border-radius:12px;background:var(--surface,#fff);overflow:hidden}
+.release-entry summary{display:flex;align-items:center;gap:14px;cursor:pointer;padding:17px 20px;list-style:none}.release-entry summary::-webkit-details-marker{display:none}
+.release-entry summary:before{content:'›';font-size:22px;color:var(--muted);transition:transform .15s}.release-entry[open] summary:before{transform:rotate(90deg)}
+.release-version{font-weight:700;font-size:14px}.release-date{margin-left:auto;font-size:12px;color:var(--muted)}.release-count{padding:4px 8px;border-radius:7px;background:var(--surface-soft,#edf3f3);color:var(--muted);font-size:11px}
+.release-entry ul{margin:0;padding:0 24px 18px 48px;font-size:13px;line-height:1.8}.release-entry li+li{margin-top:8px}.release-more{margin:18px auto 0;display:block}
+@media(min-width:761px){body.left-collapsed .nav-group-label{display:none}body.left-collapsed .sidebar .brand{padding:0}body.left-collapsed #leftPanel nav a{width:44px;height:44px;min-height:44px;padding:10px;gap:0}body.left-collapsed #leftPanel nav{overflow:visible}}
+@media(max-width:760px){.workspace{margin-left:0}.sidebar{width:min(300px,86vw);padding:20px 14px 16px}.sidebar .company-switcher{margin:0 0 20px}.sidebar .sidebar-bottom{padding-top:20px}.settings-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-tab{font-size:11px;padding:8px}.release-summary{gap:8px}.release-summary>div{padding:13px 10px}.release-summary span{font-size:10px}.release-summary strong{font-size:21px}.release-entry summary{padding:14px 12px;gap:8px}.release-date{font-size:10px}.release-entry ul{padding:0 18px 16px 32px}}

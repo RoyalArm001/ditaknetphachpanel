@@ -1,6 +1,15 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Կառավարում":["Management","Управление"],
+"Տարբերակների պատմություն":["Version history","История версий"],
+"Հրապարակված տարբերակներ և փոփոխություններ":["Released versions and changes","Опубликованные версии и изменения"],
+"Ընթացիկ տարբերակ":["Current version","Текущая версия"],
+"Գրանցված տարբերակներ":["Recorded versions","Зарегистрированные версии"],
+"Գրանցված փոփոխություններ":["Recorded changes","Зарегистрированные изменения"],
+"Պատմությունը ներառում է պահված թողարկումները։ Փոփոխությունների քանակը հաշվվում է դրանց նկարագրություններից։":["History includes recorded releases. Changes are counted from their release notes.","История включает сохранённые выпуски. Количество изменений подсчитано по описаниям выпусков."],
+"Ցույց տալ ավելին":["Show more","Показать ещё"],
+"Չհաջողվեց բեռնել տարբերակների պատմությունը։":["Could not load version history.","Не удалось загрузить историю версий."],
 "Ցանցեր ու Սարքեր":["Networks & Devices","Сети и устройства"],
 "Կառավարեք ցանցերը, սարքերի տեսակները և մոդելները։ Սարքն ավելացրեք անմիջապես ընտրված ռաքում։":["Manage networks, device types and models. Add a device directly to the selected rack.","Управляйте сетями, типами и моделями устройств. Добавляйте устройство сразу в выбранную стойку."],
 "Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։":["Choose a type, enter the model and select a rack.","Выберите тип, укажите модель и выберите стойку."],
