@@ -1,28 +1,53 @@
 {
-  "version": "2.10.3",
+  "version": "2.10.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի inspector-ը և սարքերի վահանակը mobile տարբերակում դարձել են հարմարավետ bottom sheet՝ ամբողջական տվյալներով և scroll-ով։",
-      "Tablet և mobile սարքերում բարելավվել են կոճակների հպման չափերը (40–42px) և կողային drawer-ի տեղադրությունը։"
+      "Հավելվածի թեստային ամբողջ փաթեթը (36 թեստ) հաջողությամբ անցել է ստուգումը։",
+      "Ուղղվել են ցանցի վերաթարմացման, live սեսիայի և PWA թարմացման ստուգումները, ավելացվել է npm test հրամանը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The map device inspector and picker now adapt as smooth mobile bottom sheets displaying full details and scrolling.",
-      "Tablet and mobile touch targets have been upgraded to 40–42px alongside improved side drawer docking."
+      "All 36 automated unit and integration tests successfully verified and passed.",
+      "Hardened live session recovery, database refresh handlers, and added the standard npm test runner script."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Инспектор карты и панель устройств на мобильных устройствах теперь открываются в виде удобного bottom sheet с полными данными.",
-      "Для планшетов и мобильных устройств увеличены сенсорные кнопки (40–42px) и оптимизировано отображение боковой шторки."
+      "Полный комплект из 36 автоматических тестов успешно прошёл проверку без ошибок.",
+      "Исправлены обработчики фонового обновления базы данных и сессий, добавлен скрипт npm test."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.3",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի inspector-ը և սարքերի վահանակը mobile տարբերակում դարձել են հարմարավետ bottom sheet՝ ամբողջական տվյալներով և scroll-ով։",
+          "Tablet և mobile սարքերում բարելավվել են կոճակների հպման չափերը (40–42px) և կողային drawer-ի տեղադրությունը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The map device inspector and picker now adapt as smooth mobile bottom sheets displaying full details and scrolling.",
+          "Tablet and mobile touch targets have been upgraded to 40–42px alongside improved side drawer docking."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Инспектор карты и панель устройств на мобильных устройствах теперь открываются в виде удобного bottom sheet с полными данными.",
+          "Для планшетов и мобильных устройств увеличены сенсорные кнопки (40–42px) и оптимизировано отображение боковой шторки."
+        ]
+      }
+    },
     {
       "version": "2.10.2",
       "date": "2026-10-09",

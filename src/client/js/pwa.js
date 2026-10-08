@@ -63,10 +63,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     if(!control)return;
     const label=updateReady?tr('↻ Թարմացնել հավելվածը'):standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հավելվածը');
     control.title=label;
-    control.setAttribute('aria-label',label);
-    const span=control.querySelector('span');
+    control.setAttribute?.('aria-label',label);
+    const span=control.querySelector?.('span');
     if(span)span.textContent=label;
-    else if(!control.querySelector('svg'))control.textContent=label;
+    else if(!control.querySelector?.('svg'))control.textContent=label;
   }
   function hasUnsavedWork(){return typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty);}
   function editingForm(){return !!document.querySelector('#dialog[open],#setupForm,#loginForm,input:focus,textarea:focus,select:focus');}

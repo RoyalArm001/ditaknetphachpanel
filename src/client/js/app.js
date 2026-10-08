@@ -233,7 +233,7 @@ function recoverAccountDialog(){
     let response=await fetch('/api/account/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     let result=await response.json();
     if(!response.ok){
-      response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,client:liveSessionId})});
+      response=await fetch('/api/auth/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,client:typeof liveSessionId!=='undefined'?liveSessionId:''})});
       result=await response.json();
       if(!response.ok)throw new Error(result.error);
       storageMode='shared';onboardingChoice='shared';onboardingVisible=false;accountUserId='';accountReadOnly=false;
@@ -1102,7 +1102,7 @@ window.addEventListener('pagehide',stopLive);
 document.addEventListener('visibilitychange',maintainLive);
 let refreshInFlight=false;
 async function refreshCurrentDatabase(){
-  const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||mapController?.busy?.()||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
+  const busy=()=>modeBusy||!ready||companyBusy||dirty||saving||conflict||portDraftDirty||(typeof mapController!=='undefined'&&mapController?.busy?.())||$('#dialog').open||document.querySelector('input:focus,textarea:focus,select:focus');
   if(refreshInFlight||busy()||document.visibilityState==='hidden')return;
   const pollingCompany=activeCompanyId,pollingMode=storageMode;
   const current=()=>pollingMode===storageMode&&pollingCompany===activeCompanyId&&!busy();
