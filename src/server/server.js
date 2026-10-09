@@ -155,15 +155,16 @@ function createApp(options={}) {
         const body=await readBody(req);
         if(url.pathname.endsWith('/revoke')){await viewLinks.revoke(scope,companyId,String(body.token||''));return json(res,200,{ok:true});}
         if(body.revision!==current.revision)return json(res,409,{error:tr('Տվյալները փոփոխվել են այլ աշխատակցի կողմից։ Թարմացրեք էջը։')});
-        if(!['maps','devices','all'].includes(body.kind)||!['hy','en','ru'].includes(body.language)||!['all','panel','switch','router'].includes(body.deviceType)||![7,30,90].includes(body.days)||['floorId','deviceId','planId'].some(k=>typeof body[k]!=='string'||body[k].length>200))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+        body.rackId??='';
+        if(!['maps','devices','all'].includes(body.kind)||!['hy','en','ru'].includes(body.language)||!['all',...Domain.deviceTypes(current.state).map(([id])=>id)].includes(body.deviceType)||![7,30,90].includes(body.days)||['floorId','rackId','deviceId','planId'].some(k=>typeof body[k]!=='string'||body[k].length>200))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
         const handover=require('../shared/handover-pdf'),selection=handover.select(current.state,body);
         if(body.kind==='maps'?!selection.plans.length:body.kind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)return json(res,400,{error:tr('Ընտրված պայմաններով տվյալներ չկան')});
         if((await viewLinks.list(scope,companyId)).length>=100)return json(res,429,{error:tr('Նախ անջատեք հին հղումներից մի քանիսը')});
         const outputTr=require('../shared/i18n').forLanguage(body.language);
         const font=options.font||process.env.RACKMAP_FONT||path.join(root,'assets','fonts','DejaVuSans.ttf');
-        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,font,tr:outputTr}));
+        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,rackId:body.rackId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,font,tr:outputTr}));
         if(pdf.length>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
-        const title=[current.state.company,body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr({switch:'Միայն սվիչներ',panel:'Միայն փաչ պանելներ',router:'Միայն ռաուտերներ'}[body.deviceType])].filter(Boolean).join(' · ');
+        const title=[current.state.company,body.planId?selection.plans.find(p=>p.id===body.planId)?.name:'',body.rackId?current.state.floors.flatMap(f=>f.racks).find(r=>r.id===body.rackId)?.name:'',body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr(Domain.deviceTypes(current.state).find(([id])=>id===body.deviceType)?.[1]||body.deviceType)].filter(Boolean).join(' · ');
         return json(res,201,await viewLinks.create(scope,companyId,title,pdf,body.days));
       }
       if(req.method==='POST'&&url.pathname==='/api/backup'){

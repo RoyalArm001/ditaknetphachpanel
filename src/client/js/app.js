@@ -365,10 +365,14 @@ function renderRack(id){const found=findRack(id);if(!found){$('#content').innerH
 function renderConnections(id){
   const found=findRack(id);if(!found){$('#content').innerHTML=header(tr('Ռաքը չի գտնվել'),tr('Ընտրեք ռաքը հարկերի ցանկից'));return;}
   const scene=Rack3D.buildScene(state,id);
+  const audit=RackConnections.inspect(state,id),summary=audit.summary;
+  const issueNames={unlinked:tr('Չկապված'),duplicate:tr('Կրկնված'),wrong:tr('Սխալ կապ')};
+  const endpoint=x=>x?`${x.f.name} / ${x.r.name} / ${x.d.name} · ${x.p.number}`:tr('Պորտը չի գտնվել');
+  const issueList=audit.issues.map(item=>`<div class="scene-issue"><div><strong>${esc(endpoint(item.from))}</strong><small>${esc(item.to?endpoint(item.to):item.from.p.switchPortId?tr('Պորտը չի գտնվել'):'—')}</small><span>${item.issues.map(code=>`<b class="scene-issue-${code}">${esc(issueNames[code])}</b>`).join('')}</span></div>${button(tr('Բացել պորտը'),'port',item.id,'small')}</div>`).join('');
   const sceneControl=(glyph,action,label)=>`<button type="button" class="button scene-control" data-action="${action}" aria-label="${tr(label)}" title="${tr(label)}">${glyph}</button>`;
   $('#content').innerHTML=header(found.r.name+tr(' · 3D կապեր'),tr('Քաշեք պատկերը՝ պտտելու համար, մկնիկի անիվով՝ մոտեցրեք։ Միացում ընտրելիս ընդգծվում են երկու ծայրերը։'),tr`<a class="button" href="#rack/${id}">← Խմբագրել ռաքը</a>`)+tr`
     <div class="scene-layout"><section class="scene-stage"><div class="scene-toolbar" role="group" aria-label="${tr('3D դիտման կառավարում')}"><div class="scene-control-group">${sceneControl('↶','scene-left','Պտտել ձախ')}${sceneControl('↷','scene-right','Պտտել աջ')}${sceneControl('↑','scene-up','Թեքել վեր')}${sceneControl('↓','scene-down','Թեքել վար')}</div><div class="scene-control-group">${sceneControl('＋','scene-in','Մոտեցնել')}${sceneControl('−','scene-out','Հեռացնել')}</div><div class="scene-control-group">${sceneControl('▣','scene-front','Առջևից դիտել')}${sceneControl('⟲','scene-reset','Սկզբնական տեսք')}</div><span class="scene-toolbar-tip">${tr('Քաշեք մոդելը՝ պտտելու համար')}</span></div><canvas id="rackCanvas" tabindex="0" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown + - Home Escape" aria-describedby="sceneHelp" aria-label="Ռաքի պտտվող 3D մոդել և գրանցված մալուխների կապեր">Միացումների ցանկը հասանելի է կողքի հատվածում։</canvas></section>
-    <aside class="panel scene-links"><div class="scene-links-heading"><div><div class="eyebrow">3D / LINK MAP</div><h2>Միացումներ</h2></div><strong class="scene-count">${scene.links.length}</strong></div>${serviceLegend()}<p id="sceneHelp" class="hint">Ձախ կոճակով քաշեք՝ պտտելու համար։ Shift-ով կամ աջ կոճակով քաշեք՝ մոդելը տեղափոխելու համար։ Մասշտաբը փոխելիս կենտրոնում մնում է կուրսորի տակ գտնվող հատվածը։</p><p class="hint scene-keyboard-hint">${tr('Ստեղնաշարով՝ սլաքներ, +/−, Home կամ Esc։')}</p><div class="scene-link-list">${scene.links.map(l=>`<div class="scene-link" data-link="${l.id}" style="--service-color:${l.color}"><button type="button" data-action="scene-select" data-id="${l.id}"><i style="background:${l.color}"></i><strong>${esc(l.cable||tr('Մալուխ'))}</strong><span>${esc(l.label)}</span><small>${esc(D.serviceLabel(state,l.service))} · VLAN ${esc(l.vlan||'—')}${l.external?tr(' · Այլ ռաք'):''}</small></button>${button(tr('Խմբագրել պորտը'),'port',l.id,'small')}</div>`).join('')||tr('<p class="empty">Նախ պորտի աջ վահանակում ընտրեք միացված սվիչի պորտը։</p>')}</div></aside></div>`;
+    <aside class="panel scene-links"><div class="scene-links-heading"><div><div class="eyebrow">3D / LINK MAP</div><h2>Միացումներ</h2></div><strong class="scene-count">${scene.links.length}</strong></div><div class="scene-report-actions">${button('PDF','connections-pdf',id,'small')}${button('Excel','connections-xlsx',id,'small')}</div><div class="scene-audit-summary"><span>${tr('Կապված')} <strong>${summary.linked}</strong></span><span>${tr('Չկապված')} <strong>${summary.unlinked}</strong></span><span>${tr('Կրկնված')} <strong>${summary.duplicate}</strong></span><span>${tr('Սխալ կապ')} <strong>${summary.wrong}</strong></span></div><details class="scene-issues" ${audit.issues.length?'open':''}><summary>${tr('Ստուգման արդյունք')} · ${audit.issues.length}</summary>${issueList||`<p class="hint">${tr('Խնդիրներ չեն գտնվել')}</p>`}</details>${serviceLegend()}<p id="sceneHelp" class="hint">Ձախ կոճակով քաշեք՝ պտտելու համար։ Shift-ով կամ աջ կոճակով քաշեք՝ մոդելը տեղափոխելու համար։ Մասշտաբը փոխելիս կենտրոնում մնում է կուրսորի տակ գտնվող հատվածը։</p><p class="hint scene-keyboard-hint">${tr('Ստեղնաշարով՝ սլաքներ, +/−, Home կամ Esc։')}</p><div class="scene-link-list">${scene.links.map(l=>`<div class="scene-link" data-link="${l.id}" style="--service-color:${l.color}"><button type="button" data-action="scene-select" data-id="${l.id}"><i style="background:${l.color}"></i><strong>${esc(l.cable||tr('Մալուխ'))}</strong><span>${esc(l.label)}</span><small>${esc(D.serviceLabel(state,l.service))} · VLAN ${esc(l.vlan||'—')}${l.external?tr(' · Այլ ռաք'):''}</small></button>${button(tr('Խմբագրել պորտը'),'port',l.id,'small')}</div>`).join('')||tr('<p class="empty">Նախ պորտի աջ վահանակում ընտրեք միացված սվիչի պորտը։</p>')}</div></aside></div>`;
   const highlight=id=>document.querySelectorAll('.scene-link').forEach(el=>el.classList.toggle('selected',el.dataset.link===id));
   sceneController=Rack3D.mount($('#rackCanvas'),scene,highlight);
 }
@@ -827,6 +831,41 @@ async function exportPersonal(type){
   for(const row of D.rows(state,filters))sheet.addRow(fields.map(k=>k==='status'?D.statusLabel(state,row[k]):k==='service'?D.serviceLabel(state,row[k]):row[k]));
   sheet.columns.forEach(c=>c.width=22);download(new Blob([await book.xlsx.writeBuffer()]),'MyPatch-personal.xlsx');
 }
+async function exportConnections(type,rackId){
+  const found=findRack(rackId);if(!found)return;
+  const report=RackConnections.inspect(state,rackId);
+  const label=x=>x?`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}`:tr('Պորտը չի գտնվել');
+  const issueNames={unlinked:tr('Չկապված'),duplicate:tr('Կրկնված'),wrong:tr('Սխալ կապ')};
+  const rows=report.records.map(item=>[
+    label(item.from),item.to?label(item.to):item.from.p.switchPortId?tr('Պորտը չի գտնվել'):'—',
+    item.issues.map(code=>issueNames[code]).join(', ')||tr('Կապված'),
+    item.from.p.cable||'',D.serviceLabel(state,item.from.p.service),item.from.p.vlan||'',item.from.p.notes||''
+  ]);
+  const name=`MyPatch-connections-${String(found.r.name).replace(/[^\p{L}\p{N}-]+/gu,'-').slice(0,48)}.${type}`;
+  if(type==='xlsx'){
+    if(!window.ExcelJS)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/exceljs.min.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Excel գործիքը չբեռնվեց։ Միացեք ցանցին և կրկին փորձեք։')));document.head.append(script);});
+    const book=new ExcelJS.Workbook(),sheet=book.addWorksheet(tr('Կապերի քարտեզ'));
+    sheet.addRow([state.company,found.f.name,found.r.name]);sheet.addRow([tr('Կապված'),report.summary.linked,tr('Չկապված'),report.summary.unlinked,tr('Կրկնված'),report.summary.duplicate,tr('Սխալ կապ'),report.summary.wrong]);
+    sheet.addRow([]);sheet.addRow([tr('Սկզբնակետ'),tr('Վերջնակետ'),tr('Ստուգման արդյունք'),tr('Մալուխ'),tr('Նշանակություն'),'VLAN',tr('Նշումներ')]);
+    for(const row of rows)sheet.addRow(row);
+    sheet.getRow(4).font={bold:true,color:{argb:'FFFFFFFF'}};sheet.getRow(4).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF176E68'}};
+    sheet.columns.forEach((column,i)=>{column.width=[42,42,24,24,26,12,38][i];});sheet.autoFilter={from:'A4',to:`G${Math.max(4,rows.length+4)}`};sheet.views=[{state:'frozen',ySplit:4}];
+    download(new Blob([await book.xlsx.writeBuffer()],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),name);
+  }else{
+    if(!window.PDFDocument)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/pdfkit.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(script);});
+    const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
+    const pdf=new PDFDocument({size:'A4',layout:'landscape',margin:32,info:{Title:`${state.company} — ${tr('Կապերի քարտեզ')}`,Author:'My Patch'}});
+    const chunks=[],done=new Promise((resolve,reject)=>{pdf.on('data',x=>chunks.push(x));pdf.on('end',()=>resolve(chunks));pdf.on('error',reject);});
+    pdf.registerFont('Project',new Uint8Array(await response.arrayBuffer())).font('Project');
+    const widths=[178,178,96,88,92,54,90],heads=[tr('Սկզբնակետ'),tr('Վերջնակետ'),tr('Ստուգման արդյունք'),tr('Մալուխ'),tr('Նշանակություն'),'VLAN',tr('Նշումներ')];
+    let page=0,y=0;
+    const write=(value,x,top,width,height,size=8,color='#173e43')=>pdf.font('Project').fontSize(size).fillColor(color).text(String(value||'—'),x+5,top+5,{width:width-10,height:height-10,ellipsis:true});
+    const header=()=>{if(page)pdf.addPage();page++;pdf.rect(0,0,842,7).fill('#138478');write(state.company,32,22,778,28,17);write(`${tr('Կապերի քարտեզ')} · ${found.f.name} / ${found.r.name}`,32,52,778,24,11,'#138478');write(`${tr('Կապված')}: ${report.summary.linked}    ${tr('Չկապված')}: ${report.summary.unlinked}    ${tr('Կրկնված')}: ${report.summary.duplicate}    ${tr('Սխալ կապ')}: ${report.summary.wrong}`,32,77,778,22,9);y=110;pdf.rect(32,y,778,29).fill('#e8f2ef');let x=32;heads.forEach((head,i)=>{write(head,x,y,widths[i],29,7);x+=widths[i];});y+=29;};
+    header();for(const row of rows){const h=38;if(y+h>552)header();if(Math.floor((y-139)/h)%2)pdf.rect(32,y,778,h).fill('#f5f9f8');let x=32;row.forEach((value,i)=>{write(value,x,y,widths[i],h,7);x+=widths[i];});pdf.moveTo(32,y+h).lineTo(810,y+h).strokeColor('#dce7e4').stroke();y+=h;}
+    if(!rows.length)write(tr('Կապեր չկան'),40,y+14,760,28,11);pdf.end();download(new Blob(await done,{type:'application/pdf'}),name);
+  }
+  toast(tr('Հաշվետվությունը պատրաստ է'));
+}
 const actions={
   'mobile-menu-toggle':el=>{const open=document.body.classList.toggle('mobile-nav-open');el.setAttribute('aria-expanded',String(open));el.setAttribute('aria-label',open?tr('Փակել արագ մենյուն'):tr('Բացել արագ մենյուն'));},
   'welcome-personal':()=>beginWorkspace('personal'),
@@ -884,6 +923,8 @@ const actions={
   'scene-front':()=>sceneController?.front(),
   'scene-reset':()=>{sceneController?.reset();document.querySelectorAll('.scene-link').forEach(el=>el.classList.remove('selected'));},
   'scene-select':id=>{sceneController?.select(id);document.querySelectorAll('.scene-link').forEach(el=>el.classList.toggle('selected',el.dataset.link===id));},
+  'connections-pdf':id=>exportConnections('pdf',id),
+  'connections-xlsx':id=>exportConnections('xlsx',id),
   'company-new':newCompany,'backup-all':backupAll,
   save:async()=>{if(await save())toast(tr('Տվյալները պահպանված են'));},close:()=>$('#dialog').close(),
   'toggle-auto-save':async()=>{autoSaveEnabled=!autoSaveEnabled;try{localStorage.setItem('rackmap-auto-save',String(autoSaveEnabled));}catch{}if(!autoSaveEnabled){clearTimeout(saveTimer);status(tr('Ավտոմատ պահպանումն անջատված է'));}else if(dirty){await save();}render();},
@@ -1028,7 +1069,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 actions.retry=init;
-let liveConnection=null,liveUrl='',liveConnected=false,liveRevision=null,liveOnline=0,liveUsers=[];
+let liveConnection=null,liveUrl='',liveConnected=false,liveRevision=null,liveOnline=0,liveUsers=[],liveLastUpdated=0;
 function stopLive(){
   liveConnection?.close();liveConnection=null;liveConnected=false;
   if(liveUrl){const leave=new URL(liveUrl,location.href);leave.pathname='/api/live/leave';navigator.sendBeacon?.(leave.pathname+leave.search,new Blob(['{}'],{type:'application/json'}));}
@@ -1043,10 +1084,10 @@ function maintainLive(){
   }
   const url=companyUrl('/api/live?client='+encodeURIComponent(liveSessionId));
   if(url!==liveUrl){
-    stopLive();liveUrl=url;liveRevision=null;
+    stopLive();liveUrl=url;liveRevision=null;liveLastUpdated=0;liveUsers=[];liveOnline=0;
     liveConnection=RackLive.connect(url,snapshot=>{
       if(liveUrl!==url)return;
-      liveOnline=snapshot.online;liveUsers=Array.isArray(snapshot.users)?snapshot.users:[];companies=snapshot.companies;
+      liveOnline=snapshot.online;liveUsers=Array.isArray(snapshot.users)?snapshot.users:[];companies=snapshot.companies;liveLastUpdated=Date.now();
       if(document.activeElement!==$('#companySelect'))renderCompanySelect();
       liveRevision=companies.find(x=>x.id===activeCompanyId)?.revision;
       if(liveRevision!==undefined&&liveRevision!==revision)refreshCurrentDatabase();
@@ -1067,13 +1108,14 @@ function updateLiveLabel(){
   const count=liveOnline||(liveUsers.length||1);
   if(badge){badge.textContent=liveConnected?String(count):'…';badge.dataset.connected=String(liveConnected);}
   const names=liveUsers.map(x=>x.name).filter(Boolean);
-  btn.title=liveConnected?(tr('Առցանց օգտատերեր')+' ('+count+')'+(names.length?':\n'+names.join('\n'):'')):tr('Cloud · Կապը վերականգնվում է…');
+  const lastSeen=liveLastUpdated?tr('Վերջին թարմացում')+': '+new Date(liveLastUpdated).toLocaleString(globalThis.RackI18n?.locale||'hy-AM'):'';
+  btn.title=liveConnected?(tr('Առցանց օգտատերեր')+' ('+count+')'+(names.length?':\n'+names.join('\n'):'')+(lastSeen?'\n'+lastSeen:'')):tr('Cloud · Կապը վերականգնվում է…')+(lastSeen?'\n'+lastSeen:'');
 }
 function renderLiveUsersModal(){
   const isPers=personal();
-  const count=isPers?1:(liveOnline||(liveUsers.length||1));
+  const count=isPers?1:liveConnected?(liveOnline||(liveUsers.length||1)):0;
   const defaultUser={id:'current',name:state.company?`${state.company} (${tr('Այս սարքում')})`:tr('Այս սարքում (դուք)')};
-  const items=isPers?[defaultUser]:(liveUsers.length?liveUsers:[defaultUser]);
+  const items=isPers?[defaultUser]:liveConnected?(liveUsers.length?liveUsers:[defaultUser]):[];
   const listHtml=items.map(u=>{
     const rawName=u.name||u.id||tr('Անհայտ օգտատեր');
     const isPin=String(rawName).toUpperCase().includes('PIN')||String(u.id).startsWith('pin:');
@@ -1091,9 +1133,8 @@ function renderLiveUsersModal(){
       <span class="live-pulse-dot"></span>
       <span>${tr('Առցանց օգտատերեր')}: <strong>${count}</strong></span>
     </div>
-    <ul class="live-modal-list">
-      ${listHtml}
-    </ul>
+    ${!isPers&&!liveConnected?`<p class="hint">${tr('Cloud · Կապը վերականգնվում է…')}</p>`:`<ul class="live-modal-list">${listHtml}</ul>`}
+    ${!isPers&&liveLastUpdated?`<p class="hint">${tr('Վերջին թարմացում')}: ${esc(new Date(liveLastUpdated).toLocaleString(globalThis.RackI18n?.locale||'hy-AM'))}</p>`:''}
     <p class="hint" style="margin-top:16px">${isPers?tr('Անձնական ռեժիմ · տվյալները պահպանվում են այս բրաուզերում։'):tr('Միացված մասնակիցները կարող են իրական ժամանակում տեսնել և խմբագրել տվյալները։')}</p>
   </div>`;
   modal(tr('Առցանց մասնակիցներ'),body);

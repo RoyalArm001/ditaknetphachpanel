@@ -1,28 +1,56 @@
 {
-  "version": "2.10.5",
+  "version": "2.10.6",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի և սարքերի ցանկի որոնումն այժմ աշխատում է համաժամանակյա՝ մոդելով, անունով, տեսակով, պորտով, սենյակով և VLAN-ով։",
-      "Ավելացվել է ակտիվ ֆիլտրերի և որոնման մաքրման արագ կոճակ («Մաքրել»)։"
+      "Ավելացվել է սարքի տեսակով և մոդելով նոր սարքի ստեղծում անմիջապես քարտեզի էջից՝ պորտի կապով և 1-սեղմումով տեղադրման ռեժիմով։",
+      "Ներդրվել է սարքերի խմբային ընտրություն (Shift+Click, Ctrl+A կամ շրջանակով նշում), խմբային տեղափոխում drag-and-drop-ով և սլաքներով, ինչպես նաև խմբային հեռացում։",
+      "Inspector-ում ավելացվել է նույն մոդելի նոր սարքի արագ ավելացման կոճակը՝ առանց հին կապերի կրկնության։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map markers and device list now filter synchronously by model, name, type, port, room, and VLAN.",
-      "Added a quick one-click reset button ('Clear') for active filters and search queries."
+      "Directly create new devices with type and model from the map view, automatically linking a port and activating 1-click placement.",
+      "Added multi-device group selection (Shift+Click, Ctrl+A, or marquee box select), batch drag-and-drop and arrow movement, and batch deletion.",
+      "Added quick duplication of selected device model with clean ports from the inspector."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Метки на карте и список устройств теперь синхронно фильтруются по модели, имени, типу, порту, комнате и VLAN.",
-      "Добавлена быстрая кнопка сброса активных фильтров и поиска («Очистить»)."
+      "Прямое создание устройств по типу и модели прямо с карты с автоматической привязкой порта и режимом размещения в один клик.",
+      "Добавлен групповой выбор устройств (Shift+Click, Ctrl+A или прямоугольное выделение), групповое перемещение перетаскиванием и стрелками, а также групповое удаление.",
+      "В инспекторе добавлено быстрое дублирование модели устройства с созданием чистых портов."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.5",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի և սարքերի ցանկի որոնումն այժմ աշխատում է համաժամանակյա՝ մոդելով, անունով, տեսակով, պորտով, սենյակով և VLAN-ով։",
+          "Ավելացվել է ակտիվ ֆիլտրերի և որոնման մաքրման արագ կոճակ («Մաքրել»)։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map markers and device list now filter synchronously by model, name, type, port, room, and VLAN.",
+          "Added a quick one-click reset button ('Clear') for active filters and search queries."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Метки на карте и список устройств теперь синхронно фильтруются по модели, имени, типу, порту, комнате и VLAN.",
+          "Добавлена быстрая кнопка сброса активных фильтров и поиска («Очистить»)."
+        ]
+      }
+    },
     {
       "version": "2.10.4",
       "date": "2026-10-09",
