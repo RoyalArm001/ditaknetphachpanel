@@ -298,7 +298,7 @@ function renderNetworks(){
   const list=D.networks(state);
   const typeLabel=type=>D.hasService(state,type)?D.serviceLabel(state,type):type;
   const ipText=n=>{const ips=Array.isArray(n.ip)?n.ip:(n.ip?[n.ip]:[]);return ips.length?' · '+ips.map(esc).join(', '):'';};
-  $('#content').innerHTML=header(tr('Ցանցերի տվյալներ'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),button(tr('＋ Ավելացնել ցանց'),'network-new','','primary'))+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(typeLabel(n.name))}</h2><p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։</p></section>'));
+  $('#content').innerHTML=header(tr('Ցանցերի տվյալներ'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),`${button(tr('Ընտրովի PDF'),'selective-pdf','','outline')}${button(tr('＋ Ավելացնել ցանց'),'network-new','','primary')}`)+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(typeLabel(n.name))}</h2><p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։</p></section>'));
   $('#content .page-head h1').textContent=tr('Ցանցեր ու Սարքեր');
   $('#content .page-head p').textContent=tr('Կառավարեք ցանցերը, սարքերի տեսակները և մոդելները։ Սարքն ավելացրեք անմիջապես ընտրված ռաքում։');
   const devices=D.devices(state),available=racks().length>0;
@@ -324,13 +324,38 @@ function networkModal(id=''){
 }
 function deviceTypesModal(){
   const custom=Array.isArray(state.deviceTypes)?state.deviceTypes:[];
-  modal(tr('Սարքերի տեսակներ'),tr`<p class="hint">Ավելացրեք ձեր սարքերի տեսակները։ Դրանք կհայտնվեն «Նոր սարք» ձևի տեսակների ցանկում։ Փաչ պանելն ու սվիչը համակարգային տեսակներ են։</p>${custom.length?`<div class="device-type-list">${custom.map(x=>`<div class="device-item"><strong>${esc(x.name)}</strong>${button(tr('Ջնջել'),'device-type-delete',x.id,'small danger')}</div>`).join('')}`:tr('<p class="hint">Ձեր սեփական տեսակներ դեռ չկան։</p>')}${input('deviceTypeName',tr('Նոր սարքի տեսակի անվանում'),'','text',tr('maxlength="80" placeholder="Օրինակ՝ DVR կամ Access Point"'))}`,fd=>commit(s=>{
+  modal(tr('Սարքերի տեսակներ և մոդելներ'),tr`<p class="hint">${tr('Ավելացրեք ձեր սարքերի տեսակները և մոդելները։ Դրանք կհայտնվեն «Նոր սարք» ձևի տեսակների և մոդելների ընտրացանկում։')}</p>${custom.length?`<div class="device-type-list">${custom.map(x=>`<div class="device-item" style="flex-wrap:wrap"><div><strong>${esc(x.name)}</strong><small>${x.models?.length?x.models.map(m=>esc(m.name)).join(' · '):tr('Մոդելներ չկան')}</small></div><div class="actions">${button(tr('＋ Մոդել'),'device-model-new',x.id,'small')}${button(tr('Ջնջել տեսակը'),'device-type-delete',x.id,'small danger')}</div></div>`).join('')}</div>`:tr('<p class="hint">Ձեր սեփական տեսակներ դեռ չկան։</p>')}${input('deviceTypeName',tr('Նոր սարքի տեսակի անվանում'),'','text',tr('maxlength="80" placeholder="Օրինակ՝ DVR կամ Access Point"'))}`,fd=>commit(s=>{
     const name=String(fd.get('deviceTypeName')||'').trim();if(!name)throw new Error(tr('Գրեք սարքի տեսակի անվանումը'));
     if(!Array.isArray(s.deviceTypes))s.deviceTypes=[];
     if(s.deviceTypes.some(x=>x.name.toLowerCase()===name.toLowerCase()))throw new Error(tr('Այս սարքի տեսակն արդեն կա'));
     const base=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'device';
     let id=base,i=2;while(['panel','switch','router'].includes(id)||s.deviceTypes.some(x=>x.id===id))id=`${base}-${i++}`;
-    s.deviceTypes.push({id,name});
+    s.deviceTypes.push({id,name,models:[]});
+  }));
+}
+function deviceModelModal(typeId){
+  const custom=state.deviceTypes?.find(x=>x.id===typeId);
+  const typeName=custom?.name||(D.deviceTypes(state).find(([id])=>id===typeId)?.[1]||typeId);
+  modal(tr('Ավելացնել մոդել')+' · '+typeName,`<div class="form-grid">
+    ${input('modelName',tr('Մոդելի անվանում'),'','text',tr('maxlength="80" placeholder="Օրինակ՝ DS-7616NI-K2"'))}
+    ${input('modelPorts',tr('Պորտերի քանակ'),16,'number','required min="1" max="96" step="1"')}
+    ${input('modelHeight',tr('Բարձրություն U'),1,'number','required min="1" max="60" step="1"')}
+    ${input('modelSfp',tr('SFP պորտեր'),0,'number','min="0" max="16" step="1"')}
+  </div>`,fd=>commit(s=>{
+    const name=String(fd.get('modelName')||'').trim();
+    if(!name)throw new Error(tr('Մոդելի անվանումը պարտադիր է'));
+    const ports=Number(fd.get('modelPorts')),height=Number(fd.get('modelHeight')),sfp=Number(fd.get('modelSfp')||0);
+    const target=s.deviceTypes?.find(x=>x.id===typeId);
+    if(target){
+      target.models ||= [];
+      if(target.models.some(m=>m.name.toLowerCase()===name.toLowerCase()))throw new Error(tr('Այս մոդելն արդեն կա'));
+      target.models.push({name,ports,height,sfp});
+    }else{
+      s.deviceModels ||= [];
+      if(s.deviceModels.some(m=>m.type===typeId&&m.name.toLowerCase()===name.toLowerCase()))throw new Error(tr('Այս մոդելն արդեն կա'));
+      s.deviceModels.push({type:typeId,name,ports,height,sfp});
+    }
+    setTimeout(deviceTypesModal,0);
   }));
 }
 function hostModal(value){
@@ -346,6 +371,46 @@ function hostModal(value){
     const current=target.hosts.find(x=>x.id===hostId);
     if(current)Object.assign(current,next);else target.hosts.push(next);
   }),host?button(tr('Ջնջել'),'host-delete',networkId+'/'+host.id,'danger'):'');
+}
+async function openSelectivePdfModal(defaultKind='devices'){
+  const current=state, language=globalThis.RackI18n?.language||'hy';
+  const body=`<div class="form-grid">
+    ${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}
+    ${select('pdfKind',tr('Բովանդակություն'),[['devices',tr('Սարքերի սխեմաներ')],['maps',tr('Քարտեզ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],defaultKind)}
+    ${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],'')}
+    ${select('pdfRack',tr('Ռաք'),[],'')}
+    ${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}
+    ${select('pdfDevice',tr('Սարք'),[],'')}
+    ${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}
+  </div><p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p>`;
+  modal(tr('Ընտրովի PDF'),body,async fd=>{
+    const kind=String(fd.get('pdfKind')),floorId=String(fd.get('pdfFloor')),rackId=String(fd.get('pdfRack')),deviceType=String(fd.get('pdfType')),deviceId=String(fd.get('pdfDevice')),planId=String(fd.get('pdfPlan'));
+    const sel=RackHandover.select(current,{floorId,rackId,deviceType,deviceId,planId});
+    if((kind==='maps'&&!sel.plans.length)||(kind==='devices'&&!sel.devices.length)||(kind==='all'&&!sel.plans.length&&!sel.devices.length))throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
+    if(!window.PDFDocument)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='/pdfkit.js';s.onload=resolve;s.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(s);});
+    const fontRes=await fetch('/assets/DejaVuSans.ttf');if(!fontRes.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
+    const font=new Uint8Array(await fontRes.arrayBuffer());
+    const outputTr=globalThis.RackI18n?.forLanguage?.(String(fd.get('pdfLanguage')))||tr;
+    const chunks=await RackHandover.create(PDFDocument,current,{kind,floorId,rackId,deviceType,deviceId,planId,font,tr:outputTr});
+    download(new Blob(chunks,{type:'application/pdf'}),`${current.company||'MyPatch'} - Handover.pdf`);
+    toast(tr('Հաշվետվությունը պատրաստ է'));
+  });
+  const form=$('#modalForm');if(!form)return;
+  const updateChoices=()=>{
+    const floorId=form.elements.pdfFloor.value, type=form.elements.pdfType.value;
+    const opt=(v,l)=>`<option value="${esc(v)}">${esc(l)}</option>`;
+    const racks=current.floors.filter(f=>!floorId||f.id===floorId).flatMap(f=>f.racks.map(r=>({f,r})));
+    form.elements.pdfRack.innerHTML=opt('',tr('Բոլոր ռաքերը'))+racks.map(x=>opt(x.r.id,x.f.name+' / '+x.r.name)).join('');
+    const rackId=form.elements.pdfRack.value;
+    const devs=D.devices(current).filter(x=>(!floorId||x.f.id===floorId)&&(!rackId||x.r.id===rackId)&&(type==='all'||x.d.type===type));
+    form.elements.pdfDevice.innerHTML=opt('',tr('Բոլոր սարքերը'))+devs.map(x=>opt(x.d.id,x.f.name+' / '+x.r.name+' / '+x.d.name)).join('');
+    const plans=(current.floorPlans||[]).filter(p=>!floorId||p.floorId===floorId);
+    form.elements.pdfPlan.innerHTML=opt('',tr('Բոլոր հատակագծերը'))+plans.map(p=>opt(p.id,p.name)).join('');
+  };
+  updateChoices();
+  form.elements.pdfFloor.onchange=()=>{form.elements.pdfRack.value='';form.elements.pdfDevice.value='';form.elements.pdfPlan.value='';updateChoices();};
+  form.elements.pdfRack.onchange=()=>{form.elements.pdfDevice.value='';updateChoices();};
+  form.elements.pdfType.onchange=()=>{form.elements.pdfDevice.value='';updateChoices();};
 }
 function devicePorts(d,byId,detail=false){
   const layout=D.portLayout(d),network=D.isNetworkDevice(d);
@@ -448,8 +513,8 @@ function renderSettings(){
   if(settingsPage==='releases'){ $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Հրապարակված տարբերակներ և փոփոխություններ'))+settingsTabs()+'<div id="releaseHistory" aria-live="polite"></div>';renderReleaseHistory();return;}
   if(settingsPage==='reports'){renderSearch('reports');$('#content .page-head h1').textContent=tr('Կարգավորումներ');$('#content .page-head').insertAdjacentHTML('afterend',settingsTabs());return;}
   let hasRecovery=false;try{hasRecovery=!!localStorage.getItem(recoveryKey());}catch{}
-  $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
-  const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo');
+  $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Ընկերություն, թիմի հասանելիություն և պահուստային պատճեններ'))+tr`<div class="settings-grid"><section class="panel"><h2>Ընկերություն և շենք</h2><p>${esc(state.company||tr('Չի լրացվել'))}<br><span class="muted">${state.floors.length} հարկ</span></p>${button(tr('Խմբագրել'),'company','','primary')} ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}</section><section class="panel"><h2>Թիմի հասանելիություն</h2><p class="muted">${personal()?tr('Անձնական բազան հասանելի է միայն այս սարքում։'):cloudMode?tr('Այս HTTPS հասցեով բացեք հավելվածը համակարգչից կամ հեռախոսից։'):tr('Նույն ցանցում հեռախոսից կամ այլ համակարգչից բացեք այս հասցեն։ Հիմնական համակարգիչը պետք է միացված լինի։')}</p><div id="networkInfo">Բեռնվում է…</div><p class="hint">${personal()?tr('Կոդ չի պահանջվում։'):cloudMode?tr('Մուտք՝ Իմ փաչ-ի հաշվով և RackMap-ի աշխատակցի թույլտվությամբ։'):tr('Տեղական հասանելիություն։ Եթե PIN-ը միացված է, մուտքագրեք աշխատակցի կոդը։')}</p></section><section class="panel"><h2>Պահուստային պատճեններ</h2><p class="muted">Excel կամ JSON պատճենը պահպանում է ամբողջ շենքը, կապերը և ռաքերի լուսանկարները։</p><div class="actions">${button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')}${button(tr('↓ Բոլոր ընկերությունների բազան'),'backup-all')}${button(tr('Վերականգնել ֆայլից'),'restore')}${hasRecovery?button(tr('Չպահված տարբերակ'),'recovery'):''}</div><input type="file" id="restoreInput" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></section><section class="panel"><h2>${tr('Ավտոմատ cloud backup')}</h2><div id="backupCloudStatus"><p class="hint">${tr('Բեռնվում է…')}</p></div></section><section class="panel"><h2>Պահպանման պատմություն</h2><p class="muted">Վերջին 50 փոփոխություններից առաջ եղած տարբերակները պահվում են ավտոմատ։</p>${button(tr('Դիտել տարբերակները'),'history')}</section><section class="panel"><h2>${tr('Ավտոմատ պահպանում')}</h2><p class="muted">${autoSaveEnabled?tr('Փոփոխությունները ավտոմատ պահպանվում են։'):tr('Փոփոխությունները կպահվեն միայն «Պահպանել» կոճակը սեղմելուց հետո։')}</p>${button(autoSaveEnabled?tr('Անջատել ավտոմատ պահպանումը'):tr('Միացնել ավտոմատ պահպանումը'),'toggle-auto-save')}</section><section class="panel"><h2>Բազայի պահպանում</h2><p class="muted">${personal()?tr('Անձնական տվյալները պահվում են այս բրաուզերի հիշողությունում։ Պահպանեք նաև JSON պատճենը։'):cloudMode?tr('Տվյալները պահվում են Supabase-ում՝ ծրագրի հրապարակումներից անկախ։ JSON պատճենը ներբեռնեք պահուստավորման համար։'):tr('Բազան պահվում է ծրագրի կոդից առանձին։ Գործարկման և կառուցվածքի փոփոխության ժամանակ ստեղծվում է ստուգված պատճեն։')}</p><div id="storageInfo" class="hint">Բեռնվում է…</div></section></div>`;
+  const storageInfo=$('#storageInfo'),networkInfo=$('#networkInfo'),backupCloudStatus=$('#backupCloudStatus');
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel storage-mode"><h2>Աշխատանքային տարածք</h2><p>${esc(state.company)}</p><div class="actions">${button(tr('Ինչպե՞ս եք ցանկանում աշխատել'),'workspace-choice')}</div></section>`);
   $('.settings-grid').insertAdjacentHTML('beforeend',tr`<section class="panel"><h2>${tr('SVG պատկերակների խմբագրում')}</h2><p class="muted">${tr('Ընտրեք քարտեզում և պորտերի նշանակությունների ցանկում օգտագործվող SVG պատկերակները։')}</p><div class="actions">${button(tr('Խմբագրել SVG պատկերակները'),'project-style')}</div></section>`);
   $('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel"><h2>${tr('Reset · Մաքրել հավելվածը')}</h2><p class="muted">${tr('Մաքրել միայն այս բրաուզերի տվյալներն ու մուտքը։ Cloud-ի տվյալները չեն ջնջվում։')}</p>${button(tr('Reset · Մաքրել հավելվածը'),'app-reset','','danger')}</section>`);
@@ -466,13 +531,27 @@ function renderSettings(){
   if(!personal()&&!accountMode()&&cloudMode&&pinEnabled)networkInfo.nextElementSibling.textContent=tr('Թիմի նախագծերը բացվում են աշխատակցի PIN-ով։ PIN օգտատերերին կառավարելու համար անհրաժեշտ է գլխավոր PIN-ը։');
   $('#content .page-head')?.insertAdjacentHTML('afterend',settingsTabs());
   if(!personal()&&cloudMode){$('.settings-grid').insertAdjacentHTML('beforeend',`<section class="panel pin-users-panel"><div class="section-head"><h2>${tr('PIN օգտատերեր')}</h2><button type="button" class="button primary" data-action="pin-user-new" hidden>${tr('＋ Ավելացնել օգտատեր')}</button></div><p class="muted">${tr('Անվանեք յուրաքանչյուր PIN-ը․ անունները կերևան LIVE ցանկում։')}</p><div id="pinUsers">${tr('Բեռնվում է…')}</div></section>`);loadPinUsers();}
-  const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset],#themePreference'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}$('.settings-grid').dataset.activePage=settingsPage;
+  const cards=[...document.querySelectorAll('.settings-grid>.panel')];for(const card of cards){let category='project';if(card.matches('.pin-users-panel')||card.querySelector('#networkInfo'))category='users';else if(card.querySelector('[data-action=backup],[data-action=history],[data-action=toggle-auto-save],#storageInfo,#backupCloudStatus'))category='data';else if(card.querySelector('[data-action=workspace-choice],[data-action=app-reset],#themePreference'))category='app';card.dataset.settingsPage=category;card.hidden=category!==settingsPage;}$('.settings-grid').dataset.activePage=settingsPage;
   api('/api/storage').then(x=>{if(storageInfo.isConnected)storageInfo.innerHTML=tr`<strong>Բազա</strong><div class="storage-path">${esc(x.database)}</div><strong>Ավտոմատ պատճեններ</strong><div class="storage-path">${esc(tr(x.backups))}</div>`;}).catch(()=>{if(storageInfo.isConnected)storageInfo.textContent=tr('Չհաջողվեց ստանալ բազայի տվյալները');});
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
+  api('/api/backup/status').then(res=>{
+    if(!backupCloudStatus||!backupCloudStatus.isConnected)return;
+    if(!res||!res.ok){
+      backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(res?.error||tr('Տեղական ռեժիմում cloud backup-ը անջատված է'))}</p>`;
+      return;
+    }
+    const healthy=res.healthy, enabled=res.enabled!==false;
+    const badgeClass=healthy?'healthy':'warning';
+    const statusText=healthy?tr('Ակտիվ (ամենժամյա)'):enabled?tr('Սպասում է առաջին backup-ին'):tr('Անջատված է');
+    const lastDate=res.last_backup?new Date(res.last_backup).toLocaleString(globalThis.RackI18n?.language==='hy'?'hy-AM':globalThis.RackI18n?.language==='ru'?'ru-RU':'en-US'):tr('Դեռ չկա');
+    backupCloudStatus.innerHTML=`<div class="backup-status-badge ${badgeClass}">● ${esc(statusText)}</div><p class="hint"><strong>${tr('Վերջին backup')}՝</strong> ${esc(lastDate)}</p><p class="hint"><strong>${tr('Պահպանման ժամկետ')}՝</strong> ${res.retentionHours||72} ${tr('ժամ (ավտոմատ հեռացում)')}</p>`;
+  }).catch(()=>{
+    if(backupCloudStatus?.isConnected)backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(tr('Տեղական ռեժիմ կամ կապ չկա'))}</p>`;
+  });
 }
 function modal(title,body,onSubmit,extras=''){
   const dlg=$('#dialog');if(dlg.open)dlg.close();dialogSubmit=onSubmit;
-  dlg.innerHTML=tr`<div class="dialog-heading"><h2 id="dialogTitle">${esc(title)}</h2><button class="close" data-action="close" aria-label="Փակել">×</button></div>${onSubmit?'<form id="modalForm">':''}${body}<div class="form-error" id="formError" hidden></div><div class="form-actions">${extras}${button(tr('Փակել'),'close')}${onSubmit?tr('<button class="button primary" type="submit">Պահպանել</button>'):''}</div>${onSubmit?'</form>':''}`;
+  dlg.innerHTML=tr`<div class="dialog-heading"><h2 id="dialogTitle">${esc(title)}</h2><button class="close" data-action="close" aria-label="${esc(tr('Փակել'))}">×</button></div>${onSubmit?'<form id="modalForm">':''}${body}<div class="form-error" id="formError" hidden></div><div class="form-actions">${extras}${button(tr('Փակել'),'close')}${onSubmit?tr('<button class="button primary" type="submit">Պահպանել</button>'):''}</div>${onSubmit?'</form>':''}`;
   if(onSubmit)$('#modalForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter||e.target.querySelector('button[type=submit]');b.disabled=true;try{await dialogSubmit(new FormData(e.target));dlg.close();toast(tr('Փոփոխությունն ընդունված է'));}catch(err){$('#formError').hidden=false;$('#formError').textContent=tr(err.message);}finally{b.disabled=false;}};
   dlg.showModal();
 }
@@ -552,12 +631,33 @@ function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=
     $('#count').onchange=()=>{const selected=$('#count').value==='custom';if(customField)customField.hidden=!selected;if(customInput)customInput.required=selected;};
   };
   setPortChoices(defaults.portList?defaults.portList.length-(defaults.sfpCount||0):24);
-  const syncTypeFields=()=>{$('#modelType').closest('.field').hidden=$('#type').value!=='switch';$('#sfpCount').closest('.field').hidden=!D.isNetworkDevice({type:$('#type').value});};
+  const updateKnownModels=()=>{
+    const curType=$('#type').value;
+    const models=D.deviceModels(curType,state).map(m=>m.name);
+    const existing=D.devices(state).filter(x=>x.d.type===curType).map(x=>x.d.model).filter(Boolean);
+    const allModels=[...new Set([...models,...existing])];
+    const dl=$('#knownDeviceModels');if(dl)dl.innerHTML=allModels.map(m=>`<option value="${esc(m)}"></option>`).join('');
+  };
+  const applyModelDefaults=()=>{
+    const curType=$('#type').value, val=String($('#model')?.value||'').trim();
+    const defs=D.modelDefaults(curType,val,state);
+    if(defs){
+      if(defs.ports)setPortChoices(defs.ports);
+      if(defs.height)$('#height').value=defs.height;
+      if(defs.sfpCount!==undefined&&$('#sfpCount'))$('#sfpCount').value=defs.sfpCount;
+      if(defs.modelType&&$('#modelType'))$('#modelType').value=defs.modelType;
+      syncTypeFields();
+    }
+  };
   if(catalog){
     const suggestPosition=()=>{const target=findRack($('#targetRack').value)?.r;if(!target)return;const height=Number($('#height').value)||1;$('#pos').max=target.u;$('#height').max=target.u;$('#pos').value=Array.from({length:target.u},(_,i)=>target.u-i).find(pos=>pos+height-1<=target.u&&!target.devices.some(device=>pos<device.pos+device.height&&pos+height>device.pos))||1;};
     $('#targetRack').onchange=suggestPosition;$('#height').onchange=suggestPosition;suggestPosition();
   }
-  syncTypeFields();$('#type').onchange=()=>{setPortChoices();syncTypeFields();};
+  syncTypeFields();
+  updateKnownModels();
+  $('#model').oninput=applyModelDefaults;
+  $('#model').onchange=applyModelDefaults;
+  $('#type').onchange=()=>{setPortChoices();syncTypeFields();updateKnownModels();};
 }
 function deviceDetail(id){const {d,r}=findDevice(id)||{};if(!d)return;const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));const modelType=d.type==='switch'&&d.modelType?` · ${d.modelType==='poe'?'PoE':d.modelType==='poe-plus'?'PoE+':tr('Առանց PoE')}`:'';modal(d.name,`<p class="port-title">${esc(r.name)} · U${d.pos} · ${d.height}U${esc(modelType)}${d.model?` · ${esc(d.model)}`:''}</p>${legend()}${devicePorts(d,byId,true)}`,null,button(tr('Խմբագրել սարքը'),'device',id,'primary'));paintPorts();}
 
@@ -906,6 +1006,8 @@ const actions={
   'app-reset':resetAppDialog,
   'project-style':()=>modal(tr('SVG պատկերակներ և նախագծի անվանումներ ու գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
   'device-types':deviceTypesModal,
+  'device-model-new':id=>deviceModelModal(id),
+  'selective-pdf':()=>openSelectivePdfModal('devices'),
   'catalog-device-new':type=>deviceModal('', '', undefined,{type}),
   'catalog-device-copy':id=>{const device=findDevice(id)?.d;if(device)deviceModal('', '', undefined,device);},
   'device-type-delete':id=>confirmAction(tr('Ջնջել սարքի տեսակը'),tr('Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։'),()=>commit(s=>{s.deviceTypes=(s.deviceTypes||[]).filter(x=>x.id!==id);})),

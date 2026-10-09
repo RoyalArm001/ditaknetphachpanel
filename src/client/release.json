@@ -1,31 +1,62 @@
 {
-  "version": "2.10.7",
+  "version": "2.10.8",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի ֆիլտրերի վահանակը համաժամեցվել է վերևի գործիքագոտու (Topbar) հետ և օպտիմալացվել է ամբողջ էկրանով ռեժիմի համար։",
-      "PDF արտահանման մեջ սարքերի ամփոփման աղյուսակը դասավորվել է հատակագծերից հետո՝ պահպանելով հստակ կառուցվածքը։",
-      "Ավելացվել է մնացած և ընթացիկ առաջադրանքների համակարգված պլանը (REMAINING-TASKS-PLAN.md)։"
+      "Ամբողջացվել է Custom սարքերի տեսակների և մոդելների կատալոգը՝ տեսակի ներքո անհատական մոդելների ավելացմամբ և պորտերի/չափերի ավտոմատ լրացմամբ։",
+      "Ավելացվել է «Ընտրովի PDF» արտահանումը «Ցանցեր և Սարքեր» էջից՝ ըստ հարկի, ռաքի, սարքի տեսակի և տարածքի ֆիլտրման։",
+      "Կարգավորումների էջում ինտեգրվել է ավտոմատ cloud backup-ի կարգավիճակը (72 ժամ retention, ամենժամյա պաշտպանություն, shared/account մեկուսացում)։",
+      "Բարելավվել է մատչելիությունը (A11y)՝ բարձր կոնտրաստային focus-visible ոճերով, aria-label թարգմանություններով և modal դիալոգների ստանդարտացմամբ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map filter toolbar synchronized with Topbar tools and optimized for fullscreen mode.",
-      "Equipment summary table in PDF export repositioned sequentially after floor plans.",
-      "Added structured remaining tasks and roadmap plan (REMAINING-TASKS-PLAN.md)."
+      "Completed custom device types and model catalog with per-type model creation and automatic port/height autofill.",
+      "Added Selective PDF export directly from Networks & Devices with floor, rack, device type, and area scoping.",
+      "Integrated automatic cloud backup status in Settings (72-hour retention, hourly schedule, shared/account isolation).",
+      "Enhanced accessibility (A11y) with high-contrast focus-visible styles, localized aria-labels, and modal dialog standards."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Панель фильтров карты синхронизирована с верхней панелью (Topbar) и оптимизирована для полноэкранного режима.",
-      "Сводная таблица оборудования в PDF-экспорте логически размещена после планов помещений.",
-      "Добавлен структурированный план оставшихся задач и дорожная карта (REMAINING-TASKS-PLAN.md)."
+      "Завершен каталог пользовательских типов и моделей устройств с добавлением моделей и автозаполнением портов и высоты.",
+      "Добавлен выборочный экспорт PDF со страницы «Сети и устройства» с фильтрацией по этажам, стойкам, типам устройств и планам.",
+      "В настройки добавлен статус автоматического cloud backup (хранение 72 часа, ежечасное расписание, изоляция shared/account).",
+      "Улучшена доступность (A11y) с контрастными стилями focus-visible, локализацией aria-label и стандартизацией модальных окон."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.7",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի ֆիլտրերի վահանակը համաժամեցվել է վերևի գործիքագոտու (Topbar) հետ և օպտիմալացվել է ամբողջ էկրանով ռեժիմի համար։",
+          "PDF արտահանման մեջ սարքերի ամփոփման աղյուսակը դասավորվել է հատակագծերից հետո՝ պահպանելով հստակ կառուցվածքը։",
+          "Ավելացվել է մնացած և ընթացիկ առաջադրանքների համակարգված պլանը (REMAINING-TASKS-PLAN.md)։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map filter toolbar synchronized with Topbar tools and optimized for fullscreen mode.",
+          "Equipment summary table in PDF export repositioned sequentially after floor plans.",
+          "Added structured remaining tasks and roadmap plan (REMAINING-TASKS-PLAN.md)."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Панель фильтров карты синхронизирована с верхней панелью (Topbar) и оптимизирована для полноэкранного режима.",
+          "Сводная таблица оборудования в PDF-экспорте логически размещена после планов помещений.",
+          "Добавлен структурированный план оставшихся задач и дорожная карта (REMAINING-TASKS-PLAN.md)."
+        ]
+      }
+    },
     {
       "version": "2.10.6",
       "date": "2026-10-09",

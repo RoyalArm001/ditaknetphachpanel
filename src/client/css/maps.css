@@ -34,7 +34,15 @@ body.map-view .topbar #breadcrumb{display:inline-flex;margin-right:0;flex:none;m
 .map-marker-label[data-dir=up]{top:auto;bottom:calc(100% + 5px)}
 .map-marker-label[data-dir=left]{top:50%;left:auto;right:calc(100% + 6px);transform:translateY(-50%)}
 .map-marker-label[data-dir=right]{top:50%;left:calc(100% + 6px);transform:translateY(-50%)}
-.map-marker-label{width:max-content;max-width:150px;white-space:normal;overflow-wrap:anywhere;line-height:1.3;bottom:auto;right:auto}
+.map-marker-label{width:max-content;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;bottom:auto;right:auto;transform-origin:top center}
+.map-pdf-dialog{width:min(1120px,calc(100% - 24px))}
+.map-pdf-proof{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface-soft,#edf2f2)}
+.map-pdf-proof>p{font-size:12px;margin:0 0 10px;color:var(--muted)}
+.map-pdf-proof-tools{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.map-pdf-proof-tools output{font-size:12px;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
+.map-pdf-proof-page{min-height:160px;display:flex;align-items:flex-start;justify-content:center;overflow:auto}
+.map-pdf-proof canvas{display:block;width:100%;height:auto;background:#fff;box-shadow:0 3px 14px #0002}
+.map-pdf-proof canvas[hidden]{display:none}
 .map-editor .map-label-leaders{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:hidden;stroke:#607581;stroke-width:1}
 .map-topbar{position:absolute;top:18px;left:20px;right:20px;display:flex;align-items:start;justify-content:space-between;gap:16px;pointer-events:none;z-index:10}.map-topbar>*{pointer-events:auto}
 .map-project-name{display:block;margin:0 0 9px 2px;color:#c2cfd5;font-size:11px;font-weight:650;max-width:380px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}

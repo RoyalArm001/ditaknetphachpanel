@@ -263,3 +263,11 @@ body.right-collapsed .rack-side{display:none}
 #rackCanvas{background:#1a343b;outline-offset:-4px}
 .scene-keyboard-hint{margin-top:4px!important}
 @media(max-width:620px){.scene-toolbar{gap:7px;padding:9px}.scene-control-group{gap:3px;padding-right:7px}.scene-toolbar .scene-control{min-width:34px;width:34px;height:34px;min-height:34px}.scene-toolbar-tip{display:none}#rackCanvas{min-height:360px}}
+
+:is(button,.button,a,input,select,textarea):focus-visible{outline:3px solid var(--accent,#177f76);outline-offset:2px}
+[data-theme=dark] :is(button,.button,a,input,select,textarea):focus-visible{outline:3px solid #5ed0c2;outline-offset:2px}
+.backup-status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px}
+.backup-status-badge.healthy{background:#e6f4ea;color:#137333}
+.backup-status-badge.warning{background:#fef7e0;color:#b06000}
+[data-theme=dark] .backup-status-badge.healthy{background:#133824;color:#81c995}
+[data-theme=dark] .backup-status-badge.warning{background:#3d2f0a;color:#fdd663}

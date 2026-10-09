@@ -23,6 +23,34 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   };
   const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(!s.deviceTypes?.some(x=>x.id==='router')?[['router',tr('Ռաուտեր')]]:[]),...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
   const isNetworkDevice = d => ['switch','router'].includes(d.type);
+  // Port counts below are copper ports; SFP ports are additional.
+  const defaultModels=Object.freeze([
+    ['panel','Cat6 UTP 24-Port 1U',24,1,0,false],
+    ['panel','Cat6 UTP 48-Port 2U',48,2,0,false],
+    ['panel','Cat6A FTP Shielded 24-Port 1U',24,1,0,false],
+    ['panel','Cat5e Compact 12-Port 1U',12,1,0,false],
+    ['switch','Cisco Catalyst 2960-24TT',24,1,2,false],
+    ['switch','Cisco Catalyst 2960-48TT',48,1,2,false],
+    ['switch','Cisco Catalyst 2960-24PC-L (PoE)',24,1,2,true],
+    ['switch','MikroTik CRS326-24G-2S+RM',24,1,2,false],
+    ['switch','MikroTik CRS328-24P-4S+RM (PoE+)',24,1,4,true],
+    ['switch','Ubiquiti UniFi USW-24-PoE',24,1,2,true],
+    ['switch','Ubiquiti UniFi USW-48-PoE',48,1,4,true],
+    ['router','MikroTik CCR2004-16G-2S+',16,1,2,false],
+    ['router','MikroTik RB5009UG+S+IN',8,1,1,false],
+    ['router','Cisco ISR 4331',3,1,2,false]
+  ].map(([type,name,ports,height,sfp,poe])=>Object.freeze({type,name,ports,height,sfp,poe})));
+  const deviceModels=(type,s)=>{
+    const defaults=defaultModels.filter(model=>model.type===type);
+    const customType=s?.deviceTypes?.find(t=>t.id===type);
+    const customModels=Array.isArray(customType?.models)?customType.models.map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
+    const extraModels=Array.isArray(s?.deviceModels)?s.deviceModels.filter(m=>m.type===type).map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
+    return [...defaults,...customModels,...extraModels];
+  };
+  function modelDefaults(type,name,s){
+    const model=deviceModels(type,s).find(m=>m.name.toLowerCase()===String(name||'').trim().toLowerCase());
+    return model?{ports:model.ports,height:model.height,sfpCount:model.sfp,modelType:type==='switch'?(model.poe?(model.name.includes('PoE+')?'poe-plus':'poe'):'none'):''}:null;
+  }
   function portLayout(d){
     const sfpCount=d.sfpCount||0,copper=d.portList.length-sfpCount;
     const columns=Math.ceil(copper/2),opticalColumns=Math.ceil(sfpCount/2);
@@ -70,7 +98,30 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     if(s.deviceTypes!==undefined){
       assert(Array.isArray(s.deviceTypes)&&s.deviceTypes.length<=100,tr('Սարքերի տեսակների ցանկը սխալ է'));
       const typeIds=new Set(['panel','switch']);
-      for(const type of s.deviceTypes){assert(type&&typeof type==='object',tr('Սարքի տեսակի ձևաչափը սխալ է'));assert(typeof type.id==='string'&&/^[a-z][\w-]{1,39}$/.test(type.id)&&!typeIds.has(type.id),tr('Սարքի տեսակի ID-ն սխալ է'));assert(typeof type.name==='string'&&type.name.trim().length>0&&type.name.length<=80,tr('Սարքի տեսակի անվանումը սխալ է'));typeIds.add(type.id);}
+      for(const type of s.deviceTypes){
+        assert(type&&typeof type==='object',tr('Սարքի տեսակի ձևաչափը սխալ է'));
+        assert(typeof type.id==='string'&&/^[a-z][\w-]{1,39}$/.test(type.id)&&!typeIds.has(type.id),tr('Սարքի տեսակի ID-ն սխալ է'));
+        assert(typeof type.name==='string'&&type.name.trim().length>0&&type.name.length<=80,tr('Սարքի տեսակի անվանումը սխալ է'));
+        if(type.models!==undefined){
+          assert(Array.isArray(type.models)&&type.models.length<=50,tr('Մոդելների ցանկը սխալ է'));
+          for(const m of type.models){
+            assert(m&&typeof m==='object',tr('Մոդելի ձևաչափը սխալ է'));
+            assert(typeof m.name==='string'&&m.name.trim().length>0&&m.name.length<=80,tr('Մոդելի անվանումը սխալ է'));
+            if(m.ports!==undefined)assert(Number.isInteger(m.ports)&&m.ports>=1&&m.ports<=96,tr('Պորտերի քանակը սխալ է'));
+            if(m.height!==undefined)assert(Number.isInteger(m.height)&&m.height>=1&&m.height<=60,tr('Բարձրությունը սխալ է'));
+            if(m.sfp!==undefined)assert(Number.isInteger(m.sfp)&&m.sfp>=0&&m.sfp<=16,tr('SFP քանակը սխալ է'));
+          }
+        }
+        typeIds.add(type.id);
+      }
+    }
+    if(s.deviceModels!==undefined){
+      assert(Array.isArray(s.deviceModels)&&s.deviceModels.length<=200,tr('Մոդելների ցանկը սխալ է'));
+      for(const m of s.deviceModels){
+        assert(m&&typeof m==='object',tr('Մոդելի ձևաչափը սխալ է'));
+        assert(typeof m.name==='string'&&m.name.trim().length>0&&m.name.length<=80,tr('Մոդելի անվանումը սխալ է'));
+        assert(typeof m.type==='string'&&deviceTypes(s).some(([key])=>key===m.type),tr('Սարքի տեսակը սխալ է'));
+      }
     }
     for(const field of ['serviceLabels','statusLabels','statusColors'])if(s[field]!==undefined){
       assert(s[field]&&typeof s[field]==='object'&&!Array.isArray(s[field]),tr('Տվյալների ձևաչափը սխալ է'));
@@ -231,5 +282,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,modelDefaults,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

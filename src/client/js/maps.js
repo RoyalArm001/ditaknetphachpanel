@@ -104,16 +104,15 @@ globalThis.RackMaps=(()=>{
       topbarTools.prepend(topActions);
       document.addEventListener('click',e=>{if(!root.contains(topActions)&&topActions.contains(e.target))click(e).catch(err=>toast(err.message));},{signal:abort.signal});
       document.addEventListener('pointerdown',e=>{const more=topActions.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
-      document.addEventListener('toggle',e=>{if(e.target.matches('.map-more'))scheduleLabels();},{capture:true,signal:abort.signal});
     }
     const placeHeaderControls=()=>{const breadcrumb=document.querySelector('.topbar #breadcrumb'),mapBar=root.querySelector('.map-topbar');if(!breadcrumb)return;if(document.fullscreenElement===root){if(mapFilters)mapEditor?.append(mapFilters);if(headerControls)projectHeader?.append(headerControls);if(topActions&&!mapBar?.contains(topActions))mapBar?.append(topActions);}else{if(mapFilters)document.querySelector('.topbar')?.insertBefore(mapFilters,topbarTools);if(headerControls)breadcrumb.after(headerControls);if(topActions&&topbarTools&&!topbarTools.contains(topActions))topbarTools.prepend(topActions);}};
     headerControls?.classList.add('map-header-controls');placeHeaderControls();
-    document.addEventListener('fullscreenchange',()=>{placeHeaderControls();scheduleLabels();},{signal:abort.signal});
+    document.addEventListener('fullscreenchange',()=>{placeHeaderControls();},{signal:abort.signal});
     mapFilters?.addEventListener('click',e=>{if(!root.contains(mapFilters))click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     headerControls?.addEventListener('click',e=>{if(!root.contains(headerControls))click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     function showDevices(open){view.devicesOpen=open;const side=root.querySelector('.map-sidebar');if(!side)return;root.querySelector('.map-side-panels')?.classList.toggle('devices-open',open);side.classList.toggle('is-open',open);const picker=root.querySelector('#map-device-picker');if(picker)picker.hidden=!open;const toggle=side.querySelector('[data-map-action="devices-toggle"]');if(toggle){toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-controls','map-device-picker');toggle.innerHTML=svg(open?'close':'plus');toggle.title=esc(tr(open?'Փակել':'Միացված սարքեր'));toggle.setAttribute('aria-label',toggle.title);}root.querySelector('.map-add-devices')?.setAttribute('aria-expanded',String(open));drawInspector();}
     function drawInspector(){
-      scheduleLabels();
+
       const host=root.querySelector('[data-map-inspector]');if(!host)return;
       if(view.selectedMarkerIds.size>1){
         host.hidden=false;
@@ -146,37 +145,6 @@ globalThis.RackMaps=(()=>{
       modal(tr('Խմբագրել պորտը')+' · '+row.device+' / '+row.port,`<div class="form-grid">${input('endpointName',tr('Միացված սարքի անվանում'),row.endpointName,'text','maxlength="200" placeholder="WiFi B zone"')}${select('service',tr('Նշանակություն'),D.serviceEntries(state).map(([key])=>[key,D.serviceLabel(state,key,tr)]),row.service)}${input('room',tr('Սենյակ'),row.room,'text','maxlength="200"')}${input('cable',tr('Մալուխի համար'),row.cable,'text','maxlength="200"')}${select('status',tr('Վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key,tr)]),row.p.status)}${input('vlan','VLAN',row.vlan,'number','min="1" max="4094" step="1"')}</div>`,fd=>change(s=>{const current=D.ports(s).find(x=>x.p.id===row.p.id);if(!current)throw new Error(tr('Պորտը չի գտնվել'));for(const key of ['endpointName','room','cable','service','vlan'])current.p[key]=String(fd.get(key)||'').trim();if(current.p.vlan)current.p.vlan=String(Number(current.p.vlan));current.p.status=String(fd.get('status'));if(current.p.status==='fault')current.p.service='';else if(current.p.status==='free'&&(current.p.cable||current.p.switchPortId||current.p.service))current.p.status='used';}));
     }
     const visibleService=service=>view.filter==='all'||view.filter===service;
-    let labelFrame=0;
-    function scheduleLabels(){cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(arrangeLabels);}
-    function arrangeLabels(){
-      const viewport=root.querySelector('.map-viewport');if(!viewport)return;
-      let leaders=viewport.querySelector('.map-label-leaders');
-      if(!leaders){leaders=document.createElementNS('http://www.w3.org/2000/svg','svg');leaders.classList.add('map-label-leaders');leaders.setAttribute('aria-hidden','true');viewport.append(leaders);}
-      leaders.replaceChildren();if(!view.labels)return;
-      const origin=viewport.getBoundingClientRect(),items=[],obstacles=[];
-      for(const marker of root.querySelectorAll('.map-marker')){
-        const label=marker.querySelector('.map-marker-label'),rect=marker.getBoundingClientRect();
-        label.style.visibility='';label.removeAttribute('data-dir');label.style.transform='none';
-        const x=rect.left-origin.left+rect.width/2,y=rect.top-origin.top+rect.height/2;
-        if(x<0||y<0||x>origin.width||y>origin.height){label.style.visibility='hidden';continue;}
-        const size=label.getBoundingClientRect();obstacles.push({x:x-rect.width/2-2,y:y-rect.height/2-2,width:rect.width+4,height:rect.height+4});
-        items.push({id:marker.dataset.mapMarker,x,y,width:size.width,height:size.height,radius:rect.width/2+3,priority:marker.classList.contains('selected')?1:0,label,rect,marker});
-      }
-      for(const el of [...root.querySelectorAll('.map-anchor,.map-topbar,.map-filters,.map-side-panels>aside,.map-bottom-toolbar,.map-view-tools,.map-legend,.map-more-menu'),...(topActions?.querySelectorAll('.map-more-menu')||[])]){
-        if(!el.getClientRects().length||getComputedStyle(el).visibility==='hidden')continue;const r=el.getBoundingClientRect();obstacles.push({x:r.left-origin.left,y:r.top-origin.top,width:r.width,height:r.height});
-      }
-      const boxes=RackMapLabels.layout(items,{x:5,y:5,width:Math.max(0,origin.width-10),height:Math.max(0,origin.height-10)},obstacles,3);
-      const maskId='label-lines-'+crypto.randomUUID();
-      leaders.innerHTML=`<defs><mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${origin.width}" height="${origin.height}"><rect width="${origin.width}" height="${origin.height}" fill="white" stroke="none"/>${[...obstacles,...[...boxes.values()].filter(Boolean)].map(box=>`<rect x="${box.x-1}" y="${box.y-1}" width="${box.width+2}" height="${box.height+2}" fill="black" stroke="none"/>`).join('')}</mask></defs>`;
-      for(const item of items){
-        const box=boxes.get(item.id);if(!box){item.label.style.visibility='hidden';continue;}
-        const scale=item.rect.width/item.marker.offsetWidth;
-        item.label.style.left=((box.x-(item.rect.left-origin.left))/scale-item.marker.clientLeft)+'px';
-        item.label.style.top=((box.y-(item.rect.top-origin.top))/scale-item.marker.clientTop)+'px';
-        const end=RackMapLabels.connector(item,box),length=Math.hypot(end.x-item.x,end.y-item.y);
-        if(length>item.radius+2){const line=document.createElementNS(leaders.namespaceURI,'line'),ratio=item.radius/length;for(const [key,value] of Object.entries({x1:item.x+(end.x-item.x)*ratio,y1:item.y+(end.y-item.y)*ratio,x2:end.x,y2:end.y}))line.setAttribute(key,value);line.setAttribute('mask',`url(#${maskId})`);leaders.append(line);}
-      }
-    }
     function draw(){
       if(!plan)return;const placed=new Map(mapData.markers.map(m=>[m.portId,m]));
       const search=view.query.trim().toLocaleLowerCase();
@@ -219,12 +187,17 @@ globalThis.RackMaps=(()=>{
           panelOptions.push([dev.d.id,`${dev.f.name} / ${dev.r.name} / ${dev.d.name} (${freeCount} ${tr('ազատ')})`]);
         }
       }
-      panelOptions.push(['new',tr('＋ Ստեղծել նոր փաչ պանել ռաքում')]);
+      panelOptions.push(['new',tr('＋ Ստեղծել նոր սարք ռաքում')]);
       modal(tr('Ստեղծել նոր սարք'),`<div class="form-grid">
         ${select('deviceService',tr('Սարքի տեսակ'),D.serviceEntries(curState).map(([k])=>[k,D.serviceLabel(curState,k,tr)]),defaultType)}
         ${input('endpointName',tr('Սարքի անվանում'),defaultName,'text','required maxlength="200" placeholder="WiFi AP-01"')}
         ${input('deviceModel',tr('Սարքի մոդել'),preset.model||'','text','maxlength="200" list="knownMapModels" placeholder="UniFi / MikroTik / Hikvision"')}
         ${select('targetPanelId',tr('Միացման սարք / պանել'),panelOptions,panelOptions[0]?.[0]||'new')}
+        ${select('hardwareType',tr('Ռաքի սարքի տեսակ'),D.deviceTypes(curState),'panel')}
+        ${input('hardwarePorts',tr('Հիմնական պորտերի քանակ'),24,'number','required min="1" max="96" step="1"')}
+        ${input('hardwareHeight',tr('Բարձրություն U'),1,'number','required min="1" max="60" step="1"')}
+        ${input('hardwareSfp',tr('Օպտիկական SFP պորտեր'),0,'number','required min="0" max="16" step="1"')}
+        ${select('hardwarePoe',tr('Սվիչի մոդելի տեսակ'),[['none',tr('Առանց PoE')],['poe','PoE'],['poe-plus','PoE+']],'none')}
         ${select('targetRackId',tr('Ռաք (եթե ստեղծվում է նոր պանել)'),targetRacks.map(({r,f})=>[r.id,`${f.name} / ${r.name}`]),targetRacks[0]?.r.id||'')}
         ${input('room',tr('Սենյակ'),preset.room||'','text','maxlength="200"')}
         ${input('cable',tr('Մալուխի համար'),preset.cable||'','text','maxlength="200"')}
@@ -243,12 +216,18 @@ globalThis.RackMaps=(()=>{
         change(s=>{
           let targetDev=null;
           if(targetPanelId!=='new')targetDev=D.devices(s).find(x=>x.d.id===targetPanelId)?.d;
+          if(targetPanelId!=='new'&&!targetDev)throw new Error(tr('Սարքը չի գտնվել'));
           if(!targetDev){
             const rack=s.floors.flatMap(f=>f.racks).find(r=>r.id===targetRackId)||s.floors[0]?.racks[0];
             if(!rack)throw new Error(tr('Ռաքը չի գտնվել'));
-            const panelName='PP-'+String(rack.devices.filter(d=>d.type==='panel').length+1).padStart(2,'0');
-            const nextPos=Array.from({length:rack.u},(_,i)=>rack.u-i).find(u=>!rack.devices.some(d=>u>=d.pos&&u<d.pos+d.height))||1;
-            targetDev={id:crypto.randomUUID(),name:panelName,type:'panel',model:model||'Patch Panel 24',pos:nextPos,height:1,color:'#397c78',portList:Array.from({length:24},(_,i)=>({...D.port(i+1,crypto.randomUUID())}))};
+            const type=String(fd.get('hardwareType')),ports=Number(fd.get('hardwarePorts')),height=Number(fd.get('hardwareHeight')),sfpCount=D.isNetworkDevice({type})?Number(fd.get('hardwareSfp')):0;
+            if(!Number.isInteger(ports)||ports<1||!Number.isInteger(sfpCount)||sfpCount<0||sfpCount>16||ports+sfpCount>96)throw new Error(tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
+            if(!Number.isInteger(height)||height<1||height>rack.u)throw new Error(tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
+            const prefix=type==='panel'?'PP':type==='switch'?'SW':type==='router'?'RT':'DEV',names=new Set(D.devices(s).map(x=>x.d.name.toLowerCase()));let seq=1;while(names.has((prefix+'-'+String(seq).padStart(2,'0')).toLowerCase()))seq++;
+            const panelName=prefix+'-'+String(seq).padStart(2,'0');
+            const nextPos=Array.from({length:rack.u},(_,i)=>rack.u-i).find(u=>u+height-1<=rack.u&&!rack.devices.some(d=>u<d.pos+d.height&&u+height>d.pos));
+            if(!nextPos)throw new Error(tr('Ռաքում բավարար ազատ տեղ չկա'));
+            targetDev={id:crypto.randomUUID(),name:panelName,type,model,pos:nextPos,height,sfpCount,modelType:type==='switch'?String(fd.get('hardwarePoe')):'',color:'#397c78',portList:Array.from({length:ports+sfpCount},(_,i)=>D.port(i+1,crypto.randomUUID()))};
             rack.devices.push(targetDev);
           }
           let port=targetDev.portList.find(p=>p.status==='free');
@@ -263,7 +242,6 @@ globalThis.RackMaps=(()=>{
           port.room=room;
           port.cable=cable;
           port.vlan=vlan;
-          if(model&&!targetDev.model)targetDev.model=model;
           createdPortId=port.id;
         });
         if(createdPortId){
@@ -276,6 +254,15 @@ globalThis.RackMaps=(()=>{
           viewport?.focus({preventScroll:true});
         }
       });
+      const form=document.querySelector('#modalForm'),field=name=>form.elements[name];
+      let appliedModel='';
+      const syncHardware=()=>{
+        const creating=field('targetPanelId').value==='new',type=field('hardwareType').value;
+        for(const name of ['hardwareType','deviceModel','hardwarePorts','hardwareHeight','hardwareSfp','hardwarePoe','targetRackId']){const visible=creating&&(name!=='hardwareSfp'||D.isNetworkDevice({type}))&&(name!=='hardwarePoe'||type==='switch');field(name).closest('.field').hidden=!visible;field(name).disabled=!visible;}
+        form.querySelector('#knownMapModels').innerHTML=[...new Set([...D.deviceModels(type,curState).map(m=>m.name),...D.devices(curState).filter(x=>x.d.type===type).map(x=>x.d.model).filter(Boolean)])].map(name=>`<option value="${esc(name)}"></option>`).join('');
+      };
+      const fillModel=()=>{const key=field('hardwareType').value+'|'+field('deviceModel').value.trim().toLowerCase();if(key===appliedModel)return;appliedModel=key;const model=D.modelDefaults(field('hardwareType').value,field('deviceModel').value,curState);if(!model)return;field('hardwarePorts').value=model.ports;field('hardwareHeight').value=model.height;field('hardwareSfp').value=model.sfpCount;field('hardwarePoe').value=model.modelType||'none';};
+      field('targetPanelId').onchange=syncHardware;field('hardwareType').onchange=()=>{syncHardware();fillModel();};field('deviceModel').oninput=fillModel;field('deviceModel').onchange=fillModel;syncHardware();
     }
     function cloneDeviceFromSelected(){
       const row=byId.get(view.portId);if(!row)return;
@@ -305,6 +292,7 @@ globalThis.RackMaps=(()=>{
     function exportCurrent(kind,sharing=false){
       if(sharing&&!h.canShare)throw new Error(tr('Հղումով կիսվելու համար բացեք նախագիծը կայքի cloud-ից'));
       const current=getState(),defaultFloor=plan?.floorId||'',language=globalThis.RackI18n?.language||'hy';
+      let previewBlob=null,previewName='MyPatch-map.pdf';
       // Build preview summary HTML of what will be included
       function buildPreview(floorId,deviceType,deviceId,planId,outputKind,rackId=''){
         const snap=getState();
@@ -326,7 +314,11 @@ globalThis.RackMaps=(()=>{
         html+='</div>';
         return html;
       }
-      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfRack',tr('Ռաք'),[],'')}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}${!sharing?`<div class="field full"><label for="pdfImageOpacity">${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</label><input id="pdfImageOpacity" name="pdfImageOpacity" type="range" min="0" max="90" step="10" value="${view.imageOpacity}" style="width:100%;accent-color:#137f79"></div>`:''}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p><div data-pdf-preview>${buildPreview(defaultFloor,'all','','',kind)}</div>`,async fd=>{
+      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfRack',tr('Ռաք'),[],'')}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}${!sharing?`<div class="field full"><label for="pdfImageOpacity">${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</label><input id="pdfImageOpacity" name="pdfImageOpacity" type="range" min="0" max="90" step="10" value="${view.imageOpacity}" style="width:100%;accent-color:#137f79"></div>`:''}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p><div data-pdf-preview>${buildPreview(defaultFloor,'all','','',kind)}</div>${!sharing?`<section class="map-pdf-proof" data-pdf-proof aria-busy="true"><p role="status" data-pdf-proof-status>${esc(tr('Բեռնվում է…'))}</p><div class="map-pdf-proof-tools"><button type="button" class="button small" data-pdf-prev disabled>←</button><output data-pdf-page>—</output><button type="button" class="button small" data-pdf-next disabled>→</button><button type="button" class="button small" data-pdf-retry>${esc(tr('Թարմացնել նախադիտումը'))}</button></div><div class="map-pdf-proof-page"><canvas data-pdf-canvas hidden></canvas></div></section>`:''}`,async fd=>{
+        if(!sharing){
+          if(!previewBlob)throw new Error(tr('Նախ սպասեք PDF նախադիտմանը'));
+          download(previewBlob,previewName);toast(tr('Հաշվետվությունը պատրաստ է'));return;
+        }
         const outputKind=String(fd.get('pdfKind')),floorId=String(fd.get('pdfFloor')),rackId=String(fd.get('pdfRack')),deviceType=String(fd.get('pdfType')),deviceId=String(fd.get('pdfDevice')),planId=String(fd.get('pdfPlan')),snapshot=structuredClone(getState());
         const selection=RackHandover.select(snapshot,{floorId,rackId,deviceType,deviceId,planId});
         if(outputKind==='maps'?!selection.plans.length:outputKind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
@@ -335,10 +327,6 @@ globalThis.RackMaps=(()=>{
           await h.api('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:outputKind,floorId,rackId,deviceType,deviceId,planId,language:String(fd.get('pdfLanguage')),days:Number(fd.get('shareDays')),revision:h.getRevision()})});
           setTimeout(()=>manageShares().catch(err=>toast(err.message)),0);return;
         }
-        const imgOpacity=Math.min(90,Math.max(0,Number(fd.get('pdfImageOpacity'))||0));
-        const outputTr=RackI18n.forLanguage(String(fd.get('pdfLanguage')));
-        const blob=await exportPdf(snapshot,outputKind,planId,outputTr,{floorId,rackId,deviceType,deviceId,imageOpacity:imgOpacity});
-        download(blob,outputKind==='maps'?'MyPatch-map.pdf':'MyPatch-devices.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));
       });
       const form=document.querySelector('#modalForm');
       const update=(initial=false)=>{
@@ -364,6 +352,55 @@ globalThis.RackMaps=(()=>{
       }
       update(true);refreshPreview();form.elements.pdfRack.onchange=()=>{form.elements.pdfDevice.value='';update();refreshPreview();};form.elements.pdfFloor.onchange=()=>{form.elements.pdfRack.value='';form.elements.pdfDevice.value='';form.elements.pdfPlan.value='';update();refreshPreview();};form.elements.pdfType.onchange=()=>{form.elements.pdfDevice.value='';update();refreshPreview();};form.elements.pdfKind.onchange=()=>{update();refreshPreview();};form.elements.pdfDevice?.addEventListener('change',refreshPreview);form.elements.pdfPlan?.addEventListener('change',refreshPreview);
       form.querySelector('button[type="submit"]').textContent=tr(sharing?'Ստեղծել հղումը':'Ներբեռնել PDF');
+      if(!sharing){
+        const dialog=form.closest('dialog'),submit=form.querySelector('[type="submit"]'),proof=form.querySelector('[data-pdf-proof]'),status=proof.querySelector('[data-pdf-proof-status]'),canvas=proof.querySelector('canvas'),previous=proof.querySelector('[data-pdf-prev]'),next=proof.querySelector('[data-pdf-next]'),pageLabel=proof.querySelector('[data-pdf-page]');
+        let generation=0,pageGeneration=0,timer,task,doc,renderTask,pageNumber=1,closed=false;
+        dialog.classList.add('map-pdf-dialog');
+        async function clearDocument(){
+          pageGeneration++;renderTask?.cancel();renderTask=null;doc=null;
+          const old=task;task=null;if(old)await old.destroy();
+        }
+        async function renderPage(){
+          if(!doc||closed)return;const ticket=++pageGeneration,current=doc;
+          renderTask?.cancel();const page=await current.getPage(pageNumber);if(ticket!==pageGeneration||closed)return;
+          const base=page.getViewport({scale:1}),width=Math.max(280,proof.clientWidth-24),scale=Math.min(2,width/base.width),viewport=page.getViewport({scale:scale*Math.min(devicePixelRatio||1,2)});
+          // Each render owns its canvas, so cancelled jobs cannot overwrite a newer page.
+          const surface=document.createElement('canvas');surface.width=Math.ceil(viewport.width);surface.height=Math.ceil(viewport.height);
+          const job=page.render({canvasContext:surface.getContext('2d'),viewport,background:'#ffffff'});renderTask=job;
+          try{await job.promise;}catch(error){if(error.name==='RenderingCancelledException')return;throw error;}
+          if(ticket!==pageGeneration||closed)return;
+          canvas.width=surface.width;canvas.height=surface.height;canvas.getContext('2d').drawImage(surface,0,0);canvas.hidden=false;
+          pageLabel.textContent=pageNumber+' / '+current.numPages;previous.disabled=pageNumber<=1;next.disabled=pageNumber>=current.numPages;
+        }
+        async function generate(){
+          const ticket=++generation;previewBlob=null;submit.disabled=true;canvas.hidden=true;previous.disabled=true;next.disabled=true;proof.setAttribute('aria-busy','true');status.textContent=tr('Բեռնվում է…');
+          try{
+            await clearDocument();if(ticket!==generation||closed)return;
+            const fd=new FormData(form),snapshot=structuredClone(getState()),outputKind=String(fd.get('pdfKind')),planId=String(fd.get('pdfPlan'));
+            const options={floorId:String(fd.get('pdfFloor')),rackId:String(fd.get('pdfRack')),deviceType:String(fd.get('pdfType')),deviceId:String(fd.get('pdfDevice')),imageOpacity:Math.min(90,Math.max(0,Number(fd.get('pdfImageOpacity'))||0))};
+            const selection=RackHandover.select(snapshot,{...options,planId});
+            if(outputKind==='maps'?!selection.plans.length:outputKind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
+            const blob=await exportPdf(snapshot,outputKind,planId,RackI18n.forLanguage(String(fd.get('pdfLanguage'))),options);
+            if(ticket!==generation||closed)return;
+            const lib=await import('/pdfjs/pdf.mjs');lib.GlobalWorkerOptions.workerSrc='/pdfjs/pdf.worker.mjs';
+            const bytes=new Uint8Array(await blob.arrayBuffer());if(ticket!==generation||closed)return;
+            const loading=lib.getDocument({data:bytes,isEvalSupported:false,useWasm:false,cMapUrl:'/pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:'/pdfjs/standard_fonts/'});task=loading;
+            const loaded=await loading.promise;if(ticket!==generation||closed){await loading.destroy();return;}doc=loaded;pageNumber=1;
+            await renderPage();if(ticket!==generation||closed)return;
+            previewBlob=blob;previewName=outputKind==='maps'?'MyPatch-map.pdf':'MyPatch-devices.pdf';submit.disabled=false;status.textContent=tr('Սա ներբեռնվող PDF-ի վերջնական տեսքն է');
+          }catch(error){if(ticket===generation&&!closed)status.textContent=error.message||tr('Չհաջողվեց կատարել գործողությունը');}
+          finally{if(ticket===generation&&!closed)proof.setAttribute('aria-busy','false');}
+        }
+        function queuePreview(){generation++;pageGeneration++;previewBlob=null;submit.disabled=true;canvas.hidden=true;previous.disabled=true;next.disabled=true;status.textContent=tr('Բեռնվում է…');clearTimeout(timer);timer=setTimeout(generate,300);}
+        previous.setAttribute('aria-label',tr('Նախորդ էջ'));next.setAttribute('aria-label',tr('Հաջորդ էջ'));
+        previous.onclick=()=>{if(doc&&pageNumber>1){pageNumber--;renderPage().catch(e=>status.textContent=e.message);}};
+        next.onclick=()=>{if(doc&&pageNumber<doc.numPages){pageNumber++;renderPage().catch(e=>status.textContent=e.message);}};
+        proof.querySelector('[data-pdf-retry]').onclick=queuePreview;
+        form.addEventListener('change',queuePreview);form.elements.pdfImageOpacity.addEventListener('input',queuePreview);
+        const cleanup=()=>{if(dialog.open&&form.isConnected)return;closed=true;generation++;clearTimeout(timer);previewBlob=null;void clearDocument().catch(()=>{});dialog.removeEventListener('close',cleanup);dialog.classList.toggle('map-pdf-dialog',dialog.open&&!!dialog.querySelector('[data-pdf-proof]'));};
+        dialog.addEventListener('close',cleanup);
+        queuePreview();
+      }
     }
     function place(x,y){if(!view.portId||h.readOnly)return;if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});});}
     function moveMarker(id,x,y,anchor=false){if(h.readOnly||view.locked)return;change(s=>{const marker=findPlan(s)?.markers.find(m=>m.id===id);if(!marker)return;const layout=D.mapMarkerLayout(marker);Object.assign(marker,layout,anchor?{x,y}:{iconX:x,iconY:y});});}
@@ -371,7 +408,7 @@ globalThis.RackMaps=(()=>{
     const viewport=root.querySelector('.map-viewport'),canvas=root.querySelector('.map-canvas');
     let camera=view.camera?.planId===plan?.id?view.camera:null,pan=null,pinch=null,space=false;
     const pointers=new Map();
-    function paintCamera(){if(!camera||!canvas)return;canvas.style.width=plan.width*camera.scale+'px';canvas.style.height=plan.height*camera.scale+'px';canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));view.camera=camera;scheduleLabels();root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
+    function paintCamera(){if(!camera||!canvas)return;canvas.style.width=plan.width*camera.scale+'px';canvas.style.height=plan.height*camera.scale+'px';canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
     function fit(){if(!viewport)return;const w=viewport.clientWidth,h=viewport.clientHeight,right=view.devicesOpen&&w>800?340:0,pad=w<600?28:130;const scale=Math.max(.27,Math.min((w-right-pad)/plan.width,(h-200)/plan.height,2));camera={planId:plan.id,scale,x:(w-right-plan.width*scale)/2,y:100+(h-200-plan.height*scale)/2,w,h};paintCamera();}
     function zoom(factor,point){if(!camera)return;point||={x:viewport.clientWidth/2,y:viewport.clientHeight/2};const next=Math.max(.27,Math.min(6,camera.scale*factor)),ratio=next/camera.scale;camera.x=point.x-(point.x-camera.x)*ratio;camera.y=point.y-(point.y-camera.y)*ratio;camera.scale=next;paintCamera();}
     function setTool(tool){view.tool=tool;view.placing=false;root.querySelectorAll('[data-map-action="select"],[data-map-action="hand"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapAction===tool)));draw();}
@@ -456,8 +493,7 @@ globalThis.RackMaps=(()=>{
     }
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     root.addEventListener('pointerdown',e=>{const more=topActions?.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
-    root.addEventListener('toggle',e=>{if(e.target.matches('.map-more,.map-legend'))scheduleLabels();},{capture:true,signal:abort.signal});
-    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Number(e.target.value);root.querySelector('[data-marker-size-value]').textContent='+'+view.markerSize+'%';root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));scheduleLabels();return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
+    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Number(e.target.value);root.querySelector('[data-marker-size-value]').textContent='+'+view.markerSize+'%';root.querySelector('.map-markers')?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
     const changePlan=e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.placing=false;view.camera=null;h.redraw();}};
     root.addEventListener('change',changePlan,{signal:abort.signal});
     headerControls?.addEventListener('change',e=>{if(!root.contains(headerControls))changePlan(e);},{signal:abort.signal});
@@ -680,9 +716,9 @@ globalThis.RackMaps=(()=>{
     if(plans.length)showDevices(!!view.devicesOpen);
     draw();
     const resize=viewport?new ResizeObserver(()=>{if(!camera)fit();else{camera.x+=(viewport.clientWidth-camera.w)/2;camera.y+=(viewport.clientHeight-camera.h)/2;camera.w=viewport.clientWidth;camera.h=viewport.clientHeight;paintCamera();}}):null;
-    document.fonts?.ready.then(()=>{if(!abort.signal.aborted)scheduleLabels();});
+
     if(viewport){if(!camera)fit();else paintCamera();resize.observe(viewport);}
-    return {busy:()=>pointers.size>0,destroy(){cancelAnimationFrame(labelFrame);resize?.disconnect();abort.abort();headerControls?.remove();topActions?.remove();mapFilters?.remove();document.body.classList.remove('map-view');}};
+    return {busy:()=>pointers.size>0,destroy(){resize?.disconnect();abort.abort();headerControls?.remove();topActions?.remove();mapFilters?.remove();document.body.classList.remove('map-view');}};
   }
   return {mount,exportPdf};
 })();

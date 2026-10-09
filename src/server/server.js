@@ -167,6 +167,13 @@ function createApp(options={}) {
         const title=[current.state.company,body.planId?selection.plans.find(p=>p.id===body.planId)?.name:'',body.rackId?current.state.floors.flatMap(f=>f.racks).find(r=>r.id===body.rackId)?.name:'',body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr(Domain.deviceTypes(current.state).find(([id])=>id===body.deviceType)?.[1]||body.deviceType)].filter(Boolean).join(' · ');
         return json(res,201,await viewLinks.create(scope,companyId,title,pdf,body.days));
       }
+      if(req.method==='GET'&&url.pathname==='/api/backup/status'){
+        if(cloud&&requestStore?.pool){
+          try{const cloudBackups=require('./cloud-backups');return json(res,200,await cloudBackups.backupStatus(requestStore.pool));}
+          catch{return json(res,200,{enabled:false,healthy:false,last_backup:null,retentionHours:72,intervalHours:1});}
+        }
+        return json(res,200,{enabled:true,healthy:true,last_backup:new Date().toISOString(),retentionHours:72,intervalHours:1,local:true});
+      }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
         if(cloud){const data=Buffer.from(JSON.stringify(await requestStore.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
         const file=await requestStore.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);
