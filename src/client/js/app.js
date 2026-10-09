@@ -298,11 +298,11 @@ function renderNetworks(){
   const list=D.networks(state);
   const typeLabel=type=>D.hasService(state,type)?D.serviceLabel(state,type):type;
   const ipText=n=>{const ips=Array.isArray(n.ip)?n.ip:(n.ip?[n.ip]:[]);return ips.length?' · '+ips.map(esc).join(', '):'';};
-  $('#content').innerHTML=header(tr('Ցանցերի տվյալներ'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),`${button(tr('Ընտրովի PDF'),'selective-pdf','','outline')}${button(tr('＋ Ավելացնել ցանց'),'network-new','','primary')}`)+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(typeLabel(n.name))}</h2><p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։</p></section>'));
+  $('#content').innerHTML=header(tr('Ցանցերի տվյալներ'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),`${button(tr('Մոդելների կատալոգ'),'model-catalog')}${button(tr('Ընտրովի PDF'),'selective-pdf','','outline')}${button(tr('＋ Ավելացնել ցանց'),'network-new','','primary')}`)+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(typeLabel(n.name))}</h2><p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։</p></section>'));
   $('#content .page-head h1').textContent=tr('Ցանցեր ու Սարքեր');
   $('#content .page-head p').textContent=tr('Կառավարեք ցանցերը, սարքերի տեսակները և մոդելները։ Սարքն ավելացրեք անմիջապես ընտրված ռաքում։');
   const devices=D.devices(state),available=racks().length>0;
-  $('#content .page-head').insertAdjacentHTML('afterend',`<section class="panel network-devices"><div class="section-head"><div><h2>${tr('Սարքերի տեսակներ')}</h2><p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p></div>${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div>${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}<div class="device-type-grid">${D.deviceTypes(state).map(([type,label])=>`<div class="device-type-card"><strong>${esc(label)}</strong><small>${devices.filter(x=>x.d.type===type).length} ${tr('Սարք')}</small><button type="button" class="button small" data-action="catalog-device-new" data-id="${esc(type)}" ${available?'':'disabled'}>${tr('Ավելացնել ռաքում')}</button></div>`).join('')}</div></section><section class="panel network-device-list"><div class="section-head"><h2>${tr('Սարքերի ցանկ')}</h2></div>${devices.length?`<div class="table-wrap"><table class="network-device-table"><thead><tr><th>${tr('Սարք')}</th><th>${tr('Սարքի տեսակ')}</th><th>${tr('Սարքի մոդել')}</th><th>${tr('Ռաք')}</th><th>${tr('Պորտեր')}</th><th></th></tr></thead><tbody>${devices.map(({d,r,f})=>`<tr><td><strong>${esc(d.name)}</strong></td><td>${esc(D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||d.type)}</td><td>${esc(d.model||'—')}</td><td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td><td>${d.portList.length}</td><td><div class="actions">${button(tr('Խմբագրել'),'device',d.id,'small')}${button(tr('Ավելացնել նույն մոդելը'),'catalog-device-copy',d.id,'small')}<a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a><a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումների քարտեզ')}</a></div></td></tr>`).join('')}</tbody></table></div>`:`<p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p>`}</section>`);
+  $('#content .page-head').insertAdjacentHTML('afterend',`<section class="panel network-devices"><div class="section-head"><div><h2>${tr('Սարքերի տեսակներ')}</h2><p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p></div><div class="actions">${button(tr('Մոդելների կատալոգ'),'model-catalog')}${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div></div>${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}<div class="device-type-grid">${D.deviceTypes(state).map(([type,label])=>`<div class="device-type-card"><strong>${esc(label)}</strong><small>${devices.filter(x=>x.d.type===type).length} ${tr('Սարք')}</small><button type="button" class="button small" data-action="catalog-device-new" data-id="${esc(type)}" ${available?'':'disabled'}>${tr('Ավելացնել ռաքում')}</button></div>`).join('')}</div></section><section class="panel network-device-list"><div class="section-head"><h2>${tr('Սարքերի ցանկ')}</h2></div>${devices.length?`<div class="table-wrap"><table class="network-device-table"><thead><tr><th>${tr('Սարք')}</th><th>${tr('Սարքի տեսակ')}</th><th>${tr('Սարքի մոդել')}</th><th>${tr('Ռաք')}</th><th>${tr('Պորտեր')}</th><th></th></tr></thead><tbody>${devices.map(({d,r,f})=>`<tr><td><strong>${esc(d.name)}</strong></td><td>${esc(D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||d.type)}</td><td>${esc(d.model||'—')}</td><td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td><td>${d.portList.length}</td><td><div class="actions">${button(tr('Խմբագրել'),'device',d.id,'small')}${button(tr('Ավելացնել նույն մոդելը'),'catalog-device-copy',d.id,'small')}<a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a><a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումների քարտեզ')}</a></div></td></tr>`).join('')}</tbody></table></div>`:`<p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p>`}</section>`);
   $('#content .network-device-list')?.remove();
 }
 function networkModal(id=''){
@@ -357,6 +357,111 @@ function deviceModelModal(typeId){
     }
     setTimeout(deviceTypesModal,0);
   }));
+}
+function modelCatalogModal(){
+  const all=D.allCatalogModels(state);
+  const body=`
+    <div class="filters" style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <input id="catalogSearch" type="search" placeholder="${esc(tr('Որոնել մոդել…'))}" aria-label="${esc(tr('Որոնել մոդել'))}" style="flex:1;min-width:180px">
+      <select id="catalogTypeFilter" aria-label="${esc(tr('Սարքի տեսակ'))}" style="min-width:140px">
+        <option value="">${esc(tr('Բոլոր տեսակները'))}</option>
+        ${D.deviceTypes(state).map(([id,name])=>`<option value="${esc(id)}">${esc(name)}</option>`).join('')}
+      </select>
+    </div>
+    <div id="catalogList" class="catalog-list" style="max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+  `;
+  modal(tr('Սարքերի մոդելների կատալոգ'),body,null,button(tr('＋ Ավելացնել նոր տեսակ կամ մոդել'),'device-types'));
+  const dlg=$('#dialog');if(!dlg)return;
+  const listEl=dlg.querySelector('#catalogList'), searchEl=dlg.querySelector('#catalogSearch'), typeEl=dlg.querySelector('#catalogTypeFilter');
+  const available=racks().length>0;
+  const draw=()=>{
+    const q=searchEl.value.trim().toLowerCase(), filterType=typeEl.value;
+    const filtered=all.filter(m=>(!filterType||m.typeId===filterType)&&(!q||m.name.toLowerCase().includes(q)||m.typeLabel.toLowerCase().includes(q)));
+    if(!filtered.length){
+      listEl.innerHTML=`<p class="hint">${tr('Մոդելներ չեն գտնվել')}</p>`;
+      return;
+    }
+    listEl.innerHTML=filtered.map(m=>`
+      <div class="device-item" style="justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--border,#dce7e4);border-radius:8px">
+        <div>
+          <strong style="display:block;font-size:14px">${esc(m.name)}</strong>
+          <small class="muted">${esc(m.typeLabel)} · ${m.height}U${m.ports?` · ${m.ports} ${tr('պորտ')}`:''}${m.sfp?` · ${m.sfp} SFP`:''}${m.poe?` · PoE`:''}</small>
+        </div>
+        <div class="actions">
+          <button type="button" class="button small primary" data-action="catalog-device-new" data-id="${esc(m.typeId)}" ${available?'':'disabled'} onclick="setTimeout(()=>{$('#model')&&(($('#model').value='${esc(m.name)}')&&$('#model').dispatchEvent(new Event('input')))},50)">${tr('Ավելացնել ռաքում')}</button>
+        </div>
+      </div>
+    `).join('');
+  };
+  searchEl.oninput=draw;
+  typeEl.onchange=draw;
+  draw();
+}
+async function backupSnapshotsModal(){
+  modal(tr('Ավտոմատ Backup snapshot-ներ'),`<div id="backupSnapshotsList"><p class="hint">${tr('Բեռնվում է…')}</p></div>`);
+  try{
+    const rows=await api('/api/backup/list');
+    const host=$('#backupSnapshotsList');if(!host)return;
+    if(!Array.isArray(rows)||!rows.length){
+      host.innerHTML=`<p class="hint">${tr('Պահպանված snapshot-ներ դեռ չկան։')}</p>`;
+      return;
+    }
+    const fmtSize=b=>b>1048576?`${(b/1048576).toFixed(1)} MB`:b>1024?`${(b/1024).toFixed(1)} KB`:`${b} B`;
+    const fmtDate=d=>new Date(d).toLocaleString(globalThis.RackI18n?.locale||'hy-AM');
+    host.innerHTML=`<div class="history-list" style="max-height:55vh;overflow-y:auto">${rows.map(x=>`
+      <div class="history-row" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border,#dce7e4)">
+        <span>
+          <strong>${esc(fmtDate(x.created_at))}</strong><br>
+          <small class="muted">${esc(x.space==='shared'?tr('Ընդհանուր բազա'):x.space==='account'?tr('Անձնական հաշիվ'):tr('Տեղական բազա'))} · ${fmtSize(x.size_bytes||0)}${x.revision!==null&&x.revision!==undefined?` · Rev ${x.revision}`:''}</small>
+        </span>
+        <div class="actions">
+          ${button(tr('Նախադիտել և վերականգնել'),'backup-preview',x.id,'small primary')}
+        </div>
+      </div>
+    `).join('')}</div>`;
+  }catch(e){
+    const host=$('#backupSnapshotsList');
+    if(host)host.innerHTML=`<p class="hint">${esc(e.message||tr('Չհաջողվեց բեռնել backup-ների ցանկը'))}</p>`;
+  }
+}
+async function backupPreviewModal(backupId){
+  modal(tr('Backup snapshot-ի նախադիտում'),`<div id="backupPreviewBox"><p class="hint">${tr('Բեռնվում է…')}</p></div>`);
+  try{
+    const preview=await api(`/api/backup/preview?id=${encodeURIComponent(backupId)}`);
+    const box=$('#backupPreviewBox');if(!box)return;
+    const fmtDate=d=>new Date(d).toLocaleString(globalThis.RackI18n?.locale||'hy-AM');
+    box.innerHTML=`
+      <div class="backup-preview-card">
+        <h3>${esc(preview.company||tr('Նախագիծ'))}</h3>
+        <p class="hint">${tr('Ստեղծվել է')}՝ <strong>${esc(fmtDate(preview.created_at))}</strong> · Rev <strong>${preview.revision}</strong></p>
+        <div class="release-summary" style="margin:12px 0">
+          <div><span>${tr('Հարկեր')}</span><strong>${preview.floorsCount}</strong></div>
+          <div><span>${tr('Ռաքեր')}</span><strong>${preview.racksCount}</strong></div>
+          <div><span>${tr('Սարքեր')}</span><strong>${preview.devicesCount}</strong></div>
+        </div>
+        <div class="pin-users-notice" role="alert" style="margin-top:12px">
+          <strong>${tr('Ուշադրություն')}</strong>
+          <p>${tr('Վերականգնումը կփոխարինի ընթացիկ նախագծի տվյալները այս snapshot-ի տարբերակով։ Ընթացիկ վիճակը ավտոմատ կպահվի պատմության մեջ։')}</p>
+        </div>
+        <div class="form-actions" style="margin-top:16px">
+          ${button(tr('Վերականգնել այս snapshot-ից'),'backup-restore-confirm',backupId,'danger')}
+        </div>
+      </div>
+    `;
+  }catch(e){
+    const box=$('#backupPreviewBox');
+    if(box)box.innerHTML=`<p class="hint">${esc(e.message||tr('Չհաջողվեց բեռնել snapshot-ը'))}</p>`;
+  }
+}
+async function backupRestoreExecute(backupId){
+  confirmAction(tr('Հաստատել վերականգնումը'),tr('Վերականգնե՞լ ընտրված snapshot-ը։ Ընթացիկ վիճակը կպահպանվի պատմության մեջ։'),async()=>{
+    const res=await api('/api/backup/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({backupId})});
+    if(res.state){
+      commit(s=>{Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,res.state);});
+      toast(tr('Snapshot-ը հաջողությամբ վերականգնված է'));
+      $('#dialog').close();
+    }
+  });
 }
 function hostModal(value){
   const [networkId,hostId]=String(value||'').split('/'),network=D.networks(state).find(x=>x.id===networkId);
@@ -536,17 +641,19 @@ function renderSettings(){
   api('/api/network').then(x=>{if(networkInfo.isConnected)networkInfo.innerHTML=x.urls.map(url=>`<a class="network-address" href="${esc(url)}">${esc(url)}</a>`).join('')||(personal()?tr('<span class="hint">Թիմին միանալու համար օգտագործեք «Միացնել cloud-ը» կոճակը։</span>'):tr('<span class="hint">Ցանցային հասցե չկա։ Օգտագործեք localhost:3000։</span>'));}).catch(()=>{if(networkInfo.isConnected)networkInfo.textContent=tr('Հասցեները չհաջողվեց ստանալ');});
   api('/api/backup/status').then(res=>{
     if(!backupCloudStatus||!backupCloudStatus.isConnected)return;
+    const snapBtn=`<div class="actions" style="margin-top:10px">${button(tr('Պահուստային snapshot-ների ցանկ'),'backup-snapshots','','small')}</div>`;
     if(!res||!res.ok){
-      backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(res?.error||tr('Տեղական ռեժիմում cloud backup-ը անջատված է'))}</p>`;
+      backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(res?.error||tr('Տեղական ռեժիմում cloud backup-ը անջատված է'))}</p>${snapBtn}`;
       return;
     }
     const healthy=res.healthy, enabled=res.enabled!==false;
     const badgeClass=healthy?'healthy':'warning';
     const statusText=healthy?tr('Ակտիվ (ամենժամյա)'):enabled?tr('Սպասում է առաջին backup-ին'):tr('Անջատված է');
     const lastDate=res.last_backup?new Date(res.last_backup).toLocaleString(globalThis.RackI18n?.language==='hy'?'hy-AM':globalThis.RackI18n?.language==='ru'?'ru-RU':'en-US'):tr('Դեռ չկա');
-    backupCloudStatus.innerHTML=`<div class="backup-status-badge ${badgeClass}">● ${esc(statusText)}</div><p class="hint"><strong>${tr('Վերջին backup')}՝</strong> ${esc(lastDate)}</p><p class="hint"><strong>${tr('Պահպանման ժամկետ')}՝</strong> ${res.retentionHours||72} ${tr('ժամ (ավտոմատ հեռացում)')}</p>`;
+    const nextCheckDate=new Date(Math.ceil((Date.now()+60000)/3600000)*3600000).toLocaleTimeString(globalThis.RackI18n?.language==='hy'?'hy-AM':globalThis.RackI18n?.language==='ru'?'ru-RU':'en-US');
+    backupCloudStatus.innerHTML=`<div class="backup-status-badge ${badgeClass}">● ${esc(statusText)}</div><p class="hint"><strong>${tr('Վերջին backup')}՝</strong> ${esc(lastDate)}</p><p class="hint"><strong>${tr('Հաջորդ ստուգումը')}՝</strong> ${esc(nextCheckDate)}</p><p class="hint"><strong>${tr('Պահպանման ժամկետ')}՝</strong> ${res.retentionHours||72} ${tr('ժամ (ավտոմատ հեռացում)')}</p>${snapBtn}`;
   }).catch(()=>{
-    if(backupCloudStatus?.isConnected)backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(tr('Տեղական ռեժիմ կամ կապ չկա'))}</p>`;
+    if(backupCloudStatus?.isConnected)backupCloudStatus.innerHTML=`<div class="backup-status-badge warning">● ${esc(tr('Անջատված է'))}</div><p class="hint">${esc(tr('Տեղական ռեժիմ կամ կապ չկա'))}</p><div class="actions" style="margin-top:10px">${button(tr('Պահուստային snapshot-ների ցանկ'),'backup-snapshots','','small')}</div>`;
   });
 }
 function modal(title,body,onSubmit,extras=''){
@@ -1006,8 +1113,12 @@ const actions={
   'app-reset':resetAppDialog,
   'project-style':()=>modal(tr('SVG պատկերակներ և նախագծի անվանումներ ու գույներ'),styleFields(state,true),fd=>commit(s=>D.applyProjectStyle(s,readStyle(fd)))),
   'device-types':deviceTypesModal,
+  'model-catalog':modelCatalogModal,
   'device-model-new':id=>deviceModelModal(id),
   'selective-pdf':()=>openSelectivePdfModal('devices'),
+  'backup-snapshots':backupSnapshotsModal,
+  'backup-preview':id=>backupPreviewModal(id),
+  'backup-restore-confirm':id=>backupRestoreExecute(id),
   'catalog-device-new':type=>deviceModal('', '', undefined,{type}),
   'catalog-device-copy':id=>{const device=findDevice(id)?.d;if(device)deviceModal('', '', undefined,device);},
   'device-type-delete':id=>confirmAction(tr('Ջնջել սարքի տեսակը'),tr('Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։'),()=>commit(s=>{s.deviceTypes=(s.deviceTypes||[]).filter(x=>x.id!==id);})),

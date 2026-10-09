@@ -30,4 +30,50 @@ async function backupStatus(pool){
     return {...rows[0],retentionHours:72,intervalHours:1};
   }catch(error){if(error.code==='42P01'||error.code==='3F000')return {enabled:false,healthy:false,last_backup:null};throw error;}
 }
-module.exports={projectBackups,backupStatus};
+async function backupList(pool,space='shared',userId='',companyId=''){
+  if(!['shared','account'].includes(space)||space==='account'&&!userId)throw new Error('Backup owner required');
+  try{
+    const {rows}=await pool.query(`SELECT b.id, b.created_at,
+      count(p.company_id) AS project_count,
+      coalesce(sum(length(p.body::text)),0) AS size_bytes,
+      $1 AS space,
+      max(CASE WHEN p.company_id=$3 THEN p.revision ELSE NULL END) AS revision
+      FROM rackmap.automatic_backups b
+      JOIN rackmap.automatic_backup_projects p ON p.backup_id=b.id
+      WHERE p.space=$1 AND p.user_id=$2 AND b.created_at>=now()-interval '72 hours'
+      GROUP BY b.id, b.created_at
+      ORDER BY b.created_at DESC LIMIT 30`,[space,userId,companyId||'default']);
+    return rows.map(r=>({
+      id: r.id,
+      created_at: r.created_at,
+      project_count: Number(r.project_count),
+      size_bytes: Number(r.size_bytes),
+      space: r.space,
+      revision: r.revision!==null?Number(r.revision):null
+    }));
+  }catch(error){if(error.code==='42P01'||error.code==='3F000')return [];throw error;}
+}
+async function backupPreview(pool,space='shared',userId='',backupId='',companyId=''){
+  if(!['shared','account'].includes(space)||space==='account'&&!userId)throw new Error('Backup owner required');
+  try{
+    const {rows}=await pool.query(`SELECT p.revision, p.company_id, p.body, b.created_at
+      FROM rackmap.automatic_backup_projects p
+      JOIN rackmap.automatic_backups b ON b.id=p.backup_id
+      WHERE p.space=$1 AND p.user_id=$2 AND b.id=$3 AND p.company_id=$4 AND b.created_at>=now()-interval '72 hours'
+      LIMIT 1`,[space,userId,backupId,companyId||'default']);
+    if(!rows[0])return null;
+    const body=rows[0].body||{};
+    return {
+      backupId,
+      companyId: rows[0].company_id,
+      revision: Number(rows[0].revision),
+      created_at: rows[0].created_at,
+      company: body.company||'',
+      floorsCount: Array.isArray(body.floors)?body.floors.length:0,
+      racksCount: Array.isArray(body.floors)?body.floors.flatMap(f=>f.racks||[]).length:0,
+      devicesCount: Array.isArray(body.floors)?body.floors.flatMap(f=>f.racks||[]).flatMap(r=>r.devices||[]).length:0,
+      state: body
+    };
+  }catch(error){if(error.code==='42P01'||error.code==='3F000')return null;throw error;}
+}
+module.exports={projectBackups,backupStatus,backupList,backupPreview};

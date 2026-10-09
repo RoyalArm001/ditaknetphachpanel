@@ -174,6 +174,85 @@ function createApp(options={}) {
         }
         return json(res,200,{enabled:true,healthy:true,last_backup:new Date().toISOString(),retentionHours:72,intervalHours:1,local:true});
       }
+      if(req.method==='GET'&&url.pathname==='/api/backup/list'){
+        const space=accountSpace?'account':'shared', userId=accountSpace?actorId.replace(/^account:/,''):'';
+        if(cloud&&requestStore?.pool){
+          try{const cloudBackups=require('./cloud-backups');return json(res,200,await cloudBackups.backupList(requestStore.pool,space,userId,companyId));}
+          catch{return json(res,200,[]);}
+        }
+        try{
+          const dir=requestStore.backups;
+          if(!dir||!fs.existsSync(dir))return json(res,200,[]);
+          const files=fs.readdirSync(dir).filter(f=>f.endsWith('.sqlite')).sort().reverse();
+          const list=files.slice(0,30).map(f=>{
+            const stat=fs.statSync(path.join(dir,f));
+            return {id:f,created_at:stat.mtime.toISOString(),size_bytes:stat.size,space:'local',project_count:1};
+          });
+          return json(res,200,list);
+        }catch{return json(res,200,[]); }
+      }
+      if(req.method==='GET'&&url.pathname==='/api/backup/preview'){
+        const backupId=url.searchParams.get('id')||'';
+        if(!backupId)return json(res,400,{error:tr('Պահանջվում է backup ID')});
+        const space=accountSpace?'account':'shared', userId=accountSpace?actorId.replace(/^account:/,''):'';
+        if(cloud&&requestStore?.pool){
+          try{
+            const cloudBackups=require('./cloud-backups');
+            const preview=await cloudBackups.backupPreview(requestStore.pool,space,userId,backupId,companyId);
+            return preview?json(res,200,preview):json(res,404,{error:tr('Պահուստային snapshot-ը չի գտնվել')});
+          }catch(e){return json(res,500,{error:e.message});}
+        }
+        try{
+          const filePath=path.join(requestStore.backups,path.basename(backupId));
+          if(!fs.existsSync(filePath))return json(res,404,{error:tr('Պահուստային snapshot-ը չի գտնվել')});
+          const {DatabaseSync}=require('node:sqlite');
+          const check=new DatabaseSync(filePath,{readOnly:true});
+          try{
+            const row=check.prepare("SELECT revision,body FROM companies WHERE id=?").get(companyId)||check.prepare("SELECT revision,body FROM companies LIMIT 1").get();
+            if(!row)return json(res,404,{error:tr('Տվյալները չեն գտնվել')});
+            const s=JSON.parse(row.body);
+            return json(res,200,{
+              backupId,
+              companyId,
+              revision:row.revision,
+              created_at:fs.statSync(filePath).mtime.toISOString(),
+              company:s.company||'',
+              floorsCount:s.floors?.length||0,
+              racksCount:s.floors?.flatMap(f=>f.racks||[]).length||0,
+              devicesCount:s.floors?.flatMap(f=>f.racks||[]).flatMap(r=>r.devices||[]).length||0,
+              state:s
+            });
+          }finally{check.close();}
+        }catch(e){return json(res,500,{error:e.message});}
+      }
+      if(req.method==='POST'&&url.pathname==='/api/backup/restore'){
+        let body;try{body=await readBody(req);}catch(e){return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});}
+        const backupId=typeof body.backupId==='string'?body.backupId:'';
+        if(!backupId)return json(res,400,{error:tr('Պահանջվում է backup ID')});
+        const space=accountSpace?'account':'shared', userId=accountSpace?actorId.replace(/^account:/,''):'';
+        let targetState=null;
+        if(cloud&&requestStore?.pool){
+          const cloudBackups=require('./cloud-backups');
+          const preview=await cloudBackups.backupPreview(requestStore.pool,space,userId,backupId,companyId);
+          if(!preview||!preview.state)return json(res,404,{error:tr('Պահուստային snapshot-ը չի գտնվել')});
+          targetState=preview.state;
+        }else{
+          const filePath=path.join(requestStore.backups,path.basename(backupId));
+          if(!fs.existsSync(filePath))return json(res,404,{error:tr('Պահուստային snapshot-ը չի գտնվել')});
+          const {DatabaseSync}=require('node:sqlite');
+          const check=new DatabaseSync(filePath,{readOnly:true});
+          try{
+            const row=check.prepare("SELECT revision,body FROM companies WHERE id=?").get(companyId)||check.prepare("SELECT revision,body FROM companies LIMIT 1").get();
+            if(!row)return json(res,404,{error:tr('Տվյալները չեն գտնվել')});
+            targetState=JSON.parse(row.body);
+          }finally{check.close();}
+        }
+        Domain.validate(targetState);
+        const cur=await read(companyId);
+        if(!cur)return json(res,404,{error:tr('Ընկերությունը չի գտնվել')});
+        const result=await requestStore.save(companyId,targetState,cur.revision);
+        return json(res,200,{ok:true,...result,state:targetState});
+      }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
         if(cloud){const data=Buffer.from(JSON.stringify(await requestStore.backup()));if(data.length>4*1024*1024)return json(res,413,{error:tr('Ամբողջական պատճենը մեծ է։ Օգտագործեք cloud:export հրամանը։')});res.writeHead(200,{'Content-Type':'application/json','Content-Disposition':'attachment; filename="MyPatch-all.json"'});return res.end(data);}
         const file=await requestStore.backup();res.writeHead(200,{'Content-Type':'application/vnd.sqlite3','Content-Disposition':'attachment; filename="RackMap-all-companies.sqlite"'});return fs.createReadStream(file).pipe(res);

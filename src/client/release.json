@@ -1,34 +1,62 @@
 {
-  "version": "2.10.8",
+  "version": "2.10.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ամբողջացվել է Custom սարքերի տեսակների և մոդելների կատալոգը՝ տեսակի ներքո անհատական մոդելների ավելացմամբ և պորտերի/չափերի ավտոմատ լրացմամբ։",
-      "Ավելացվել է «Ընտրովի PDF» արտահանումը «Ցանցեր և Սարքեր» էջից՝ ըստ հարկի, ռաքի, սարքի տեսակի և տարածքի ֆիլտրման։",
-      "Կարգավորումների էջում ինտեգրվել է ավտոմատ cloud backup-ի կարգավիճակը (72 ժամ retention, ամենժամյա պաշտպանություն, shared/account մեկուսացում)։",
-      "Բարելավվել է մատչելիությունը (A11y)՝ բարձր կոնտրաստային focus-visible ոճերով, aria-label թարգմանություններով և modal դիալոգների ստանդարտացմամբ։"
+      "Ավելացվել է սարքերի պատրաստի մոդելների հարուստ կատալոգ (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS)՝ ռաքում 1-սեղմումով տեղադրմամբ։",
+      "Ամբողջացվել է ավտոմատ Cloud/Local Backup-ների snapshot ցանկը, նախադիտումը (Preview) և անվտանգ վերականգնումը (Restore)։",
+      "Ինտեգրվել է 72-ժամյա պահուստավորման retention ֆիլտրումը, տվյալների տարածքների (Shared/Account) մեկուսացումը և համակարգային թեստերը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Completed custom device types and model catalog with per-type model creation and automatic port/height autofill.",
-      "Added Selective PDF export directly from Networks & Devices with floor, rack, device type, and area scoping.",
-      "Integrated automatic cloud backup status in Settings (72-hour retention, hourly schedule, shared/account isolation).",
-      "Enhanced accessibility (A11y) with high-contrast focus-visible styles, localized aria-labels, and modal dialog standards."
+      "Added enterprise device models catalog (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS) with 1-click rack placement.",
+      "Implemented backup snapshots listing, detail preview, and safe restore modal for cloud and local databases.",
+      "Integrated 72-hour backup retention pruning, shared/account tenant isolation, and comprehensive test coverage."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Завершен каталог пользовательских типов и моделей устройств с добавлением моделей и автозаполнением портов и высоты.",
-      "Добавлен выборочный экспорт PDF со страницы «Сети и устройства» с фильтрацией по этажам, стойкам, типам устройств и планам.",
-      "В настройки добавлен статус автоматического cloud backup (хранение 72 часа, ежечасное расписание, изоляция shared/account).",
-      "Улучшена доступность (A11y) с контрастными стилями focus-visible, локализацией aria-label и стандартизацией модальных окон."
+      "Добавлен каталог корпоративных моделей устройств (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS) с установкой в стойку в 1 клик.",
+      "Реализован список резервных копий (снэпшотов), предпросмотр деталей и безопасное восстановление базы данных.",
+      "Интегрирована фильтрация 72-часового хранения копий, изоляция shared/account и тестовое покрытие."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.8",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ամբողջացվել է Custom սարքերի տեսակների և մոդելների կատալոգը՝ տեսակի ներքո անհատական մոդելների ավելացմամբ և պորտերի/չափերի ավտոմատ լրացմամբ։",
+          "Ավելացվել է «Ընտրովի PDF» արտահանումը «Ցանցեր և Սարքեր» էջից՝ ըստ հարկի, ռաքի, սարքի տեսակի և տարածքի ֆիլտրման։",
+          "Կարգավորումների էջում ինտեգրվել է ավտոմատ cloud backup-ի կարգավիճակը (72 ժամ retention, ամենժամյա պաշտպանություն, shared/account մեկուսացում)։",
+          "Բարելավվել է մատչելիությունը (A11y)՝ բարձր կոնտրաստային focus-visible ոճերով, aria-label թարգմանություններով և modal դիալոգների ստանդարտացմամբ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Completed custom device types and model catalog with per-type model creation and automatic port/height autofill.",
+          "Added Selective PDF export directly from Networks & Devices with floor, rack, device type, and area scoping.",
+          "Integrated automatic cloud backup status in Settings (72-hour retention, hourly schedule, shared/account isolation).",
+          "Enhanced accessibility (A11y) with high-contrast focus-visible styles, localized aria-labels, and modal dialog standards."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Завершен каталог пользовательских типов и моделей устройств с добавлением моделей и автозаполнением портов и высоты.",
+          "Добавлен выборочный экспорт PDF со страницы «Сети и устройства» с фильтрацией по этажам, стойкам, типам устройств и планам.",
+          "В настройки добавлен статус автоматического cloud backup (хранение 72 часа, ежечасное расписание, изоляция shared/account).",
+          "Улучшена доступность (A11y) с контрастными стилями focus-visible, локализацией aria-label и стандартизацией модальных окон."
+        ]
+      }
+    },
     {
       "version": "2.10.7",
       "date": "2026-10-09",

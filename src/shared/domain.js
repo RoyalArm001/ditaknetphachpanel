@@ -29,16 +29,36 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     ['panel','Cat6 UTP 48-Port 2U',48,2,0,false],
     ['panel','Cat6A FTP Shielded 24-Port 1U',24,1,0,false],
     ['panel','Cat5e Compact 12-Port 1U',12,1,0,false],
+    ['panel','Optical ODF 24-Port LC/SC 1U',24,1,24,false],
+    ['panel','Optical ODF 48-Port LC/SC 2U',48,2,48,false],
     ['switch','Cisco Catalyst 2960-24TT',24,1,2,false],
     ['switch','Cisco Catalyst 2960-48TT',48,1,2,false],
     ['switch','Cisco Catalyst 2960-24PC-L (PoE)',24,1,2,true],
+    ['switch','Cisco Catalyst 3850-48P (PoE+)',48,1,4,true],
     ['switch','MikroTik CRS326-24G-2S+RM',24,1,2,false],
     ['switch','MikroTik CRS328-24P-4S+RM (PoE+)',24,1,4,true],
+    ['switch','MikroTik CRS354-48G-4S+2Q+RM',48,1,6,false],
     ['switch','Ubiquiti UniFi USW-24-PoE',24,1,2,true],
     ['switch','Ubiquiti UniFi USW-48-PoE',48,1,4,true],
+    ['switch','HPE Aruba 2530-24G',24,1,4,false],
+    ['switch','HPE Aruba 2930F-48G PoE+',48,1,4,true],
+    ['switch','D-Link DGS-1210-28',24,1,4,false],
     ['router','MikroTik CCR2004-16G-2S+',16,1,2,false],
+    ['router','MikroTik CCR2116-12G-4S+',12,1,4,false],
     ['router','MikroTik RB5009UG+S+IN',8,1,1,false],
-    ['router','Cisco ISR 4331',3,1,2,false]
+    ['router','MikroTik hEX S 5-Port',5,1,1,false],
+    ['router','Cisco ISR 4331',3,1,2,false],
+    ['router','Ubiquiti EdgeRouter 12',10,1,2,false],
+    ['router','Ubiquiti Dream Machine Pro',8,1,2,false],
+    ['server','1U Rack Server (Dell PowerEdge R640)',4,1,2,false],
+    ['server','2U Rack Server (Dell PowerEdge R740)',4,2,2,false],
+    ['nvr','NVR 16-Channel 1U (Hikvision / Dahua)',16,1,0,true],
+    ['nvr','NVR 32-Channel 2U (Hikvision / Dahua)',32,2,0,true],
+    ['ups','UPS 1500VA 2U (APC Smart-UPS)',1,2,0,false],
+    ['ups','UPS 3000VA 3U (APC Smart-UPS)',1,3,0,false],
+    ['organizer','1U Horizontal Cable Manager',0,1,0,false],
+    ['organizer','2U Horizontal Cable Manager',0,2,0,false],
+    ['shelf','1U 19" Cantilever Shelf',0,1,0,false]
   ].map(([type,name,ports,height,sfp,poe])=>Object.freeze({type,name,ports,height,sfp,poe})));
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
@@ -46,6 +66,28 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const customModels=Array.isArray(customType?.models)?customType.models.map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
     const extraModels=Array.isArray(s?.deviceModels)?s.deviceModels.filter(m=>m.type===type).map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
     return [...defaults,...customModels,...extraModels];
+  };
+  const allCatalogModels=s=>{
+    const typeMap=new Map(deviceTypes(s));
+    const standardLabels={
+      panel:tr('Փաչ պանել'),
+      switch:tr('Սվիչ'),
+      router:tr('Ռաուտեր'),
+      server:tr('Սերվեր'),
+      nvr:tr('NVR / DVR'),
+      ups:tr('UPS'),
+      organizer:tr('Կաբել մենեջմենթ'),
+      shelf:tr('Դարակ')
+    };
+    for(const [type,label] of Object.entries(standardLabels)){
+      if(!typeMap.has(type))typeMap.set(type,label);
+    }
+    const allTypeIds=[...typeMap.keys()];
+    return allTypeIds.flatMap(id=>{
+      const label=typeMap.get(id)||id;
+      const models=deviceModels(id,s);
+      return models.map(m=>({...m,typeId:id,typeLabel:label}));
+    });
   };
   function modelDefaults(type,name,s){
     const model=deviceModels(type,s).find(m=>m.name.toLowerCase()===String(name||'').trim().toLowerCase());
@@ -282,5 +324,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,modelDefaults,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
