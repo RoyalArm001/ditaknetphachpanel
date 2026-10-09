@@ -97,6 +97,7 @@ globalThis.RackMaps=(()=>{
       </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
     const headerControls=root.querySelector('.map-plan-controls'),projectHeader=root.querySelector('.map-project');
     const topActions=root.querySelector('.map-top-actions');
+    const mapFilters=root.querySelector('.map-filters'),mapEditor=root.querySelector('.map-editor');
     const topbarTools=document.querySelector('.topbar .save-tools');
     if(topActions&&topbarTools){
       topActions.classList.add('map-top-actions-global');
@@ -105,9 +106,10 @@ globalThis.RackMaps=(()=>{
       document.addEventListener('pointerdown',e=>{const more=topActions.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
       document.addEventListener('toggle',e=>{if(e.target.matches('.map-more'))scheduleLabels();},{capture:true,signal:abort.signal});
     }
-    const placeHeaderControls=()=>{const breadcrumb=document.querySelector('.topbar #breadcrumb'),mapBar=root.querySelector('.map-topbar');if(!breadcrumb)return;if(document.fullscreenElement===root){if(headerControls)projectHeader?.append(headerControls);if(topActions&&!mapBar?.contains(topActions))mapBar?.append(topActions);}else{if(headerControls)breadcrumb.after(headerControls);if(topActions&&topbarTools&&!topbarTools.contains(topActions))topbarTools.prepend(topActions);}};
+    const placeHeaderControls=()=>{const breadcrumb=document.querySelector('.topbar #breadcrumb'),mapBar=root.querySelector('.map-topbar');if(!breadcrumb)return;if(document.fullscreenElement===root){if(mapFilters)mapEditor?.append(mapFilters);if(headerControls)projectHeader?.append(headerControls);if(topActions&&!mapBar?.contains(topActions))mapBar?.append(topActions);}else{if(mapFilters)document.querySelector('.topbar')?.insertBefore(mapFilters,topbarTools);if(headerControls)breadcrumb.after(headerControls);if(topActions&&topbarTools&&!topbarTools.contains(topActions))topbarTools.prepend(topActions);}};
     headerControls?.classList.add('map-header-controls');placeHeaderControls();
-    document.addEventListener('fullscreenchange',placeHeaderControls,{signal:abort.signal});
+    document.addEventListener('fullscreenchange',()=>{placeHeaderControls();scheduleLabels();},{signal:abort.signal});
+    mapFilters?.addEventListener('click',e=>{if(!root.contains(mapFilters))click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     headerControls?.addEventListener('click',e=>{if(!root.contains(headerControls))click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     function showDevices(open){view.devicesOpen=open;const side=root.querySelector('.map-sidebar');if(!side)return;root.querySelector('.map-side-panels')?.classList.toggle('devices-open',open);side.classList.toggle('is-open',open);const picker=root.querySelector('#map-device-picker');if(picker)picker.hidden=!open;const toggle=side.querySelector('[data-map-action="devices-toggle"]');if(toggle){toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-controls','map-device-picker');toggle.innerHTML=svg(open?'close':'plus');toggle.title=esc(tr(open?'Փակել':'Միացված սարքեր'));toggle.setAttribute('aria-label',toggle.title);}root.querySelector('.map-add-devices')?.setAttribute('aria-expanded',String(open));drawInspector();}
     function drawInspector(){
@@ -190,7 +192,7 @@ globalThis.RackMaps=(()=>{
       const lockBtn=root.querySelector('[data-map-action="lock-toggle"]');
       if(lockBtn){lockBtn.setAttribute('aria-pressed',String(!!view.locked));lockBtn.innerHTML=svg(view.locked?'lock':'unlock');lockBtn.title=esc(tr(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)'));lockBtn.setAttribute('aria-label',lockBtn.title);}
       const selected=byId.get(view.portId);root.querySelector('[data-map-hint]').textContent=view.locked?tr('Քարտեզը կողպված է'):view.placing&&selected?tr('Սեղմեք հատակագծի վրա՝ սարքը տեղադրելու համար։'):view.selectedMarkerIds.size>1?tr('Քաշեք նշաններից որևէ մեկը կամ օգտագործեք սլաքները՝ բոլոր ընտրված սարքերը միասին տեղափոխելու համար։'):tr('Անիվ՝ խոշորացում · Space + քաշել՝ տեղաշարժում');
-      root.querySelectorAll('[data-map-filter]').forEach(b=>{const f=b.dataset.mapFilter;if(f==='clear'){b.hidden=(view.filter==='all'&&!search);return;}b.setAttribute('aria-pressed',String(view.filter===f));const count=b.querySelector('small');if(count)count.textContent=String(f==='all'?mapData.markers.length:mapData.markers.filter(m=>m.row.service===f).length);});
+      mapFilters?.querySelectorAll('[data-map-filter]').forEach(b=>{const f=b.dataset.mapFilter;if(f==='clear'){b.hidden=(view.filter==='all'&&!search);return;}b.setAttribute('aria-pressed',String(view.filter===f));const count=b.querySelector('small');if(count)count.textContent=String(f==='all'?mapData.markers.length:mapData.markers.filter(m=>m.row.service===f).length);});
       const matches=r=>visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
       const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placed.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
       const portList=root.querySelector('.map-port-list');
@@ -680,7 +682,7 @@ globalThis.RackMaps=(()=>{
     const resize=viewport?new ResizeObserver(()=>{if(!camera)fit();else{camera.x+=(viewport.clientWidth-camera.w)/2;camera.y+=(viewport.clientHeight-camera.h)/2;camera.w=viewport.clientWidth;camera.h=viewport.clientHeight;paintCamera();}}):null;
     document.fonts?.ready.then(()=>{if(!abort.signal.aborted)scheduleLabels();});
     if(viewport){if(!camera)fit();else paintCamera();resize.observe(viewport);}
-    return {busy:()=>pointers.size>0,destroy(){cancelAnimationFrame(labelFrame);resize?.disconnect();abort.abort();headerControls?.remove();topActions?.remove();document.body.classList.remove('map-view');}};
+    return {busy:()=>pointers.size>0,destroy(){cancelAnimationFrame(labelFrame);resize?.disconnect();abort.abort();headerControls?.remove();topActions?.remove();mapFilters?.remove();document.body.classList.remove('map-view');}};
   }
   return {mount,exportPdf};
 })();

@@ -62,7 +62,6 @@
       for(const {f,r,d} of equipment){const values=[d.name,typeName(d),d.model||tr('Չնշված'),f.name,r.name,D.hostsForDevice(state,d.id).map(x=>x.h.ip).filter(Boolean).join('\n')||'—',d.portList.length];const h=Math.min(380,Math.max(40,...values.map((value,i)=>pdf.font('Project').fontSize(8).heightOfString(String(value),{width:cols[i][1]-12,lineGap:2})+16)));if(y+h>bottom){page(tr('Սարքերի ամփոփում'),scope);y=121;head();}let x=32;for(let i=0;i<values.length;i++){text(values[i],x+6,y+8,cols[i][1]-12,8,ink,h-12);x+=cols[i][1];}y+=h;pdf.moveTo(32,y).lineTo(810,y).strokeColor('#d8e4e2').stroke();}
       if(!equipment.length)text(tr('Տվյալներ չկան'),32,y+16,W,11,muted);
     }
-    equipmentTable();
     if(kind==='maps'||kind==='all'){
       const plans=selection.plans;
       for(const plan of plans){
@@ -111,6 +110,7 @@
         table(tr('Քարտեզի սարքերի ցանկ'),plan.name+' · '+floor,[...groups.values()].flat().map(m=>({portId:m.portId,number:m.number})));
       }
     }
+    equipmentTable();
     if(kind!=='maps'){
       for(const {f,r,d} of selection.devices){
         const title=tr(d.type==='panel'?'Փաչ պանելի սխեմա':d.type==='switch'?'Սվիչի սխեմա':d.type==='router'?'Ռաուտերի սխեմա':'Սարքի սխեմա');

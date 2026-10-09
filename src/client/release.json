@@ -1,31 +1,59 @@
 {
-  "version": "2.10.6",
+  "version": "2.10.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել է սարքի տեսակով և մոդելով նոր սարքի ստեղծում անմիջապես քարտեզի էջից՝ պորտի կապով և 1-սեղմումով տեղադրման ռեժիմով։",
-      "Ներդրվել է սարքերի խմբային ընտրություն (Shift+Click, Ctrl+A կամ շրջանակով նշում), խմբային տեղափոխում drag-and-drop-ով և սլաքներով, ինչպես նաև խմբային հեռացում։",
-      "Inspector-ում ավելացվել է նույն մոդելի նոր սարքի արագ ավելացման կոճակը՝ առանց հին կապերի կրկնության։"
+      "Քարտեզի ֆիլտրերի վահանակը համաժամեցվել է վերևի գործիքագոտու (Topbar) հետ և օպտիմալացվել է ամբողջ էկրանով ռեժիմի համար։",
+      "PDF արտահանման մեջ սարքերի ամփոփման աղյուսակը դասավորվել է հատակագծերից հետո՝ պահպանելով հստակ կառուցվածքը։",
+      "Ավելացվել է մնացած և ընթացիկ առաջադրանքների համակարգված պլանը (REMAINING-TASKS-PLAN.md)։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Directly create new devices with type and model from the map view, automatically linking a port and activating 1-click placement.",
-      "Added multi-device group selection (Shift+Click, Ctrl+A, or marquee box select), batch drag-and-drop and arrow movement, and batch deletion.",
-      "Added quick duplication of selected device model with clean ports from the inspector."
+      "Map filter toolbar synchronized with Topbar tools and optimized for fullscreen mode.",
+      "Equipment summary table in PDF export repositioned sequentially after floor plans.",
+      "Added structured remaining tasks and roadmap plan (REMAINING-TASKS-PLAN.md)."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Прямое создание устройств по типу и модели прямо с карты с автоматической привязкой порта и режимом размещения в один клик.",
-      "Добавлен групповой выбор устройств (Shift+Click, Ctrl+A или прямоугольное выделение), групповое перемещение перетаскиванием и стрелками, а также групповое удаление.",
-      "В инспекторе добавлено быстрое дублирование модели устройства с созданием чистых портов."
+      "Панель фильтров карты синхронизирована с верхней панелью (Topbar) и оптимизирована для полноэкранного режима.",
+      "Сводная таблица оборудования в PDF-экспорте логически размещена после планов помещений.",
+      "Добавлен структурированный план оставшихся задач и дорожная карта (REMAINING-TASKS-PLAN.md)."
     ]
   },
   "date": "2026-10-09",
   "history": [
+    {
+      "version": "2.10.6",
+      "date": "2026-10-09",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել է սարքի տեսակով և մոդելով նոր սարքի ստեղծում անմիջապես քարտեզի էջից՝ պորտի կապով և 1-սեղմումով տեղադրման ռեժիմով։",
+          "Ներդրվել է սարքերի խմբային ընտրություն (Shift+Click, Ctrl+A կամ շրջանակով նշում), խմբային տեղափոխում drag-and-drop-ով և սլաքներով, ինչպես նաև խմբային հեռացում։",
+          "Inspector-ում ավելացվել է նույն մոդելի նոր սարքի արագ ավելացման կոճակը՝ առանց հին կապերի կրկնության։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Directly create new devices with type and model from the map view, automatically linking a port and activating 1-click placement.",
+          "Added multi-device group selection (Shift+Click, Ctrl+A, or marquee box select), batch drag-and-drop and arrow movement, and batch deletion.",
+          "Added quick duplication of selected device model with clean ports from the inspector."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Прямое создание устройств по типу и модели прямо с карты с автоматической привязкой порта и режимом размещения в один клик.",
+          "Добавлен групповой выбор устройств (Shift+Click, Ctrl+A или прямоугольное выделение), групповое перемещение перетаскиванием и стрелками, а также групповое удаление.",
+          "В инспекторе добавлено быстрое дублирование модели устройства с созданием чистых портов."
+        ]
+      }
+    },
     {
       "version": "2.10.5",
       "date": "2026-10-09",
