@@ -3,7 +3,7 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "functions": {"api/index.js": {"maxDuration": 60, "includeFiles": "assets/**"}},
+  "functions": {"api/index.js": {"maxDuration": 60, "includeFiles": "{assets/**,migrations/011-session-audit.sql}"}},
   "rewrites": [{"source":"/api/:path*","destination":"/api"}],
   "headers": [{"source":"/(.*)","headers":[
     {"key":"X-Content-Type-Options","value":"nosniff"},

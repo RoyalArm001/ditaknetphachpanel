@@ -551,7 +551,7 @@ function resultsTable(rows){return tr`<div class="table-wrap"><table><thead><tr>
 function renderSearch(view){const report=view==='reports';$('#content').innerHTML=header(report?tr('Հաշվետվություններ'):tr('Մալուխներ և որոնում'),report?tr('Արտահանումը ներառում է ընտրված ֆիլտրերին համապատասխան բոլոր պորտերը։'):tr('Գտեք պորտը և բացեք մալուխի ամբողջական քարտը։'),report?button('↓ Excel','xlsx')+button('↓ PDF','pdf','','primary'):'')+filterControls()+'<div id="results"></div>';renderResults();}
 function renderResults(){const all=D.rows(state,filters);page=Math.min(page,Math.max(0,Math.ceil(all.length/50)-1));const slice=all.slice(page*50,page*50+50);$('#results').innerHTML=tr`<div class="result-count">${all.length} պորտ ${all.length>50?`· ${page*50+1}–${Math.min((page+1)*50,all.length)}`:''}</div>${slice.length?resultsTable(slice):tr('<section class="panel empty"><h2>Արդյունքներ չկան</h2><p>Փոխեք որոնման բառը կամ ֆիլտրերը։</p></section>')}${all.length>50?`<div class="actions" style="margin-top:16px">${page?button(tr('← Նախորդը'),'prev'):''}${(page+1)*50<all.length?button(tr('Հաջորդը →'),'next'):''}</div>`:''}`;}
 let settingsPage='project';
-const settingsTabs=()=>{const pages=[['project','▦',tr('Նախագիծ'),tr('Շենքի և սարքերի կարգավորումներ')],['users','●',tr('Օգտատերեր'),tr('PIN-եր և թիմի հասանելիություն')],['data','↧',tr('Տվյալներ'),tr('Պատճեններ և պահպանում')],['reports','↗',tr('Հաշվետվություններ'),tr('Արտահանումը ներառում է ընտրված ֆիլտրերին համապատասխան բոլոր պորտերը։')],['app','⚙',tr('Հավելված'),tr('Աշխատանքային ռեժիմ և reset')],['releases','↺',tr('Տարբերակների պատմություն'),tr('Հրապարակված տարբերակներ և փոփոխություններ')]],current=pages.find(x=>x[0]===settingsPage);return `<nav class="settings-tabs" aria-label="${tr('Կարգավորումների բաժիններ')}">${pages.map(([id,icon,label])=>`<button type="button" class="settings-tab ${id===settingsPage?'active':''}" data-action="settings-tab" data-id="${id}"><span>${icon}</span>${label}</button>`).join('')}</nav><div class="settings-page-heading"><h2>${current[2]}</h2><p>${current[3]}</p></div>`;};
+const settingsTabs=()=>{const pages=[['audit','≡',tr('Գործողությունների պատմություն'),tr('Ով, երբ և ինչ է փոխել')],['project','▦',tr('Նախագիծ'),tr('Շենքի և սարքերի կարգավորումներ')],['users','●',tr('Օգտատերեր'),tr('PIN-եր և թիմի հասանելիություն')],['data','↧',tr('Տվյալներ'),tr('Պատճեններ և պահպանում')],['reports','↗',tr('Հաշվետվություններ'),tr('Արտահանումը ներառում է ընտրված ֆիլտրերին համապատասխան բոլոր պորտերը։')],['app','⚙',tr('Հավելված'),tr('Աշխատանքային ռեժիմ և reset')],['releases','↺',tr('Տարբերակների պատմություն'),tr('Հրապարակված տարբերակներ և փոփոխություններ')]],current=pages.find(x=>x[0]===settingsPage);return `<nav class="settings-tabs" aria-label="${tr('Կարգավորումների բաժիններ')}">${pages.map(([id,icon,label])=>`<button type="button" class="settings-tab ${id===settingsPage?'active':''}" data-action="settings-tab" data-id="${id}"><span>${icon}</span>${label}</button>`).join('')}</nav><div class="settings-page-heading"><h2>${current[2]}</h2><p>${current[3]}</p></div>`;};
 async function loadPinUsers(){
   const host=$('#pinUsers');if(!host||host.getAttribute('aria-busy')==='true')return;
   const add=host.closest('.panel').querySelector('[data-action=pin-user-new]');add.hidden=true;host.dataset.rows='[]';
@@ -614,7 +614,16 @@ async function renderReleaseHistory(){
   }catch{if(host.isConnected){host.innerHTML=`<section class="panel"><p>${tr('Չհաջողվեց բեռնել տարբերակների պատմությունը։')}</p><button type="button" class="button">${tr('Կրկին փորձել')}</button></section>`;host.querySelector('button').onclick=renderReleaseHistory;}}
 }
 function renderSettings(){
-  const section=route().id;if(['project','users','data','reports','app','releases'].includes(section))settingsPage=section;
+  const section=route().id;if(['project','users','data','reports','app','releases','audit'].includes(section))settingsPage=section;
+  if(settingsPage==='audit'){
+    $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Գործողությունների պատմություն'))+settingsTabs()+'<section class="panel" id="auditLog" aria-live="polite"></section>';
+    const host=$('#auditLog');host.textContent=tr('Բեռնվում է…');
+    const load=async(before='')=>{try{const rows=await api('/api/audit'+(before?'?before='+encodeURIComponent(before):''));if(!host.isConnected)return;
+      const actions={'backup.restore':'Պատճենի վերականգնում','pin.rotate':'PIN-ի փոփոխություն','pin.create':'PIN-ի ստեղծում','pin.update':'PIN-ի խմբագրում','pin.delete':'PIN-ի ջնջում','pin.login':'Մուտք PIN-ով','company.create':'Ընկերության ստեղծում','project.update':'Նախագծի փոփոխություն'};
+      host.innerHTML='<div class="table-wrap"><table><thead><tr>'+['Ամսաթիվ','Օգտատեր','IP','Գործողություն','Օբյեկտ'].map(x=>'<th>'+esc(tr(x))+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr><td>'+esc(new Date(row.created_at).toLocaleString())+'</td><td>'+esc(row.actor)+'</td><td>'+esc(row.ip)+'</td><td>'+esc(tr(actions[row.action]||row.action))+'</td><td>'+esc(row.target)+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p>'+esc(tr('Գրառումներ չկան'))+'</p>');
+      if(rows.length===100){const next=document.createElement('button');next.className='button';next.textContent=tr('Հաջորդը');next.onclick=()=>load(rows.at(-1).id);host.append(next);}
+    }catch(error){if(host.isConnected)host.textContent=error.message;}};load();return;
+  }
   if(settingsPage==='releases'){ $('#content').innerHTML=header(tr('Կարգավորումներ'),tr('Հրապարակված տարբերակներ և փոփոխություններ'))+settingsTabs()+'<div id="releaseHistory" aria-live="polite"></div>';renderReleaseHistory();return;}
   if(settingsPage==='reports'){renderSearch('reports');$('#content .page-head h1').textContent=tr('Կարգավորումներ');$('#content .page-head').insertAdjacentHTML('afterend',settingsTabs());return;}
   let hasRecovery=false;try{hasRecovery=!!localStorage.getItem(recoveryKey());}catch{}
@@ -1082,7 +1091,7 @@ const actions={
   'account-signup':()=>renderAccountLogin('signup'),
   'account-login':()=>renderAccountLogin('login'),
   'account-recover':recoverAccountDialog,
-  'settings-tab':id=>{if(!['project','users','data','reports','app','releases'].includes(id))return;settingsPage=id;const target='settings/'+id;if(location.hash.slice(1)===target)renderSettings();else location.hash=target;},
+  'settings-tab':id=>{if(!['project','users','data','reports','app','releases','audit'].includes(id))return;settingsPage=id;const target='settings/'+id;if(location.hash.slice(1)===target)renderSettings();else location.hash=target;},
   'pin-user-new':()=>pinUserDialog(),
   'pin-user-edit':id=>pinUserDialog(id),
   'pin-users-retry':loadPinUsers,

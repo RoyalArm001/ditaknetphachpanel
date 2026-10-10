@@ -1,0 +1,31 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {DatabaseSync}=require('node:sqlite');
+const {securityStore}=require('../src/server/security-store');
+test('audit history isolates owners and spaces, paginates, and excludes credential fields',async t=>{
+ const db=new DatabaseSync(':memory:');t.after(()=>db.close());const log=securityStore({db});
+ for(let i=0;i<103;i++)await log.append({space:'account',owner:'alice',actor:'account:alice',ip:'127.0.0.1',action:'backup.restore',target:String(i),pin:'SECRET',token:'SECRET'});
+ await log.append({space:'account',owner:'bob',actor:'bob',action:'pin.rotate'});
+ await log.append({space:'shared',actor:'pin:admin',action:'pin.create'});
+ const page=await log.list('account','alice');assert.equal(page.length,100);assert.equal(page[0].target,'102');
+ assert.equal((await log.list('account','alice',page.at(-1).id)).length,3);
+ assert.equal((await log.list('shared')).length,1);assert.equal((await log.list('account','bob')).length,1);
+ assert.equal((await log.list('account','unknown')).length,0);
+ assert.ok(!JSON.stringify(page).includes('SECRET'));assert.ok(!Number.isNaN(Date.parse(page[0].created_at)));
+ await assert.rejects(log.list('shared','','1 OR 1=1'));
+});
+test('audit endpoint requires an admin PIN and records successful actions only',async t=>{
+ const db=new DatabaseSync(':memory:');let role='admin';
+ const store={db,list:async()=>[],create:async()=>{},pinRole:async()=>role,close:()=>{}};
+ const {createApp}=require('../src/server/server');const server=createApp({cloud:true,store,auth:{authenticate:async()=>({id:'admin',method:'pin'})}});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ t.after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));db.close();});
+ const url='http://127.0.0.1:'+server.address().port;
+ await securityStore(store).append({space:'shared',actor:'pin:admin',action:'pin.update'});
+ let r=await fetch(url+'/api/audit');assert.equal(r.status,200);assert.equal((await r.json()).length,1);
+ role='user';r=await fetch(url+'/api/audit');assert.equal(r.status,403);
+ role='admin';r=await fetch(url+'/api/companies',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});assert.equal(r.status,400);
+ assert.equal((await securityStore(store).list('shared')).length,1);
+ r=await fetch(url+'/api/companies',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Audit test',floorCount:1})});
+ assert.equal(r.status,201);const rows=await securityStore(store).list('shared');assert.equal(rows.length,2);assert.equal(rows[0].action,'company.create');assert.equal(rows[0].actor,'pin:admin');assert.ok(rows[0].ip);
+});

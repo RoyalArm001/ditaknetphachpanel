@@ -1,0 +1,32 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {DatabaseSync}=require('node:sqlite');
+const {createPinAuth,hashPin}=require('../src/server/pin-auth');
+const response=()=>({headers:{},setHeader(k,v){this.headers[k]=v;},getHeader(k){return this.headers[k];}});
+const request=res=>({headers:{cookie:res.headers['Set-Cookie'].at(-1).split(';')[0]}});
+test('latest PIN login invalidates the previous session across auth instances; failed login does not',async t=>{
+ const db=new DatabaseSync(':memory:');t.after(()=>db.close());
+ const store={db,pinAttempt:async()=>1,pinReset:async()=>{}};
+ const env={RACKMAP_SESSION_SECRET:'s'.repeat(40),RACKMAP_PIN_HASHES:JSON.stringify({staff:await hashPin('12345678')})};
+ let now=Date.now();const options={env,now:()=>now};
+ const a=createPinAuth(store,options),b=createPinAuth(store,options),first=response(),second=response();
+ await a.login({headers:{}},first,'12345678');assert.equal((await b.authenticate(request(first))).id,'staff');
+ assert.equal(await b.login({headers:{}},response(),'87654321'),null);
+ assert.ok(await a.authenticate(request(first)));
+ await b.login({headers:{}},second,'12345678');
+ assert.equal(await a.authenticate(request(first)),null);assert.ok(await a.authenticate(request(second)));
+ now+=2*86400000;const renewed=response();assert.ok(await b.authenticate(request(second),renewed));
+ assert.ok(await a.authenticate(request(renewed)));assert.ok(await a.authenticate(request(second)));
+ const personal=createPinAuth(store,{...options,cookieName:'mypatch_recovery'}),recovery=response();
+ await personal.login({headers:{}},recovery,'12345678');assert.ok(await b.authenticate(request(second)));
+ assert.ok(await personal.authenticate(request(recovery)));
+ assert.equal(db.prepare('SELECT count(*) AS n FROM active_pin_sessions').get().n,2);
+ assert.ok(!JSON.stringify(db.prepare('SELECT * FROM active_pin_sessions').all()).includes('12345678'));
+});
+test('concurrent successful logins leave exactly one valid editing session',async t=>{
+ const db=new DatabaseSync(':memory:');t.after(()=>db.close());
+ const store={db,pinAttempt:async()=>1,pinReset:async()=>{}};
+ const auth=createPinAuth(store,{env:{RACKMAP_SESSION_SECRET:'s'.repeat(40),RACKMAP_PIN_HASH:await hashPin('12345678')}});
+ const responses=[response(),response()];await Promise.all(responses.map(r=>auth.login({headers:{}},r,'12345678')));
+ const users=await Promise.all(responses.map(r=>auth.authenticate(request(r))));assert.equal(users.filter(Boolean).length,1);
+});

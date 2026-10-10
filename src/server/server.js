@@ -15,6 +15,7 @@ function createApp(options={}) {
   const cloud=options.cloud??(process.env.RACKMAP_STORAGE==='supabase'||process.env.VERCEL==='1');
   const store=options.store||(cloud?require('./cloud-store').openCloudStore():require('./local-repository').openLocalRepository(options));
   const viewLinks=require('./view-links').createViewLinks(store);
+  const security=require('./security-store').securityStore(store);
   const pinModule=require('./pin-auth');
   const configuredPinAuth=pinModule.createPinAuth(store,{secure:cloud});
   const databasePinAuth=cloud&&store.pinConfiguration?pinModule.createDatabasePinAuth(store,{secure:cloud}):null;
@@ -31,13 +32,21 @@ function createApp(options={}) {
   const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req,res)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
   const {createPresence,streamLive}=require('./live'),presence=createPresence(store.pool);
-  const json=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
+  const json=async(res,code,data)=>{
+    if(code>=200&&code<300&&res.auditContext?.action){
+      try{const entry={...res.auditContext};if(data?.user?.id)entry.actor=(data.user.method==='pin'?'pin:':'account:')+data.user.id;if(res.auditTarget)entry.target=res.auditTarget;else if(entry.action==='pin.create'&&data?.id)entry.target=data.id;await security.append(entry);}
+      catch(error){console.error('Audit write failed:',error.code||error.name);code=500;data={error:'Action completed, but audit recording failed. Refresh before retrying.'};}
+    }
+    res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));
+  };
   const server=http.createServer(async(req,res)=>{
     if(require('./client-session').clearClientSession(req,res))return;
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
     res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try{
       const url=new URL(req.url,'http://localhost');
+      const auditActions={'POST /api/backup/restore':'backup.restore','POST /api/account/pin/new':'pin.rotate','POST /api/pins':'pin.create','PUT /api/pins':'pin.update','DELETE /api/pins':'pin.delete','POST /api/companies':'company.create','PUT /api/state':'project.update','POST /api/auth/pin':'pin.login','POST /api/account/recover':'pin.login'};
+      res.auditContext={space:'shared',owner:'',actor:'local',ip:process.env.VERCEL==='1'?req.headers['x-real-ip']||'':req.socket?.remoteAddress||'',action:auditActions[req.method+' '+url.pathname],target:url.searchParams.get('company')||'default'};
       const lang=['en','ru'].includes(url.searchParams.get('lang'))?url.searchParams.get('lang'):'hy';
       const tr=require('../shared/i18n').forLanguage(lang);
       if(url.pathname.startsWith('/api/'))res.setHeader('Cache-Control','no-store');
@@ -65,6 +74,7 @@ function createApp(options={}) {
           if(url.pathname.endsWith('/recover')){
             personalAuth.clear(res);
             const user=await accounts.login(req,res,null,body.pin);
+            if(user&&!user.limited)Object.assign(res.auditContext,{space:'account',owner:user.id,actor:'account:'+user.id});
             if(user?.limited)return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
             return user?json(res,200,{user}):json(res,401,{error:tr('Անձնական PIN-ը սխալ է')});
           }
@@ -80,16 +90,15 @@ function createApp(options={}) {
         const user=await personalAuth.authenticate(req,res)||await accounts.authenticate(req,res);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք ձեր անձնական հաշվով')});
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
-        if(req.method==='POST'&&url.pathname==='/api/account/pin/new')return json(res,200,{pin:await accounts.provision(user,true)});
+        if(req.method==='POST'&&url.pathname==='/api/account/pin/new'){Object.assign(res.auditContext,{space:'account',owner:user.id,actor:'account:'+user.id});return json(res,200,{pin:await accounts.provision(user,true)});}
         actorId='account:'+user.id;requestStore=accounts.scope(user.id);
+        Object.assign(res.auditContext,{space:'account',owner:user.id,actor:actorId});
       }else if(authRequired&&url.pathname.startsWith('/api/')){
         if(['POST','PUT','DELETE'].includes(req.method)&&req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(url.pathname==='/api/auth/pin'&&req.method==='POST'&&pinAuth){
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
           const body=await readBody(req),user=await pinAuth.login(req,res,body.pin);
           if(user?.limited){res.setHeader('Retry-After','900');return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});}
-          const client=typeof body.client==='string'&&/^[a-zA-Z0-9_-]{16,80}$/.test(body.client)?body.client:'';
-          if(user&&client&&await presence.activeOther('team','pin:'+user.id,client)){pinAuth.clear(res);return json(res,409,{error:tr('Այս PIN-ով մեկ այլ սարք արդեն միացած է')});}
           return user?json(res,200,{user}):json(res,401,{error:tr('PIN կոդը սխալ է')});
         }
         if(url.pathname==='/api/auth/login'&&req.method==='POST'){
@@ -100,7 +109,7 @@ function createApp(options={}) {
         if(url.pathname==='/api/auth/logout'&&req.method==='POST'){auth.clear(res);return json(res,200,{ok:true});}
         const user=await auth.authenticate(req,res);
         if(!user)return json(res,401,{error:tr('Մուտք գործեք Իմ փաչ-ի ձեր հաշվով')});
-        actorId=(user.method==='pin'?'pin:':'account:')+user.id;
+        actorId=(user.method==='pin'?'pin:':'account:')+user.id;res.auditContext.actor=actorId;
         if(user.method==='pin'){const access=await store.pinAccess?.(user.id);if(access?.role==='user')pinCompanyIds=new Set(access.ids);}
         if(url.pathname==='/api/auth/session')return json(res,200,{user});
         if(url.pathname==='/api/pins'){
@@ -114,7 +123,7 @@ function createApp(options={}) {
             if((await store.pinUsers()).length>=20)return json(res,400,{error:tr('Առավելագույնը 20 PIN օգտատեր')});
             const pin=String(require('node:crypto').randomInt(1000000000,10000000000)),id='pin-'+randomUUID(),hash=await pinModule.hashPin(pin);await store.pinCreate(id,label,hash);const valid=new Set((await store.list()).map(x=>x.id)),ids=Array.isArray(body.companyIds)?[...new Set(body.companyIds.filter(x=>typeof x==='string'&&valid.has(x)))]:[];await store.pinSetAccess(id,ids);return json(res,201,{id,pin});
           }
-          const id=typeof body.id==='string'?body.id:'';
+          const id=typeof body.id==='string'?body.id:'';res.auditTarget=id;
           if(req.method==='PUT'){
             if(!label||label.length>80)return json(res,400,{error:tr('Գրեք օգտատիրոջ անունը')});
             const pin=body.rotate?String(require('node:crypto').randomInt(1000000000,10000000000)):null,hash=pin?await pinModule.hashPin(pin):null,result=await store.pinUpdate(id,label,body.enabled!==false,hash);
@@ -139,6 +148,10 @@ function createApp(options={}) {
         return json(res,405,{error:tr('Գործողությունը չի գտնվել')});
       }
       const companyId=url.searchParams.get('company')||'default';
+      if(req.method==='GET'&&url.pathname==='/api/audit'){
+        if(!accountSpace&&authRequired&&(!actorId.startsWith('pin:')||await store.pinRole?.(actorId.slice(4))!=='admin'))return json(res,403,{error:tr('Պատմությունը հասանելի է միայն ադմինին')});
+        return json(res,200,await security.list(accountSpace?'account':'shared',accountSpace?actorId.slice(8):'',url.searchParams.get('before')||Number.MAX_SAFE_INTEGER));
+      }
       const read=id=>requestStore.read(id),listCompanies=()=>requestStore.list();
       if(req.method==='GET'&&url.pathname==='/api/storage')return json(res,200,{directory:requestStore.directory,database:requestStore.database,backups:requestStore.backups,cloud});
       if(req.method==='GET'&&url.pathname==='/api/companies')return json(res,200,await listCompanies());
@@ -251,6 +264,7 @@ function createApp(options={}) {
         const cur=await read(companyId);
         if(!cur)return json(res,404,{error:tr('Ընկերությունը չի գտնվել')});
         const result=await requestStore.save(companyId,targetState,cur.revision);
+        if(result.conflict)return json(res,409,{error:tr('Տվյալները փոփոխվել են այլ աշխատակցի կողմից։ Թարմացրեք էջը։'),revision:result.revision});
         return json(res,200,{ok:true,...result,state:targetState});
       }
       if(req.method==='POST'&&url.pathname==='/api/backup'){
@@ -265,7 +279,7 @@ function createApp(options={}) {
         if((await listCompanies()).some(x=>x.name.toLocaleLowerCase()===name.toLocaleLowerCase()))return json(res,400,{error:tr('Այս անունով ընկերություն արդեն կա')});
         const state={...Domain.empty(),...Domain.projectStyle(body.style),company:name,floors:Array.from({length:body.floorCount},(_,i)=>({id:randomUUID(),name:tr`${i+1}-րդ հարկ`,racks:[]}))};
         try{Domain.validate(state);}catch(e){return json(res,400,{error:tr(e.message)});}const id=randomUUID();await requestStore.create(id,state);
-        return json(res,201,{id,revision:0,state});
+        res.auditTarget=id;return json(res,201,{id,revision:0,state});
       }
       const scoped=['/api/state','/api/revision','/api/history','/api/export.xlsx','/api/export.pdf'].includes(url.pathname)||url.pathname.startsWith('/api/history/');
       const current=scoped?await read(companyId):null;

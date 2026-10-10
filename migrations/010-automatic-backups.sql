@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION rackmap.capture_automatic_backup() RETURNS bigint
 LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog,rackmap,pg_temp AS $$
 DECLARE backup_id bigint;
 BEGIN
-  IF NOT pg_try_advisory_xact_lock(724109,10) THEN RETURN NULL; END IF;
+  IF NOT pg_try_advisory_xact_lock(hashtext('hourly_cloud_backup')) THEN RETURN NULL; END IF;
   -- One SQL statement gives all projects and access records the same MVCC snapshot.
   WITH snapshot AS (
     INSERT INTO rackmap.automatic_backups(access_data)

@@ -14,6 +14,7 @@ async function verifyPin(pin,stored){
 }
 function equalHex(a,b){const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);}
 function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),cookieName='rackmap_pin'}={}){
+  const sessions=require('./security-store').securityStore(store);
   const secret=env.RACKMAP_SESSION_SECRET;
   const hashes=env.RACKMAP_PIN_HASHES?JSON.parse(env.RACKMAP_PIN_HASHES):{};
   if(!hashes||typeof hashes!=='object'||Array.isArray(hashes))throw new Error('Invalid PIN server configuration');
@@ -26,13 +27,13 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
   const equal=(a,b)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y);};
   function cookie(res,value,age){const previous=res.getHeader?.('Set-Cookie')||[];const expires=new Date(age?now()+age*1000:0).toUTCString();res.setHeader('Set-Cookie',[...(Array.isArray(previous)?previous:[previous]),`${cookieName}=${value}; Path=/api; HttpOnly; ${secure?'Secure; ':''}SameSite=Lax; Max-Age=${age}; Expires=${expires}`]);}
   const sessionAge=180*24*60*60;
-  function issue(res,id){
-    const payload=Buffer.from(JSON.stringify({id,exp:now()+sessionAge*1000,version:fingerprint(hashes[id]),nonce:randomBytes(12).toString('hex')})).toString('base64url');
+  function issue(res,id,nonce){
+    const payload=Buffer.from(JSON.stringify({id,exp:now()+sessionAge*1000,version:fingerprint(hashes[id]),nonce})).toString('base64url');
     cookie(res,payload+'.'+signature(payload),sessionAge);
   }
   return {
     enabled:async()=>true,
-    authenticate(req,res){
+    async authenticate(req,res){
       const token=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='))?.slice(cookieName.length+1);
       if(!token||token.length>500)return null;
       const [payload,mac]=token.split('.');if(!payload||!mac||!equal(signature(payload),mac))return null;
@@ -40,8 +41,9 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
         // Different cloud instances may have slightly different clocks. This only
         // permits small future issuance skew; expired tokens remain invalid.
         if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+(sessionAge+300)*1000)return null;
-        // Renew daily while active; older valid sessions upgrade automatically.
-        if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id);
+        if(!await sessions.valid(cookieName,id,data.nonce))return null;
+        // Renew daily without replacing the active session identity.
+        if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id,data.nonce);
         return {id,method:'pin'};
       }catch{return null;}
     },
@@ -53,7 +55,8 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
       const matches=await Promise.all(entries.map(async([id,hash])=>{const [salt,digest]=hash.split(':');return equal((await derive(pin,salt,32)).toString('hex'),digest)?id:null;}));
       const id=matches.find(Boolean);if(!id)return null;
       await store.pinReset(key);
-      issue(res,id);return {id,method:'pin'};
+      const nonce=randomBytes(24).toString('hex');await sessions.claim(cookieName,id,nonce);
+      issue(res,id,nonce);return {id,method:'pin'};
     },
     clear:res=>cookie(res,'',0)
   };

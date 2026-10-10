@@ -2432,4 +2432,19 @@
   "＋ Ավելացնել նոր տեսակ կամ մոդել": ["+ Add new type or model","+ Добавить новый тип или модель"],
   "Պահուստային snapshot-ը չի գտնվել": ["Backup snapshot not found","Snapshot backup не найден"],
   "Պահանջվում է backup ID": ["Backup ID is required","Требуется ID backup"]
+,
+  "Գործողությունների պատմություն": ["Activity history","История действий"],
+  "Ով, երբ և ինչ է փոխել": ["Who changed what and when","Кто, когда и что изменил"],
+  "Պատմությունը հասանելի է միայն ադմինին": ["History is available to administrators only","История доступна только администратору"],
+  "Գրառումներ չկան": ["No records yet","Записей пока нет"],
+  "Օբյեկտ": ["Target","Объект"],
+  "Գործողություն": ["Action","Действие"],
+  "Պատճենի վերականգնում": ["Backup restored","Восстановление копии"],
+  "PIN-ի փոփոխություն": ["PIN rotated","Замена PIN"],
+  "PIN-ի ստեղծում": ["PIN created","Создание PIN"],
+  "PIN-ի խմբագրում": ["PIN updated","Изменение PIN"],
+  "PIN-ի ջնջում": ["PIN deleted","Удаление PIN"],
+  "Մուտք PIN-ով": ["PIN sign-in","Вход по PIN"],
+  "Ընկերության ստեղծում": ["Company created","Создание компании"],
+  "Նախագծի փոփոխություն": ["Project updated","Изменение проекта"]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

@@ -1,31 +1,59 @@
 {
-  "version": "2.10.9",
+  "version": "2.10.10",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել է սարքերի պատրաստի մոդելների հարուստ կատալոգ (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS)՝ ռաքում 1-սեղմումով տեղադրմամբ։",
-      "Ամբողջացվել է ավտոմատ Cloud/Local Backup-ների snapshot ցանկը, նախադիտումը (Preview) և անվտանգ վերականգնումը (Restore)։",
-      "Ինտեգրվել է 72-ժամյա պահուստավորման retention ֆիլտրումը, տվյալների տարածքների (Shared/Account) մեկուսացումը և համակարգային թեստերը։"
+      "Նույն PIN-ի վերջին հաջող մուտքն ակտիվ է․ նախորդ սարքի սեսիան անվավեր է դառնում։ Թարմացումից հետո PIN-ով մեկ նոր մուտք է պահանջվում։",
+      "Կարգավորումներում ավելացվել է գործողությունների պատմություն՝ օգտատիրոջ ID-ով, ժամով, IP-ով և գործողությամբ։ Անձնական և թիմային գրառումները մեկուսացված են։",
+      "Պատրաստվել են cloud backup-ի տեղադրման և իրական միջավայրի ստուգման հրամանները։ Իրական cloud ստուգումը սպասում է միացման կարգավորումներին։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added enterprise device models catalog (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS) with 1-click rack placement.",
-      "Implemented backup snapshots listing, detail preview, and safe restore modal for cloud and local databases.",
-      "Integrated 72-hour backup retention pruning, shared/account tenant isolation, and comprehensive test coverage."
+      "The latest successful PIN login stays active and replaces earlier sessions. One fresh PIN login is required after this update.",
+      "Settings now includes activity history with actor ID, time, IP and action. Personal and team records stay isolated.",
+      "Added cloud backup deployment and live verification commands. Live cloud verification is pending connection configuration."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлен каталог корпоративных моделей устройств (Cisco, MikroTik, Ubiquiti, Aruba, Dell, NVR, UPS) с установкой в стойку в 1 клик.",
-      "Реализован список резервных копий (снэпшотов), предпросмотр деталей и безопасное восстановление базы данных.",
-      "Интегрирована фильтрация 72-часового хранения копий, изоляция shared/account и тестовое покрытие."
+      "Последний успешный вход по PIN заменяет предыдущие сеансы. После обновления потребуется один повторный вход по PIN.",
+      "В настройках появилась история действий с ID пользователя, временем, IP и действием. Личные и командные записи изолированы.",
+      "Добавлены команды установки и проверки облачных резервных копий. Проверка реального облака ожидает настройки подключения."
     ]
   },
-  "date": "2026-10-09",
+  "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.9",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Նույն PIN-ի վերջին հաջող մուտքն ակտիվ է․ նախորդ սարքի սեսիան անվավեր է դառնում։ Թարմացումից հետո PIN-ով մեկ նոր մուտք է պահանջվում։",
+          "Կարգավորումներում ավելացվել է գործողությունների պատմություն՝ օգտատիրոջ ID-ով, ժամով, IP-ով և գործողությամբ։ Անձնական և թիմային գրառումները մեկուսացված են։",
+          "Պատրաստվել են cloud backup-ի տեղադրման և իրական միջավայրի ստուգման հրամանները։ Իրական cloud ստուգումը սպասում է միացման կարգավորումներին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The latest successful PIN login stays active and replaces earlier sessions. One fresh PIN login is required after this update.",
+          "Settings now includes activity history with actor ID, time, IP and action. Personal and team records stay isolated.",
+          "Added cloud backup deployment and live verification commands. Live cloud verification is pending connection configuration."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Последний успешный вход по PIN заменяет предыдущие сеансы. После обновления потребуется один повторный вход по PIN.",
+          "В настройках появилась история действий с ID пользователя, временем, IP и действием. Личные и командные записи изолированы.",
+          "Добавлены команды установки и проверки облачных резервных копий. Проверка реального облака ожидает настройки подключения."
+        ]
+      },
+      "date": "2026-10-09"
+    },
     {
       "version": "2.10.8",
       "date": "2026-10-09",

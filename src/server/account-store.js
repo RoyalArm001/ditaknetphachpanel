@@ -67,7 +67,7 @@ function createAccounts(store){
       let id;try{id=JSON.parse(Buffer.from(token.split('.')[0],'base64url')).id;}catch{return null;}
       if(typeof id!=='string'||id.length>64)return null;
       const row=(await pool.query('SELECT user_id,pin_hash FROM rackmap.personal_accounts WHERE user_id=$1',[id])).rows[0];
-      const user=(await configure(row))?.authenticate(req,res);return user?{...user,method:'recovery'}:null;
+      const user=await (await configure(row))?.authenticate(req,res);return user?{...user,method:'recovery'}:null;
     },
     clear(res){const current=res.getHeader('Set-Cookie')||[];res.setHeader('Set-Cookie',[...current,`${cookieName}=; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=0`]);},
     scope:userId=>accountStore(pool,userId)
