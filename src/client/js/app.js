@@ -35,7 +35,7 @@ let liveSessionId;try{liveSessionId=localStorage.getItem('rackmap-live-client');
 const uiZoomSteps=[.7,.75,.8,.85,.9,.95,1,1.05,1.1];
 let uiZoom=innerWidth<=760?1:.9;
 try{const saved=Number(localStorage.getItem('rackmap-ui-zoom'));if(uiZoomSteps.includes(saved))uiZoom=saved;}catch{}
-const zoomControls=document.createElement('div');zoomControls.className='zoom-controls';zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.innerHTML=`<button class="button" type="button" data-action="ui-zoom-out" aria-label="${tr('Փոքրացնել էջը')}">−</button><span id="uiZoomValue"></span><button class="button" type="button" data-action="ui-zoom-in" aria-label="${tr('Մեծացնել էջը')}">＋</button>`;$('#breadcrumb')?.after(zoomControls);
+const zoomControls=document.createElement('div');zoomControls.className='zoom-controls';zoomControls.hidden=true;zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.innerHTML=`<button class="button" type="button" data-action="ui-zoom-out" aria-label="${tr('Փոքրացնել էջը')}">−</button><span id="uiZoomValue"></span><button class="button" type="button" data-action="ui-zoom-in" aria-label="${tr('Մեծացնել էջը')}">＋</button>`;$('#breadcrumb')?.after(zoomControls);
 function updateZoomLabels(){zoomControls.setAttribute('aria-label',tr('Էջի չափ'));zoomControls.querySelector('[data-action=ui-zoom-out]').setAttribute('aria-label',tr('Փոքրացնել էջը'));zoomControls.querySelector('[data-action=ui-zoom-in]').setAttribute('aria-label',tr('Մեծացնել էջը'));}
 window.addEventListener('rackmap-languagechange',updateZoomLabels);
 function applyUiZoom(){document.documentElement.style.setProperty('--ui-zoom',String(uiZoom));const value=$('#uiZoomValue');if(value)value.textContent=Math.round(uiZoom*100)+'%';const outBtn=zoomControls.querySelector('[data-action=ui-zoom-out]');if(outBtn)outBtn.disabled=uiZoom<=uiZoomSteps[0]+0.001;const inBtn=zoomControls.querySelector('[data-action=ui-zoom-in]');if(inBtn)inBtn.disabled=uiZoom>=uiZoomSteps[uiZoomSteps.length-1]-0.001;}
@@ -46,7 +46,7 @@ let sceneController=null;
 function renderLogin(method=pinEnabled?'pin':'account'){
   mapController?.destroy();mapController=null;
   if(accountMode())return renderAccountLogin(accountMethod);
-  ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
+  ready=false;document.body.classList.add('login-view');document.body.classList.remove('rack-view');zoomControls.hidden=true;$('#dialog').close();
   const usePin=method==='pin'&&pinEnabled;
   $('#content').innerHTML=tr('<section class="panel setup login-card"><div class="login-mark">▤</div><div class="eyebrow">ԻՄ ՓԱՉ · ԱՇԽԱՏԱԿՑԻ ՄՈՒՏՔ</div><h1>Իմ փաչ</h1><p class="login-intro">Բացեք ընկերությունների բազան և խմբագրեք ռաքերն ու միացումները։</p>')+(pinEnabled&&accountEnabled?'<div class="login-tabs">'+button(tr('PIN կոդ'),'login-pin')+button(tr('Թիմային հաշիվ'),'login-account')+'</div>':'')+'<form id="loginForm">'+(usePin?input('pin',tr('Աշխատակցի PIN'),'','password',tr('required inputmode="numeric" pattern="[0-9]{8,12}" minlength="8" maxlength="12" autocomplete="off" placeholder="Մուտքագրեք PIN կոդը"')):input('email',tr('Էլ․ փոստ'),'','email','required autocomplete="username"')+input('password',tr('Գաղտնաբառ'),'','password','required autocomplete="current-password"'))+tr('<p id="loginError" role="alert"></p><button class="button primary" type="submit">Բացել աշխատանքային տարածքը →</button></form></section>');
   $('#leftPanel').inert=true;const rightToggle=$('#rightToggle');if(rightToggle)rightToggle.hidden=true;
@@ -181,20 +181,21 @@ function render(){
   document.body.classList.remove('login-view');
   sceneController?.destroy();sceneController=null;
 
-  $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');$('#breadcrumb').textContent=viewNames[view];
+  $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');zoomControls.hidden=view!=='rack';$('#breadcrumb').textContent=viewNames[view];
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
   if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
   applyPanels();updateLiveLabel();
 }
 function renderSetup(){
+  zoomControls.hidden=true;
   $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ՆՈՐ ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ</div><h1>Սկսենք ձեր շենքից</h1><p class="muted">Նշեք ընկերությունն ու հարկերի քանակը։ Հետո ընտրեք այն հարկերը, որտեղ կան ռաքեր։</p><form id="setupForm"><div class="form-grid">${input('company',tr('Ընկերության անվանում'),'','text',tr('required maxlength="200" placeholder="Ընկերություն"'))}${input('count',tr('Հարկերի քանակ'),3,'number','required min="1" max="200"')}</div>${backupFormatField()}${styleFields()}<div class="form-actions"><button class="button primary">Ստեղծել շենքը →</button></div><div id="setupError" class="form-error" hidden></div></form></section>`;
   $('#setupForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);try{commit(s=>{Object.assign(s,readStyle(f));s.backupFormat=f.get('backupFormat');s.company=f.get('company').trim();if(!s.company)throw new Error(tr('Գրեք ընկերության անվանումը'));s.floors=Array.from({length:+f.get('count')},(_,i)=>({id:uid(),name:tr`${i+1}-րդ հարկ`,racks:[]}));});toast(tr('Շենքը ստեղծված է'));}catch(err){$('#setupError').hidden=false;$('#setupError').textContent=tr(err.message);}};
 }
 function renderWelcome(){
   mapController?.destroy();mapController=null;
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
-  document.body.classList.add('login-view');document.body.classList.remove('rack-view');$('#dialog').close();
+  document.body.classList.add('login-view');document.body.classList.remove('rack-view');zoomControls.hidden=true;$('#dialog').close();
   const icon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
   const rack=icon('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h8"/>');
   const pin=icon('<rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 6h6M9 10h.01M15 10h.01M9 14h.01M15 14h.01M9 18h6"/>');
