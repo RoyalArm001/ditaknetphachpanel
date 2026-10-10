@@ -50,6 +50,20 @@ test('manual update works after a controller change even with no waiting worker'
   await app.context.actions['install-app']();assert.equal(app.reloads(),1);
 });
 
+test('install button is hidden and install prompt blocked when app is installed',async()=>{
+  const app=pwa();await tick();
+  assert.equal(app.control.hidden,true,'hidden by default before installPrompt');
+  let prompted=false;
+  await app.events.beforeinstallprompt({preventDefault(){},prompt:async()=>{prompted=true;},userChoice:Promise.resolve({outcome:'dismissed'})});
+  assert.equal(app.control.hidden,false,'unhidden when installPrompt is available');
+  await app.events.appinstalled();
+  assert.equal(app.control.hidden,true,'hidden again after installation');
+  let installModalOpened=false;
+  app.context.modal=()=>{installModalOpened=true;};
+  await app.context.actions['install-app']();
+  assert.equal(installModalOpened,false,'no install prompt modal offered when already installed');
+});
+
 test('service worker uses the network without HTTP cache, with offline fallback',async()=>{
   const stored=new Map(),events={};let offline=false,options;
   const context={Response,URL,self:{addEventListener:(k,f)=>events[k]=f,location:{origin:'https://example.com'}},

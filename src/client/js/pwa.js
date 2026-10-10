@@ -1,6 +1,7 @@
 'use strict';
 (()=>{
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   let installPrompt=null;
   let registration=null,updateReady=false,updateBusy=false,reloadPending=false,checkingUpdate=false,lastUpdateCheck=0;
@@ -32,7 +33,33 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     }catch{/* Offline or unavailable release notes must not interrupt startup. */}
   }
   if(location.protocol!=='file:')setTimeout(announceRelease,600);
-  const standalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  const standalone=()=>Boolean(window.matchMedia?.('(display-mode: standalone)')?.matches
+    ||window.matchMedia?.('(display-mode: minimal-ui)')?.matches
+    ||window.matchMedia?.('(display-mode: window-controls-overlay)')?.matches
+    ||navigator.standalone===true);
+  let isInstalled=false;
+  try{isInstalled=localStorage.getItem('mypatch-app-installed')==='true';}catch{}
+  if(standalone())isInstalled=true;
+
+  async function detectInstalled(){
+    if(standalone()){
+      isInstalled=true;
+      try{localStorage.setItem('mypatch-app-installed','true');}catch{}
+      update();
+      return;
+    }
+    if(typeof navigator!=='undefined'&&'getInstalledRelatedApps' in navigator){
+      try{
+        const apps=await navigator.getInstalledRelatedApps();
+        if(Array.isArray(apps)&&apps.length>0){
+          isInstalled=true;
+          try{localStorage.setItem('mypatch-app-installed','true');}catch{}
+          update();
+        }
+      }catch{}
+    }
+  }
+
   let notificationOfferPending=false;
   const notificationSupported=()=>window.isSecureContext&&'Notification' in window;
   function notificationDialog(){
@@ -42,7 +69,6 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     document.querySelector('#dialog').addEventListener('close',()=>{try{localStorage.setItem('mypatch-notification-offer','seen');}catch{}},{once:true});
     const control=document.querySelector('#enableNotifications');
     if(control)control.onclick=()=>{
-      // Request directly from the click, before any await, for mobile browsers.
       const request=Notification.requestPermission();control.disabled=true;
       request.then(()=>{if(control.isConnected&&document.querySelector('#dialog').open){document.querySelector('#dialog').close();setTimeout(notificationDialog,0);}}).catch(()=>{control.disabled=false;toast(tr('Չհաջողվեց միացնել ծանուցումները։ Կրկին փորձեք։'));});
     };
@@ -61,12 +87,35 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function update(){
     const control=document.querySelector('[data-action="install-app"]');
     if(!control)return;
-    const label=updateReady?tr('↻ Թարմացնել հավելվածը'):standalone()?tr('✓ Հավելվածը տեղադրված է'):tr('↓ Տեղադրել հավելվածը');
-    control.title=label;
-    control.setAttribute?.('aria-label',label);
-    const span=control.querySelector?.('span');
-    if(span)span.textContent=label;
-    else if(!control.querySelector?.('svg'))control.textContent=label;
+    const installed=isInstalled||standalone();
+
+    if(updateReady){
+      const label=tr('↻ Թարմացնել հավելվածը');
+      control.hidden=false;
+      control.title=label;
+      control.setAttribute?.('aria-label',label);
+      const span=control.querySelector?.('span');
+      if(span)span.textContent=label;
+      else if(!control.querySelector?.('svg'))control.textContent=label;
+      return;
+    }
+
+    if(installed){
+      control.hidden=true;
+      return;
+    }
+
+    const isIos=typeof navigator!=='undefined'&&/iphone|ipad|ipod/i.test(navigator.userAgent||'')&&!standalone();
+    const canInstall=Boolean(installPrompt||isIos);
+    control.hidden=!canInstall;
+    if(canInstall){
+      const label=tr('↓ Տեղադրել հավելվածը');
+      control.title=label;
+      control.setAttribute?.('aria-label',label);
+      const span=control.querySelector?.('span');
+      if(span)span.textContent=label;
+      else if(!control.querySelector?.('svg'))control.textContent=label;
+    }
   }
   function hasUnsavedWork(){return typeof dirty!=='undefined'&&(dirty||saving||portDraftDirty);}
   function editingForm(){return !!document.querySelector('#dialog[open],#setupForm,#loginForm,input:focus,textarea:focus,select:focus');}
@@ -88,13 +137,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     if(!registration?.waiting){checkForUpdates(true);return;}
     protectLocalData();registration.waiting.postMessage({type:'SKIP_WAITING'});toast(tr('Թարմացվում է…'));
   }
-  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;update();});
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;isInstalled=false;try{localStorage.removeItem('mypatch-app-installed');}catch{}update();});
   window.addEventListener('rackmap-languagechange',update);
-  window.addEventListener('appinstalled',()=>{installPrompt=null;protectLocalData();update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;isInstalled=true;try{localStorage.setItem('mypatch-app-installed','true');}catch{}protectLocalData();update();toast(tr('Իմ փաչ-ը տեղադրված է'));offerNotifications();});
   actions['install-app']=async()=>{
     if(updateReady){activateUpdate();return;}
-    if(standalone()){notificationDialog();return;}
-    if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();await prompt.userChoice;update();return;}
+    if(standalone()||isInstalled){return;}
+    if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();const choice=await prompt.userChoice;if(choice?.outcome==='accepted'){isInstalled=true;try{localStorage.setItem('mypatch-app-installed','true');}catch{}}update();return;}
     const secure=window.isSecureContext;
     modal(tr('Տեղադրել Իմ փաչ-ը'),
       (secure?'':tr('<p><strong>Հեռախոսում տեղադրելու համար բացեք ծրագրի HTTPS հասցեն։</strong> Սովորական տեղական HTTP հասցեն նախատեսված է բրաուզերով աշխատանքի համար։ HTTPS հասցեն պետք է կարգավորի ցանցի ադմինիստրատորը։</p>'))+
@@ -117,11 +166,16 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     }).catch(()=>{});
   }
   window.addEventListener('online',()=>checkForUpdates(true));
-  window.addEventListener('focus',()=>checkForUpdates(true));
-  window.addEventListener('pageshow',()=>checkForUpdates(true));
+  window.addEventListener('focus',()=>(detectInstalled(),checkForUpdates(true)));
+  window.addEventListener('pageshow',()=>(detectInstalled(),checkForUpdates(true)));
+  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',()=>{
+    if(standalone()){isInstalled=true;try{localStorage.setItem('mypatch-app-installed','true');}catch{}}
+    update();
+  });
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdates(true);});
   document.querySelector('#dialog')?.addEventListener('close',()=>setTimeout(reloadWhenSafe,0));
   setInterval(()=>checkForUpdates(),15000);
   if(window.isSecureContext)protectLocalData();
+  detectInstalled();
   update();
 })();
