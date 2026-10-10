@@ -6,7 +6,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
 let autoSaveEnabled=true,resetInProgress=false,mergedNeedsRender=false;
 try{autoSaveEnabled=localStorage.getItem('rackmap-auto-save')!=='false';}catch{}
-let filters={query:'',floor:'',rack:'',status:''},page=0;
+let filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status:'',sort:'location'},page=0;
 const localHost=/^(localhost$|127\.0\.0\.1$|\[::1\]$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
 let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
@@ -1009,11 +1009,11 @@ function renderSearch(view){
   renderResults();
 }
 function updateSearchFilter(key,value){
-  if(key==='all')filters={query:'',floor:'',rack:'',status:'',sort:filters.sort||'location'};
+  if(key==='all')filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status:'',sort:filters.sort||'location'};
   else filters[key]=value;
   if(key==='floor')filters.rack='';
   const rackSelect=$('[data-filter=rack]');if(rackSelect&&(key==='floor'||key==='all'))rackSelect.innerHTML=opts(searchChoices().rack,filters.rack||'');
-  document.querySelectorAll('[data-filter]').forEach(control=>{control.value=filters[control.dataset.filter]||'';});
+  document.querySelectorAll('[data-filter]').forEach(control=>{if(control.tagName==='INPUT'||control.tagName==='SELECT')control.value=filters[control.dataset.filter]||'';});
   page=0;renderResults();
 }
 function renderResults(){
@@ -1857,10 +1857,12 @@ function portModal(id){
   const original=findPort(id),item=panelPortFor(id);
   if(!original)return;
   if(D.isNetworkDevice(original.d)&&!item){toast(tr('Սվիչի պորտն ընտրելու համար նախ միացրեք այն փաչ պանելի պորտին։'));return;}
+  const targetPort=item||original;
+  if(!targetPort?.p){toast(tr('Պորտը չի գտնվել'));return;}
   selectedPortIds.clear();
-  selectedPortId=item.p.id;portDraft=null;portDraftDirty=false;panelPrefs.right=true;if(window.matchMedia('(max-width:760px)').matches)panelPrefs.left=false;applyPanels();
+  selectedPortId=targetPort.p.id;portDraft=null;portDraftDirty=false;panelPrefs.right=true;if(window.matchMedia('(max-width:760px)').matches)panelPrefs.left=false;applyPanels();
   $('#dialog').close();
-  if(route().view!=='rack'||route().id!==item.r.id){location.hash='#rack/'+item.r.id;return;}
+  if(route().view!=='rack'||route().id!==targetPort.r.id){location.hash='#rack/'+targetPort.r.id;return;}
   renderPortTools();paintPorts();
   if(window.matchMedia('(max-width:760px)').matches)$('#portTools').scrollIntoView?.({behavior:'smooth',block:'start'});
 }
@@ -1923,7 +1925,7 @@ async function switchCompany(id){
     const data=personal()?await PersonalStore.request(companyUrl('/api/state',id)):await (async()=>{const res=await fetch(companyUrl('/api/state',id),{cache:'no-store'});const data=await res.json();if(!res.ok)throw new Error(tr(data.error));return data;})();
     D.validate(data.state);
     activeCompanyId=id;state=data.state;revision=data.revision;dirty=false;conflict=false;selectedPortId='';portDraft=null;portDraftDirty=false;clearTimeout(portTimer);
-    filters={query:'',floor:'',rack:'',status:''};page=0;
+    filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status:'',sort:'location'};page=0;
     try{localStorage.setItem('rackmap-active-company',id);}catch{}
     const url=new URL(location.href);url.searchParams.set('company',id);url.hash='overview';history.replaceState(null,'',url);
     $('#dialog').close();$('#connectionBanner').hidden=true;status(tr('Պահված է'));render();
@@ -1952,7 +1954,7 @@ async function switchStorage(mode){
   if(modeBusy)return;if(storageMode===mode){if(!ready)await init();return;}
   if(ready&&!await save())throw new Error(tr('Նախ պահպանեք ընթացիկ փոփոխությունները'));
   modeBusy=true;ready=false;
-  try{storageMode=mode;try{localStorage.setItem('rackmap-storage-mode',mode);}catch{}activeCompanyId='default';selectedPortId='';portDraft=null;portDraftDirty=false;dirty=false;conflict=false;filters={query:'',floor:'',rack:'',status:''};page=0;clearTimeout(portTimer);clearTimeout(saveTimer);
+  try{storageMode=mode;try{localStorage.setItem('rackmap-storage-mode',mode);}catch{}activeCompanyId='default';selectedPortId='';portDraft=null;portDraftDirty=false;dirty=false;conflict=false;filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status:'',sort:'location'};page=0;clearTimeout(portTimer);clearTimeout(saveTimer);
     const url=new URL(location.href);url.searchParams.delete('company');url.hash='settings';history.replaceState(null,'',url);
     accountReadOnly=false;accountUserId='';await init();
   }finally{modeBusy=false;}
@@ -2133,6 +2135,9 @@ const actions={
   recovery:()=>{const raw=localStorage.getItem(recoveryKey());if(raw)return restoreFile(new File([raw],'recovery.json',{type:'application/json'}));},
   xlsx:()=>exportReport('xlsx'),pdf:()=>exportReport('pdf'),reload:reloadShared,
   next:()=>{page++;renderResults();},prev:()=>{page--;renderResults();},
+  'search-clear':()=>updateSearchFilter('all',''),
+  'search-status':id=>{filters.status=(filters.status===id)?'':id;page=0;renderResults();},
+  'search-remove':id=>updateSearchFilter(id,''),
   history:async()=>{const rows=await api('/api/history');modal(tr('Պահպանման պատմություն'),rows.length?rows.map(x=>tr`<div class="history-row"><span>Տարբերակ ${x.revision}<br><small>${esc(new Date(x.saved_at).toLocaleString(globalThis.RackI18n?.locale||'hy-AM'))}</small></span>${button(tr('Վերականգնել'),'history-restore',x.revision,'small')}</div>`).join(''):tr('<p class="hint">Պահպանված տարբերակներ դեռ չկան։</p>'));},
   'history-restore':async id=>{const {state:old}=await api('/api/history/'+id);D.validate(old);confirmAction(tr('Վերականգնել նախորդ տարբերակը'),tr`Տարբերակ ${id}։ Ներկայիս տվյալներն ավտոմատ կպահվեն պատմության մեջ։`,()=>commit(s=>{Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,old);}));}
 };
@@ -2158,7 +2163,23 @@ document.addEventListener('click',e=>{
   }
   const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const fn=actions[el.dataset.action];if(fn)Promise.resolve().then(()=>fn(el.dataset.id,el)).catch(err=>toast(err.message));});
 document.addEventListener('input',e=>{if(e.target.dataset.filter==='query'){filters.query=e.target.value;page=0;renderResults();}});
-document.addEventListener('change',e=>{if(e.target.name==='name'&&e.target.closest('#modalForm'))rememberNetworkType(e.target.value);if(e.target.id==='companySelect'){switchCompany(e.target.value).catch(err=>{toast(err.message);renderCompanySelect();});return;}const k=e.target.dataset.filter;if(k&&k!=='query'){filters[k]=e.target.value;if(k==='floor'){filters.rack='';const rs=$('[data-filter=rack]');rs.innerHTML=opts([['',tr('Բոլոր ռաքերը')],...racks().filter(x=>!filters.floor||x.f.id===filters.floor).map(x=>[x.r.id,`${x.f.name} / ${x.r.name}`])],'');}page=0;renderResults();}});
+document.addEventListener('search',e=>{if(e.target.dataset.filter==='query'){filters.query=e.target.value;page=0;renderResults();}});
+document.addEventListener('change',e=>{
+  if(e.target.dataset.searchSort!==undefined||e.target.id==='searchSort'){filters.sort=e.target.value;page=0;renderResults();return;}
+  if(e.target.dataset.searchSize!==undefined||e.target.id==='searchPageSize'){searchPageSize=Number(e.target.value)||50;page=0;renderResults();return;}
+  if(e.target.name==='name'&&e.target.closest('#modalForm'))rememberNetworkType(e.target.value);
+  if(e.target.id==='companySelect'){switchCompany(e.target.value).catch(err=>{toast(err.message);renderCompanySelect();});return;}
+  const k=e.target.dataset.filter;
+  if(k&&k!=='query'){
+    filters[k]=e.target.value;
+    if(k==='floor'){
+      filters.rack='';
+      const rs=$('[data-filter=rack]');
+      if(rs)rs.innerHTML=opts([['',tr('Բոլոր ռաքերը')],...racks().filter(x=>!filters.floor||x.f.id===filters.floor).map(x=>[x.r.id,`${x.f.name} / ${x.r.name}`])],'');
+    }
+    page=0;renderResults();
+  }
+});
 window.addEventListener('hashchange',()=>{if(ready){$('#dialog').close();render();$('#content').scrollTop=0;window.scrollTo(0,0);}});
 window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||saving||portDraftDirty){recovery();e.preventDefault();e.returnValue='';}});
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});

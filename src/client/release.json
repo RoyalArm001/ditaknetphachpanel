@@ -1,25 +1,47 @@
 {
-  "version": "2.10.22",
+  "version": "2.10.23",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Շտկվել է Հաշվետվությունների և Որոնման բաժնի որոնման դաշտի սխալը (հսկա սև շրջանը)՝ ավելացվել են որոնման և ֆիլտրերի ամբողջական դիզայնն ու ոճերը։"
+      "«Մալուխներ և որոնում» բաժնում շտկվել են ֆիլտրերը մաքրելու, վիճակի կոճակների, տեսակավորման, էջի չափի փոփոխության և պորտերի անվտանգ բացման գործողությունները։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed Reports and Search layout issue where an unconstrained search icon rendered as an oversized circle, adding polished styles for cable filters and tables."
+      "Fixed interactive actions in Cables & Search: connected clear filters, status buttons, sort and page size controls, and secured port opening navigation."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлена ошибка отображения в Отчетах и Поиске (огромный черный круг вместо иконки поиска), добавлены полноценные стили для фильтров и таблиц."
+      "В разделе «Кабели и поиск» исправлены действия: очистка фильтров, переключение статусов, сортировка, размер страницы и безопасный переход к портам."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.22",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Շտկվել է Հաշվետվությունների և Որոնման բաժնի որոնման դաշտի սխալը (հսկա սև շրջանը)՝ ավելացվել են որոնման և ֆիլտրերի ամբողջական դիզայնն ու ոճերը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed Reports and Search layout issue where an unconstrained search icon rendered as an oversized circle, adding polished styles for cable filters and tables."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлена ошибка отображения в Отчетах и Поиске (огромный черный круг вместо иконки поиска), добавлены полноценные стили для фильтров и таблиц."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.21",
       "hy": {
