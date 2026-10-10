@@ -287,3 +287,40 @@ body.right-collapsed .rack-side{display:none}
 .backup-status-badge.warning{background:#fef7e0;color:#b06000}
 [data-theme=dark] .backup-status-badge.healthy{background:#133824;color:#81c995}
 [data-theme=dark] .backup-status-badge.warning{background:#3d2f0a;color:#fdd663}
+
+/* Cable search & reports styles */
+.cable-filters{padding:18px 20px;border-radius:14px;margin-bottom:18px;background:var(--surface,#fff);border:1px solid var(--line)}
+.cable-query{position:relative;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cable-query-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none;flex-shrink:0}
+.cable-query input{flex:1;min-width:0;height:42px;padding:8px 12px 8px 38px;border:1px solid var(--line);border-radius:10px;background:var(--field,#fff);color:var(--ink);font-size:13px}
+.cable-query input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(22,121,111,.15)}
+.cable-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.cable-filter-grid .field{margin:0;display:flex;flex-direction:column;gap:4px}
+.cable-filter-grid .field span{font-size:11px;font-weight:700;color:var(--muted)}
+.cable-filter-grid select{width:100%;height:38px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field,#fff);color:var(--ink);font-size:12px}
+.cable-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.cable-stat{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);color:var(--ink);cursor:pointer;font-size:12px;transition:all .15s ease}
+.cable-stat:hover{border-color:var(--accent);background:var(--surface-soft,#f4f7f6)}
+.cable-stat[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:#fff}
+.cable-stat[aria-pressed=true] strong{color:#fff}
+.cable-stat strong{font-weight:700;font-size:13px}
+.cable-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.cable-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;border:1px solid var(--line);background:var(--surface-soft,#edf3f3);color:var(--ink);font-size:11px;font-weight:600}
+button.cable-chip{cursor:pointer}
+button.cable-chip:hover{background:var(--line);border-color:var(--muted)}
+.cable-result-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.cable-result-tools>div{display:flex;align-items:center;gap:12px}
+.cable-result-tools select{height:34px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--field,#fff);color:var(--ink);font-size:12px}
+.cable-table{background:var(--surface,#fff);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+.cable-identity{display:flex;align-items:center;gap:10px}
+.cable-symbol{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--surface-soft,#edf3f3);color:var(--accent);flex-shrink:0}
+.cable-symbol svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cable-port{display:inline-block;padding:2px 6px;border-radius:4px;background:var(--surface-soft,#edf3f3);font-size:11px;font-weight:700;color:var(--ink);margin-left:4px}
+.cable-connected{display:inline-block;padding:2px 8px;border-radius:6px;background:#e8f4fd;color:#20639b;font-weight:600;font-size:11px}
+.cable-row-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.cable-rack-link{font-size:11px;font-weight:600;color:var(--accent);padding:4px 8px;border-radius:6px;background:var(--surface-soft,#edf3f3);text-decoration:none}
+.cable-rack-link:hover{text-decoration:underline}
+.cable-note{display:block;color:var(--muted);font-size:10px;margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cable-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0;font-size:12px;font-weight:600;color:var(--muted)}
+.cable-pagination .button{min-height:34px;padding:6px 14px}
+

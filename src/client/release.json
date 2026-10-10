@@ -1,25 +1,47 @@
 {
-  "version": "2.10.21",
+  "version": "2.10.22",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Էջի մասշտաբավորման (Zoom) կոճակները կարգավորվել են այնպես, որ երևան միայն ռաքի տեսքում (Rack View) և այլևս չհայտնվեն Կարգավորումներ կամ այլ էջերում։"
+      "Շտկվել է Հաշվետվությունների և Որոնման բաժնի որոնման դաշտի սխալը (հսկա սև շրջանը)՝ ավելացվել են որոնման և ֆիլտրերի ամբողջական դիզայնն ու ոճերը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Page zoom controls are now strictly scoped to Rack View, completely hidden across Settings and other workspace sections."
+      "Fixed Reports and Search layout issue where an unconstrained search icon rendered as an oversized circle, adding polished styles for cable filters and tables."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Элементы масштабирования (Zoom) теперь отображаются исключительно в режиме стойки (Rack View) и скрыты в Настройках и остальных разделах."
+      "Исправлена ошибка отображения в Отчетах и Поиске (огромный черный круг вместо иконки поиска), добавлены полноценные стили для фильтров и таблиц."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.21",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Էջի մասշտաբավորման (Zoom) կոճակները կարգավորվել են այնպես, որ երևան միայն ռաքի տեսքում (Rack View) և այլևս չհայտնվեն Կարգավորումներ կամ այլ էջերում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Page zoom controls are now strictly scoped to Rack View, completely hidden across Settings and other workspace sections."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Элементы масштабирования (Zoom) теперь отображаются исключительно в режиме стойки (Rack View) и скрыты в Настройках и остальных разделах."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.20",
       "hy": {

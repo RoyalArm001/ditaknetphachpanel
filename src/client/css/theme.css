@@ -175,3 +175,18 @@
 .live-user-details strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .live-user-tag{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
 
+[data-theme=dark] .cable-filters{background:var(--surface);border-color:var(--line)}
+[data-theme=dark] .cable-query input{background:var(--field);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cable-query-icon{color:var(--muted)}
+[data-theme=dark] .cable-filter-grid select{background:var(--field);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cable-stat{background:var(--surface);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cable-stat:hover{background:var(--surface-soft);border-color:var(--accent)}
+[data-theme=dark] .cable-chip{background:var(--surface-soft);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cable-result-tools select{background:var(--field);border-color:var(--line);color:var(--ink)}
+[data-theme=dark] .cable-table{background:var(--surface);border-color:var(--line)}
+[data-theme=dark] .cable-symbol{background:var(--surface-soft);color:var(--accent)}
+[data-theme=dark] .cable-port{background:var(--surface-soft);color:var(--ink)}
+[data-theme=dark] .cable-connected{background:#18364e;color:#8cc4f7}
+[data-theme=dark] .cable-rack-link{background:var(--surface-soft);color:var(--accent)}
+
+
