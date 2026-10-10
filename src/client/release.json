@@ -1,31 +1,47 @@
 {
-  "version": "2.10.10",
+  "version": "2.10.11",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Նույն PIN-ի վերջին հաջող մուտքն ակտիվ է․ նախորդ սարքի սեսիան անվավեր է դառնում։ Թարմացումից հետո PIN-ով մեկ նոր մուտք է պահանջվում։",
-      "Կարգավորումներում ավելացվել է գործողությունների պատմություն՝ օգտատիրոջ ID-ով, ժամով, IP-ով և գործողությամբ։ Անձնական և թիմային գրառումները մեկուսացված են։",
-      "Պատրաստվել են cloud backup-ի տեղադրման և իրական միջավայրի ստուգման հրամանները։ Իրական cloud ստուգումը սպասում է միացման կարգավորումներին։"
+      "Ուղղվել է կապերի ցանկի սպիտակ ֆոնը գիշերային ռեժիմում․ քարտերի անվանումներն ու մանրամասներն այժմ հստակ կարդացվում են։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The latest successful PIN login stays active and replaces earlier sessions. One fresh PIN login is required after this update.",
-      "Settings now includes activity history with actor ID, time, IP and action. Personal and team records stay isolated.",
-      "Added cloud backup deployment and live verification commands. Live cloud verification is pending connection configuration."
+      "Fixed white connection cards in dark mode so names and connection details remain readable."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Последний успешный вход по PIN заменяет предыдущие сеансы. После обновления потребуется один повторный вход по PIN.",
-      "В настройках появилась история действий с ID пользователя, временем, IP и действием. Личные и командные записи изолированы.",
-      "Добавлены команды установки и проверки облачных резервных копий. Проверка реального облака ожидает настройки подключения."
+      "Исправлен белый фон карточек соединений в тёмной теме: названия и детали теперь хорошо читаются."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.10",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել է կապերի ցանկի սպիտակ ֆոնը գիշերային ռեժիմում․ քարտերի անվանումներն ու մանրամասներն այժմ հստակ կարդացվում են։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed white connection cards in dark mode so names and connection details remain readable."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлен белый фон карточек соединений в тёмной теме: названия и детали теперь хорошо читаются."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.9",
       "hy": {

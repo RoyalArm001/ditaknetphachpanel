@@ -47,6 +47,9 @@
   [data-theme=dark] .status.free{background:#1c4333;color:#b4e6cd}
   [data-theme=dark] .status.used{background:#243e59;color:#b9d9fc}
   [data-theme=dark] .status.fault{background:#502e34;color:#ffb7b4}
+  [data-theme=dark] .scene-link{background:var(--surface-soft);color:var(--ink)}
+  [data-theme=dark] .scene-link:hover{background:var(--field)}
+  [data-theme=dark] .scene-count{background:var(--surface-soft)}
   [data-theme=dark] .scene-link>button:first-child{color:var(--ink)}
   [data-theme=dark] .scene-link.selected{background:#4d4321}
   [data-theme=dark] dialog::backdrop{background:#000a}
