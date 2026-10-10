@@ -2490,5 +2490,7 @@
   "Պորտեր (Զբաղված / Ազատ)": ["Ports (Used / Free)","Порты (Занято / Свободно)"],
   "Բացել ռաքը": ["Open rack","Открыть стойку"],
   "Զբաղված U": ["Used U","Занято U"],
-  "Կրկնօրինակել": ["Duplicate","Дублировать"]
+  "Կրկնօրինակել": ["Duplicate","Дублировать"],
+  "Անիմացիա": ["Animation","Анимация"],
+  "Կապերի ցուցադրական անիմացիա․ իրական տրաֆիկ չի չափվում": ["Illustrative connection animation; no live traffic is measured","Наглядная анимация соединений; реальный трафик не измеряется"]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);

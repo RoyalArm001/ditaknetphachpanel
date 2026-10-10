@@ -1,28 +1,53 @@
 {
-  "version": "2.10.14",
+  "version": "2.10.15",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "«Ցանցեր ու Սարքեր» բաժինը վերակառուցվել է առանձին բաժիններով՝ ռաուտերներ, սվիչներ, փաչ պանելներ, ռաքեր, սերվերներ/UPS/այլ և VLAN ցանցեր՝ կատեգորիաների ֆիլտրման ներդիրներով։",
-      "Ավելացվել են սարքերի ճիշտ ստանդարտ տեսակները (սերվեր, NVR/DVR, UPS, կաբել մենեջմենթ, դարակ), իսկ նոր սարքի պատուհանում PoE և SFP դաշտերը ճշգրիտ հարմարվում են ընտրված տեսակին։"
+      "Սվիչների 3D տեսքն ունի մետաղական կորպուս, օդափոխման բացվածքներ, մանրամասն RJ45 ու առանձին SFP բնիկներ։",
+      "Ավելացվել են պորտերի LED և կապերի ցուցադրական անիմացիաներ՝ անջատման կոճակով։ Անիմացիան դադարում է թաքնված էջում և հաշվի է առնում շարժման նվազեցման կարգավորումը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The Networks & Devices page now features dedicated sections for routers, switches, patch panels, racks, servers/UPS/other, and VLAN networks with category filter tabs.",
-      "Added standard hardware types (server, NVR/DVR, UPS, cable organizer, shelf) and made the device modal dynamically adapt PoE and SFP fields per device type."
+      "Refined 3D switches with a metallic chassis, ventilation, detailed RJ45 sockets and separate SFP cages.",
+      "Added illustrative port LED and connection animations with a toggle. Motion pauses when hidden and respects reduced-motion preferences."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Раздел «Сети и Устройства» получил отдельные секции для маршрутизаторов, коммутаторов, патч-панелей, стоек, серверов/ИБП и сетей VLAN с вкладками категорий.",
-      "Добавлены стандартные типы устройств (сервер, NVR/DVR, ИБП, кабельный органайзер, полка), а в модальном окне поля PoE и SFP автоматически адаптируются к типу устройства."
+      "Обновлён 3D вид коммутаторов: металлический корпус, вентиляция, подробные разъёмы RJ45 и отдельные гнёзда SFP.",
+      "Добавлена наглядная анимация индикаторов и соединений с кнопкой отключения. Движение останавливается на скрытой странице и учитывает настройку уменьшения движения."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.14",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Սվիչների 3D տեսքն ունի մետաղական կորպուս, օդափոխման բացվածքներ, մանրամասն RJ45 ու առանձին SFP բնիկներ։",
+          "Ավելացվել են պորտերի LED և կապերի ցուցադրական անիմացիաներ՝ անջատման կոճակով։ Անիմացիան դադարում է թաքնված էջում և հաշվի է առնում շարժման նվազեցման կարգավորումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Refined 3D switches with a metallic chassis, ventilation, detailed RJ45 sockets and separate SFP cages.",
+          "Added illustrative port LED and connection animations with a toggle. Motion pauses when hidden and respects reduced-motion preferences."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Обновлён 3D вид коммутаторов: металлический корпус, вентиляция, подробные разъёмы RJ45 и отдельные гнёзда SFP.",
+          "Добавлена наглядная анимация индикаторов и соединений с кнопкой отключения. Движение останавливается на скрытой странице и учитывает настройку уменьшения движения."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.13",
       "hy": {
