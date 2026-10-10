@@ -28,6 +28,10 @@
   [data-theme=dark] .settings-tabs{background:var(--surface-soft);border-color:var(--line)}
   [data-theme=dark] .settings-tab:hover{background:var(--field)}
   [data-theme=dark] .settings-tab.active{background:#16796f;color:#fff}
+  [data-theme=dark] .category-tabs{background:var(--surface-soft);border-color:var(--line)}
+  [data-theme=dark] .category-tab:hover{background:var(--field)}
+  [data-theme=dark] .category-tab.active{background:#16796f;color:#fff}
+  [data-theme=dark] .empty-section-notice{background:var(--surface-soft);border-color:var(--line)}
   [data-theme=dark] .storage-mode{border-color:#4eb1a3}
   [data-theme=dark] :is(.field,.link-config legend,.link-heading,.credits,.credits a,th,.close){color:var(--ink)}
   [data-theme=dark] :is(.close,.photo,.mobile-sheet-head){background:var(--surface-soft)}

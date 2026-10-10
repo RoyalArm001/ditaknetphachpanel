@@ -1,28 +1,53 @@
 {
-  "version": "2.10.13",
+  "version": "2.10.14",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Թարմացվել է փաչ պանելի 3D կառուցվածքը՝ բարակ կորպուսով, RJ45 բնիկներով, կոնտակտներով, համարակալմամբ և մոդելի անվանմամբ։",
-      "Պորտերը պտտվում ու մասշտաբվում են պանելի հետ։ 48 պորտը ցուցադրվում է երկու շարքով, կապերը կցված են համապատասխան բնիկներին։"
+      "«Ցանցեր ու Սարքեր» բաժինը վերակառուցվել է առանձին բաժիններով՝ ռաուտերներ, սվիչներ, փաչ պանելներ, ռաքեր, սերվերներ/UPS/այլ և VLAN ցանցեր՝ կատեգորիաների ֆիլտրման ներդիրներով։",
+      "Ավելացվել են սարքերի ճիշտ ստանդարտ տեսակները (սերվեր, NVR/DVR, UPS, կաբել մենեջմենթ, դարակ), իսկ նոր սարքի պատուհանում PoE և SFP դաշտերը ճշգրիտ հարմարվում են ընտրված տեսակին։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Refined the 3D patch panel with a shallow chassis, RJ45 sockets, contacts, numbering and model labels.",
-      "Ports rotate and scale with the panel. 48-port panels use two rows, with cables anchored to their sockets."
+      "The Networks & Devices page now features dedicated sections for routers, switches, patch panels, racks, servers/UPS/other, and VLAN networks with category filter tabs.",
+      "Added standard hardware types (server, NVR/DVR, UPS, cable organizer, shelf) and made the device modal dynamically adapt PoE and SFP fields per device type."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Обновлена 3D патч-панель: тонкий корпус, разъёмы RJ45, контакты, нумерация и название модели.",
-      "Порты вращаются и масштабируются вместе с панелью. 48 портов расположены в два ряда, кабели закреплены за соответствующими разъёмами."
+      "Раздел «Сети и Устройства» получил отдельные секции для маршрутизаторов, коммутаторов, патч-панелей, стоек, серверов/ИБП и сетей VLAN с вкладками категорий.",
+      "Добавлены стандартные типы устройств (сервер, NVR/DVR, ИБП, кабельный органайзер, полка), а в модальном окне поля PoE и SFP автоматически адаптируются к типу устройства."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.13",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Թարմացվել է փաչ պանելի 3D կառուցվածքը՝ բարակ կորպուսով, RJ45 բնիկներով, կոնտակտներով, համարակալմամբ և մոդելի անվանմամբ։",
+          "Պորտերը պտտվում ու մասշտաբվում են պանելի հետ։ 48 պորտը ցուցադրվում է երկու շարքով, կապերը կցված են համապատասխան բնիկներին։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Refined the 3D patch panel with a shallow chassis, RJ45 sockets, contacts, numbering and model labels.",
+          "Ports rotate and scale with the panel. 48-port panels use two rows, with cables anchored to their sockets."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Обновлена 3D патч-панель: тонкий корпус, разъёмы RJ45, контакты, нумерация и название модели.",
+          "Порты вращаются и масштабируются вместе с панелью. 48 портов расположены в два ряда, кабели закреплены за соответствующими разъёмами."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.12",
       "hy": {

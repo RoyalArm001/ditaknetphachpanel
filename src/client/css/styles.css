@@ -91,6 +91,19 @@ body.right-collapsed .rack-side{display:none}
 .device-type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .device-type-card{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft,#edf3f3);min-width:0}
 .device-type-card strong{overflow-wrap:anywhere}.device-type-card small{color:var(--muted)}.device-type-card .button{margin-top:auto}
+.category-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface-soft,#edf3f3)}
+.category-tab{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:8px 16px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s ease}
+.category-tab:hover{background:var(--surface,#fff);color:var(--dark,#153e42)}
+.category-tab.active{background:var(--accent,#16796f);color:#fff;box-shadow:0 4px 14px rgba(22,121,111,.25)}
+.category-tab .tab-badge{display:inline-block;padding:2px 8px;border-radius:12px;background:rgba(0,0,0,.08);font-size:11px;font-weight:600}
+.category-tab.active .tab-badge{background:rgba(255,255,255,.25);color:#fff}
+.network-section{margin-bottom:20px}
+.network-section .section-head{flex-wrap:wrap;gap:12px}
+.network-section .section-head h2{display:flex;align-items:center;gap:8px;font-size:18px}
+.network-section .section-head h2 .tab-badge{font-size:12px;padding:2px 9px;border-radius:12px;background:var(--surface-soft,#edf3f3);color:var(--muted);font-weight:600}
+.empty-section-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border:1px dashed var(--line);border-radius:10px;background:var(--surface-soft,#edf3f3)}
+.empty-section-notice p{margin:0}
+.device-color-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .network-devices .section-head{flex-wrap:wrap;gap:12px}
 .network-device-table{min-width:960px;table-layout:auto}.network-device-table td{min-width:100px;vertical-align:top}.network-device-table td:last-child{width:300px;min-width:260px}.network-device-table .actions{display:flex;flex-wrap:wrap;gap:6px}.network-device-table .actions .button{white-space:nowrap;flex:none}
 @media print{.settings-tabs,.settings-page-heading{display:none!important}}

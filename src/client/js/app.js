@@ -54,6 +54,7 @@ function renderLogin(method=pinEnabled?'pin':'account'){
 }
 let panelPrefs={left:!window.matchMedia('(max-width:760px)').matches,right:!window.matchMedia('(max-width:760px)').matches};
 let mapNavOpen=false;
+let networkActiveTab='all';
 try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k of ['left','right'])if(typeof p[k]==='boolean')panelPrefs[k]=p[k];}catch{}
 function applyPanels(){
   for(const k of ['left','right']){
@@ -295,15 +296,441 @@ function renderOverview(){const rs=racks(),ds=D.devices(state),all=D.rows(state)
 }
 function renderFloors(){$('#content').innerHTML=header(tr('Հարկեր և ռաքեր'),tr`${state.floors.length} հարկ · ${racks().length} ռաք`,button(tr('＋ Ավելացնել հարկ'),'floor','','primary'))+floorCards();}
 function renderNetworks(){
-  const list=D.networks(state);
+  const allNets=D.networks(state);
+  const devices=D.devices(state);
+  const allRacks=racks();
+  const available=allRacks.length>0;
+
+  const routers=devices.filter(x=>x.d.type==='router');
+  const switches=devices.filter(x=>x.d.type==='switch');
+  const panels=devices.filter(x=>x.d.type==='panel');
+  const others=devices.filter(x=>!['router','switch','panel'].includes(x.d.type));
+
   const typeLabel=type=>D.hasService(state,type)?D.serviceLabel(state,type):type;
   const ipText=n=>{const ips=Array.isArray(n.ip)?n.ip:(n.ip?[n.ip]:[]);return ips.length?' · '+ips.map(esc).join(', '):'';};
-  $('#content').innerHTML=header(tr('Ցանցերի տվյալներ'),tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։'),`${button(tr('Մոդելների կատալոգ'),'model-catalog')}${button(tr('Ընտրովի PDF'),'selective-pdf','','outline')}${button(tr('＋ Ավելացնել ցանց'),'network-new','','primary')}`)+(list.length?list.map(n=>`<section class="panel network-card"><div class="section-head"><div><h2>${esc(typeLabel(n.name))}</h2><p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p></div><div class="actions">${button(tr('Խմբագրել'),'network',n.id,'small')}${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}</div></div><div class="network-hosts"><strong>${tr('Սարքի IP և մուտք')}</strong><span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span></div><div class="table-wrap"><table><thead><tr><th>${tr('Սարք')}</th><th>IP</th><th>${tr('Մուտքանուն')}</th><th>${tr('Գաղտնաբառ')}</th><th></th></tr></thead><tbody>${n.hosts.map(h=>{const linked=h.deviceId?findDevice(h.deviceId):null;return `<tr><td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td><td>${esc(h.ip)}</td><td>${esc(h.username||'—')}</td><td>${h.password?'••••••':'—'}</td><td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td></tr>`;}).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}</tbody></table></div></section>`).join(''):tr('<section class="panel empty"><h2>Ցանցեր դեռ չկան</h2><p>Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։</p></section>'));
-  $('#content .page-head h1').textContent=tr('Ցանցեր ու Սարքեր');
-  $('#content .page-head p').textContent=tr('Կառավարեք ցանցերը, սարքերի տեսակները և մոդելները։ Սարքն ավելացրեք անմիջապես ընտրված ռաքում։');
-  const devices=D.devices(state),available=racks().length>0;
-  $('#content .page-head').insertAdjacentHTML('afterend',`<section class="panel network-devices"><div class="section-head"><div><h2>${tr('Սարքերի տեսակներ')}</h2><p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p></div><div class="actions">${button(tr('Մոդելների կատալոգ'),'model-catalog')}${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}</div></div>${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}<div class="device-type-grid">${D.deviceTypes(state).map(([type,label])=>`<div class="device-type-card"><strong>${esc(label)}</strong><small>${devices.filter(x=>x.d.type===type).length} ${tr('Սարք')}</small><button type="button" class="button small" data-action="catalog-device-new" data-id="${esc(type)}" ${available?'':'disabled'}>${tr('Ավելացնել ռաքում')}</button></div>`).join('')}</div></section><section class="panel network-device-list"><div class="section-head"><h2>${tr('Սարքերի ցանկ')}</h2></div>${devices.length?`<div class="table-wrap"><table class="network-device-table"><thead><tr><th>${tr('Սարք')}</th><th>${tr('Սարքի տեսակ')}</th><th>${tr('Սարքի մոդել')}</th><th>${tr('Ռաք')}</th><th>${tr('Պորտեր')}</th><th></th></tr></thead><tbody>${devices.map(({d,r,f})=>`<tr><td><strong>${esc(d.name)}</strong></td><td>${esc(D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||d.type)}</td><td>${esc(d.model||'—')}</td><td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td><td>${d.portList.length}</td><td><div class="actions">${button(tr('Խմբագրել'),'device',d.id,'small')}${button(tr('Ավելացնել նույն մոդելը'),'catalog-device-copy',d.id,'small')}<a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a><a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումների քարտեզ')}</a></div></td></tr>`).join('')}</tbody></table></div>`:`<p class="hint">${tr('Ընտրեք տեսակը, լրացրեք մոդելը և ընտրեք ռաքը։')}</p>`}</section>`);
-  $('#content .network-device-list')?.remove();
+
+  const pageHead=header(
+    tr('Ցանցեր ու Սարքեր'),
+    tr('Կառավարեք ռաուտերները, սվիչները, փաչ պանելները, ռաքերը և VLAN ցանցերը առանձին բաժիններով։'),
+    `${button(tr('Մոդելների կատալոգ'),'model-catalog')}${button(tr('Կառավարել սարքերի տեսակները'),'device-types')}${button(tr('Ընտրովի PDF'),'selective-pdf','','outline')}${button(tr('＋ Ավելացնել ցանց'),'network-new','','primary')}`
+  );
+
+  const tabs=[
+    {id:'all',label:tr('Բոլորը'),count:devices.length+allRacks.length},
+    {id:'routers',label:`🌐 ${tr('Ռաուտերներ')}`,count:routers.length},
+    {id:'switches',label:`⚡ ${tr('Սվիչներ')}`,count:switches.length},
+    {id:'panels',label:`🔲 ${tr('Փաչ պանելներ')}`,count:panels.length},
+    {id:'racks',label:`🗄️ ${tr('Ռաքեր')}`,count:allRacks.length},
+    {id:'others',label:`🖥️ ${tr('Սերվերներ / UPS / Այլ')}`,count:others.length},
+    {id:'vlans',label:`🔀 ${tr('VLAN Ցանցեր')}`,count:allNets.length}
+  ];
+
+  const tabsHtml=`
+    <div class="category-tabs" role="tablist">
+      ${tabs.map(t=>`
+        <button type="button" class="category-tab ${networkActiveTab===t.id?'active':''}" data-action="network-tab" data-id="${t.id}" role="tab" aria-selected="${networkActiveTab===t.id}">
+          <span>${t.label}</span>
+          <span class="tab-badge">${t.count}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  const showAll=networkActiveTab==='all';
+
+  let routersHtml='';
+  if(showAll||networkActiveTab==='routers'){
+    routersHtml=`
+      <section class="panel network-section">
+        <div class="section-head">
+          <div>
+            <h2>🌐 ${tr('Ռաուտերներ')} <span class="tab-badge">${routers.length}</span></h2>
+            <p class="hint">${tr('Ցանցային երթուղղիչներ (Routers), WAN մուտքեր և դարպասներ (Gateways)')}</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="button small primary" data-action="catalog-device-new" data-id="router" ${available?'':'disabled'}>${tr('＋ Ավելացնել ռաուտեր')}</button>
+          </div>
+        </div>
+        ${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}
+        ${routers.length?`
+          <div class="table-wrap">
+            <table class="network-device-table">
+              <thead>
+                <tr>
+                  <th>${tr('Սարք')}</th>
+                  <th>${tr('Սարքի մոդել')}</th>
+                  <th>${tr('Ռաք / Տեղադրություն')}</th>
+                  <th>${tr('Բարձրություն U')}</th>
+                  <th>${tr('Պորտեր')}</th>
+                  <th>${tr('Ցանց / IP')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${routers.map(({d,r,f})=>{
+                  const linkedHosts=D.hostsForDevice(state,d.id);
+                  const firstHost=linkedHosts[0];
+                  const hostLabel=firstHost?`${esc(firstHost.h.ip)} (VLAN ${esc(firstHost.n.vlan)})`:'—';
+                  const sfpText=d.sfpCount?` + ${d.sfpCount} SFP`:'';
+                  const copperCount=d.portList.length-(d.sfpCount||0);
+                  return `
+                    <tr>
+                      <td><span class="device-color-dot" style="background:${esc(d.color||'#397c78')}"></span><strong>${esc(d.name)}</strong></td>
+                      <td>${esc(d.model||'—')}</td>
+                      <td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td>
+                      <td>${d.height}U</td>
+                      <td>${copperCount} ${tr('պորտ')}${sfpText}</td>
+                      <td>${hostLabel}</td>
+                      <td>
+                        <div class="actions">
+                          ${button(tr('Խմբագրել'),'device',d.id,'small')}
+                          ${button(tr('Կրկնօրինակել'),'catalog-device-copy',d.id,'small')}
+                          <a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a>
+                          <a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումներ')}</a>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `:`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Դեռ ռաուտեր չկա։ Սեղմեք «＋ Ավելացնել ռաուտեր» ընտրված ռաքում տեղադրելու համար։')}</p>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="router" ${available?'':'disabled'}>${tr('＋ Ավելացնել ռաուտեր')}</button>
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  let switchesHtml='';
+  if(showAll||networkActiveTab==='switches'){
+    switchesHtml=`
+      <section class="panel network-section">
+        <div class="section-head">
+          <div>
+            <h2>⚡ ${tr('Սվիչներ')} <span class="tab-badge">${switches.length}</span></h2>
+            <p class="hint">${tr('Կոմուտատորներ (Switches), PoE սնուցում և օպտիկական SFP կապեր')}</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="button small primary" data-action="catalog-device-new" data-id="switch" ${available?'':'disabled'}>${tr('＋ Ավելացնել սվիչ')}</button>
+          </div>
+        </div>
+        ${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}
+        ${switches.length?`
+          <div class="table-wrap">
+            <table class="network-device-table">
+              <thead>
+                <tr>
+                  <th>${tr('Սարք')}</th>
+                  <th>${tr('Սարքի մոդել')}</th>
+                  <th>${tr('Տեսակ / PoE')}</th>
+                  <th>${tr('Ռաք / Տեղադրություն')}</th>
+                  <th>${tr('Բարձրություն U')}</th>
+                  <th>${tr('Պորտեր (Զբաղված / Ազատ)')}</th>
+                  <th>${tr('Օպտիկական SFP պորտեր')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${switches.map(({d,r,f})=>{
+                  const usedPorts=d.portList.filter(p=>p.status!=='free').length;
+                  const freePorts=d.portList.length-usedPorts;
+                  const poeLabel=d.modelType==='poe'?'PoE':d.modelType==='poe-plus'?'PoE+':tr('Առանց PoE');
+                  return `
+                    <tr>
+                      <td><span class="device-color-dot" style="background:${esc(d.color||'#397c78')}"></span><strong>${esc(d.name)}</strong></td>
+                      <td>${esc(d.model||'—')}</td>
+                      <td>${esc(poeLabel)}</td>
+                      <td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td>
+                      <td>${d.height}U</td>
+                      <td><strong>${usedPorts}</strong> / ${freePorts} (${d.portList.length})</td>
+                      <td>${d.sfpCount?`${d.sfpCount} SFP`:'—'}</td>
+                      <td>
+                        <div class="actions">
+                          ${button(tr('Խմբագրել'),'device',d.id,'small')}
+                          ${button(tr('Կրկնօրինակել'),'catalog-device-copy',d.id,'small')}
+                          <a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a>
+                          <a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումներ')}</a>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `:`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Դեռ սվիչ չկա։ Սեղմեք «＋ Ավելացնել սվիչ» ընտրված ռաքում տեղադրելու համար։')}</p>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="switch" ${available?'':'disabled'}>${tr('＋ Ավելացնել սվիչ')}</button>
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  let panelsHtml='';
+  if(showAll||networkActiveTab==='panels'){
+    panelsHtml=`
+      <section class="panel network-section">
+        <div class="section-head">
+          <div>
+            <h2>🔲 ${tr('Փաչ պանելներ')} <span class="tab-badge">${panels.length}</span></h2>
+            <p class="hint">${tr('Կոմուտացիոն պանելներ (Patch Panels), ODF և մալուխային միացումներ')}</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="button small primary" data-action="catalog-device-new" data-id="panel" ${available?'':'disabled'}>${tr('＋ Ավելացնել փաչ պանել')}</button>
+          </div>
+        </div>
+        ${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}
+        ${panels.length?`
+          <div class="table-wrap">
+            <table class="network-device-table">
+              <thead>
+                <tr>
+                  <th>${tr('Սարք')}</th>
+                  <th>${tr('Սարքի մոդել')}</th>
+                  <th>${tr('Ռաք / Տեղադրություն')}</th>
+                  <th>${tr('Բարձրություն U')}</th>
+                  <th>${tr('Պորտեր (Զբաղված / Ազատ)')}</th>
+                  <th>${tr('Կապված սվիչի հետ')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${panels.map(({d,r,f})=>{
+                  const usedPorts=d.portList.filter(p=>p.status!=='free').length;
+                  const freePorts=d.portList.length-usedPorts;
+                  const linkedCount=d.portList.filter(p=>p.switchPortId).length;
+                  return `
+                    <tr>
+                      <td><span class="device-color-dot" style="background:${esc(d.color||'#397c78')}"></span><strong>${esc(d.name)}</strong></td>
+                      <td>${esc(d.model||'—')}</td>
+                      <td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td>
+                      <td>${d.height}U</td>
+                      <td><strong>${usedPorts}</strong> / ${freePorts} (${d.portList.length})</td>
+                      <td>${linkedCount?`${linkedCount} ${tr('պորտ')}`:'—'}</td>
+                      <td>
+                        <div class="actions">
+                          ${button(tr('Խմբագրել'),'device',d.id,'small')}
+                          ${button(tr('Կրկնօրինակել'),'catalog-device-copy',d.id,'small')}
+                          <a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a>
+                          <a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումներ')}</a>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `:`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Դեռ փաչ պանել չկա։ Սեղմեք «＋ Ավելացնել փաչ պանել» ընտրված ռաքում տեղադրելու համար։')}</p>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="panel" ${available?'':'disabled'}>${tr('＋ Ավելացնել փաչ պանել')}</button>
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  let racksHtml='';
+  if(showAll||networkActiveTab==='racks'){
+    racksHtml=`
+      <section class="panel network-section">
+        <div class="section-head">
+          <div>
+            <h2>🗄️ ${tr('Ռաքեր')} <span class="tab-badge">${allRacks.length}</span></h2>
+            <p class="hint">${tr('19" հեռահաղորդակցական պահարաններ, չափսեր և զբաղվածություն')}</p>
+          </div>
+          <div class="actions">
+            ${button(tr('＋ Ավելացնել ռաք'),'rack-new-any','','small primary')}
+            <a class="button small outline" href="#floors">${tr('Հարկեր և ռաքեր')}</a>
+          </div>
+        </div>
+        ${allRacks.length?`
+          <div class="table-wrap">
+            <table class="network-device-table">
+              <thead>
+                <tr>
+                  <th>${tr('Ռաքի անվանում')}</th>
+                  <th>${tr('Հարկ')}</th>
+                  <th>${tr('Բարձրություն U')}</th>
+                  <th>${tr('Զբաղված U')}</th>
+                  <th>${tr('Սարքեր')}</th>
+                  <th>${tr('Տեղադրություն')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allRacks.map(({r,f})=>{
+                  const usedU=r.devices.reduce((acc,dev)=>acc+(dev.height||1),0);
+                  const pct=Math.round((usedU/r.u)*100);
+                  return `
+                    <tr>
+                      <td><strong>${esc(r.name)}</strong></td>
+                      <td>${esc(f.name)}</td>
+                      <td>${r.u}U</td>
+                      <td>${usedU}U / ${r.u}U (${pct}%)</td>
+                      <td>${r.devices.length} ${tr('սարք')}</td>
+                      <td>${esc(r.location||'—')}</td>
+                      <td>
+                        <div class="actions">
+                          <a class="button small primary" href="#rack/${encodeURIComponent(r.id)}">${tr('Բացել ռաքը')}</a>
+                          <a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումներ')}</a>
+                          ${button(tr('Խմբագրել'),'rack',r.id,'small')}
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `:`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Դեռ ռաքեր չկան։ Ստեղծեք առաջին ռաքը սարքեր տեղադրելու համար։')}</p>
+            ${button(tr('＋ Ավելացնել ռաք'),'rack-new-any','','small primary')}
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  let othersHtml='';
+  if(showAll||networkActiveTab==='others'){
+    othersHtml=`
+      <section class="panel network-section">
+        <div class="section-head">
+          <div>
+            <h2>🖥️ ${tr('Սերվերներ, NVR, UPS և այլ սարքեր')} <span class="tab-badge">${others.length}</span></h2>
+            <p class="hint">${tr('Սերվերներ, տեսաձայնագրիչներ, UPS սնուցում, օրգանայզերներ և դարակներ')}</p>
+          </div>
+          <div class="actions" style="display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="server" ${available?'':'disabled'}>${tr('＋ Սերվեր')}</button>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="nvr" ${available?'':'disabled'}>${tr('＋ NVR')}</button>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="ups" ${available?'':'disabled'}>${tr('＋ UPS')}</button>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="organizer" ${available?'':'disabled'}>${tr('＋ Օրգանայզեր')}</button>
+            <button type="button" class="button small" data-action="catalog-device-new" data-id="shelf" ${available?'':'disabled'}>${tr('＋ Դարակ')}</button>
+          </div>
+        </div>
+        ${!available?`<p class="hint">${tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։')} <a class="button small" href="#floors">${tr('Հարկեր և ռաքեր')}</a></p>`:''}
+        ${others.length?`
+          <div class="table-wrap">
+            <table class="network-device-table">
+              <thead>
+                <tr>
+                  <th>${tr('Սարք')}</th>
+                  <th>${tr('Սարքի տեսակ')}</th>
+                  <th>${tr('Սարքի մոդել')}</th>
+                  <th>${tr('Ռաք / Տեղադրություն')}</th>
+                  <th>${tr('Բարձրություն U')}</th>
+                  <th>${tr('Պորտեր')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${others.map(({d,r,f})=>`
+                  <tr>
+                    <td><span class="device-color-dot" style="background:${esc(d.color||'#397c78')}"></span><strong>${esc(d.name)}</strong></td>
+                    <td>${esc(D.deviceTypes(state).find(([k])=>k===d.type)?.[1]||d.type)}</td>
+                    <td>${esc(d.model||'—')}</td>
+                    <td>${esc(f.name)} / ${esc(r.name)} · U${d.pos}</td>
+                    <td>${d.height}U</td>
+                    <td>${d.portList.length?`${d.portList.length} ${tr('պորտ')}`:'—'}</td>
+                    <td>
+                      <div class="actions">
+                        ${button(tr('Խմբագրել'),'device',d.id,'small')}
+                        ${button(tr('Կրկնօրինակել'),'catalog-device-copy',d.id,'small')}
+                        <a class="button small" href="#rack/${encodeURIComponent(r.id)}">${tr('Ռաք')}</a>
+                        <a class="button small" href="#connections/${encodeURIComponent(r.id)}">${tr('Միացումներ')}</a>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `:`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Դեռ սերվերներ, NVR կամ UPS սարքեր ավելացված չեն։')}</p>
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  let vlansHtml='';
+  if(showAll||networkActiveTab==='vlans'){
+    vlansHtml=`
+      <section class="panel network-section network-vlans">
+        <div class="section-head">
+          <div>
+            <h2>🔀 ${tr('VLAN Ցանցեր և IP հասցեներ')} <span class="tab-badge">${allNets.length}</span></h2>
+            <p class="hint">${tr('Նախօրոք գրանցեք VLAN-ները, VLAN IP-ները և սարքերի մուտքի տվյալները։')}</p>
+          </div>
+          <div class="actions">
+            ${button(tr('＋ Ավելացնել ցանց'),'network-new','','small primary')}
+          </div>
+        </div>
+        ${allNets.length?allNets.map(n=>`
+          <div class="panel network-card" style="margin-top:14px">
+            <div class="section-head">
+              <div>
+                <h2>${esc(typeLabel(n.name))}</h2>
+                <p class="hint">VLAN ${esc(n.vlan)}${ipText(n)}</p>
+              </div>
+              <div class="actions">
+                ${button(tr('Խմբագրել'),'network',n.id,'small')}
+                ${button(tr('＋ Պահպանել IP / գաղտնաբառ'),'host-new',n.id,'small primary')}
+              </div>
+            </div>
+            <div class="network-hosts">
+              <strong>${tr('Սարքի IP և մուտք')}</strong>
+              <span class="hint">${tr('Այս VLAN-ի սարքերի IP հասցեները, մուտքանունները և գաղտնաբառերը')}</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>${tr('Սարք')}</th>
+                    <th>IP</th>
+                    <th>${tr('Մուտքանուն')}</th>
+                    <th>${tr('Գաղտնաբառ')}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${n.hosts.map(h=>{
+                    const linked=h.deviceId?findDevice(h.deviceId):null;
+                    return `
+                      <tr>
+                        <td><strong>${esc(h.name)}</strong>${linked?`<small>${esc(linked.f.name)} · ${esc(linked.r.name)}</small>`:''}</td>
+                        <td>${esc(h.ip)}</td>
+                        <td>${esc(h.username||'—')}</td>
+                        <td>${h.password?'••••••':'—'}</td>
+                        <td>${button(tr('Փոխել'),'host',n.id+'/'+h.id,'small')}</td>
+                      </tr>
+                    `;
+                  }).join('')||tr`<tr><td colspan="5">${tr('Դեռ սարքի IP և մուտքի տվյալներ չկան։ Սեղմեք «Պահպանել IP / գաղտնաբառ»։')}</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `).join(''):`
+          <div class="empty-section-notice">
+            <p class="hint">${tr('Ավելացրեք VLAN և այդ VLAN-ի IP-ն, ապա գրեք սարքերի IP-ները՝ մուտքանուններով և գաղտնաբառերով։')}</p>
+            ${button(tr('＋ Ավելացնել ցանց'),'network-new','','small primary')}
+          </div>
+        `}
+      </section>
+    `;
+  }
+
+  $('#content').innerHTML=pageHead+tabsHtml+routersHtml+switchesHtml+panelsHtml+racksHtml+othersHtml+vlansHtml;
 }
 function networkModal(id=''){
   const network=D.networks(state).find(x=>x.id===id);
@@ -713,16 +1140,28 @@ window.addEventListener('online',()=>AppReset.ensureSessionCleared().catch(()=>{
 function confirmAction(title,description,action){modal(title,`<p>${esc(description)}</p>`,async()=>action());}
 function floorModal(id){const f=state.floors.find(x=>x.id===id);modal(f?tr('Խմբագրել հարկը'):tr('Նոր հարկ'),input('name',tr('Հարկի անվանում'),f?.name||'','text','required maxlength="200"'),fd=>commit(s=>{if(f)s.floors.find(x=>x.id===id).name=fd.get('name').trim();else s.floors.push({id:uid(),name:fd.get('name').trim(),racks:[]});}),f?button(tr('Ջնջել հարկը'),'floor-delete',id,'danger'):'');}
 function rackModal(id,floorId){const found=findRack(id),r=found?.r;modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),found?.f.id||floorId)}${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div>`,fd=>commit(s=>{const target=s.floors.find(f=>f.id===fd.get('floorId'));if(r){let source=s.floors.find(f=>f.racks.some(x=>x.id===id));const edit=source.racks.find(x=>x.id===id);Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});if(source.id!==target.id){source.racks=source.racks.filter(x=>x.id!==id);target.racks.push(edit);}}else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});}),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');$('#preset').onchange=e=>{if(e.target.value)$('#u').value=e.target.value;};}
-function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=found?.d,r=found?.r||findRack(rackId)?.r||(!id&&!rackId?racks()[0]?.r:null);if(!r)return;
+function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=found?.d,r=found?.r||findRack(rackId)?.r||(!id&&!rackId?racks()[0]?.r:null);
+  if(!r){
+    if(racks().length===0){toast(tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։'));location.hash='floors';return;}
+    return;
+  }
   const catalog=!id&&!rackId,defaults=d||preset;
-  const existingPortCount=defaults.portList?.length-(defaults.sfpCount||0)||24;
+  const currentType=defaults?.type||'panel';
+  const existingPortCount=defaults.portList?.length-(defaults.sfpCount||0)||(currentType==='router'?8:['organizer','shelf'].includes(currentType)?1:24);
   const initialCustomPortCount=[4,6,8,12,16,24,48].includes(existingPortCount)?'':existingPortCount;
   const nextPosition=position||Array.from({length:r.u},(_,i)=>r.u-i).find(u=>!r.devices.some(d=>u>=d.pos&&u<d.pos+d.height))||1;
   const nets=D.networks(state),linked=d?D.hostsForDevice(state,d.id):[],first=linked[0];
-  modal(d?tr('Խմբագրել սարքը'):tr('Նոր սարք'),tr`<div class="form-grid">${catalog?select('targetRack',tr('Ռաք'),racks().map(({r,f})=>[r.id,`${f.name} / ${r.name}`]),r.id):''}${input('name',tr('Սարքի անվանում'),d?.name||'','text',tr('required maxlength="200" placeholder="PP-01 կամ SW-01"'))}${select('type',tr('Սարքի տեսակ'),D.deviceTypes(state),defaults?.type||'panel')}${input('model',tr('Սարքի մոդել'),defaults?.model||'','text','maxlength="200" list="knownDeviceModels" placeholder="MikroTik / UniFi / Cisco"')}${select('modelType',tr('Սվիչի մոդելի տեսակ'),[['',tr('Ընտրել')],['poe','PoE'],['poe-plus','PoE+'],['none',tr('Առանց PoE')]],defaults?.modelType||'')}${input('pos',tr('Սկզբնական U դիրք ներքևից'),d?.pos||nextPosition,'number',`required min="1" max="${r.u}"`)}${input('height',tr('Բարձրություն U'),defaults?.height||1,'number',`required min="1" max="${r.u}"`)}${select('count',tr('Հիմնական պորտերի քանակ'),[],existingPortCount)}${input('customCount',tr('Այլ քանակ / ձեռքով'),initialCustomPortCount,'number','min="1" max="96" step="1" placeholder="1–96"')}${select('sfpCount',tr('Օպտիկական SFP պորտեր'),[0,1,2,4,8,16].map(n=>[n,n?`${n} SFP / SFP+`:tr('Չկա')]),defaults?.sfpCount||0)}<div class="field"><label for="color">${tr('Փաչ պանելի կամ սվիչի գույնը 3D-ում')}</label><input id="color" name="color" type="color" value="${esc(defaults?.color||'#397c78')}" required></div>${!d?select('initialStatus',tr('Նոր պորտերի սկզբնական վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),'free')+select('initialService',tr('Նոր պորտերի նշանակություն'),D.serviceEntries(state).map(([key])=>[key,D.serviceLabel(state,key)]),''):''}<datalist id="knownDeviceModels">${[...new Set(D.devices(state).map(x=>x.d.model).filter(Boolean))].map(model=>`<option value="${esc(model)}"></option>`).join('')}</datalist><datalist id="heights"><option value="1"><option value="2"><option value="4"></datalist><datalist id="portCounts"><option value="12"><option value="24"><option value="48"></option></datalist>
+  const typeTitle=D.deviceTypes(state).find(([t])=>t===currentType)?.[1]||tr('Սարք');
+  modal(d?tr('Խմբագրել սարքը'):tr('Նոր սարք'),tr`<div class="form-grid">${catalog?select('targetRack',tr('Ռաք'),racks().map(({r,f})=>[r.id,`${f.name} / ${r.name}`]),r.id):''}${input('name',tr('Սարքի անվանում'),d?.name||'','text',tr('required maxlength="200" placeholder="PP-01 կամ SW-01"'))}${select('type',tr('Սարքի տեսակ'),D.deviceTypes(state),currentType)}${input('model',tr('Սարքի մոդել'),defaults?.model||'','text','maxlength="200" list="knownDeviceModels" placeholder="MikroTik / UniFi / Cisco"')}${select('modelType',tr('Սվիչի մոդելի տեսակ'),[['',tr('Ընտրել')],['poe','PoE'],['poe-plus','PoE+'],['none',tr('Առանց PoE')]],defaults?.modelType||'')}${input('pos',tr('Սկզբնական U դիրք ներքևից'),d?.pos||nextPosition,'number',`required min="1" max="${r.u}"`)}${input('height',tr('Բարձրություն U'),defaults?.height||1,'number',`required min="1" max="${r.u}"`)}${select('count',tr('Հիմնական պորտերի քանակ'),[],existingPortCount)}${input('customCount',tr('Այլ քանակ / ձեռքով'),initialCustomPortCount,'number','min="1" max="96" step="1" placeholder="1–96"')}${select('sfpCount',tr('Օպտիկական SFP պորտեր'),[0,1,2,4,8,16].map(n=>[n,n?`${n} SFP / SFP+`:tr('Չկա')]),defaults?.sfpCount||0)}<div class="field"><label for="color">${typeTitle}-ի գույնը 3D-ում</label><input id="color" name="color" type="color" value="${esc(defaults?.color||'#397c78')}" required></div>${!d?select('initialStatus',tr('Նոր պորտերի սկզբնական վիճակ'),Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),'free')+select('initialService',tr('Նոր պորտերի նշանակություն'),D.serviceEntries(state).map(([key])=>[key,D.serviceLabel(state,key)]),''):''}<datalist id="knownDeviceModels">${[...new Set(D.devices(state).map(x=>x.d.model).filter(Boolean))].map(model=>`<option value="${esc(model)}"></option>`).join('')}</datalist><datalist id="heights"><option value="1"><option value="2"><option value="4"></datalist><datalist id="portCounts"><option value="12"><option value="24"><option value="48"></option></datalist>
   <div class="field full"><p class="hint">${nets.length?tr('Սարքի IP-ն, մուտքանունը և գաղտնաբառը պահվում են ընտրված VLAN ցանցում։'):tr('Նախ «Ցանցեր» բաժնում ավելացրեք VLAN։')}</p></div>
-  ${nets.length?select('hostNetworkId',tr('Ցանց'),[['',tr('Չնշել')],...nets.map(n=>[n.id,networkLabel(n)])],first?.n.id||'')+input('hostIp',tr('Սարքի IP'),first?.h.ip||'','text',tr('maxlength="200" placeholder="192.168.10.2" inputmode="decimal" autocomplete="off"'))+input('hostUsername',tr('Մուտքանուն'),first?.h.username||'','text','maxlength="200" autocomplete="off"')+secretInput('hostPassword',tr('Գաղտնաբառ'),first?.h.password||''):''}</div><p class="form-note">Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։</p>`,fd=>commit(s=>{
-    const rr=s.floors.flatMap(f=>f.racks).find(x=>x.id===(catalog?fd.get('targetRack'):r.id));if(!rr)throw new Error(tr('Ռաքը չի գտնվել'));const edit=d?rr.devices.find(x=>x.id===id):{id:uid(),portList:[]};const selectedCount=String(fd.get('count')||'');const count=selectedCount==='custom'?Number(fd.get('customCount')):Number(selectedCount);if(!Number.isInteger(count)||count<1||count>96)throw new Error(tr('Պորտերի քանակը պետք է լինի 1–96'));const sfpCount=D.isNetworkDevice({type:fd.get('type')})?+fd.get('sfpCount'):0;const previousSfp=edit.sfpCount||0,split=edit.portList.length-previousSfp,copper=edit.portList.slice(0,split),optical=edit.portList.slice(split);
+  ${nets.length?select('hostNetworkId',tr('Ցանց'),[['',tr('Չնշել')],...nets.map(n=>[n.id,networkLabel(n)])],first?.n.id||'')+input('hostIp',tr('Սարքի IP'),first?.h.ip||'','text',tr('maxlength="200" placeholder="192.168.10.2" inputmode="decimal" autocomplete="off"'))+input('hostUsername',tr('Մուտքանուն'),first?.h.username||'','text','maxlength="200" autocomplete="off"')+secretInput('hostPassword',tr('Գաղտնաբառ'),first?.h.password||''):''}</div><p class="form-note">${tr('Սվիչի համար ընտրեք PoE, PoE+ կամ առանց PoE։')}</p>`,fd=>commit(s=>{
+    const rr=s.floors.flatMap(f=>f.racks).find(x=>x.id===(catalog?fd.get('targetRack'):r.id));if(!rr)throw new Error(tr('Ռաքը չի գտնվել'));const edit=d?rr.devices.find(x=>x.id===id):{id:uid(),portList:[]};
+    const isPassive=['organizer','shelf'].includes(fd.get('type'));
+    const selectedCount=String(fd.get('count')||'');
+    const count=isPassive?1:(selectedCount==='custom'?Number(fd.get('customCount')):Number(selectedCount));
+    if(!Number.isInteger(count)||count<1||count>96)throw new Error(tr('Պորտերի քանակը պետք է լինի 1–96'));
+    const sfpCount=D.isNetworkDevice({type:fd.get('type')})?+fd.get('sfpCount'):0;
+    const previousSfp=edit.sfpCount||0,split=edit.portList.length-previousSfp,copper=edit.portList.slice(0,split),optical=edit.portList.slice(split);
     const removed=[...copper.slice(count),...optical.slice(sfpCount)];if(removed.some(p=>p.status!=='free'||p.endpointName||p.cable||p.floorId||p.door||p.side||p.room||p.notes||p.service||p.vlan||p.switchPortId||(s.floorPlans||[]).some(plan=>plan.markers.some(m=>m.portId===p.id))||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Հեռացվող պորտերում կան տվյալներ կամ կապեր։ Նախ մաքրեք դրանք։'));
     if(d&&d.type!==fd.get('type')&&edit.portList.some(p=>p.switchPortId||D.ports(s).some(x=>x.p.switchPortId===p.id)))throw new Error(tr('Կապված սարքի տեսակը փոխելուց առաջ անջատեք կապերը։'));
     Object.assign(edit,{name:fd.get('name').trim(),type:fd.get('type'),model:String(fd.get('model')||'').trim(),sfpCount,modelType:fd.get('type')==='switch'?String(fd.get('modelType')||''):'',pos:+fd.get('pos'),height:+fd.get('height'),color:fd.get('color')});
@@ -738,21 +1177,79 @@ function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=
     }
   }),d?button(tr('Ջնջել սարքը'),'device-delete',id,'danger'):'');
   const setPortChoices=(preferred)=>{
+    const curType=$('#type')?.value||'panel';
     const counts=[4,6,8,12,16,24,48];
-    const preferredNumber=Number(preferred),hasPreferred=Number.isInteger(preferredNumber)&&preferredNumber>0,custom=hasPreferred&&!counts.includes(preferredNumber),chosen=custom?'custom':hasPreferred?preferredNumber:24;
+    const defaultCount=curType==='router'?8:['organizer','shelf'].includes(curType)?1:24;
+    const preferredNumber=Number(preferred),hasPreferred=Number.isInteger(preferredNumber)&&preferredNumber>0,custom=hasPreferred&&!counts.includes(preferredNumber),chosen=custom?'custom':hasPreferred?preferredNumber:defaultCount;
     $('#count').innerHTML=opts([...counts.map(n=>[n,n+tr(' պորտ')]),['custom',tr('Այլ քանակ / ձեռքով')]],chosen);
     const customField=$('#customCount')?.closest('.field'),customInput=$('#customCount');
     if(customField)customField.hidden=!custom;
     if(customInput){customInput.required=custom;if(custom&&(!customInput.value||Number(customInput.value)!==preferredNumber))customInput.value=custom?preferredNumber:'';}
     $('#count').onchange=()=>{const selected=$('#count').value==='custom';if(customField)customField.hidden=!selected;if(customInput)customInput.required=selected;};
   };
-  setPortChoices(defaults.portList?defaults.portList.length-(defaults.sfpCount||0):24);
+  setPortChoices(defaults.portList?defaults.portList.length-(defaults.sfpCount||0):(currentType==='router'?8:['organizer','shelf'].includes(currentType)?1:24));
   const syncTypeFields=()=>{
-    const type=$('#type').value;
-    for(const [id,visible] of [['modelType',type==='switch'],['sfpCount',D.isNetworkDevice({type})]]){
-      const field=$('#'+id);field.closest('.field').hidden=!visible;field.disabled=!visible;
+    const curType=$('#type')?.value||'panel';
+    const isSwitch=curType==='switch';
+    const isRouter=curType==='router';
+    const isPanel=curType==='panel';
+    const isPassive=['organizer','shelf'].includes(curType);
+    const canHaveSfp=D.isNetworkDevice({type:curType});
+
+    for(const [elemId,visible] of [['modelType',isSwitch],['sfpCount',canHaveSfp]]){
+      const el=$('#'+elemId);
+      if(el){
+        el.disabled=!visible;
+        const f=el.closest?.('.field');
+        if(f)f.hidden=!visible;
+      }
     }
-    $('#model').placeholder=type==='panel'?'Cat6 UTP / Cat6A FTP':type==='router'?'MikroTik CCR / RB5009 / Cisco ISR':'MikroTik / UniFi / Cisco';
+    if(!isSwitch&&$('#modelType'))$('#modelType').value='';
+    if(!canHaveSfp&&$('#sfpCount'))$('#sfpCount').value='0';
+
+    const formNote=typeof document!=='undefined'&&document.querySelector?document.querySelector('#dialog .form-note'):null;
+    if(formNote)formNote.hidden=!isSwitch;
+
+    const countField=$('#count')?.closest?.('.field');
+    if(countField)countField.hidden=isPassive;
+    const customCountField=$('#customCount')?.closest?.('.field');
+    if(customCountField&&isPassive)customCountField.hidden=true;
+
+    [$('#hostNetworkId'),$('#hostIp'),$('#hostUsername'),$('#hostPassword')].forEach(el=>{
+      const f=el?.closest?.('.field');
+      if(f)f.hidden=isPassive;
+    });
+
+    const colorField=$('#color')?.closest?.('.field');
+    const colorLabel=colorField?.querySelector?.('label')||(typeof document!=='undefined'&&document.querySelector?document.querySelector('label[for="color"]'):null);
+    if(colorLabel){
+      const currentTitle=D.deviceTypes(state).find(([t])=>t===curType)?.[1]||tr('Սարք');
+      colorLabel.textContent=tr`${currentTitle}-ի գույնը 3D-ում`;
+    }
+
+    const nameInput=$('#name');
+    if(nameInput&&(!nameInput.value||['PP-01 կամ SW-01','RT-01','SW-01','PP-01'].some(p=>nameInput.value===p))){
+      if(isRouter)nameInput.placeholder='RT-01 կամ CCR2004';
+      else if(isSwitch)nameInput.placeholder='SW-01 կամ USW-24';
+      else if(isPanel)nameInput.placeholder='PP-01 կամ ODF-01';
+      else if(curType==='server')nameInput.placeholder='SRV-01';
+      else if(curType==='nvr')nameInput.placeholder='NVR-01';
+      else if(curType==='ups')nameInput.placeholder='UPS-01';
+      else if(curType==='organizer')nameInput.placeholder='ORG-01';
+      else if(curType==='shelf')nameInput.placeholder='SHELF-01';
+      else nameInput.placeholder='DEV-01';
+    }
+
+    const modelInput=$('#model');
+    if(modelInput){
+      if(isRouter)modelInput.placeholder='MikroTik CCR / Cisco ISR / UniFi Gateway';
+      else if(isSwitch)modelInput.placeholder='Cisco Catalyst / UniFi USW / MikroTik CRS';
+      else if(isPanel)modelInput.placeholder='Cat6 UTP / Cat6A FTP / ODF';
+      else if(curType==='server')modelInput.placeholder='Dell PowerEdge / HPE ProLiant';
+      else if(curType==='nvr')modelInput.placeholder='Hikvision / Dahua NVR';
+      else if(curType==='ups')modelInput.placeholder='APC Smart-UPS / Eaton';
+      else modelInput.placeholder='MikroTik / Cisco / Ubiquiti';
+    }
   };
   $('#model').closest('.field').insertAdjacentHTML('beforebegin',select('modelPreset',tr('Մոդելների կատալոգ'),[['',tr('Ընտրել')]],''));
   const updateKnownModels=()=>{
@@ -1141,6 +1638,8 @@ const actions={
   'backup-snapshots':backupSnapshotsModal,
   'backup-preview':id=>backupPreviewModal(id),
   'backup-restore-confirm':id=>backupRestoreExecute(id),
+  'network-tab':id=>{networkActiveTab=id;renderNetworks();},
+  'rack-new-any':()=>{if(!state.floors.length)floorModal();else rackModal('',state.floors[0].id);},
   'catalog-device-new':type=>deviceModal('', '', undefined,{type}),
   'catalog-device-copy':id=>{const device=findDevice(id)?.d;if(device)deviceModal('', '', undefined,device);},
   'device-type-delete':id=>confirmAction(tr('Ջնջել սարքի տեսակը'),tr('Այս տեսակը կհեռացվի ընտրացանկից։ Գոյություն ունեցող սարքերը կմնան տվյալներով։'),()=>commit(s=>{s.deviceTypes=(s.deviceTypes||[]).filter(x=>x.id!==id);})),

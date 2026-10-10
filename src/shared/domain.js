@@ -21,8 +21,24 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const [key] of serviceEntries(s))if(key&&!hasService(style,key)&&serviceInUse(s,key))throw new Error(tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'));
     Object.assign(s,style);
   };
-  const deviceTypes = s => [['panel',tr('Փաչ պանել')],['switch',tr('Սվիչ')],...(!s.deviceTypes?.some(x=>x.id==='router')?[['router',tr('Ռաուտեր')]]:[]),...(Array.isArray(s.deviceTypes)?s.deviceTypes.map(x=>[x.id,x.name]):[])];
-  const isNetworkDevice = d => ['switch','router'].includes(d.type);
+  const standardDeviceTypes = Object.freeze([
+    ['panel', tr('Փաչ պանել')],
+    ['switch', tr('Սվիչ')],
+    ['router', tr('Ռաուտեր')],
+    ['server', tr('Սերվեր')],
+    ['nvr', tr('NVR / DVR')],
+    ['ups', tr('UPS')],
+    ['organizer', tr('Կաբել մենեջմենթ')],
+    ['shelf', tr('Դարակ')]
+  ]);
+  const deviceTypes = s => {
+    const custom = Array.isArray(s?.deviceTypes) ? s.deviceTypes : [];
+    const customMap = new Map(custom.filter(x => x && x.id).map(x => [x.id, x.name]));
+    const standard = standardDeviceTypes.map(([id, defaultLabel]) => [id, customMap.get(id) || defaultLabel]);
+    const extraCustom = custom.filter(x => x && x.id && !standardDeviceTypes.some(([stdId]) => stdId === x.id)).map(x => [x.id, x.name]);
+    return [...standard, ...extraCustom];
+  };
+  const isNetworkDevice = d => ['switch','router','server','nvr'].includes(d?.type);
   // Port counts below are copper ports; SFP ports are additional.
   const defaultModels=Object.freeze([
     ['panel','Cat6 UTP 24-Port 1U',24,1,0,false],
