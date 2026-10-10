@@ -1,28 +1,53 @@
 {
-  "version": "2.10.16",
+  "version": "2.10.17",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ռաքի 3D տեսքը ամբողջությամբ դարձել է իրական՝ հեռահաղորդակցական պահարանի ամուր հենակներով, հատակի ստվերով, կարգավորվող ոտքերով, տանիքի կափարիչով և EIA-310 19\" ռելսերով (U համարակալում և 3-անցքանի cage-nut համակարգ):",
-      "Սարքերն ունեն 19\" ամրացման ականջներ պտուտակներով, մետաղական կորպուս, ուղղորդված 3D լուսավորություն, իսկ կաբելներն ունեն RJ45 connector boot-եր և բնական կախվածության ֆիզիկա՝ առանց անբնական մեծ օղակների։"
+      "Կարգավորումների էջը ամբողջությամբ արդիականացվել է՝ ստանալով նորարարական flex pill նավիգացիա, հստակ իկոններ և հարմար հորիզոնական սահուն շարժում բջջային սարքերում։",
+      "Յուրաքանչյուր բաժին (Նախագիծ, Օգտատերեր, Տվյալներ/Backup, Հաշվետվություններ, Աուդիտ, Հավելված, Տարբերակներ) ստացել է առանձնացված քարտեր, վիճակագրական տվյալներ, իկոնային նշաններ և նպատակային գործողությունների կոճակներ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Upgraded the 3D rack view to full physical realism with structural corner pillars, floor drop shadows, leveling feet, roof cap, and EIA-310 19\" mounting rails with cage-nut holes and U markings.",
-      "Hardware units now feature 19\" mounting ears with chrome screws, realistic metallic chassis with directional lighting, and patch cables have molded RJ45 boots and natural catenary drape physics."
+      "Completely modernized the Settings page with a sleek flex pill navigation bar, curated iconography, and smooth touch-scrolling on mobile devices.",
+      "Each settings section (Project, Users, Data & Backup, Reports, Audit Log, App, Releases) now features dedicated modular cards, badge indicators, statistics, and tailored action buttons."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "3D вид стойки обновлён до реалистичного уровня: массивные угловые стойки, тень на полу, регулируемые ножки, верхняя крышка и 19\" направляющие EIA-310 с разметкой U и отверстиями под закладные гайки.",
-      "Оборудование получило 19\" крепежные уши с винтами, металлический корпус с направленным освещением, а патч-корды — литые разъёмы RJ45 и естественную физику провисания без гигантских петель."
+      "Страница настроек полностью модернизирована: новая навигация в виде адаптивных flex pill табов, наглядные иконки и плавный скролл на мобильных устройствах.",
+      "Каждый раздел (Проект, Пользователи, Данные/Backup, Отчёты, Аудит, Приложение, Версии) получил выделенные модульные карточки со статистикой, значками статуса и контекстными действиями."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.16",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ռաքի 3D տեսքը ամբողջությամբ դարձել է իրական՝ հեռահաղորդակցական պահարանի ամուր հենակներով, հատակի ստվերով, կարգավորվող ոտքերով, տանիքի կափարիչով և EIA-310 19\" ռելսերով (U համարակալում և 3-անցքանի cage-nut համակարգ):",
+          "Սարքերն ունեն 19\" ամրացման ականջներ պտուտակներով, մետաղական կորպուս, ուղղորդված 3D լուսավորություն, իսկ կաբելներն ունեն RJ45 connector boot-եր և բնական կախվածության ֆիզիկա՝ առանց անբնական մեծ օղակների։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Upgraded the 3D rack view to full physical realism with structural corner pillars, floor drop shadows, leveling feet, roof cap, and EIA-310 19\" mounting rails with cage-nut holes and U markings.",
+          "Hardware units now feature 19\" mounting ears with chrome screws, realistic metallic chassis with directional lighting, and patch cables have molded RJ45 boots and natural catenary drape physics."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "3D вид стойки обновлён до реалистичного уровня: массивные угловые стойки, тень на полу, регулируемые ножки, верхняя крышка и 19\" направляющие EIA-310 с разметкой U и отверстиями под закладные гайки.",
+          "Оборудование получило 19\" крепежные уши с винтами, металлический корпус с направленным освещением, а патч-корды — литые разъёмы RJ45 и естественную физику провисания без гигантских петель."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.15",
       "hy": {

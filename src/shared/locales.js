@@ -2492,5 +2492,19 @@
   "Զբաղված U": ["Used U","Занято U"],
   "Կրկնօրինակել": ["Duplicate","Дублировать"],
   "Անիմացիա": ["Animation","Анимация"],
-  "Կապերի ցուցադրական անիմացիա․ իրական տրաֆիկ չի չափվում": ["Illustrative connection animation; no live traffic is measured","Наглядная анимация соединений; реальный трафик не измеряется"]
+  "Կապերի ցուցադրական անիմացիա․ իրական տրաֆիկ չի չափվում": ["Illustrative connection animation; no live traffic is measured","Наглядная анимация соединений; реальный трафик не измеряется"],
+  "Տվյալներ / Backup": ["Data / Backup","Данные / Backup"],
+  "Տարբերակներ": ["Releases","Версии"],
+  "Խմբագրել ընկերությունը": ["Edit company","Редактировать компанию"],
+  "SVG պատկերակներ և ոճեր": ["SVG icons & styles","SVG иконки и стили"],
+  "PIN օգտատերեր և թիմ": ["PIN users & team","PIN пользователи и команда"],
+  "Ավտոմատ պահպանում և պատմություն": ["Auto-save & history","Автосохранение и история"],
+  "Շենքի, հարկերի և ցանցային ծառայությունների կարգավորումներ": ["Building, floors and network service settings","Настройки здания, этажей и сетевых сервисов"],
+  "PIN-եր, թիմի հասանելիություն և իրավունքներ": ["PINs, team access and permissions","PIN-коды, доступ команды и права"],
+  "Պահուստային պատճեններ, Cloud Backup և վերականգնում": ["Backups, Cloud Backup and restore","Резервные копии, Cloud Backup и восстановление"],
+  "Պորտերի և մալուխների արտահանում Excel / PDF": ["Export ports and cables to Excel / PDF","Экспорт портов и кабелей в Excel / PDF"],
+  "Ով, երբ և ինչ է փոխել նախագծում": ["Who, when and what was changed in project","Кто, когда и что изменил в проекте"],
+  "Էջի տեսք (Theme), աշխատանքային ռեժիմ և Reset": ["Theme preferences, workspace mode and Reset","Тема оформления, режим работы и Reset"],
+  "Ընտրեք քարտեզում և պորտերի նշանակությունների ցանկում օգտագործվող SVG պատկերակները, ծառայությունների գույները և անվանումները։": ["Select SVG icons, service colors and names used on the map and port service list.","Выберите SVG иконки, цвета сервисов и названия, используемые на карте и в списке портов."],
+  "Պահպանում է 72 ժամվա ամենժամյա snapshot-ներ Supabase cloud-ում՝ պատահական կորստից պաշտպանելու համար։": ["Stores 72 hours of hourly snapshots in Supabase cloud to protect against accidental loss.","Сохраняет почасовые снимки за 72 часа в Supabase cloud для защиты от случайной потери."]
 };if(typeof module==='object')module.exports=messages;else root.RackMessages=messages;})(globalThis);
