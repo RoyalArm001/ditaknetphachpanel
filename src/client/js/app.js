@@ -1077,6 +1077,39 @@ function pinUserDialog(id=''){
     },0);
   });
 }
+let releaseCatalog=null;
+function showReleaseModal(ver){
+  if(!releaseCatalog)return;
+  const item=releaseCatalog.versions.find(v=>v.version===ver);
+  if(!item)return;
+  const isCurrent=item.version===releaseCatalog.currentVersion;
+  const changeList=releaseCatalog.changes(item);
+  const title=releaseCatalog.title(item);
+  const dateStr=releaseCatalog.date(item.date);
+  const modalTitle=`v${esc(item.version)} · ${esc(title)}`;
+  const modalBody=`
+    <div class="release-modal-view">
+      <div class="release-modal-hero">
+        <div class="release-modal-meta">
+          <span class="release-vtag large ${isCurrent?'active':''}">v${esc(item.version)}</span>
+          ${isCurrent?`<span class="release-badge-current">${tr('Ընթացիկ ակտիվ տարբերակ')}</span>`:''}
+          ${dateStr?`<span class="release-card-date">📅 ${esc(dateStr)}</span>`:''}
+          <span class="release-count-pill">✨ ${changeList.length} ${tr('գրանցված փոփոխություն')}</span>
+        </div>
+      </div>
+      <div class="release-modal-notes-title">${tr('Ինչ է փոխվել այս տարբերակում․')}</div>
+      <ul class="release-modal-items">
+        ${changeList.length?changeList.map((ch,i)=>`
+          <li class="release-modal-item">
+            <span class="release-item-bullet">${i+1}</span>
+            <div class="release-item-desc">${esc(ch)}</div>
+          </li>
+        `).join(''):`<li class="release-modal-item"><div class="release-item-desc hint">${tr('Փոփոխությունների նկարագրություն նշված չէ')}</div></li>`}
+      </ul>
+    </div>
+  `;
+  modal(modalTitle,modalBody);
+}
 async function renderReleaseHistory(){
   const host=$('#releaseHistory');if(!host)return;host.innerHTML=`<p class="hint">${tr('Բեռնվում է…')}</p>`;
   try{
@@ -1087,14 +1120,70 @@ async function renderReleaseHistory(){
     const versions=[release,...(Array.isArray(release.history)?release.history:[])].filter(item=>{if(!item||typeof item.version!=='string'||seen.has(item.version))return false;seen.add(item.version);return true;});
     const notes=item=>item[language]||item.hy||item.en||{changes:[]};
     const changes=item=>Array.isArray(notes(item).changes)?notes(item).changes.filter(x=>typeof x==='string'):[];
-    const total=versions.reduce((sum,item)=>sum+changes(item).length,0);let visible=12;
+    const title=item=>notes(item).title||tr('Հավելվածի թարմացում');
+    const total=versions.reduce((sum,item)=>sum+changes(item).length,0);
     const date=value=>/^\d{4}-\d{2}-\d{2}$/.test(value||'')?new Intl.DateTimeFormat(language,{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z')):'';
-    const summary=`<div class="release-summary"><div><span>${tr('Ընթացիկ տարբերակ')}</span><strong>v${esc(release.version)}</strong></div><div><span>${tr('Գրանցված տարբերակներ')}</span><strong>${versions.length}</strong></div><div><span>${tr('Գրանցված փոփոխություններ')}</span><strong>${total}</strong></div></div><p class="hint">${tr('Պատմությունը ներառում է պահված թողարկումները։ Փոփոխությունների քանակը հաշվվում է դրանց նկարագրություններից։')}</p>`;
-    function draw(){
-      host.innerHTML=summary+`<div class="release-list">${versions.slice(0,visible).map((item,index)=>`<details class="release-entry" ${index===0?'open':''}><summary><span class="release-version">v${esc(item.version)}</span><span class="release-date">${esc(date(item.date))}</span><span class="release-count">${changes(item).length}</span></summary><ul>${changes(item).map(text=>`<li>${esc(text)}</li>`).join('')}</ul></details>`).join('')}</div>`+(visible<versions.length?`<button type="button" class="button release-more">${tr('Ցույց տալ ավելին')}</button>`:'');
-      host.querySelector('.release-more')?.addEventListener('click',()=>{visible+=12;draw();});
+    
+    releaseCatalog={versions,currentVersion:release.version,changes,title,date};
+
+    const summary=`<div class="release-summary"><div><span>${tr('Ընթացիկ տարբերակ')}</span><strong>v${esc(release.version)}</strong></div><div><span>${tr('Գրանցված տարբերակներ')}</span><strong>${versions.length}</strong></div><div><span>${tr('Գրանցված փոփոխություններ')}</span><strong>${total}</strong></div></div><p class="hint">${tr('Բոլոր թողարկումները մեկ էջում։ Սեղմեք ցանկացած տարբերակի վրա՝ փոփոխությունների մանրամասն պատուհանը բացելու համար։')}</p>`;
+
+    const toolbar=`<div class="release-toolbar"><div class="release-search-wrap"><input type="search" id="releaseSearch" placeholder="${tr('Որոնել ըստ տարբերակի կամ փոփոխության…')}" aria-label="${tr('Որոնել թողարկումներ')}"></div><span class="release-search-count" id="releaseSearchCount">${versions.length} ${tr('տարբերակ')}</span></div>`;
+
+    const cardsHtml=versions.map((item,index)=>{
+      const isCurrent=item.version===release.version;
+      const changeList=changes(item);
+      const firstSnippet=changeList[0]||title(item);
+      const dateStr=date(item.date);
+      const searchBlob=(item.version+' '+(item.date||'')+' '+changeList.join(' ')+' '+title(item)).toLowerCase();
+      return `<div class="release-card ${isCurrent?'is-current':''}" role="button" tabindex="0" data-action="release-modal" data-id="${esc(item.version)}" data-search="${esc(searchBlob)}">
+        <div class="release-card-left">
+          <span class="release-vtag ${isCurrent?'active':''}">v${esc(item.version)}</span>
+          ${isCurrent?`<span class="release-badge-current">${tr('Ընթացիկ')}</span>`:''}
+        </div>
+        <div class="release-card-body">
+          <div class="release-card-meta">
+            ${dateStr?`<span class="release-card-date">📅 ${esc(dateStr)}</span>`:''}
+            <span class="release-count-pill">${changeList.length} ${tr('փոփոխություն')}</span>
+          </div>
+          <div class="release-card-snippet">${esc(firstSnippet)}</div>
+        </div>
+        <div class="release-card-right">
+          <button type="button" class="button small secondary release-open-btn" data-action="release-modal" data-id="${esc(item.version)}" title="${tr('Դիտել փոփոխությունները')}"><span class="btn-icon">ℹ</span><span>${tr('Փոփոխություններ')}</span></button>
+        </div>
+      </div>`;
+    }).join('');
+
+    host.innerHTML=summary+toolbar+`<div class="release-list" id="releaseList">${cardsHtml}</div><div class="release-empty hint" id="releaseSearchEmpty" hidden style="text-align:center;padding:32px 16px;">${tr('Համապատասխան տարբերակ չի գտնվել')}</div>`;
+
+    const searchInput=host.querySelector('#releaseSearch');
+    const searchCount=host.querySelector('#releaseSearchCount');
+    const emptyEl=host.querySelector('#releaseSearchEmpty');
+    const cardEls=host.querySelectorAll('.release-card');
+
+    if(searchInput){
+      searchInput.addEventListener('input',()=>{
+        const q=searchInput.value.trim().toLowerCase();
+        let matched=0;
+        cardEls.forEach(card=>{
+          const text=card.dataset.search||'';
+          const ok=!q||text.includes(q);
+          card.hidden=!ok;
+          if(ok)matched++;
+        });
+        if(searchCount)searchCount.textContent=q?`${matched} / ${versions.length} ${tr('տարբերակ')}`:`${versions.length} ${tr('տարբերակ')}`;
+        if(emptyEl)emptyEl.hidden=matched>0;
+      });
     }
-    draw();
+
+    host.querySelector('#releaseList')?.addEventListener('keydown',e=>{
+      if((e.key==='Enter'||e.key===' ')&&e.target.matches('.release-card')){
+        e.preventDefault();
+        const ver=e.target.dataset.id;
+        if(ver)showReleaseModal(ver);
+      }
+    });
+
   }catch{if(host.isConnected){host.innerHTML=`<section class="panel"><p>${tr('Չհաջողվեց բեռնել տարբերակների պատմությունը։')}</p><button type="button" class="button">${tr('Կրկին փորձել')}</button></section>`;host.querySelector('button').onclick=renderReleaseHistory;}}
 }
 function renderSettings(){
@@ -1833,6 +1922,7 @@ const actions={
   'account-login':()=>renderAccountLogin('login'),
   'account-recover':recoverAccountDialog,
   'settings-tab':id=>{if(!['project','users','data','reports','app','releases','audit'].includes(id))return;settingsPage=id;const target='settings/'+id;if(location.hash.slice(1)===target)renderSettings();else location.hash=target;},
+  'release-modal':id=>showReleaseModal(id),
   'pin-user-new':()=>pinUserDialog(),
   'pin-user-edit':id=>pinUserDialog(id),
   'pin-users-retry':loadPinUsers,

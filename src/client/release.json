@@ -1,28 +1,53 @@
 {
-  "version": "2.10.18",
+  "version": "2.10.19",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Երբ հավելվածն արդեն տեղադրված է (PWA / Standalone ռեժիմում կամ բրաուզերի հավելվածների ցանկում), տեղադրման կոճակը և տեղադրելու առաջարկները ավտոմատ թաքցվում են և այլևս չեն ցուցադրվում։",
-      "Կոճակը ցուցադրվում է բացառապես այն դեպքում, երբ հավելվածը դեռ տեղադրված չէ, կամ երբ առկա է հավելվածի նոր տարբերակ՝ այն թարմացնելու համար։"
+      "Տարբերակների պատմության էջը վերակառուցվել է. բոլոր թողարկումներն այժմ հավաքված են մեկ էջում՝ կոմպակտ ցանկով և արագ որոնման դաշտով։",
+      "Ցանկացած տարբերակի վրա սեղմելիս բացվում է առանձին պատուհան (modal), որտեղ մանրամասն ներկայացված է, թե ինչ և ինչու է փոխվել տվյալ թողարկման մեջ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "When the application is already installed (PWA / standalone mode or detected by browser), the install button and installation prompt dialogs are automatically hidden and suppressed.",
-      "The button is only displayed when the app is eligible for installation or when a new application update is ready to be applied."
+      "Redesigned the Releases page: all versions are now presented on a single page in a compact, organized catalog with instant real-time search.",
+      "Clicking on any release opens a dedicated detail modal window explaining what changed and why in that version."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Если приложение уже установлено (в режиме PWA / standalone или обнаружено браузером), кнопка установки и диалоговые окна с предложением установки автоматически скрываются и больше не предлагаются.",
-      "Кнопка отображается только тогда, когда приложение еще не установлено, либо когда доступно новое обновление для установки."
+      "Страница версий полностью переработана: все выпуски теперь собраны на одной странице в компактном каталоге с быстрым поиском.",
+      "При нажатии на любую версию открывается модальное окно с подробным описанием того, что и почему изменилось в данном выпуске."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.18",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Երբ հավելվածն արդեն տեղադրված է (PWA / Standalone ռեժիմում կամ բրաուզերի հավելվածների ցանկում), տեղադրման կոճակը և տեղադրելու առաջարկները ավտոմատ թաքցվում են և այլևս չեն ցուցադրվում։",
+          "Կոճակը ցուցադրվում է բացառապես այն դեպքում, երբ հավելվածը դեռ տեղադրված չէ, կամ երբ առկա է հավելվածի նոր տարբերակ՝ այն թարմացնելու համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "When the application is already installed (PWA / standalone mode or detected by browser), the install button and installation prompt dialogs are automatically hidden and suppressed.",
+          "The button is only displayed when the app is eligible for installation or when a new application update is ready to be applied."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Если приложение уже установлено (в режиме PWA / standalone или обнаружено браузером), кнопка установки и диалоговые окна с предложением установки автоматически скрываются и больше не предлагаются.",
+          "Кнопка отображается только тогда, когда приложение еще не установлено, либо когда доступно новое обновление для установки."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.17",
       "hy": {
