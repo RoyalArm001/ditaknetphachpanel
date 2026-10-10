@@ -1210,7 +1210,108 @@ function renderSettings(){
   }
 
   if(settingsPage==='reports'){
-    $('#content').innerHTML=header(tr('Կարգավորումներ'),currentTab[3],button('↓ Excel','xlsx')+button('↓ PDF','pdf','','primary'))+settingsTabs()+filterControls()+'<div id="searchStats" class="cable-stats"></div><div id="results"></div>';
+    const allPorts=D.ports(state);
+    const totalPorts=allPorts.length;
+    const usedPorts=allPorts.filter(x=>x.p.status==='used').length;
+    const freePorts=allPorts.filter(x=>x.p.status==='free').length;
+    const faultPorts=allPorts.filter(x=>x.p.status==='fault').length;
+    const usedPct=totalPorts?Math.round((usedPorts/totalPorts)*100):0;
+    const freePct=totalPorts?Math.round((freePorts/totalPorts)*100):0;
+    const linkedCount=allPorts.filter(x=>x.p.switchPortId).length;
+    const allNets=state.networks||[];
+    const totalIps=allNets.reduce((acc,n)=>acc+(n.hosts?n.hosts.length:0),0);
+    const allRacksList=racks();
+    const allDevs=D.devices(state);
+    const firstRackId=allRacksList[0]?.r.id;
+
+    $('#content').innerHTML=header(tr('Կարգավորումներ'),currentTab[3],button('↓ Excel','xlsx')+button('↓ PDF','pdf','','primary'))+settingsTabs()+`
+      <div class="stats" style="margin-bottom:22px">
+        <div class="stat">
+          <label>📊 ${tr('Ընդհանուր պորտեր')}</label>
+          <strong>${totalPorts}</strong>
+          <small>${allRacksList.length} ${tr('ռաք')} · ${allDevs.length} ${tr('սարք')}</small>
+        </div>
+        <div class="stat">
+          <label>🔵 ${tr('Զբաղված պորտեր')}</label>
+          <strong style="color:var(--used,#397cc4)">${usedPorts}</strong>
+          <small>${usedPct}% ${tr('զբաղվածություն')}</small>
+        </div>
+        <div class="stat">
+          <label>🟢 ${tr('Ազատ պորտեր')}</label>
+          <strong style="color:var(--free,#299c72)">${freePorts}</strong>
+          <small>${freePct}% ${tr('հասանելի')}</small>
+        </div>
+        <div class="stat">
+          <label>🔴 ${tr('Անսարքություններ')}</label>
+          <strong style="color:var(--fault,#d35352)">${faultPorts}</strong>
+          <small>${faultPorts?tr('Ուշադրության կարիք ունի'):tr('Խնդիրներ չկան')}</small>
+        </div>
+      </div>
+
+      <div class="settings-grid" style="margin-bottom:24px">
+        <section class="panel">
+          <div class="settings-card-head">
+            <h2><span class="settings-card-icon">📑</span>${tr('Պորտերի և մալուխների աղյուսակ')}</h2>
+            <span class="cable-chip">${totalPorts} ${tr('պորտ')}</span>
+          </div>
+          <p class="muted">${tr('Բոլոր պորտերի, մալուխների, VLAN-ների և տեղադրությունների արտահանում ընտրված ֆիլտրերով։')}</p>
+          <div class="actions" style="margin-top:16px">
+            ${button('↓ Excel (.xlsx)','xlsx','','primary')}
+            ${button('↓ PDF Տպել','pdf')}
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="settings-card-head">
+            <h2><span class="settings-card-icon">📋</span>${tr('Ընտրովի PDF փաստաթղթավորում')}</h2>
+            <span class="cable-chip">${state.floors.length} ${tr('հարկ')}</span>
+          </div>
+          <p class="muted">${tr('Պաշտոնական Handover փաստաթուղթ՝ ընտրված հարկով, առանձին ռաքով, սարքերի սխեմաներով կամ հատակագծով։')}</p>
+          <div class="actions" style="margin-top:16px">
+            ${button(tr('📑 Ընտրովի PDF'),'selective-pdf','','primary')}
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="settings-card-head">
+            <h2><span class="settings-card-icon">🔗</span>${tr('Կապերի քարտեզ և աուդիտ')}</h2>
+            <span class="cable-chip">${linkedCount} ${tr('միացված')}</span>
+          </div>
+          <p class="muted">${tr('Ռաքերի կոմուտացիոն կապերի ստուգում (կապված, չկապված, կրկնված կամ սխալ կապեր) և 3D դիտում։')}</p>
+          <div class="actions" style="margin-top:16px">
+            ${firstRackId?`<a class="button primary" href="#connections/${encodeURIComponent(firstRackId)}">${tr('3D կապեր և ստուգում')}</a>`:`<a class="button primary" href="#floors">${tr('Հարկեր և ռաքեր')}</a>`}
+            <a class="button" href="#floors">${tr('Ռաքերի ցանկ')}</a>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="settings-card-head">
+            <h2><span class="settings-card-icon">🌐</span>${tr('Ցանցային տեղեկագիր և IP-ներ')}</h2>
+            <span class="cable-chip">${allNets.length} VLAN · ${totalIps} IP</span>
+          </div>
+          <p class="muted">${tr('VLAN ցանցերի, ենթացանցերի և սարքերին հատկացված IP հասցեների կառավարում ու տեղեկագիր։')}</p>
+          <div class="actions" style="margin-top:16px">
+            <a class="button primary" href="#networks">${tr('Ցանցեր և IP-ներ')}</a>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-top:24px">
+        <div class="section-head">
+          <div>
+            <h2><span class="settings-card-icon">🔎</span>${tr('Մալուխների և պորտերի ինտերակտիվ ցանկ')}</h2>
+            <p class="hint">${tr('Որոնեք և ֆիլտրեք տվյալները։ Վերևի Excel և PDF կոճակները կարտահանեն ֆիլտրված արդյունքները։')}</p>
+          </div>
+          <div class="actions">
+            ${button('↓ Excel','xlsx','','small')}
+            ${button('↓ PDF','pdf','','small')}
+          </div>
+        </div>
+        ${filterControls()}
+        <div id="searchStats" class="cable-stats"></div>
+        <div id="results"></div>
+      </section>
+    `;
     renderResults();
     return;
   }

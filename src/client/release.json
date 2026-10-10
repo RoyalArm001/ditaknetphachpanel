@@ -1,28 +1,53 @@
 {
-  "version": "2.10.19",
+  "version": "2.10.20",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Տարբերակների պատմության էջը վերակառուցվել է. բոլոր թողարկումներն այժմ հավաքված են մեկ էջում՝ կոմպակտ ցանկով և արագ որոնման դաշտով։",
-      "Ցանկացած տարբերակի վրա սեղմելիս բացվում է առանձին պատուհան (modal), որտեղ մանրամասն ներկայացված է, թե ինչ և ինչու է փոխվել տվյալ թողարկման մեջ։"
+      "Հաշվետվությունների բաժինը ամբողջությամբ արդիականացվել է՝ ստանալով ցանցի վիճակագրական ինդիկատորներ (պորտեր, զբաղվածություն, ազատ տեղեր, խնդիրներ):",
+      "Ավելացվել են մոդուլային քարտեր արագ արտահանումների համար (Excel/PDF, ընտրովի Handover փաստաթուղթ, 3D կապերի աուդիտ, VLAN/IP տեղեկագիր) և մալուխների ինտերակտիվ որոնման վահանակ:"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Redesigned the Releases page: all versions are now presented on a single page in a compact, organized catalog with instant real-time search.",
-      "Clicking on any release opens a dedicated detail modal window explaining what changed and why in that version."
+      "Completely redesigned the Reports section with a live analytics dashboard (total ports, utilization, free capacity, issues).",
+      "Added modular cards for 1-click exports (Excel/PDF, selective Handover documentation, 3D links audit, VLAN & IP inventory) and an interactive cable search panel."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Страница версий полностью переработана: все выпуски теперь собраны на одной странице в компактном каталоге с быстрым поиском.",
-      "При нажатии на любую версию открывается модальное окно с подробным описанием того, что и почему изменилось в данном выпуске."
+      "Раздел отчетов полностью модернизирован: добавлена аналитическая панель ключевых показателей сети (всего портов, загрузка, свободные порты, неполадки).",
+      "Добавлены модульные карточки быстрых экспортов (Excel/PDF, выборочная Handover-документация, аудит 3D-связей, справочник VLAN и IP) и интерактивная таблица поиска кабелей."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.19",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Տարբերակների պատմության էջը վերակառուցվել է. բոլոր թողարկումներն այժմ հավաքված են մեկ էջում՝ կոմպակտ ցանկով և արագ որոնման դաշտով։",
+          "Ցանկացած տարբերակի վրա սեղմելիս բացվում է առանձին պատուհան (modal), որտեղ մանրամասն ներկայացված է, թե ինչ և ինչու է փոխվել տվյալ թողարկման մեջ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Redesigned the Releases page: all versions are now presented on a single page in a compact, organized catalog with instant real-time search.",
+          "Clicking on any release opens a dedicated detail modal window explaining what changed and why in that version."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Страница версий полностью переработана: все выпуски теперь собраны на одной странице в компактном каталоге с быстрым поиском.",
+          "При нажатии на любую версию открывается модальное окно с подробным описанием того, что и почему изменилось в данном выпуске."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.18",
       "hy": {
