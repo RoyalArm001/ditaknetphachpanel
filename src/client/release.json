@@ -1,25 +1,53 @@
 {
-  "version": "2.10.11",
+  "version": "2.10.12",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղվել է կապերի ցանկի սպիտակ ֆոնը գիշերային ռեժիմում․ քարտերի անվանումներն ու մանրամասներն այժմ հստակ կարդացվում են։"
+      "Սարք ավելացնելիս մոդելների ընտրացանկն այժմ առանձնացված է ըստ տեսակի՝ փաչ պանել, ռաուտեր կամ սվիչ։ Հասանելի է նաև սեփական մոդելի մուտքագրումը։",
+      "Ուղղվել է սարքի պատուհանի բացման սխալը․ PoE-ն ցուցադրվում է միայն սվիչի համար, իսկ ձեռքով փոխված պորտերի քանակը պահպանվում է։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed white connection cards in dark mode so names and connection details remain readable."
+      "Device creation now shows a model selector filtered by device type, including patch panels and routers, with custom model entry.",
+      "Fixed device dialog initialization and switch-only PoE fields; manual port count changes are preserved."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлен белый фон карточек соединений в тёмной теме: названия и детали теперь хорошо читаются."
+      "При добавлении устройства список моделей разделён по типам, включая патч-панели и роутеры. Можно ввести свою модель.",
+      "Исправлена инициализация окна: PoE отображается только для коммутатора, ручное изменение числа портов сохраняется."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.11",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Սարք ավելացնելիս մոդելների ընտրացանկն այժմ առանձնացված է ըստ տեսակի՝ փաչ պանել, ռաուտեր կամ սվիչ։ Հասանելի է նաև սեփական մոդելի մուտքագրումը։",
+          "Ուղղվել է սարքի պատուհանի բացման սխալը․ PoE-ն ցուցադրվում է միայն սվիչի համար, իսկ ձեռքով փոխված պորտերի քանակը պահպանվում է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Device creation now shows a model selector filtered by device type, including patch panels and routers, with custom model entry.",
+          "Fixed device dialog initialization and switch-only PoE fields; manual port count changes are preserved."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "При добавлении устройства список моделей разделён по типам, включая патч-панели и роутеры. Можно ввести свою модель.",
+          "Исправлена инициализация окна: PoE отображается только для коммутатора, ручное изменение числа портов сохраняется."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.10",
       "hy": {

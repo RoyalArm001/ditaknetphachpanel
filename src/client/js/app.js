@@ -747,15 +747,27 @@ function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=
     $('#count').onchange=()=>{const selected=$('#count').value==='custom';if(customField)customField.hidden=!selected;if(customInput)customInput.required=selected;};
   };
   setPortChoices(defaults.portList?defaults.portList.length-(defaults.sfpCount||0):24);
+  const syncTypeFields=()=>{
+    const type=$('#type').value;
+    for(const [id,visible] of [['modelType',type==='switch'],['sfpCount',D.isNetworkDevice({type})]]){
+      const field=$('#'+id);field.closest('.field').hidden=!visible;field.disabled=!visible;
+    }
+    $('#model').placeholder=type==='panel'?'Cat6 UTP / Cat6A FTP':type==='router'?'MikroTik CCR / RB5009 / Cisco ISR':'MikroTik / UniFi / Cisco';
+  };
+  $('#model').closest('.field').insertAdjacentHTML('beforebegin',select('modelPreset',tr('Մոդելների կատալոգ'),[['',tr('Ընտրել')]],''));
   const updateKnownModels=()=>{
     const curType=$('#type').value;
     const models=D.deviceModels(curType,state).map(m=>m.name);
     const existing=D.devices(state).filter(x=>x.d.type===curType).map(x=>x.d.model).filter(Boolean);
     const allModels=[...new Set([...models,...existing])];
     const dl=$('#knownDeviceModels');if(dl)dl.innerHTML=allModels.map(m=>`<option value="${esc(m)}"></option>`).join('');
+    $('#modelPreset').innerHTML=opts([['',tr('Ընտրել')],...allModels.map(name=>[name,name])],allModels.includes($('#model').value)?$('#model').value:'');
   };
+  let appliedModel='';
   const applyModelDefaults=()=>{
     const curType=$('#type').value, val=String($('#model')?.value||'').trim();
+    const key=curType+'|'+val.toLowerCase();if(key===appliedModel)return;appliedModel=key;
+    $('#modelPreset').value=[...$('#modelPreset').options].some(option=>option.value===val)?val:'';
     const defs=D.modelDefaults(curType,val,state);
     if(defs){
       if(defs.ports)setPortChoices(defs.ports);
@@ -773,7 +785,8 @@ function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=
   updateKnownModels();
   $('#model').oninput=applyModelDefaults;
   $('#model').onchange=applyModelDefaults;
-  $('#type').onchange=()=>{setPortChoices();syncTypeFields();updateKnownModels();};
+  $('#modelPreset').onchange=()=>{if($('#modelPreset').value){$('#model').value=$('#modelPreset').value;applyModelDefaults();}};
+  $('#type').onchange=()=>{appliedModel='';setPortChoices();syncTypeFields();updateKnownModels();};
 }
 function deviceDetail(id){const {d,r}=findDevice(id)||{};if(!d)return;const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));const modelType=d.type==='switch'&&d.modelType?` · ${d.modelType==='poe'?'PoE':d.modelType==='poe-plus'?'PoE+':tr('Առանց PoE')}`:'';modal(d.name,`<p class="port-title">${esc(r.name)} · U${d.pos} · ${d.height}U${esc(modelType)}${d.model?` · ${esc(d.model)}`:''}</p>${legend()}${devicePorts(d,byId,true)}`,null,button(tr('Խմբագրել սարքը'),'device',id,'primary'));paintPorts();}
 
