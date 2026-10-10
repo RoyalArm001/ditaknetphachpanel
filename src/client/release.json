@@ -1,28 +1,53 @@
 {
-  "version": "2.10.15",
+  "version": "2.10.16",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Սվիչների 3D տեսքն ունի մետաղական կորպուս, օդափոխման բացվածքներ, մանրամասն RJ45 ու առանձին SFP բնիկներ։",
-      "Ավելացվել են պորտերի LED և կապերի ցուցադրական անիմացիաներ՝ անջատման կոճակով։ Անիմացիան դադարում է թաքնված էջում և հաշվի է առնում շարժման նվազեցման կարգավորումը։"
+      "Ռաքի 3D տեսքը ամբողջությամբ դարձել է իրական՝ հեռահաղորդակցական պահարանի ամուր հենակներով, հատակի ստվերով, կարգավորվող ոտքերով, տանիքի կափարիչով և EIA-310 19\" ռելսերով (U համարակալում և 3-անցքանի cage-nut համակարգ):",
+      "Սարքերն ունեն 19\" ամրացման ականջներ պտուտակներով, մետաղական կորպուս, ուղղորդված 3D լուսավորություն, իսկ կաբելներն ունեն RJ45 connector boot-եր և բնական կախվածության ֆիզիկա՝ առանց անբնական մեծ օղակների։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Refined 3D switches with a metallic chassis, ventilation, detailed RJ45 sockets and separate SFP cages.",
-      "Added illustrative port LED and connection animations with a toggle. Motion pauses when hidden and respects reduced-motion preferences."
+      "Upgraded the 3D rack view to full physical realism with structural corner pillars, floor drop shadows, leveling feet, roof cap, and EIA-310 19\" mounting rails with cage-nut holes and U markings.",
+      "Hardware units now feature 19\" mounting ears with chrome screws, realistic metallic chassis with directional lighting, and patch cables have molded RJ45 boots and natural catenary drape physics."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Обновлён 3D вид коммутаторов: металлический корпус, вентиляция, подробные разъёмы RJ45 и отдельные гнёзда SFP.",
-      "Добавлена наглядная анимация индикаторов и соединений с кнопкой отключения. Движение останавливается на скрытой странице и учитывает настройку уменьшения движения."
+      "3D вид стойки обновлён до реалистичного уровня: массивные угловые стойки, тень на полу, регулируемые ножки, верхняя крышка и 19\" направляющие EIA-310 с разметкой U и отверстиями под закладные гайки.",
+      "Оборудование получило 19\" крепежные уши с винтами, металлический корпус с направленным освещением, а патч-корды — литые разъёмы RJ45 и естественную физику провисания без гигантских петель."
     ]
   },
   "date": "2026-10-10",
   "history": [
+    {
+      "version": "2.10.15",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Սվիչների 3D տեսքն ունի մետաղական կորպուս, օդափոխման բացվածքներ, մանրամասն RJ45 ու առանձին SFP բնիկներ։",
+          "Ավելացվել են պորտերի LED և կապերի ցուցադրական անիմացիաներ՝ անջատման կոճակով։ Անիմացիան դադարում է թաքնված էջում և հաշվի է առնում շարժման նվազեցման կարգավորումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Refined 3D switches with a metallic chassis, ventilation, detailed RJ45 sockets and separate SFP cages.",
+          "Added illustrative port LED and connection animations with a toggle. Motion pauses when hidden and respects reduced-motion preferences."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Обновлён 3D вид коммутаторов: металлический корпус, вентиляция, подробные разъёмы RJ45 и отдельные гнёзда SFP.",
+          "Добавлена наглядная анимация индикаторов и соединений с кнопкой отключения. Движение останавливается на скрытой странице и учитывает настройку уменьшения движения."
+        ]
+      },
+      "date": "2026-10-10"
+    },
     {
       "version": "2.10.14",
       "hy": {

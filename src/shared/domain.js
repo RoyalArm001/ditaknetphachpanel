@@ -272,16 +272,34 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function rows(s,filter={}) {
     const all=ports(s), byId=new Map(all.map(x=>[x.p.id,x]));
     const incoming=new Map(all.filter(x=>x.p.switchPortId).map(x=>[x.p.switchPortId,x]));
-    return all.map(x=>{
+    const normalize=value=>String(value??'').normalize('NFKC').toLocaleLowerCase();
+    const terms=normalize(filter.query).trim().split(/\s+/).filter(Boolean),hostText=new Map();
+    if(terms.length)for(const n of networks(s))for(const h of n.hosts){if(h.deviceId)hostText.set(h.deviceId,(hostText.get(h.deviceId)||'')+' '+[n.name,n.vlan,n.ip,h.ip,h.username,h.name].join(' '));}
+    const result=all.map(x=>{
       const {f,r,d,p}=x, source=isNetworkDevice(d)?incoming.get(p.id):x;
       const info=source?.p||p, peer=byId.get(p.switchPortId)||incoming.get(p.id);
       const switchEnd=d.type==='switch'?x:peer?.d.type==='switch'?peer:null;
       const status=p.status==='fault'?'fault':p.status==='used'||p.switchPortId||incoming.has(p.id)?'used':'free';
       return {floor:f.name,rack:r.name,device:d.name,type:d.type,port:p.number,status, cable:info.cable,
-        destination:s.floors.find(f=>f.id===info.floorId)?.name||'', endpointName:info.endpointName||'',room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
+        destination:s.floors.find(f=>f.id===info.floorId)?.name||'',destinationId:info.floorId||'',model:d.model||'',endpointName:info.endpointName||'',room:info.room,door:info.door,side:info.side,notes:info.notes,service:info.service||'',vlan:info.vlan||'',
         switchName:switchEnd?.d.name||'',switchPort:switchEnd?.p.number??'',switchRack:switchEnd?.r.name||'',
         connection:peer?`${peer.r.name} / ${peer.d.name} / ${peer.p.number}`:'',...x};
-    }).filter(x=>(!filter.floor||x.f.id===filter.floor||x.p.floorId===filter.floor||x.destination===s.floors.find(f=>f.id===filter.floor)?.name)&&(!filter.rack||x.r.id===filter.rack)&&(!filter.status||x.status===filter.status)&&(!filter.query||[x.floor,x.rack,x.device,x.port,x.endpointName,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,...hostsForDevice(s,x.d.id).flatMap(y=>[y.n.name,y.n.vlan,y.n.ip,y.h.ip,y.h.username,y.h.name])].join(' ').toLocaleLowerCase().includes(filter.query.toLocaleLowerCase())));
+    }).filter(x=>{
+      if(filter.floor&&x.f.id!==filter.floor&&x.destinationId!==filter.floor)return false;
+      if(filter.rack&&x.r.id!==filter.rack||filter.status&&x.status!==filter.status||filter.type&&x.type!==filter.type)return false;
+      if(filter.service&&(filter.service==='__none__'?!!x.service:x.service!==filter.service))return false;
+      if(filter.vlan&&(filter.vlan==='__none__'?!!x.vlan:String(x.vlan)!==String(filter.vlan)))return false;
+      if(filter.link==='linked'&&!x.connection||filter.link==='unlinked'&&!!x.connection)return false;
+      if(!terms.length)return true;
+      const haystack=normalize([x.floor,x.rack,x.device,x.model,x.port,x.endpointName,x.cable,x.destination,x.room,x.door,x.side,x.notes,x.connection,x.vlan,serviceLabel(s,x.service),statusLabel(s,x.status),x.service,hostText.get(x.d.id)||''].join(' '));
+      return terms.every(term=>haystack.includes(term));
+    });
+    if(['location','cable','endpoint','status'].includes(filter.sort)){
+      const compare=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'}).compare;
+      const location=(a,b)=>compare(a.floor,b.floor)||compare(a.rack,b.rack)||compare(a.device,b.device)||a.port-b.port||compare(a.p.id,b.p.id);
+      result.sort((a,b)=>{let value=0;if(filter.sort==='cable'||filter.sort==='endpoint'){const key=filter.sort==='cable'?'cable':'endpointName';value=Number(!a[key])-Number(!b[key])||compare(a[key],b[key]);}else if(filter.sort==='status'){const order={fault:0,used:1,free:2};value=order[a.status]-order[b.status];}return value||location(a,b);});
+    }
+    return result;
   }
   const endpointLabel=(s,row,translate=tr)=>row.endpointName||row.room||row.cable||serviceLabel(s,row.service,translate);
   // x/y remains the exact floor-plan point. The icon can move independently.
