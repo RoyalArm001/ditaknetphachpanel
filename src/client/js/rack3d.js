@@ -44,8 +44,8 @@
     const all=D.ports(state),byId=new Map(all.map(x=>[x.p.id,x]));
     const linked=all.filter(x=>x.p.switchPortId&&byId.has(x.p.switchPortId)).map(x=>({from:x,to:byId.get(x.p.switchPortId)})).filter(x=>x.from.r.id===rackId||x.to.r.id===rackId);
     const remote=[...new Map(linked.flatMap(x=>[x.from,x.to]).filter(x=>x.r.id!==rackId).map(x=>[x.d.id,x])).values()];
-    const boxes=rack.devices.map(d=>({id:d.id,label:d.name,color:d.color,min:[-1,(d.pos-1)*U+.008,d.type==='panel'?.12:-.32],max:[1,(d.pos-1+d.height)*U-.008,.32],d,remote:false}));
-    remote.forEach((x,i)=>{const y=rack.u*U*(i+1)/(remote.length+1);boxes.push({id:x.d.id,label:`${x.r.name} / ${x.d.name}`,color:x.d.color,min:[1.8,y,-.1],max:[3.3,y+.22,.32],d:x.d,remote:true});});
+    const boxes=rack.devices.map(d=>({id:d.id,label:d.name,color:D.effectiveDeviceColor(d,rack.devices),min:[-1,(d.pos-1)*U+.008,d.type==='panel'?.12:-.32],max:[1,(d.pos-1+d.height)*U-.008,.32],d,remote:false}));
+    remote.forEach((x,i)=>{const y=rack.u*U*(i+1)/(remote.length+1);boxes.push({id:x.d.id,label:`${x.r.name} / ${x.d.name}`,color:D.effectiveDeviceColor(x.d,x.r.devices),min:[1.8,y,-.1],max:[3.3,y+.22,.32],d:x.d,remote:true});});
     const boxById=new Map(boxes.map(x=>[x.id,x]));
     const layouts=new Map(boxes.map(b=>[b.d.id,new Map(faceLayout(b.d).map(x=>[x.p.id,x]))]));
     const socket=x=>{

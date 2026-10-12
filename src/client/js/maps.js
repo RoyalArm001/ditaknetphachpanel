@@ -227,8 +227,8 @@ globalThis.RackMaps=(()=>{
             const prefix=type==='panel'?'PP':type==='switch'?'SW':type==='router'?'RT':'DEV',names=new Set(D.devices(s).map(x=>x.d.name.toLowerCase()));let seq=1;while(names.has((prefix+'-'+String(seq).padStart(2,'0')).toLowerCase()))seq++;
             const panelName=prefix+'-'+String(seq).padStart(2,'0');
             const nextPos=Array.from({length:rack.u},(_,i)=>rack.u-i).find(u=>u+height-1<=rack.u&&!rack.devices.some(d=>u<d.pos+d.height&&u+height>d.pos));
-            if(!nextPos)throw new Error(tr('Ռաքում բավարար ազատ տեղ չկա'));
-            targetDev={id:crypto.randomUUID(),name:panelName,type,model,pos:nextPos,height,sfpCount,modelType:type==='switch'?String(fd.get('hardwarePoe')):'',color:'#397c78',portList:Array.from({length:ports+sfpCount},(_,i)=>D.port(i+1,crypto.randomUUID()))};
+            const devIndex=rack.devices.filter(x=>x.type===type).length;
+            targetDev={id:crypto.randomUUID(),name:panelName,type,model,pos:nextPos,height,sfpCount,modelType:type==='switch'?String(fd.get('hardwarePoe')):'',color:D.autoDeviceColor(type,devIndex),portList:Array.from({length:ports+sfpCount},(_,i)=>D.port(i+1,crypto.randomUUID()))};
             rack.devices.push(targetDev);
             if(fd.get('saveHardwareModel'))D.saveDeviceModel(s,{type,name:model,ports,height,sfp:sfpCount,modelType:targetDev.modelType});
           }

@@ -50,7 +50,8 @@
   [data-theme=dark] :is(.rack-link:hover,tbody tr:hover,.mobile-nav a.active,.sidebar nav a.active){background:#24473f;color:#c6f4e8}
   [data-theme=dark] .mobile-nav a{color:var(--muted)}
   [data-theme=dark] :is(.sidebar nav a.active,.mobile-nav a.active){color:#c6f4e8}
-  [data-theme=dark] .rack-device{background:#23383f;border-color:#526e76;border-left-color:var(--device)}
+  [data-theme=dark] .rack-device{background:linear-gradient(90deg,color-mix(in srgb,var(--device) 14%,#1e3037) 0%,#1f323a 28%);border-color:#3f5862;border-left:6px solid var(--device);box-shadow:0 3px 8px #00000033}
+  [data-theme=dark] .rack-device:hover{border-color:#587a88;box-shadow:0 4px 14px #0000004d}
   [data-theme=dark] .device-head button{color:var(--ink)}
   [data-theme=dark] .device-head small{color:var(--muted)}
   [data-theme=dark] :is(.rack-side,.rack-view .rack-side,.mobile-sheet-head,.topbar #saveStatus){background:var(--bg)}

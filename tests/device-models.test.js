@@ -29,3 +29,24 @@ test('invalid model configurations cannot be saved or imported',()=>{
  }
  for(const extra of [{ports:-1},{ports:1.5},{ports:96,sfp:1},{sfp:17},{height:0}])assert.throws(()=>D.validate({...D.empty(),deviceModels:[{...base,...extra}]}));
 });
+test('device auto and effective colors provide distinct palettes and resolve legacy defaults',()=>{
+ const patch1={id:'p1',name:'Patch 1',type:'panel',color:'#397c78'};
+ const patch2={id:'p2',name:'Patch 2',type:'panel',color:'#397c78'};
+ const router={id:'r1',name:'Router 1',type:'router',color:'#397c78'};
+ const sw1={id:'s1',name:'Switch 1',type:'switch',color:'#397c78'};
+ const rackDevices=[patch1,patch2,router,sw1];
+
+ const cPatch1=D.effectiveDeviceColor(patch1,rackDevices);
+ const cPatch2=D.effectiveDeviceColor(patch2,rackDevices);
+ const cRouter=D.effectiveDeviceColor(router,rackDevices);
+ const cSw1=D.effectiveDeviceColor(sw1,rackDevices);
+
+ assert.notEqual(cPatch1,cPatch2,'Patch 1 and Patch 2 must have distinct colors');
+ assert.notEqual(cPatch1,cRouter,'Patch and Router must have distinct colors');
+ assert.notEqual(cPatch1,cSw1,'Patch and Switch must have distinct colors');
+ assert.notEqual(cRouter,cSw1,'Router and Switch must have distinct colors');
+
+ const customDev={id:'c1',name:'Custom',type:'switch',color:'#123456'};
+ assert.equal(D.effectiveDeviceColor(customDev,rackDevices),'#123456','Custom explicit hex color must be preserved');
+});
+

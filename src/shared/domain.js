@@ -192,6 +192,27 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     if(/^(1u|2u)/i.test(n))return tr('Աքսեսուարներ / Սերվեր');
     return tr('Այլ մոդելներ');
   }
+  const deviceTypeColors=Object.freeze({
+    panel:['#2563eb','#0284c7','#0d9488','#4f46e5','#0891b2','#3b82f6'],
+    switch:['#7c3aed','#9333ea','#6366f1','#8b5cf6','#a855f7','#6d28d9'],
+    router:['#ea580c','#d97706','#f97316','#c2410c','#b45309','#e11d48'],
+    server:['#475569','#334155','#1e293b','#64748b','#0f172a'],
+    nvr:['#e11d48','#be123c','#f43f5e','#9f1239'],
+    ups:['#ca8a04','#b45309','#eab308','#a16207'],
+    organizer:['#1e293b','#334155'],
+    shelf:['#475569','#64748b']
+  });
+  function autoDeviceColor(type,index=0){
+    const palette=deviceTypeColors[type]||['#0d9488','#059669','#10b981','#14b8a6','#2563eb'];
+    return palette[Math.abs(index)%palette.length];
+  }
+  function effectiveDeviceColor(d,rackDevices=[]){
+    if(d?.color&&d.color.toLowerCase()!=='#397c78'&&/^#[0-9a-f]{6}$/i.test(d.color))return d.color;
+    const list=Array.isArray(rackDevices)?rackDevices:[];
+    const sameType=list.filter(x=>x&&x.type===d?.type);
+    const index=sameType.findIndex(x=>x&&x.id===d?.id);
+    return autoDeviceColor(d?.type,index>=0?index:(list.indexOf(d)>=0?list.indexOf(d):0));
+  }
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
     const customType=s?.deviceTypes?.find(t=>t.id===type);
@@ -504,5 +525,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
