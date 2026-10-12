@@ -1729,12 +1729,20 @@ function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=
       else modelInput.placeholder='MikroTik / Cisco / Ubiquiti';
     }
   };
-  $('#model').closest('.field').insertAdjacentHTML('beforebegin',input('modelSearch',tr('Որոնել մոդել'),'','search',`placeholder="${esc(tr('Արտադրող կամ մոդել'))}" autocomplete="off"`)+select('modelPreset',tr('Մոդելների կատալոգ'),[['',tr('Սեփական մոդել / ձեռքով')]],''));
+  $('#model').closest('.field').insertAdjacentHTML('beforebegin',input('modelSearch',tr('Որոնել մոդել'),'','search',`placeholder="${esc(tr('Արտադրող, մոդել, 24p, PoE…'))}" autocomplete="off"`)+select('modelPreset',tr('Մոդելների կատալոգ'),[['',tr('Սեփական մոդել / ձեռքով')]],''));
   const updateKnownModels=()=>{
     const curType=$('#type').value;
-    const allModels=D.searchDeviceModels(curType,$('#modelSearch').value,state).map(m=>m.name);
-    const dl=$('#knownDeviceModels');if(dl)dl.innerHTML=allModels.map(m=>`<option value="${esc(m)}"></option>`).join('');
-    $('#modelPreset').innerHTML=opts([['',tr(allModels.length?'Սեփական մոդել / ձեռքով':'Մոդելներ չեն գտնվել')],...allModels.map(name=>[name,name])],allModels.includes($('#model').value)?$('#model').value:'');
+    const allModels=D.searchDeviceModels(curType,$('#modelSearch').value,state);
+    const dl=$('#knownDeviceModels');if(dl)dl.innerHTML=allModels.map(m=>`<option value="${esc(m.name)}"></option>`).join('');
+    const curVal=$('#model').value;
+    const modelLabel=m=>{
+      const poeText=m.poe?(m.name.includes('PoE+')?' PoE+':' PoE'):'';
+      const sfpText=m.sfp?` · ${m.sfp} SFP`:'';
+      const portText=m.ports!==undefined?`${m.ports}p`:'';
+      const details=[portText+poeText,sfpText?sfpText.slice(3):'',m.height?m.height+'U':''].filter(Boolean).join(' · ');
+      return details?`${m.name} (${details})`:m.name;
+    };
+    $('#modelPreset').innerHTML=opts([['',tr(allModels.length?'Սեփական մոդել / ձեռքով':'Մոդելներ չեն գտնվել')],...allModels.map(m=>[m.name,modelLabel(m)])],allModels.some(m=>m.name===curVal)?curVal:'');
   };
   let appliedModel=currentType+'|'+String(defaults.model||'').trim().toLowerCase();
   const applyModelDefaults=()=>{

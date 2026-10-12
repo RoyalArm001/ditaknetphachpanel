@@ -41,41 +41,157 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const isNetworkDevice = d => ['switch','router','server','nvr'].includes(d?.type);
   // Port counts below are copper ports; SFP ports are additional.
   const defaultModels=Object.freeze([
+    // Patch Panels
     ['panel','Cat6 UTP 24-Port 1U',24,1,0,false],
     ['panel','Cat6 UTP 48-Port 2U',48,2,0,false],
+    ['panel','Cat6 UTP 48-Port 1U (High Density)',48,1,0,false],
     ['panel','Cat6A FTP Shielded 24-Port 1U',24,1,0,false],
+    ['panel','Cat6A STP Shielded 48-Port 2U',48,2,0,false],
+    ['panel','Cat5e UTP 24-Port 1U',24,1,0,false],
     ['panel','Cat5e Compact 12-Port 1U',12,1,0,false],
+    ['panel','Keystone Modular 24-Port 1U',24,1,0,false],
+    ['panel','Keystone Modular 48-Port 2U',48,2,0,false],
+    ['panel','Optical ODF 12-Port LC/SC 1U',12,1,12,false],
     ['panel','Optical ODF 24-Port LC/SC 1U',24,1,24,false],
     ['panel','Optical ODF 48-Port LC/SC 2U',48,2,48,false],
-    ['switch','Cisco Catalyst 2960-24TT',24,1,2,false],
-    ['switch','Cisco Catalyst 2960-48TT',48,1,2,false],
-    ['switch','Cisco Catalyst 2960-24PC-L (PoE)',24,1,2,true],
-    ['switch','Cisco Catalyst 3850-48P (PoE+)',48,1,4,true],
+
+    // MikroTik Switches
+    ['switch','MikroTik CSS326-24G-2S+RM',24,1,2,false],
     ['switch','MikroTik CRS326-24G-2S+RM',24,1,2,false],
     ['switch','MikroTik CRS328-24P-4S+RM (PoE+)',24,1,4,true],
     ['switch','MikroTik CRS354-48G-4S+2Q+RM',48,1,6,false],
+    ['switch','MikroTik CRS354-48P-4S+2Q+RM (PoE+)',48,1,6,true],
+    ['switch','MikroTik CRS310-8G+2S+IN (2.5G)',8,1,2,false],
+    ['switch','MikroTik CRS309-1G-8S+IN (10G SFP+)',1,1,8,false],
+    ['switch','MikroTik CRS326-24S+2Q+RM (10G SFP+)',0,1,26,false],
+    ['switch','MikroTik CRS112-8P-4S-IN (PoE)',8,1,4,true],
+
+    // Ubiquiti UniFi Switches
+    ['switch','Ubiquiti UniFi USW-16-PoE',16,1,2,true],
+    ['switch','Ubiquiti UniFi USW-24',24,1,2,false],
     ['switch','Ubiquiti UniFi USW-24-PoE',24,1,2,true],
+    ['switch','Ubiquiti UniFi USW-Pro-24-PoE',24,1,2,true],
+    ['switch','Ubiquiti UniFi USW-48',48,1,4,false],
     ['switch','Ubiquiti UniFi USW-48-PoE',48,1,4,true],
+    ['switch','Ubiquiti UniFi USW-Pro-48-PoE',48,1,4,true],
+    ['switch','Ubiquiti UniFi USW-Enterprise-24-PoE (2.5G)',24,1,2,true],
+    ['switch','Ubiquiti UniFi USW-Enterprise-48-PoE (2.5G)',48,1,4,true],
+    ['switch','Ubiquiti UniFi USW-Aggregation (8x SFP+)',0,1,8,false],
+
+    // Cisco Switches
+    ['switch','Cisco Catalyst 1000-8P-2G-L (PoE+)',8,1,2,true],
+    ['switch','Cisco Catalyst 1000-16P-2G-L (PoE+)',16,1,2,true],
+    ['switch','Cisco Catalyst 1000-24T-4G-L',24,1,4,false],
+    ['switch','Cisco Catalyst 1000-24P-4G-L (PoE+)',24,1,4,true],
+    ['switch','Cisco Catalyst 1000-48T-4G-L',48,1,4,false],
+    ['switch','Cisco Catalyst 1000-48P-4G-L (PoE+)',48,1,4,true],
+    ['switch','Cisco Catalyst 2960-24TT',24,1,2,false],
+    ['switch','Cisco Catalyst 2960-48TT',48,1,2,false],
+    ['switch','Cisco Catalyst 2960-24PC-L (PoE)',24,1,2,true],
+    ['switch','Cisco Catalyst 2960-X 24TS-L',24,1,4,false],
+    ['switch','Cisco Catalyst 2960-X 24PD-L (PoE+)',24,1,2,true],
+    ['switch','Cisco Catalyst 2960-X 48FPS-L (PoE+)',48,1,4,true],
+    ['switch','Cisco Catalyst 3850-48P (PoE+)',48,1,4,true],
+    ['switch','Cisco Catalyst 9200L-24P-4G (PoE+)',24,1,4,true],
+    ['switch','Cisco Catalyst 9200L-48P-4G (PoE+)',48,1,4,true],
+    ['switch','Cisco CBS250-24T-4G',24,1,4,false],
+    ['switch','Cisco CBS250-24P-4G (PoE+)',24,1,4,true],
+    ['switch','Cisco CBS350-24P-4G (PoE+)',24,1,4,true],
+    ['switch','Cisco CBS350-48P-4G (PoE+)',48,1,4,true],
+
+    // TP-Link Omada Switches
+    ['switch','TP-Link Omada SG2210P (PoE+)',8,1,2,true],
+    ['switch','TP-Link Omada SG2428P (PoE+)',24,1,4,true],
+    ['switch','TP-Link Omada SG3428',24,1,4,false],
+    ['switch','TP-Link Omada SG3428X (10G SFP+)',24,1,4,false],
+    ['switch','TP-Link Omada SG3452P (PoE+)',48,1,4,true],
+
+    // D-Link Switches
+    ['switch','D-Link DGS-1210-10P (PoE)',8,1,2,true],
+    ['switch','D-Link DGS-1210-28',24,1,4,false],
+    ['switch','D-Link DGS-1210-28P (PoE+)',24,1,4,true],
+    ['switch','D-Link DGS-1210-52',48,1,4,false],
+    ['switch','D-Link DGS-1510-28X (10G SFP+)',24,1,4,false],
+
+    // HPE Aruba Switches
     ['switch','HPE Aruba 2530-24G',24,1,4,false],
     ['switch','HPE Aruba 2930F-48G PoE+',48,1,4,true],
-    ['switch','D-Link DGS-1210-28',24,1,4,false],
+    ['switch','Aruba CX 6000 24G 4SFP',24,1,4,false],
+    ['switch','Aruba CX 6000 48G 4SFP',48,1,4,false],
+    ['switch','Aruba CX 6100 24G Class4 PoE 4SFP+',24,1,4,true],
+    ['switch','Aruba CX 6100 48G Class4 PoE 4SFP+',48,1,4,true],
+    ['switch','Aruba Instant On 1930 24G 4SFP/SFP+',24,1,4,false],
+    ['switch','Aruba Instant On 1930 24G Class4 PoE 4SFP/SFP+',24,1,4,true],
+    ['switch','Aruba Instant On 1930 48G 4SFP/SFP+',48,1,4,false],
+    ['switch','Aruba Instant On 1930 48G Class4 PoE 4SFP/SFP+',48,1,4,true],
+
+    // Huawei Switches
+    ['switch','Huawei CloudEngine S5735-L24T4S-A',24,1,4,false],
+    ['switch','Huawei CloudEngine S5735-L24P4S-A (PoE+)',24,1,4,true],
+    ['switch','Huawei CloudEngine S5735-L48P4S-A (PoE+)',48,1,4,true],
+
+    // Routers & Gateways
+    ['router','MikroTik hEX (RB750Gr3) 5-Port',5,1,0,false],
+    ['router','MikroTik hEX S 5-Port',5,1,1,false],
+    ['router','MikroTik RB5009UG+S+IN',8,1,1,false],
+    ['router','MikroTik RB4011iGS+RM',10,1,1,false],
+    ['router','MikroTik CCR1009-7G-1C-1S+',8,1,1,false],
     ['router','MikroTik CCR2004-16G-2S+',16,1,2,false],
     ['router','MikroTik CCR2116-12G-4S+',12,1,4,false],
-    ['router','MikroTik RB5009UG+S+IN',8,1,1,false],
-    ['router','MikroTik hEX S 5-Port',5,1,1,false],
-    ['router','Cisco ISR 4331',3,1,2,false],
+    ['router','MikroTik CCR2216-1G-12XS-2XQ',1,1,14,false],
+    ['router','Ubiquiti EdgeRouter 4',3,1,1,false],
+    ['router','Ubiquiti EdgeRouter 6P (PoE)',5,1,1,true],
     ['router','Ubiquiti EdgeRouter 12',10,1,2,false],
     ['router','Ubiquiti Dream Machine Pro',8,1,2,false],
+    ['router','Ubiquiti Dream Machine SE (PoE)',8,1,2,true],
+    ['router','Ubiquiti UniFi Gateway Pro (UXG-Pro)',2,1,2,false],
+    ['router','Cisco ISR 4321',2,1,2,false],
+    ['router','Cisco ISR 4331',3,1,2,false],
+    ['router','Cisco Catalyst 8200L-1N-4T',4,1,0,false],
+    ['router','Fortinet FortiGate 40F',5,1,0,false],
+    ['router','Fortinet FortiGate 60F',10,1,0,false],
+    ['router','Fortinet FortiGate 80F',8,1,2,false],
+
+    // Servers & Storage
     ['server','1U Rack Server (Dell PowerEdge R640)',4,1,2,false],
     ['server','2U Rack Server (Dell PowerEdge R740)',4,2,2,false],
+    ['server','1U Rack Server (HPE ProLiant DL360 Gen10)',4,1,2,false],
+    ['server','2U Rack Server (HPE ProLiant DL380 Gen10)',4,2,2,false],
+
+    // NVR / Video Surveillance
     ['nvr','NVR 16-Channel 1U (Hikvision / Dahua)',16,1,0,true],
     ['nvr','NVR 32-Channel 2U (Hikvision / Dahua)',32,2,0,true],
+    ['nvr','NVR 64-Channel 2U (Enterprise)',64,2,2,false],
+
+    // UPS & Power
     ['ups','UPS 1500VA 2U (APC Smart-UPS)',1,2,0,false],
+    ['ups','UPS 2200VA 2U (APC Smart-UPS)',1,2,0,false],
     ['ups','UPS 3000VA 3U (APC Smart-UPS)',1,3,0,false],
+    ['ups','PDU 8-Outlet 1U Rackmount',1,1,0,false],
+
+    // Cable Management & Shelves
     ['organizer','1U Horizontal Cable Manager',0,1,0,false],
     ['organizer','2U Horizontal Cable Manager',0,2,0,false],
-    ['shelf','1U 19" Cantilever Shelf',0,1,0,false]
+    ['shelf','1U 19" Cantilever Shelf',0,1,0,false],
+    ['shelf','2U 19" Fixed Shelf',0,2,0,false]
   ].map(([type,name,ports,height,sfp,poe])=>Object.freeze({type,name,ports,height,sfp,poe})));
+  function modelBrand(name){
+    const n=String(name||'').trim();
+    if(/^mikrotik/i.test(n))return 'MikroTik';
+    if(/^ubiquiti/i.test(n))return 'Ubiquiti UniFi';
+    if(/^cisco/i.test(n))return 'Cisco';
+    if(/^tp-link/i.test(n))return 'TP-Link Omada';
+    if(/^d-link/i.test(n))return 'D-Link';
+    if(/^(hpe|aruba)/i.test(n))return 'HPE / Aruba';
+    if(/^huawei/i.test(n))return 'Huawei';
+    if(/^fortinet/i.test(n))return 'Fortinet';
+    if(/^dell/i.test(n))return 'Dell';
+    if(/^(cat5|cat6|odf|keystone)/i.test(n))return tr('Փաչ պանելներ');
+    if(/^(nvr|hikvision|dahua)/i.test(n))return 'NVR / Տեսահսկում';
+    if(/^(ups|pdu|apc)/i.test(n))return 'UPS / Սնուցում';
+    if(/^(1u|2u)/i.test(n))return tr('Աքսեսուարներ / Սերվեր');
+    return tr('Այլ մոդելներ');
+  }
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
     const customType=s?.deviceTypes?.find(t=>t.id===type);
@@ -90,7 +206,12 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       names.add(d.model.trim().toLowerCase());known.push({type,name:d.model,ports:d.portList.length-(d.sfpCount||0),height:d.height,sfp:d.sfpCount||0,poe:['poe','poe-plus'].includes(d.modelType),modelType:d.modelType});
     }
     const terms=String(query||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return known.filter(m=>terms.every(term=>m.name.toLowerCase().includes(term)));
+    if(!terms.length)return known;
+    return known.filter(m=>{
+      const b=modelBrand(m.name).toLowerCase();
+      const txt=(m.name+' '+b+' '+(m.ports||'')+' '+(m.ports?m.ports+'p':'')+' '+(m.sfp?'sfp':'')+' '+(m.poe?'poe':'')).toLowerCase();
+      return terms.every(term=>txt.includes(term));
+    });
   }
   function saveDeviceModel(s,model){
     const item={type:model.type,name:String(model.name||'').trim(),ports:model.ports,height:model.height,sfp:model.sfp??0,poe:['poe','poe-plus'].includes(model.modelType),modelType:model.modelType||'none'};
@@ -383,5 +504,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
