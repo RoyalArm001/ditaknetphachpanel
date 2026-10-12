@@ -825,6 +825,66 @@ function modelCatalogModal(){
   typeEl.onchange=draw;
   draw();
 }
+async function importCloudProject(){
+  if(personal()||accountReadOnly)return;
+  if(!await save())return;
+  const sources=(await api('/api/companies')).filter(x=>x.id!==activeCompanyId);
+  if(!sources.length){toast(tr('Ներմուծման համար այլ նախագիծ չկա։'));return;}
+  const destination=activeCompanyId;
+  modal(tr('Ներմուծել cloud-ից'),`<p class="hint">${tr('Նպատակային նախագիծ')}: <strong>${esc(state.company)}</strong></p><form id="projectImportForm">
+    <div class="form-grid">${select('source',tr('Սկզբնական նախագիծ'),[['',tr('Ընտրել')],...sources.map(x=>[x.id,x.name])],'')}${select('mode',tr('Ներմուծման եղանակ'),[['move',tr('Տեղափոխել')],['copy',tr('Պատճենել')]],'move')}</div>
+    <p class="hint">${tr('Տեղափոխելիս ընտրված ռաքերը հեռացվում են սկզբնական նախագծից։ Պատճենելիս մնում են երկու նախագծերում։')}</p>
+    <div id="projectImportRacks" class="project-import-racks"></div>
+    <button class="button primary" type="submit" disabled>${tr('Նախադիտել ներմուծումը')}</button>
+    <div id="projectImportPreview" aria-live="polite"></div></form>`);
+  const form=$('#projectImportForm'),tree=$('#projectImportRacks'),preview=$('#projectImportPreview'),submit=form.querySelector('[type=submit]'),dlg=$('#dialog');
+  let source=null,generation=0,sourceGeneration=0,pending=null,busy=false;
+  const error=e=>{if(form.isConnected){$('#formError').textContent=tr(e.message);$('#formError').hidden=false;}};
+  const invalidate=()=>{generation++;pending=null;preview.replaceChildren();$('#formError').hidden=true;};
+  form.elements.source.onchange=async e=>{
+    e.stopPropagation();source=null;invalidate();const ticket=++sourceGeneration;submit.disabled=true;tree.textContent=tr('Բեռնվում է…');
+    const id=form.elements.source.value;if(!id){tree.replaceChildren();return;}
+    try{
+      const data=await api('/api/projects/import?source='+encodeURIComponent(id));
+      if(!form.isConnected||ticket!==sourceGeneration)return;
+      source=data;
+      tree.innerHTML=data.floors.filter(f=>f.racks.length).map(f=>`<fieldset class="project-import-floor"><legend><label><input type="checkbox" data-floor="${esc(f.id)}"> ${esc(f.name)}</label></legend>${f.racks.map(r=>`<label class="project-import-rack"><input type="checkbox" name="rack" value="${esc(r.id)}" data-in-floor="${esc(f.id)}"><span>${esc(r.name)}</span><small>${r.devices} ${tr('սարք')}</small></label>`).join('')}</fieldset>`).join('')||`<p class="hint">${tr('Այս նախագծում ռաքեր չկան։')}</p>`;
+    }catch(e){if(ticket===sourceGeneration&&form.isConnected){tree.replaceChildren();error(e);}}
+  };
+  form.onchange=e=>{
+    invalidate();
+    if(e.target.dataset.floor)for(const cb of tree.querySelectorAll('[name=rack]'))if(cb.dataset.inFloor===e.target.dataset.floor)cb.checked=e.target.checked;
+    for(const group of tree.querySelectorAll('fieldset')){const all=[...group.querySelectorAll('[name=rack]')],checked=all.filter(x=>x.checked).length,head=group.querySelector('[data-floor]');head.checked=checked===all.length;head.indeterminate=checked>0&&checked<all.length;}
+    submit.disabled=!source||!tree.querySelector('[name=rack]:checked');
+  };
+  form.onsubmit=async e=>{
+    e.preventDefault();if(busy||!source)return;busy=true;submit.disabled=true;invalidate();
+    const ticket=++generation;
+    try{
+      if(!await save())throw new Error(tr('Նախ պահպանեք գործող ընկերության փոփոխությունները։'));
+      const request={sourceId:form.elements.source.value,sourceRevision:source.revision,targetRevision:revision,mode:form.elements.mode.value,rackIds:[...tree.querySelectorAll('[name=rack]:checked')].map(x=>x.value)};
+      const result=await api('/api/projects/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...request,preview:true})});
+      if(!form.isConnected||ticket!==generation)return;
+      pending=request;const s=result.summary;
+      preview.innerHTML=`<section class="project-import-summary"><h3>${tr('Ներմուծման ամփոփում')}</h3><p><strong>${esc(sources.find(x=>x.id===request.sourceId)?.name)}</strong> → <strong>${esc(state.company)}</strong> · ${esc(tr(request.mode==='move'?'Տեղափոխել':'Պատճենել'))}</p><ul>${[[s.floors,'Նոր հարկեր'],[s.racks,'Ռաքեր'],[s.devices,'Սարքեր'],[s.ports,'Պորտեր'],[s.plans,'Հատակագծեր'],[s.renamed,'Վերանվանվող տարրեր'],[s.detachedLinks,'Բաժանվող արտաքին կապեր']].map(([n,label])=>`<li>${tr(label)}: <strong>${n}</strong></li>`).join('')}</ul><p class="hint">${tr('Ներքին կապերը պահպանվում են։ Այլ նախագծում մնացող սարքերի կապերը անջատվում են։ Կրկնվող անուններին ավելացվում է համար։')}</p><label class="project-import-confirm"><input type="checkbox" id="projectImportConfirm"> ${tr('Հաստատում եմ ընտրված ռաքերի ներմուծումը')}</label><button type="button" id="projectImportApply" class="button primary" disabled>${tr('Կատարել ներմուծումը')}</button></section>`;
+      $('#projectImportConfirm').onchange=e=>{e.stopPropagation();$('#projectImportApply').disabled=!e.target.checked;};
+      $('#projectImportApply').onclick=async()=>{
+        if(busy||!pending)return;
+        if(dirty||revision!==pending.targetRevision||activeCompanyId!==destination){invalidate();error(new Error(tr('Նախագծերը փոխվել են։ Կրկին բացեք ներմուծումը։')));return;}
+        busy=true;const preventClose=e=>e.preventDefault();dlg.addEventListener('cancel',preventClose);
+        const controls=[...dlg.querySelectorAll('button,input,select')];controls.forEach(x=>x.disabled=true);
+        try{
+          const result=await api('/api/projects/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...pending,preview:false})});
+          state=result.state;revision=result.revision;dirty=false;conflict=false;selectedPortId='';selectedPortIds.clear();
+          try{localStorage.removeItem(recoveryKey());}catch{}
+          dlg.close();render();status(tr('Պահված է'));toast(tr('Ներմուծումն ավարտված է'));
+          refreshCompanies().catch(()=>{});
+        }catch(e){error(e);}
+        finally{busy=false;dlg.removeEventListener('cancel',preventClose);controls.forEach(x=>x.disabled=false);}
+      };
+    }catch(e){error(e);}finally{busy=false;if(form.isConnected)submit.disabled=!source||!tree.querySelector('[name=rack]:checked');}
+  };
+}
 async function backupSnapshotsModal(){
   modal(tr('Ավտոմատ Backup snapshot-ներ'),`<div id="backupSnapshotsList"><p class="hint">${tr('Բեռնվում է…')}</p></div>`);
   try{
@@ -1196,7 +1256,7 @@ function renderSettings(){
     $('#content').innerHTML=header(tr('Կարգավորումներ'),currentTab[3])+settingsTabs()+'<section class="panel" id="auditLog" aria-live="polite"></section>';
     const host=$('#auditLog');host.textContent=tr('Բեռնվում է…');
     const load=async(before='')=>{try{const rows=await api('/api/audit'+(before?'?before='+encodeURIComponent(before):''));if(!host.isConnected)return;
-      const actions={'backup.restore':'Պատճենի վերականգնում','pin.rotate':'PIN-ի փոփոխություն','pin.create':'PIN-ի ստեղծում','pin.update':'PIN-ի խմբագրում','pin.delete':'PIN-ի ջնջում','pin.login':'Մուտք PIN-ով','company.create':'Ընկերության ստեղծում','project.update':'Նախագծի փոփոխություն'};
+      const actions={'backup.restore':'Պատճենի վերականգնում','pin.rotate':'PIN-ի փոփոխություն','pin.create':'PIN-ի ստեղծում','pin.update':'PIN-ի խմբագրում','pin.delete':'PIN-ի ջնջում','pin.login':'Մուտք PIN-ով','company.create':'Ընկերության ստեղծում','project.update':'Նախագծի փոփոխություն','project.move':'Ռաքերի տեղափոխում','project.copy':'Ռաքերի պատճենում'};
       host.innerHTML='<div class="table-wrap"><table><thead><tr>'+['Ամսաթիվ','Օգտատեր','IP','Գործողություն','Օբյեկտ'].map(x=>'<th>'+esc(tr(x))+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr><td>'+esc(new Date(row.created_at).toLocaleString())+'</td><td>'+esc(row.actor)+'</td><td>'+esc(row.ip)+'</td><td>'+esc(tr(actions[row.action]||row.action))+'</td><td>'+esc(row.target)+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p>'+esc(tr('Գրառումներ չկան'))+'</p>');
       if(rows.length===100){const next=document.createElement('button');next.className='button';next.textContent=tr('Հաջորդը');next.onclick=()=>load(rows.at(-1).id);host.append(next);}
     }catch(error){if(host.isConnected)host.textContent=error.message;}};
@@ -1410,6 +1470,7 @@ function renderSettings(){
     let hasRecovery=false;try{hasRecovery=!!localStorage.getItem(recoveryKey());}catch{}
     $('#content').innerHTML=header(tr('Կարգավորումներ'),currentTab[3],button('↓ '+(state.backupFormat==='xlsx'?'Excel':'JSON'),'backup','','primary')+button(tr('Պահուստային snapshot-ներ'),'backup-snapshots'))+settingsTabs()+`
     <div class="settings-grid">
+      ${!personal()&&!accountReadOnly?`<section class="panel"><div class="settings-card-head"><h2>${tr('Ներմուծել cloud-ից')}</h2></div><p class="muted">${tr('Ընտրեք այլ նախագծի հարկերն ու ռաքերը և տեղափոխեք կամ պատճենեք այս նախագծի մեջ։')}</p>${button(tr('Ընտրել նախագիծ և ռաքեր'),'project-import','','primary')}</section>`:''}
       <section class="panel">
         <div class="settings-card-head">
           <h2><span class="settings-card-icon">☁️</span>${tr('Ավտոմատ cloud backup')}</h2>
@@ -2060,6 +2121,7 @@ const actions={
   'model-catalog':modelCatalogModal,
   'device-model-new':id=>deviceModelModal(id),
   'selective-pdf':()=>openSelectivePdfModal('devices'),
+  'project-import':importCloudProject,
   'backup-snapshots':backupSnapshotsModal,
   'backup-preview':id=>backupPreviewModal(id),
   'backup-restore-confirm':id=>backupRestoreExecute(id),

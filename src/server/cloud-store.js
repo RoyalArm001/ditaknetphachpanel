@@ -13,6 +13,7 @@ function openCloudStore(options={}){
   const pool=options.pool||createPool();
   const read=async id=>{const {rows}=await pool.query('SELECT revision,body FROM rackmap.companies WHERE id=$1',[id]);return rows[0]?{revision:Number(rows[0].revision),state:rows[0].body,companyId:id}:null;};
   return {cloud:true,pool,read,directory:'Supabase',database:'Supabase PostgreSQL · rackmap',backups:'Վերջին 50 փոփոխությունները և JSON արտահանում',
+    transfer:request=>require('./project-transfer').transferPostgres(pool,null,request),
     list:async()=>{const {rows}=await pool.query("SELECT id,revision,body->>'company' AS name,jsonb_array_length(body->'floors') AS count FROM rackmap.companies ORDER BY created_at,id");return rows.map(x=>({id:x.id,revision:Number(x.revision),name:x.name,floorCount:Number(x.count)}));},
     create:async(id,state)=>{D.validate(state);await pool.query('INSERT INTO rackmap.companies(id,revision,body) VALUES($1,0,$2)',[id,JSON.stringify(state)]);},
     save:async(id,state,revision)=>{

@@ -159,6 +159,24 @@ function createApp(options={}) {
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
       }
+      if(url.pathname==='/api/projects/import'){
+        if(!['GET','POST'].includes(req.method))return json(res,405,{error:tr('Գործողությունը չի գտնվել')});
+        let body;try{body=req.method==='POST'?await readBody(req):{};}catch{return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});}
+        const sourceId=req.method==='GET'?url.searchParams.get('source'):body.sourceId;
+        if(typeof sourceId!=='string'||!sourceId||sourceId===companyId)return json(res,400,{error:tr('Ընտրեք այլ սկզբնական նախագիծ')});
+        // Use the permission-filtered reader for BOTH projects before entering the store transaction.
+        const source=await read(sourceId),target=await read(companyId);
+        if(!source||!target)return json(res,404,{error:tr('Նախագիծը չի գտնվել')});
+        if(req.method==='GET')return json(res,200,{revision:source.revision,name:source.state.company,floors:source.state.floors.map(f=>({id:f.id,name:f.name,racks:f.racks.map(r=>({id:r.id,name:r.name,devices:r.devices.length}))}))});
+        if(typeof body.preview!=='boolean'||!Number.isSafeInteger(body.sourceRevision)||!Number.isSafeInteger(body.targetRevision))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+        const request={sourceId,targetId:companyId,sourceRevision:body.sourceRevision,targetRevision:body.targetRevision,rackIds:body.rackIds,mode:body.mode,maxBytes:cloud?4*1024*1024:24*1024*1024};
+        try{
+          if(body.preview){const result=require('./project-transfer').prepare(source,target,request);return json(res,200,{summary:result.summary});}
+          const result=await requestStore.transfer(request);
+          res.auditContext.action=body.mode==='move'?'project.move':'project.copy';res.auditContext.target=sourceId+' → '+companyId;
+          return json(res,200,result);
+        }catch(e){if(e.status||!e.code)return json(res,e.status||400,{error:tr(e.message)});throw e;}
+      }
       if(url.pathname==='/api/shares'||url.pathname==='/api/shares/revoke'){
         const current=await read(companyId);
         if(!current)return json(res,404,{error:tr('Ընկերությունը չի գտնվել')});

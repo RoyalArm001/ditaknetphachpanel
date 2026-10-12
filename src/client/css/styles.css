@@ -1,6 +1,20 @@
 @font-face{font-family:MyPatch;src:url('/assets/DejaVuSans.ttf') format('truetype');font-weight:400;font-display:swap}
 .project-style{margin:20px 0;padding:14px;border:1px solid var(--line);border-radius:8px}
 .project-style summary{cursor:pointer;font-weight:600;line-height:1.6}
+.project-import-racks{max-height:36vh;overflow:auto;margin:16px 0;overscroll-behavior:contain}
+.project-import-floor{min-width:0;border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:12px}
+.project-import-floor legend{max-width:100%;padding:0 8px;font-weight:700;overflow-wrap:anywhere}
+.project-import-floor label,.project-import-confirm{display:flex;align-items:center;gap:10px;cursor:pointer}
+.project-import-rack{padding:10px 8px;border-radius:8px;overflow-wrap:anywhere}
+.project-import-rack:hover{background:var(--surface-2,var(--bg))}
+.project-import-rack span{flex:1;min-width:0}
+.project-import-rack small{white-space:nowrap;color:var(--muted)}
+#projectImportForm input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);margin:0}
+.project-import-summary{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:18px;overflow-wrap:anywhere}
+.project-import-summary ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0;list-style:none}
+.project-import-summary li{display:flex;justify-content:space-between;gap:8px}
+.project-import-confirm{margin:16px 0;line-height:1.5}
+@media(max-width:480px){.project-import-summary ul{grid-template-columns:1fr}}
 .project-style fieldset{min-width:0;margin:16px 0;padding:12px;border:1px solid var(--line);border-radius:8px}
 .project-style legend{font-size:13px;padding:0 6px}
 .project-style-row{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:12px;align-items:end;margin:12px 0}
