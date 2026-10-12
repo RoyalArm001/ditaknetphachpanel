@@ -1,6 +1,12 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Արտադրող կամ մոդել":["Manufacturer or model","Производитель или модель"],
+"Սեփական մոդել / ձեռքով":["Custom model / manual entry","Своя модель / вручную"],
+"Պահպանել այս մոդելը իմ կատալոգում":["Save this model to my catalog","Сохранить эту модель в моём каталоге"],
+"Մոդելը չկա՞ ցանկում։ Գրեք ձեր մոդելը և ընտրեք պորտերը։ Ձեռքով փոխած արժեքները պահպանվում են։":["Model not listed? Enter your model and choose the ports. Manual changes are kept.","Модели нет в списке? Введите свою модель и выберите порты. Изменения, внесённые вручную, сохраняются."],
+"＋ Սվիչի մոդել":["＋ Switch model","＋ Модель коммутатора"],
+"＋ Ռաուտերի մոդել":["＋ Router model","＋ Модель маршрутизатора"],
 "Ներմուծել cloud-ից":["Import from cloud","Импорт из облака"],
 "Ընտրեք այլ նախագծի հարկերն ու ռաքերը և տեղափոխեք կամ պատճենեք այս նախագծի մեջ։":["Select floors and racks from another project to move or copy into this project.","Выберите этажи и стойки другого проекта для переноса или копирования в этот проект."],
 "Ընտրել նախագիծ և ռաքեր":["Select project and racks","Выбрать проект и стойки"],

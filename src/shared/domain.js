@@ -79,10 +79,31 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
     const customType=s?.deviceTypes?.find(t=>t.id===type);
-    const customModels=Array.isArray(customType?.models)?customType.models.map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
-    const extraModels=Array.isArray(s?.deviceModels)?s.deviceModels.filter(m=>m.type===type).map(m=>({type,name:m.name,ports:m.ports||m.portCount||24,height:m.height||1,sfp:m.sfp||m.sfpCount||0,poe:!!m.poe})):[];
-    return [...defaults,...customModels,...extraModels];
+    const normalize=m=>({...m,type,ports:m.ports??m.portCount??24,height:m.height??1,sfp:m.sfp??m.sfpCount??0,poe:!!m.poe});
+    const customModels=Array.isArray(customType?.models)?customType.models.map(normalize):[];
+    const extraModels=Array.isArray(s?.deviceModels)?s.deviceModels.filter(m=>m.type===type).map(normalize):[];
+    return [...new Map([...defaults,...customModels,...extraModels].map(m=>[m.name.trim().toLowerCase(),m])).values()];
   };
+  function searchDeviceModels(type,query,s){
+    const known=deviceModels(type,s),names=new Set(known.map(m=>m.name.trim().toLowerCase()));
+    for(const {d} of devices(s||empty()))if(d.type===type&&d.model?.trim()&&!names.has(d.model.trim().toLowerCase())){
+      names.add(d.model.trim().toLowerCase());known.push({type,name:d.model,ports:d.portList.length-(d.sfpCount||0),height:d.height,sfp:d.sfpCount||0,poe:['poe','poe-plus'].includes(d.modelType),modelType:d.modelType});
+    }
+    const terms=String(query||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return known.filter(m=>terms.every(term=>m.name.toLowerCase().includes(term)));
+  }
+  function saveDeviceModel(s,model){
+    const item={type:model.type,name:String(model.name||'').trim(),ports:model.ports,height:model.height,sfp:model.sfp??0,poe:['poe','poe-plus'].includes(model.modelType),modelType:model.modelType||'none'};
+    assert(item.name&&item.name.length<=80,tr('Մոդելի անվանումը սխալ է'));
+    assert(deviceTypes(s).some(([id])=>id===item.type),tr('Սարքի տեսակը սխալ է'));
+    assert(Number.isInteger(item.ports)&&item.ports>=0&&Number.isInteger(item.sfp)&&item.sfp>=0&&item.sfp<=16&&item.ports+item.sfp>=1&&item.ports+item.sfp<=96&&(!item.sfp||isNetworkDevice(item)),tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
+    assert(Number.isInteger(item.height)&&item.height>=1&&item.height<=60,tr('Բարձրությունը սխալ է'));
+    assert(['none','poe','poe-plus'].includes(item.modelType),tr('Սվիչի մոդելի տեսակը սխալ է'));
+    s.deviceModels??=[];
+    const index=s.deviceModels.findIndex(m=>m.type===item.type&&m.name.trim().toLowerCase()===item.name.toLowerCase());
+    if(index>=0)s.deviceModels[index]=item;else{assert(s.deviceModels.length<200,tr('Մոդելների ցանկը սխալ է'));s.deviceModels.push(item);}
+    return item;
+  }
   const allCatalogModels=s=>{
     const typeMap=new Map(deviceTypes(s));
     const standardLabels={
@@ -106,8 +127,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     });
   };
   function modelDefaults(type,name,s){
-    const model=deviceModels(type,s).find(m=>m.name.toLowerCase()===String(name||'').trim().toLowerCase());
-    return model?{ports:model.ports,height:model.height,sfpCount:model.sfp,modelType:type==='switch'?(model.poe?(model.name.includes('PoE+')?'poe-plus':'poe'):'none'):''}:null;
+    const model=searchDeviceModels(type,'',s).find(m=>m.name.trim().toLowerCase()===String(name||'').trim().toLowerCase());
+    return model?{ports:model.ports,height:model.height,sfpCount:model.sfp,modelType:type==='switch'?(model.modelType||(model.poe?(model.name.includes('PoE+')?'poe-plus':'poe'):'none')):''}:null;
   }
   function portLayout(d){
     const sfpCount=d.sfpCount||0,copper=d.portList.length-sfpCount;
@@ -179,6 +200,10 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(m&&typeof m==='object',tr('Մոդելի ձևաչափը սխալ է'));
         assert(typeof m.name==='string'&&m.name.trim().length>0&&m.name.length<=80,tr('Մոդելի անվանումը սխալ է'));
         assert(typeof m.type==='string'&&deviceTypes(s).some(([key])=>key===m.type),tr('Սարքի տեսակը սխալ է'));
+        if(m.ports!==undefined)assert(Number.isInteger(m.ports)&&m.ports>=0&&m.ports<=96,tr('Պորտերի քանակը սխալ է'));
+        if(m.height!==undefined)assert(Number.isInteger(m.height)&&m.height>=1&&m.height<=60,tr('Բարձրությունը սխալ է'));
+        if(m.sfp!==undefined)assert(Number.isInteger(m.sfp)&&m.sfp>=0&&m.sfp<=16&&(!m.sfp||isNetworkDevice(m)),tr('SFP քանակը սխալ է'));
+        if(m.ports!==undefined)assert(m.ports+(m.sfp||0)>=1&&m.ports+(m.sfp||0)<=96,tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
       }
     }
     for(const field of ['serviceLabels','statusLabels','statusColors'])if(s[field]!==undefined){
@@ -358,5 +383,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelDefaults,allCatalogModels,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

@@ -194,10 +194,11 @@ globalThis.RackMaps=(()=>{
         ${input('deviceModel',tr('Սարքի մոդել'),preset.model||'','text','maxlength="200" list="knownMapModels" placeholder="UniFi / MikroTik / Hikvision"')}
         ${select('targetPanelId',tr('Միացման սարք / պանել'),panelOptions,panelOptions[0]?.[0]||'new')}
         ${select('hardwareType',tr('Ռաքի սարքի տեսակ'),D.deviceTypes(curState),'panel')}
-        ${input('hardwarePorts',tr('Հիմնական պորտերի քանակ'),24,'number','required min="1" max="96" step="1"')}
+        ${input('hardwarePorts',tr('Հիմնական պորտերի քանակ'),24,'number','required min="0" max="96" step="1"')}
         ${input('hardwareHeight',tr('Բարձրություն U'),1,'number','required min="1" max="60" step="1"')}
         ${input('hardwareSfp',tr('Օպտիկական SFP պորտեր'),0,'number','required min="0" max="16" step="1"')}
         ${select('hardwarePoe',tr('Սվիչի մոդելի տեսակ'),[['none',tr('Առանց PoE')],['poe','PoE'],['poe-plus','PoE+']],'none')}
+        <div class="field full model-save-option"><label><input type="checkbox" name="saveHardwareModel"> ${tr('Պահպանել այս մոդելը իմ կատալոգում')}</label><p class="hint">${tr('Մոդելը չկա՞ ցանկում։ Գրեք ձեր մոդելը և ընտրեք պորտերը։ Ձեռքով փոխած արժեքները պահպանվում են։')}</p></div>
         ${select('targetRackId',tr('Ռաք (եթե ստեղծվում է նոր պանել)'),targetRacks.map(({r,f})=>[r.id,`${f.name} / ${r.name}`]),targetRacks[0]?.r.id||'')}
         ${input('room',tr('Սենյակ'),preset.room||'','text','maxlength="200"')}
         ${input('cable',tr('Մալուխի համար'),preset.cable||'','text','maxlength="200"')}
@@ -221,7 +222,7 @@ globalThis.RackMaps=(()=>{
             const rack=s.floors.flatMap(f=>f.racks).find(r=>r.id===targetRackId)||s.floors[0]?.racks[0];
             if(!rack)throw new Error(tr('Ռաքը չի գտնվել'));
             const type=String(fd.get('hardwareType')),ports=Number(fd.get('hardwarePorts')),height=Number(fd.get('hardwareHeight')),sfpCount=D.isNetworkDevice({type})?Number(fd.get('hardwareSfp')):0;
-            if(!Number.isInteger(ports)||ports<1||!Number.isInteger(sfpCount)||sfpCount<0||sfpCount>16||ports+sfpCount>96)throw new Error(tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
+            if(!Number.isInteger(ports)||ports<0||!Number.isInteger(sfpCount)||sfpCount<0||sfpCount>16||ports+sfpCount<1||ports+sfpCount>96)throw new Error(tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
             if(!Number.isInteger(height)||height<1||height>rack.u)throw new Error(tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
             const prefix=type==='panel'?'PP':type==='switch'?'SW':type==='router'?'RT':'DEV',names=new Set(D.devices(s).map(x=>x.d.name.toLowerCase()));let seq=1;while(names.has((prefix+'-'+String(seq).padStart(2,'0')).toLowerCase()))seq++;
             const panelName=prefix+'-'+String(seq).padStart(2,'0');
@@ -229,6 +230,7 @@ globalThis.RackMaps=(()=>{
             if(!nextPos)throw new Error(tr('Ռաքում բավարար ազատ տեղ չկա'));
             targetDev={id:crypto.randomUUID(),name:panelName,type,model,pos:nextPos,height,sfpCount,modelType:type==='switch'?String(fd.get('hardwarePoe')):'',color:'#397c78',portList:Array.from({length:ports+sfpCount},(_,i)=>D.port(i+1,crypto.randomUUID()))};
             rack.devices.push(targetDev);
+            if(fd.get('saveHardwareModel'))D.saveDeviceModel(s,{type,name:model,ports,height,sfp:sfpCount,modelType:targetDev.modelType});
           }
           let port=targetDev.portList.find(p=>p.status==='free');
           if(!port){
@@ -258,8 +260,9 @@ globalThis.RackMaps=(()=>{
       let appliedModel='';
       const syncHardware=()=>{
         const creating=field('targetPanelId').value==='new',type=field('hardwareType').value;
-        for(const name of ['hardwareType','deviceModel','hardwarePorts','hardwareHeight','hardwareSfp','hardwarePoe','targetRackId']){const visible=creating&&(name!=='hardwareSfp'||D.isNetworkDevice({type}))&&(name!=='hardwarePoe'||type==='switch');field(name).closest('.field').hidden=!visible;field(name).disabled=!visible;}
-        form.querySelector('#knownMapModels').innerHTML=[...new Set([...D.deviceModels(type,curState).map(m=>m.name),...D.devices(curState).filter(x=>x.d.type===type).map(x=>x.d.model).filter(Boolean)])].map(name=>`<option value="${esc(name)}"></option>`).join('');
+        for(const name of ['hardwareType','deviceModel','hardwarePorts','hardwareHeight','hardwareSfp','hardwarePoe','targetRackId','saveHardwareModel']){const visible=creating&&(name!=='hardwareSfp'||D.isNetworkDevice({type}))&&(name!=='hardwarePoe'||type==='switch');field(name).closest('.field').hidden=!visible;field(name).disabled=!visible;}
+        field('hardwarePorts').min=D.isNetworkDevice({type})?'0':'1';
+        form.querySelector('#knownMapModels').innerHTML=D.searchDeviceModels(type,'',curState).map(m=>`<option value="${esc(m.name)}"></option>`).join('');
       };
       const fillModel=()=>{const key=field('hardwareType').value+'|'+field('deviceModel').value.trim().toLowerCase();if(key===appliedModel)return;appliedModel=key;const model=D.modelDefaults(field('hardwareType').value,field('deviceModel').value,curState);if(!model)return;field('hardwarePorts').value=model.ports;field('hardwareHeight').value=model.height;field('hardwareSfp').value=model.sfpCount;field('hardwarePoe').value=model.modelType||'none';};
       field('targetPanelId').onchange=syncHardware;field('hardwareType').onchange=()=>{syncHardware();fillModel();};field('deviceModel').oninput=fillModel;field('deviceModel').onchange=fillModel;syncHardware();
