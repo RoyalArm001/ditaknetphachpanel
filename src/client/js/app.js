@@ -122,7 +122,7 @@ const findPort=id=>D.ports(state).find(x=>x.p.id===id);
 const panelPortFor=id=>{
   const item=findPort(id);
   if(!item)return null;
-  if(item.d.type==='panel')return item;
+  if(item.d.type==='panel'||item.d.type==='router')return item;
   return D.ports(state).find(x=>x.p.switchPortId===id)||null;
 };
 const serviceVlan=service=>{
@@ -1823,8 +1823,16 @@ function renderPortTools(){
   if(v.status==='fault')v.service='';
   if(!v.vlan&&v.service)v.vlan=serviceVlan(v.service);
   const all=D.ports(state),usedTargets=new Set(all.filter(x=>x.p.id!==p.id&&x.p.switchPortId).map(x=>x.p.switchPortId));
-  const choices=all.filter(x=>D.isNetworkDevice(x.d)&&!usedTargets.has(x.p.id)).map(x=>[x.p.id,`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}${D.portLayout(x.d).find(y=>y.p.id===x.p.id)?.optical?' SFP':''}${x.p.status==='fault'?tr(' · ԱՆՍԱՐՔ'):''}`]);
-  host.innerHTML=tr`<div class="port-editor-heading"><div><div class="eyebrow">ԸՆՏՐՎԱԾ ՊՈՐՏ</div><h2>${esc(d.name)} / ${p.number}</h2></div>${button('×','port-deselect','','small')}</div><p class="port-title">${esc(r.name)} · ${d.type==='panel'?tr('Փաչ պանել'):tr('Սվիչ')}</p>
+  const canConnect=d.type==='panel'||d.type==='router';
+  const choices=all.filter(x=>{
+    if(x.p.id===p.id||x.d.id===d.id)return false;
+    if(usedTargets.has(x.p.id))return false;
+    if(x.p.switchPortId)return false;
+    if(d.type==='router')return x.d.type==='switch'||D.isNetworkDevice(x.d);
+    return D.isNetworkDevice(x.d);
+  }).map(x=>[x.p.id,`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}${D.portLayout(x.d).find(y=>y.p.id===x.p.id)?.optical?' SFP':''}${x.p.status==='fault'?tr(' · ԱՆՍԱՐՔ'):''}`]);
+  const deviceTypeLabel=D.deviceTypes(state).find(([key])=>key===d.type)?.[1]||(d.type==='panel'?tr('Փաչ պանել'):tr('Սվիչ'));
+  host.innerHTML=tr`<div class="port-editor-heading"><div><div class="eyebrow">ԸՆՏՐՎԱԾ ՊՈՐՏ</div><h2>${esc(d.name)} / ${p.number}</h2></div>${button('×','port-deselect','','small')}</div><p class="port-title">${esc(r.name)} · ${esc(deviceTypeLabel)}</p>
   <form id="portForm">
     ${input('endpointName',tr('Միացված սարքի անվանում'),v.endpointName||'','text','maxlength="200" placeholder="WiFi B zone"')}
     <fieldset class="link-config"><legend>Կապի կարգավորումներ</legend>
@@ -1836,7 +1844,7 @@ function renderPortTools(){
     <div class="form-grid">
       ${select('status',tr('Վիճակ'),incoming?[['used',D.statusLabel(state,'used')],['fault',D.statusLabel(state,'fault')]]:Object.keys(D.statuses).map(key=>[key,D.statusLabel(state,key)]),v.status)}
       ${input('cable',tr('Մալուխի համար'),v.cable,'text','maxlength="200" placeholder="C-024"')}
-      ${d.type==='panel'?`<div class="field full">${select('switchPortId',tr('Միացված սվիչի պորտ'),[['',tr('Կապ չկա')],...choices],v.switchPortId)}</div>`:''}
+      ${canConnect?`<div class="field full">${select('switchPortId',tr('Միացված սվիչի պորտ'),[['',tr('Կապ չկա')],...choices],v.switchPortId)}</div>`:''}
     </div>
     <details class="port-extra"><summary>${tr('Այլ տվյալներ')}</summary><div class="form-grid">
       ${select('floorId',tr('Նպատակակետի հարկ'),[['',tr('Ընտրել')],...state.floors.map(f=>[f.id,f.name])],v.floorId)}
@@ -1928,7 +1936,7 @@ function portModal(id){
   if(!flushPortEditor())return;
   const original=findPort(id),item=panelPortFor(id);
   if(!original)return;
-  if(D.isNetworkDevice(original.d)&&!item){toast(tr('Սվիչի պորտն ընտրելու համար նախ միացրեք այն փաչ պանելի պորտին։'));return;}
+  if(D.isNetworkDevice(original.d)&&!item){toast(tr('Սվիչի պորտն ընտրելու համար նախ միացրեք այն փաչ պանելի կամ ռաուտերի պորտին։'));return;}
   const targetPort=item||original;
   if(!targetPort?.p){toast(tr('Պորտը չի գտնվել'));return;}
   selectedPortIds.clear();
@@ -2225,8 +2233,8 @@ document.addEventListener('click',e=>{
     if(item){
       if(selectedPortIds.has(item.p.id))selectedPortIds.delete(item.p.id);else selectedPortIds.add(item.p.id);
       selectedPortId='';renderPortTools();paintPorts();
-    }else if(D.isNetworkDevice(findPort(port.dataset.id)?.d||{})){
-      toast(tr('Չմիացված սվիչի պորտը բազմակի ընտրության համար հասանելի չէ։ Նախ կապեք փաչ պանելի պորտին։'));
+    }else if(findPort(port.dataset.id)?.d.type==='switch'){
+      toast(tr('Չմիացված սվիչի պորտը բազմակի ընտրության համար հասանելի չէ։ Նախ կապեք փաչ պանելի կամ ռաուտերի պորտին։'));
     }
     return;
   }

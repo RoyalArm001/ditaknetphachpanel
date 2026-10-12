@@ -410,7 +410,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
             if(p.vlan!==undefined)assert(typeof p.vlan==='string'&&(p.vlan===''||(/^\d{1,4}$/.test(p.vlan)&&Number(p.vlan)>=1&&Number(p.vlan)<=4094)),tr('VLAN-ը պետք է լինի 1–4094 ամբողջ թիվ կամ դատարկ'));
             assert(!p.floorId||s.floors.some(x=>x.id===p.floorId),tr('Մալուխի հարկը չի գտնվել'));
             assert(p.status!=='free'||(!p.cable&&!p.switchPortId),tr('Մալուխով կամ կապով պորտը չի կարող ազատ լինել'));
-            assert(d.type==='panel'||!p.switchPortId,tr('Կապը լրացվում է փաչ պանելի պորտում'));
+            assert(d.type==='panel'||d.type==='router'||!p.switchPortId,tr('Կապը լրացվում է փաչ պանելի կամ ռաուտերի պորտում'));
           });
         }
       }
@@ -454,7 +454,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     }
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
-      assert(d.type==='panel'&&to&&isNetworkDevice(to.d),tr('Սվիչի պորտը չի գտնվել'));
+      const validTarget=to&&to.d.id!==d.id&&((d.type==='panel'&&isNetworkDevice(to.d))||(d.type==='router'&&isNetworkDevice(to.d)));
+      assert(validTarget,tr('Սվիչի պորտը չի գտնվել'));
       assert(!taken.has(p.switchPortId),tr('Սվիչի պորտն արդեն կապված է այլ փաչ պորտի հետ'));taken.add(p.switchPortId);
     }
     return s;
@@ -467,7 +468,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const terms=normalize(filter.query).trim().split(/\s+/).filter(Boolean),hostText=new Map();
     if(terms.length)for(const n of networks(s))for(const h of n.hosts){if(h.deviceId)hostText.set(h.deviceId,(hostText.get(h.deviceId)||'')+' '+[n.name,n.vlan,n.ip,h.ip,h.username,h.name].join(' '));}
     const result=all.map(x=>{
-      const {f,r,d,p}=x, source=isNetworkDevice(d)?incoming.get(p.id):x;
+      const {f,r,d,p}=x, source=(isNetworkDevice(d)&&!p.switchPortId)?incoming.get(p.id):x;
       const info=source?.p||p, peer=byId.get(p.switchPortId)||incoming.get(p.id);
       const switchEnd=d.type==='switch'?x:peer?.d.type==='switch'?peer:null;
       const status=p.status==='fault'?'fault':p.status==='used'||p.switchPortId||incoming.has(p.id)?'used':'free';

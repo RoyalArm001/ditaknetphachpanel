@@ -1,28 +1,53 @@
 {
-  "version": "2.10.29",
+  "version": "2.10.30",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղվել է դիզայնի խնդիրը, երբ ռաքի կողային վահանակը (պորտի խմբագրում, սարքերի ցանկ) բարձրանում և ծածկում էր վերին վահանակը (top bar)։",
-      "Վերին վահանակի կոճակներն ու ռաքի մասշտաբավորումը այժմ աշխատում են կայուն՝ առանց դիրքային շեղումների։"
+      "Ավելացվել է ռաուտերի պորտերը սվիչի պորտերին ուղիղ միացնելու հնարավորություն։",
+      "Ռաուտերի պորտերն այժմ բացվում և խմբագրվում են անմիջապես, և հասանելի է «Միացված սվիչի պորտ» ցանկը՝ 2D և 3D կապերով։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed layout issue where the rack side inspector panel (port tools and device list) overlapped the top navigation bar.",
-      "Top bar controls and rack zoom now operate smoothly without coordinate or layering conflicts."
+      "Added support for connecting router ports directly to switch ports.",
+      "Router ports can now be opened and edited directly, with full switch port linking and 2D/3D cable visualization."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлена ошибка верстки, из-за которой боковая панель стойки (редактор портов и список устройств) перекрывала верхнюю панель (top bar).",
-      "Элементы верхней панели и масштабирование стойки теперь работают стабильно без смещений и наложений."
+      "Добавлена возможность прямого подключения портов маршрутизатора к портам коммутатора.",
+      "Порты маршрутизатора теперь открываются и настраиваются напрямую, с выбором порта коммутатора и отображением в 2D и 3D."
     ]
   },
   "date": "2026-10-12",
   "history": [
+    {
+      "version": "2.10.29",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել է դիզայնի խնդիրը, երբ ռաքի կողային վահանակը (պորտի խմբագրում, սարքերի ցանկ) բարձրանում և ծածկում էր վերին վահանակը (top bar)։",
+          "Վերին վահանակի կոճակներն ու ռաքի մասշտաբավորումը այժմ աշխատում են կայուն՝ առանց դիրքային շեղումների։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed layout issue where the rack side inspector panel (port tools and device list) overlapped the top navigation bar.",
+          "Top bar controls and rack zoom now operate smoothly without coordinate or layering conflicts."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлена ошибка верстки, из-за которой боковая панель стойки (редактор портов и список устройств) перекрывала верхнюю панель (top bar).",
+          "Элементы верхней панели и масштабирование стойки теперь работают стабильно без смещений и наложений."
+        ]
+      },
+      "date": "2026-10-12"
+    },
     {
       "version": "2.10.28",
       "hy": {

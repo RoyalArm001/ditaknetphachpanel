@@ -14,7 +14,8 @@
       if(rackId&&from.r.id!==rackId&&target?.r.id!==rackId)continue;
       const issues=[];
       if(linked){
-        if(from.d.type!=='panel'||!target||!D.isNetworkDevice(target.d)||target.p.id===from.p.id)issues.push('wrong');
+        const validSource = from.d.type==='panel' || (from.d.type==='router'&&target?.d.type==='switch');
+        if(!validSource||!target||!D.isNetworkDevice(target.d)||target.p.id===from.p.id)issues.push('wrong');
         if((incoming.get(from.p.switchPortId)||[]).length>1)issues.push('duplicate');
       }else issues.push('unlinked');
       records.push({id:from.p.id,from,to:target||null,issues});
