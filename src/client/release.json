@@ -1,28 +1,53 @@
 {
-  "version": "2.10.28",
+  "version": "2.10.29",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ռաքի սարքերը վերև/ներքև տեղափոխելիս (↑/↓) այլևս չեն արգելափակվում հարևան զբաղված դիրքերից։",
-      "Սարքն ավտոմատ բաց է թողնում զբաղված հատվածները և թռչում հաջորդ ազատ դիրքին, որտեղ տեղավորվում է։"
+      "Ուղղվել է դիզայնի խնդիրը, երբ ռաքի կողային վահանակը (պորտի խմբագրում, սարքերի ցանկ) բարձրանում և ծածկում էր վերին վահանակը (top bar)։",
+      "Վերին վահանակի կոճակներն ու ռաքի մասշտաբավորումը այժմ աշխատում են կայուն՝ առանց դիրքային շեղումների։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Moving rack devices up or down (↑/↓) no longer gets blocked by adjacent occupied slots.",
-      "Devices automatically skip occupied positions and jump directly to the next available free slot."
+      "Fixed layout issue where the rack side inspector panel (port tools and device list) overlapped the top navigation bar.",
+      "Top bar controls and rack zoom now operate smoothly without coordinate or layering conflicts."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Перемещение устройств вверх и вниз (↑/↓) больше не блокируется соседними занятыми слотами.",
-      "Устройства автоматически перескакивают занятые позиции и занимают следующий доступный свободный слот."
+      "Исправлена ошибка верстки, из-за которой боковая панель стойки (редактор портов и список устройств) перекрывала верхнюю панель (top bar).",
+      "Элементы верхней панели и масштабирование стойки теперь работают стабильно без смещений и наложений."
     ]
   },
   "date": "2026-10-12",
   "history": [
+    {
+      "version": "2.10.28",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ռաքի սարքերը վերև/ներքև տեղափոխելիս (↑/↓) այլևս չեն արգելափակվում հարևան զբաղված դիրքերից։",
+          "Սարքն ավտոմատ բաց է թողնում զբաղված հատվածները և թռչում հաջորդ ազատ դիրքին, որտեղ տեղավորվում է։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Moving rack devices up or down (↑/↓) no longer gets blocked by adjacent occupied slots.",
+          "Devices automatically skip occupied positions and jump directly to the next available free slot."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Перемещение устройств вверх и вниз (↑/↓) больше не блокируется соседними занятыми слотами.",
+          "Устройства автоматически перескакивают занятые позиции и занимают следующий доступный свободный слот."
+        ]
+      },
+      "date": "2026-10-12"
+    },
     {
       "version": "2.10.27",
       "hy": {
