@@ -1941,9 +1941,11 @@ function portModal(id){
 function moveDevice(id,direction){
   const found=D.devices(state).find(x=>x.d.id===id);
   if(!found)return;
-  const next=found.d.pos+(direction==='up'?1:-1);
-  if(next<1||next+found.d.height-1>found.r.u){toast(tr('Սարքը չի կարող դուրս գալ ռաքի սահմաններից'));return;}
-  if(found.r.devices.some(d=>d.id!==id&&next<d.pos+d.height&&next+found.d.height>d.pos)){toast(tr('Այս դիրքը զբաղված է այլ սարքով'));return;}
+  const next=D.findNextDevicePosition(found.r,found.d,direction);
+  if(next===null){
+    toast(direction==='down'?tr('Ներքևում ազատ տեղ չկա'):tr('Վերևում ազատ տեղ չկա'));
+    return;
+  }
   commit(s=>{const d=D.devices(s).find(x=>x.d.id===id)?.d;if(d)d.pos=next;});
   render();
 }

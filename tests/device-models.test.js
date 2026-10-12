@@ -49,4 +49,33 @@ test('device auto and effective colors provide distinct palettes and resolve leg
  const customDev={id:'c1',name:'Custom',type:'switch',color:'#123456'};
  assert.equal(D.effectiveDeviceColor(customDev,rackDevices),'#123456','Custom explicit hex color must be preserved');
 });
+test('findNextDevicePosition automatically skips occupied slots and jumps to next free space',()=>{
+ const rack={
+  id:'r1',
+  u:42,
+  devices:[
+   {id:'p1',name:'Փաչ 1',pos:42,height:1},
+   {id:'rt',name:'Router1',pos:41,height:1},
+   {id:'p2',name:'Փաչ 2',pos:40,height:1}
+  ]
+ };
+ const router=rack.devices[1];
+ assert.equal(D.findNextDevicePosition(rack,router,'down'),39,'Router at U41 must jump over occupied U40 down to free U39');
+
+ router.pos=39;
+ assert.equal(D.findNextDevicePosition(rack,router,'down'),38,'Router at U39 moves down to free U38');
+ assert.equal(D.findNextDevicePosition(rack,router,'up'),41,'Router at U39 jumps over occupied U40 up to free U41');
+
+ const patch1=rack.devices[0];
+ assert.equal(D.findNextDevicePosition(rack,patch1,'up'),null,'Patch 1 at top U42 cannot move up');
+ assert.equal(D.findNextDevicePosition(rack,patch1,'down'),41,'Patch 1 moves to newly vacated U41');
+
+ router.pos=41;
+ assert.equal(D.findNextDevicePosition(rack,patch1,'down'),39,'With U41 and U40 occupied, Patch 1 jumps down to U39');
+
+ const bigServer={id:'srv',name:'Server',pos:37,height:2};
+ rack.devices.push(bigServer);
+ assert.equal(D.findNextDevicePosition(rack,bigServer,'down'),36);
+});
+
 

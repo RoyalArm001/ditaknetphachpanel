@@ -213,6 +213,30 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const index=sameType.findIndex(x=>x&&x.id===d?.id);
     return autoDeviceColor(d?.type,index>=0?index:(list.indexOf(d)>=0?list.indexOf(d):0));
   }
+  function findNextDevicePosition(rack,device,direction){
+    if(!rack||!device)return null;
+    const height=Number(device.height)||1;
+    const uMax=Number(rack.u)||42;
+    const currentPos=Number(device.pos);
+    const otherDevices=(rack.devices||[]).filter(d=>d.id!==device.id);
+    const canFit=pos=>{
+      if(pos<1||pos+height-1>uMax)return false;
+      return !otherDevices.some(d=>pos<d.pos+d.height&&pos+height>d.pos);
+    };
+    if(direction==='down'){
+      for(let p=currentPos-1;p>=1;p--){
+        if(canFit(p))return p;
+      }
+      return null;
+    }
+    if(direction==='up'){
+      for(let p=currentPos+1;p<=uMax-height+1;p++){
+        if(canFit(p))return p;
+      }
+      return null;
+    }
+    return null;
+  }
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
     const customType=s?.deviceTypes?.find(t=>t.id===type);
@@ -525,5 +549,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

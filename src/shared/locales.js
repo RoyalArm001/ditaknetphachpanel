@@ -1,6 +1,8 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Ներքևում ազատ տեղ չկա":["No free space below","Внизу нет свободного места"],
+"Վերևում ազատ տեղ չկա":["No free space above","Вверху нет свободного места"],
 "Արտադրող կամ մոդել":["Manufacturer or model","Производитель или модель"],
 "Սեփական մոդել / ձեռքով":["Custom model / manual entry","Своя модель / вручную"],
 "Պահպանել այս մոդելը իմ կատալոգում":["Save this model to my catalog","Сохранить эту модель в моём каталоге"],
