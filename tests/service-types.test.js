@@ -125,3 +125,20 @@ test('deleting a customized default service removes customization even if passiv
   assert.equal(state.serviceLabels[''],undefined);
   assert.equal(D.hasService(state,''),true);
 });
+
+test('speaker, mic and dynamicMic icons and translations are available and render valid SVG', () => {
+  for (const key of ['speaker', 'mic', 'microphone', 'dynamicMic']) {
+    const path = D.serviceIcon(key);
+    assert.ok(path && path.length > 10, `path for ${key} should exist`);
+    const svg = D.serviceIconSvg(key);
+    assert.ok(svg.startsWith('<svg') && svg.includes(path) && svg.endsWith('</svg>'));
+  }
+  for (const key of ['speaker', 'mic', 'dynamicMic']) {
+    const hyName = D.serviceIconNames[key];
+    assert.ok(hyName, `name for ${key} should exist`);
+    const en = I.forLanguage('en')(hyName);
+    const ru = I.forLanguage('ru')(hyName);
+    assert.ok(en && !/[\u0531-\u0587]/.test(en), `English translation for ${hyName} should not contain Armenian`);
+    assert.ok(ru && !/[\u0531-\u0587]/.test(ru), `Russian translation for ${hyName} should not contain Armenian`);
+  }
+});

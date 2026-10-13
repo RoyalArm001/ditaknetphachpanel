@@ -549,13 +549,18 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     access:'M5 21V3h13v18 M2 21h20 M14 12h1',
     phone:'M6 3l4 4-3 3q2 5 7 7l3-3 4 4q-2 5-7 2Q3 16 3 7Z',
     internet:'M3 12h18 M12 3C5 8 5 16 12 21 M12 3c7 5 7 13 0 18 M12 3C0 3 0 21 12 21C24 21 24 3 12 3Z',
+    speaker:'M3 9h4l5-5v16l-5-5H3V9Z M16.5 8.5a5 5 0 0 1 0 7 M19.5 5.5a9 9 0 0 1 0 13',
+    mic:'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3 M8 22h8',
+    microphone:'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3 M8 22h8',
+    dynamicMic:'M12 2a4 4 0 0 0-4 4c0 1.5.8 2.8 2 3.5L8.5 21h7L14 9.5c1.2-.7 2-2 2-3.5a4 4 0 0 0-4-4Z M8 6h8 M9 9.5h6',
     other:'M4 4h16v13H4Z M8 21h8 M12 17v4'
   };
-  const serviceIconNames={lan:'LAN վարդակ',computer:'Համակարգիչ',laptop:'Նոթբուք',cameraIndoor:'Ներքին տեսախցիկ',cameraOutdoor:'Արտաքին տեսախցիկ',cameraPtz:'PTZ տեսախցիկ',camera:'Տեսախցիկ',wifi:'Wi-Fi',access:'Մուտքի վերահսկում',phone:'Հեռախոս',internet:'Ինտերնետ',socket:'Էլեկտրական վարդակ',fiber:'Օպտիկական միացում',switch:'Սվիչ',router:'Ռաուտեր',server:'Սերվեր',printer:'Տպիչ',tv:'Հեռուստացույց',intercom:'Դոմոֆոն',alarm:'Ազդանշանային սարք',sensor:'Սենսոր',ups:'UPS',cable:'Մալուխի միացում',other:'Այլ սարք'};
+  const serviceIconNames={lan:'LAN վարդակ',computer:'Համակարգիչ',laptop:'Նոթբուք',cameraIndoor:'Ներքին տեսախցիկ',cameraOutdoor:'Արտաքին տեսախցիկ',cameraPtz:'PTZ տեսախցիկ',camera:'Տեսախցիկ',wifi:'Wi-Fi',access:'Մուտքի վերահսկում',phone:'Հեռախոս',internet:'Ինտերնետ',socket:'Էլեկտրական վարդակ',fiber:'Օպտիկական միացում',switch:'Սվիչ',router:'Ռաուտեր',server:'Սերվեր',printer:'Տպիչ',tv:'Հեռուստացույց',intercom:'Դոմոֆոն',alarm:'Ազդանշանային սարք',sensor:'Սենսոր',ups:'UPS',speaker:'Դինամիկ',mic:'Միկրոֆոն',dynamicMic:'Դինամիկ միկրոֆոն',cable:'Մալուխի միացում',other:'Այլ սարք'};
   const serviceIcon = (key,state) => serviceIconPaths[state?.serviceIcons?.[key]]||serviceIconPaths[key]||serviceIconPaths.other;
+  const serviceIconSvg = (key,state,size=24) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${serviceIcon(key,state)}"/></svg>`;
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconPaths,serviceIconNames,serviceIconSvg,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });
