@@ -1,25 +1,47 @@
 {
-  "version": "2.10.38",
+  "version": "2.10.39",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Թաքցվել է ներքևի հեղինակային շերտը։ «Օգնություն»-ի տակ ավելացվել է «Հեղինակ» բաժին՝ Սիփան Դանիելյանի և նախագծի մասին կարճ ներկայացմամբ։"
+      "Ուղղվել է սվիչների ավելացումը. ավտոմատ լրացվում է սարքի եզակի անվանումը (SW-01), ապահովվել են PoE տեսակի ճիշտ լռելյայն արժեքը, բրաուզերի գաղտնաբառերի ինքնալրացման անվտանգությունը, ազատ U դիրքերի ճշգրիտ ընտրությունը և մինչև 32 SFP պորտերի աջակցությունը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Hidden the bottom credits bar and added an Author page below Help, with a short introduction to Sipan Danielyan and the project."
+      "Fixed switch addition: unique device names (SW-01) are now auto-generated, with a safe default PoE setting, browser autofill safety for credentials, accurate free rack slot selection, and support for up to 32 SFP ports."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Скрыта нижняя строка авторства. Под разделом «Помощь» добавлена страница «Автор» с кратким представлением Сипана Даниеляна и проекта."
+      "Исправлено добавление коммутаторов: автоматически подставляется уникальное имя (SW-01), установлен корректный тип PoE по умолчанию, обеспечена защита от автозаполнения паролей браузером, точный выбор свободной позиции в стойке и поддержка до 32 SFP-портов."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.10.38",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Թաքցվել է ներքևի հեղինակային շերտը։ «Օգնություն»-ի տակ ավելացվել է «Հեղինակ» բաժին՝ Սիփան Դանիելյանի և նախագծի մասին կարճ ներկայացմամբ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Hidden the bottom credits bar and added an Author page below Help, with a short introduction to Sipan Danielyan and the project."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Скрыта нижняя строка авторства. Под разделом «Помощь» добавлена страница «Автор» с кратким представлением Сипана Даниеляна и проекта."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.10.37",
       "hy": {

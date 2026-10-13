@@ -237,6 +237,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     }
     return null;
   }
+  function nextDeviceName(type, s){
+    const prefix=type==='panel'?'PP':type==='switch'?'SW':type==='router'?'RT':type==='server'?'SRV':type==='nvr'?'NVR':type==='ups'?'UPS':type==='organizer'?'ORG':type==='shelf'?'SHELF':'DEV';
+    const names=new Set(devices(s||empty()).map(x=>String(x.d?.name||'').trim().toLowerCase()));
+    let seq=1;
+    while(names.has((prefix+'-'+String(seq).padStart(2,'0')).toLowerCase()))seq++;
+    return prefix+'-'+String(seq).padStart(2,'0');
+  }
   const deviceModels=(type,s)=>{
     const defaults=defaultModels.filter(model=>model.type===type);
     const customType=s?.deviceTypes?.find(t=>t.id===type);
@@ -400,7 +407,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
           integer(d.pos,1,r.u);integer(d.height,1,r.u);assert(d.pos+d.height-1<=r.u,tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
           for(let u=d.pos;u<d.pos+d.height;u++){assert(!used.has(u),tr`U${u} դիրքն արդեն զբաղված է`);used.add(u);}
           assert(Array.isArray(d.portList),tr('Պորտերի ցանկը սխալ է'));integer(d.portList.length,1,96);
-          if(d.sfpCount!==undefined){integer(d.sfpCount,0,Math.min(16,d.portList.length));assert(!d.sfpCount||isNetworkDevice(d),tr('Օպտիկական պորտերը հասանելի են սվիչի և ռաուտերի համար'));}
+          if(d.sfpCount!==undefined){integer(d.sfpCount,0,Math.min(32,d.portList.length));assert(!d.sfpCount||isNetworkDevice(d),tr('Օպտիկական պորտերը հասանելի են սվիչի և ռաուտերի համար'));}
           d.portList.forEach((p,i)=>{
             id(p.id);assert(p.number===i+1,tr('Պորտերի համարակալումը սխալ է'));assert(Object.hasOwn(statuses,p.status),tr('Պորտի վիճակը սխալ է'));
             for(const k of ['cable','floorId','room','door','side','switchPortId'])text(p[k]);text(p.notes,2000);
@@ -550,5 +557,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconNames,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

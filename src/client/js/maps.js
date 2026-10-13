@@ -243,7 +243,7 @@ globalThis.RackMaps=(()=>{
         ${select('hardwareType',tr('Ռաքի սարքի տեսակ'),D.deviceTypes(curState),'panel')}
         ${input('hardwarePorts',tr('Հիմնական պորտերի քանակ'),24,'number','required min="0" max="96" step="1"')}
         ${input('hardwareHeight',tr('Բարձրություն U'),1,'number','required min="1" max="60" step="1"')}
-        ${input('hardwareSfp',tr('Օպտիկական SFP պորտեր'),0,'number','required min="0" max="16" step="1"')}
+        ${input('hardwareSfp',tr('Օպտիկական SFP պորտեր'),0,'number','required min="0" max="32" step="1"')}
         ${select('hardwarePoe',tr('Սվիչի մոդելի տեսակ'),[['none',tr('Առանց PoE')],['poe','PoE'],['poe-plus','PoE+']],'none')}
         <div class="field full model-save-option"><label><input type="checkbox" name="saveHardwareModel"> ${tr('Պահպանել այս մոդելը իմ կատալոգում')}</label><p class="hint">${tr('Մոդելը չկա՞ ցանկում։ Գրեք ձեր մոդելը և ընտրեք պորտերը։ Ձեռքով փոխած արժեքները պահպանվում են։')}</p></div>
         ${select('targetRackId',tr('Ռաք (եթե ստեղծվում է նոր պանել)'),targetRacks.map(({r,f})=>[r.id,`${f.name} / ${r.name}`]),targetRacks[0]?.r.id||'')}
@@ -269,11 +269,11 @@ globalThis.RackMaps=(()=>{
             const rack=s.floors.flatMap(f=>f.racks).find(r=>r.id===targetRackId)||s.floors[0]?.racks[0];
             if(!rack)throw new Error(tr('Ռաքը չի գտնվել'));
             const type=String(fd.get('hardwareType')),ports=Number(fd.get('hardwarePorts')),height=Number(fd.get('hardwareHeight')),sfpCount=D.isNetworkDevice({type})?Number(fd.get('hardwareSfp')):0;
-            if(!Number.isInteger(ports)||ports<0||!Number.isInteger(sfpCount)||sfpCount<0||sfpCount>16||ports+sfpCount<1||ports+sfpCount>96)throw new Error(tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
+            if(!Number.isInteger(ports)||ports<0||!Number.isInteger(sfpCount)||sfpCount<0||sfpCount>32||ports+sfpCount<1||ports+sfpCount>96)throw new Error(tr('Պորտերի ընդհանուր քանակը պետք է լինի 1–96'));
             if(!Number.isInteger(height)||height<1||height>rack.u)throw new Error(tr('Սարքը դուրս է գալիս ռաքի սահմաններից'));
-            const prefix=type==='panel'?'PP':type==='switch'?'SW':type==='router'?'RT':'DEV',names=new Set(D.devices(s).map(x=>x.d.name.toLowerCase()));let seq=1;while(names.has((prefix+'-'+String(seq).padStart(2,'0')).toLowerCase()))seq++;
-            const panelName=prefix+'-'+String(seq).padStart(2,'0');
+            const panelName=D.nextDeviceName(type,s);
             const nextPos=Array.from({length:rack.u},(_,i)=>rack.u-i).find(u=>u+height-1<=rack.u&&!rack.devices.some(d=>u<d.pos+d.height&&u+height>d.pos));
+            if(!nextPos)throw new Error(tr('Ընտրված ռաքում բավարար ազատ տեղ չկա'));
             const devIndex=rack.devices.filter(x=>x.type===type).length;
             targetDev={id:crypto.randomUUID(),name:panelName,type,model,pos:nextPos,height,sfpCount,modelType:type==='switch'?String(fd.get('hardwarePoe')):'',color:D.autoDeviceColor(type,devIndex),portList:Array.from({length:ports+sfpCount},(_,i)=>D.port(i+1,crypto.randomUUID()))};
             rack.devices.push(targetDev);
