@@ -10,7 +10,7 @@
 @media screen{
   :root[data-theme=dark]{color-scheme:dark;--ink:#e3edf0;--muted:#a6bcc3;--line:#344b54;--accent:#76d6c8;--dark:#10282e;--bg:#0f1b20;--surface:#17282e;--surface-soft:#1e333a;--field:#102127;scrollbar-color:#536e76 var(--bg)}
   [data-theme=dark] body{background:var(--bg);color:var(--ink)}
-  [data-theme=dark] :is(.panel,.stat,.floor-card,.table-wrap,dialog,.topbar,.mobile-nav,.port-tools .form-actions){background:var(--surface);color:var(--ink);border-color:var(--line)}
+  [data-theme=dark] :is(.panel,.stat,.floor-card,.table-wrap,dialog,.topbar,.mobile-nav,.port-tools .form-actions,.form-actions){background:var(--surface);color:var(--ink);border-color:var(--line)}
   [data-theme=dark] :is(.button,input,select,textarea,.service-choice span){background:var(--field);color:var(--ink);border-color:var(--line)}
   [data-theme=dark] :is(input,select,textarea){accent-color:var(--accent)}
   [data-theme=dark] input::placeholder,[data-theme=dark] textarea::placeholder{color:#99afb5;opacity:1}
