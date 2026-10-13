@@ -1,6 +1,15 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Հեղինակ":["Author","Автор"],
+"Մարդը՝ նախագծի հետևում":["The person behind the project","Человек, стоящий за проектом"],
+"Սիփան Դանիելյան":["Sipan Danielyan","Сипан Даниелян"],
+"«Իմ Փաչ» նախագծի հեղինակ":["Creator of My Patch","Автор проекта My Patch"],
+"Սիփան Դանիելյանը «Իմ Փաչ» նախագծի հեղինակն է։ Նախագծի հիմքում պարզ գաղափար է՝ ցանցային սարքերի և դրանց կապերի մասին տեղեկությունը դարձնել տեսանելի, հասկանալի և հեշտ կառավարելի։":["Sipan Danielyan is the creator of My Patch. The project is built around a simple idea: make information about network devices and their connections visible, clear and easy to manage.","Сипан Даниелян — автор проекта My Patch. В основе проекта простая идея: сделать сведения о сетевых устройствах и их соединениях наглядными, понятными и удобными для работы."],
+"«Իմ Փաչ»-ը մեկտեղում է հարկերը, ռաքերը, պորտերն ու մալուխային կապերը՝ հատակագծից մինչև հաշվետվություն։ Նպատակն է օգնել մարդկանց արագ գտնել անհրաժեշտ սարքը և հստակ տեսնել, թե ինչն ինչին է միացված։":["My Patch brings floors, racks, ports and cable connections together, from floor plans to reports. Its goal is to help people quickly find the device they need and clearly see how everything connects.","My Patch объединяет этажи, стойки, порты и кабельные соединения — от плана до отчёта. Цель — помочь людям быстро находить нужное устройство и ясно видеть, что к чему подключено."],
+"Հեղինակի կայքը":["Author’s website","Сайт автора"],
+"Սպասարկում":["Support","Обслуживание"],
+"Հավելվածի սպասարկող՝ Ditaknet։":["Application support provided by Ditaknet.","Обслуживание приложения — Ditaknet."],
 "Նշաններ և գծեր":["Icons and lines","Значки и линии"],
 "SVG նշանների չափ":["SVG icon size","Размер SVG-значков"],
 "Գծերի հաստություն":["Line thickness","Толщина линий"],

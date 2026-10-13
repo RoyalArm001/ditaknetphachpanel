@@ -33,5 +33,14 @@ globalThis.RackHelp=(()=>{
   ];
   function html(tr,esc){return `<section class="help-page"><div class="help-hero"><div><div class="eyebrow">MY PATCH</div><h1>${tr('Օգնություն')}</h1><p>${tr('Կարճ ուղեցույց՝ առաջին նախագծից մինչև պատրաստի հաշվետվություն։')}</p></div><a class="button primary" href="/?demo=1" target="_blank" rel="noopener">${tr('Բացել դեմոն')}</a></div><label class="help-search">${tr('Որոնել օգնության մեջ')}<input id="helpSearch" type="search" placeholder="${esc(tr('Օրինակ՝ ջնջել, պորտ, քարտեզ'))}"></label><div class="help-articles">${articles.map(([id,title,steps],i)=>`<details class="panel help-article" data-help-id="${id}" ${i===0?'open':''}><summary>${esc(tr(title))}</summary><ol>${steps.map(text=>`<li>${esc(tr(text))}</li>`).join('')}</ol></details>`).join('')}</div><p id="helpEmpty" class="hint" hidden>${tr('Արդյունքներ չկան')}</p></section>`;}
   function bind(host){const search=host.querySelector('#helpSearch');if(!search)return;search.oninput=()=>{const terms=search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);let count=0;for(const item of host.querySelectorAll('[data-help-id]')){item.hidden=!terms.every(term=>item.textContent.toLowerCase().includes(term));if(!item.hidden){count++;if(terms.length)item.open=true;}}host.querySelector('#helpEmpty').hidden=count>0;};}
-  return {articles,html,bind};
+  function author(tr,esc){return `<section class="author-page" aria-labelledby="authorHeading">
+    <header class="author-header"><span class="eyebrow">MY PATCH</span><h1 id="authorHeading">${esc(tr('Հեղինակ'))}</h1><p>${esc(tr('Մարդը՝ նախագծի հետևում'))}</p></header>
+    <article class="author-card"><div class="author-identity"><div class="author-monogram" aria-hidden="true">SD</div><div><h2>${esc(tr('Սիփան Դանիելյան'))}</h2><span>${esc(tr('«Իմ Փաչ» նախագծի հեղինակ'))}</span></div></div>
+      <div class="author-story"><p>${esc(tr('Սիփան Դանիելյանը «Իմ Փաչ» նախագծի հեղինակն է։ Նախագծի հիմքում պարզ գաղափար է՝ ցանցային սարքերի և դրանց կապերի մասին տեղեկությունը դարձնել տեսանելի, հասկանալի և հեշտ կառավարելի։'))}</p>
+      <p>${esc(tr('«Իմ Փաչ»-ը մեկտեղում է հարկերը, ռաքերը, պորտերն ու մալուխային կապերը՝ հատակագծից մինչև հաշվետվություն։ Նպատակն է օգնել մարդկանց արագ գտնել անհրաժեշտ սարքը և հստակ տեսնել, թե ինչն ինչին է միացված։'))}</p></div>
+      <a class="button primary author-website" href="https://royalarm.uk" target="_blank" rel="noopener noreferrer">${esc(tr('Հեղինակի կայքը'))}<span aria-hidden="true">↗</span><small>royalarm.uk</small></a>
+    </article>
+    <section class="author-support"><div><h2>${esc(tr('Սպասարկում'))}</h2><p>${esc(tr('Հավելվածի սպասարկող՝ Ditaknet։'))}</p></div><a href="https://www.ditaknet.com/en" target="_blank" rel="noopener noreferrer">ditaknet.com <span aria-hidden="true">↗</span></a></section>
+  </section>`;}
+  return {articles,html,bind,author};
 })();

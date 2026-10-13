@@ -1,25 +1,47 @@
 {
-  "version": "2.10.37",
+  "version": "2.10.38",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղվել է քարտեզի անվանումների դիրքավորումը՝ ըստ տեքստի իրական չափի, նշանի մեծացման և zoom-ի։ Անվանումները կենտրոնացվում են հավասար բացատով և տեղավորվում ազատ կողմում։"
+      "Թաքցվել է ներքևի հեղինակային շերտը։ «Օգնություն»-ի տակ ավելացվել է «Հեղինակ» բաժին՝ Սիփան Դանիելյանի և նախագծի մասին կարճ ներկայացմամբ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Map labels now use actual text and icon dimensions at the current zoom, with centered alignment, consistent spacing and collision-aware placement."
+      "Hidden the bottom credits bar and added an Author page below Help, with a short introduction to Sipan Danielyan and the project."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Подписи на карте теперь учитывают реальные размеры текста и значков и текущий масштаб: ровное выравнивание, одинаковые отступы и выбор свободной стороны."
+      "Скрыта нижняя строка авторства. Под разделом «Помощь» добавлена страница «Автор» с кратким представлением Сипана Даниеляна и проекта."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.10.37",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել է քարտեզի անվանումների դիրքավորումը՝ ըստ տեքստի իրական չափի, նշանի մեծացման և zoom-ի։ Անվանումները կենտրոնացվում են հավասար բացատով և տեղավորվում ազատ կողմում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map labels now use actual text and icon dimensions at the current zoom, with centered alignment, consistent spacing and collision-aware placement."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Подписи на карте теперь учитывают реальные размеры текста и значков и текущий масштаб: ровное выравнивание, одинаковые отступы и выбор свободной стороны."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.10.36",
       "hy": {
