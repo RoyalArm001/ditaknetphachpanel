@@ -1,6 +1,30 @@
 'use strict';
 globalThis.RackMaps=(()=>{
   const D=globalThis.RackDomain,ui=new Map();let pdfLoading;
+  // Measure in screen pixels: normalized distances ignore text length, zoom and icon size.
+  function resolveLabelDirections(items,bounds,anchors=[]){
+    const gap=6,pad=3,placed=new Map(),directions=['down','up','right','left'];
+    const area=(a,b)=>a.left>=b.right||a.right<=b.left||a.top>=b.bottom||a.bottom<=b.top?0:(Math.min(a.right,b.right)-Math.max(a.left,b.left))*(Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+    const box=(x,y,w,h)=>({left:x-w/2,right:x+w/2,top:y-h/2,bottom:y+h/2});
+    const icons=items.map(p=>box(p.x,p.y,p.iconWidth+pad*2,p.iconHeight+pad*2)).concat(anchors);
+    const edge={left:0,top:0,right:bounds.width,bottom:bounds.height};
+    const ordered=[...items].sort((a,b)=>String(a.id).localeCompare(String(b.id)));
+    // A second pass lets early labels account for the later labels as well.
+    for(let pass=0;pass<2;pass++)for(const p of ordered){
+      let best;
+      for(const [rank,dir] of directions.entries()){
+        const x=p.x+(dir==='left'?-(p.iconWidth+p.width)/2-gap:dir==='right'?(p.iconWidth+p.width)/2+gap:0);
+        const y=p.y+(dir==='up'?-(p.iconHeight+p.height)/2-gap:dir==='down'?(p.iconHeight+p.height)/2+gap:0);
+        const rect=box(x,y,p.width,p.height),padded=box(x,y,p.width+pad*2,p.height+pad*2);
+        const overlap=icons.reduce((sum,b)=>sum+area(rect,b),0)+[...placed].reduce((sum,[id,b])=>sum+(id===p.id?0:area(padded,b)),0);
+        const outside=Math.max(0,p.width*p.height-area(rect,edge));
+        const score=Math.round((overlap+outside*2)*1000)/1000+rank*.001;
+        if(!best||score<best.score)best={...rect,dir,score};
+      }
+      placed.set(p.id,best);
+    }
+    return placed;
+  }
   const loadScript=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>{s.remove();reject(new Error('PDF tools could not load'));};document.head.append(s);});
   async function exportPdf(state,kind,planId,tr,options={}){
     if(!globalThis.PDFDocument){pdfLoading||=loadScript('/pdfkit.js').catch(e=>{pdfLoading=null;throw e;});await pdfLoading;}
@@ -173,40 +197,10 @@ globalThis.RackMaps=(()=>{
       const search=view.query.trim().toLocaleLowerCase();
       const markerMatches=m=>visibleService(m.row.service)&&(!search||[name(m.row),m.row.d?.model,m.row.endpointName,D.serviceLabel(state,m.row.service,tr),m.row.floor,m.row.rack,m.row.device,m.row.port,m.row.cable,m.row.room,m.row.vlan,m.row.connection,m.row.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
       const visible=mapData.markers.filter(markerMatches);
-      function resolveLabelDirections(markers){
-        const dirs=new Map();
-        if(markers.length<=1)return dirs;
-        const pts=markers.map(m=>{const p=D.mapMarkerLayout(m);return {id:m.id,x:p.iconX,y:p.iconY};});
-        const candidates=[{dir:'down',dx:0,dy:.045,bias:0},{dir:'up',dx:0,dy:-.045,bias:.005},{dir:'right',dx:.07,dy:0,bias:.008},{dir:'left',dx:-.07,dy:0,bias:.008}];
-        const placed=[];
-        for(const pt of pts){
-          let bestDir='down',minPen=Infinity;
-          for(const c of candidates){
-            const lx=pt.x+c.dx,ly=pt.y+c.dy;
-            let pen=c.bias;
-            if(lx<.02||lx>.98||ly<.02||ly>.98)pen+=10;
-            for(const o of pts){
-              if(o.id===pt.id)continue;
-              const d=(lx-o.x)**2+(ly-o.y)**2;
-              if(d<.004)pen+=1/(d+.0001);
-            }
-            for(const pl of placed){
-              const d=(lx-pl.x)**2+(ly-pl.y)**2;
-              if(d<.004)pen+=1.5/(d+.0001);
-            }
-            if(pen<minPen){minPen=pen;bestDir=c.dir;}
-          }
-          dirs.set(pt.id,bestDir);
-          const ch=candidates.find(c=>c.dir===bestDir)||candidates[0];
-          placed.push({x:pt.x+ch.dx,y:pt.y+ch.dy});
-        }
-        return dirs;
-      }
-      const labelDirs=resolveLabelDirections(visible);
       const legend=new Map();for(const marker of visible){const row=marker.row,key=JSON.stringify([row.service||'',row.d?.model||'',row.status]);const item=legend.get(key);if(item)item.count++;else legend.set(key,{row,count:1});}
       root.querySelector('[data-map-legend-count]').textContent=String(visible.length);
       root.querySelector('[data-map-legend-list]').innerHTML=[...legend.values()].map(({row,count})=>`<div class="map-legend-item"><i style="--legend-service:${esc(D.serviceColor(state,row.service))};--legend-status:${esc(D.statusColor(state,row.status))}"></i><span><strong>${esc(D.serviceLabel(state,row.service,tr))}</strong>${row.d?.model?`<small>${esc(row.d.model)}</small>`:''}<small>${esc(D.statusLabel(state,row.status,tr))}</small></span><b>${count}</b></div>`).join('')||`<p>${esc(tr('Քարտեզում նշաններ չկան'))}</p>`;
-      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="${esc(labelDirs.get(m.id)||'down')}" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
+      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
       const undoBtn=root.querySelector('[data-map-action="undo"]'),redoBtn=root.querySelector('[data-map-action="redo"]');
       if(undoBtn)undoBtn.disabled=!undoStack.length;
       if(redoBtn)redoBtn.disabled=!redoStack.length;
@@ -220,7 +214,7 @@ globalThis.RackMaps=(()=>{
       for(const group of portList.querySelectorAll('.map-device-group')){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);}
       for(const card of portList.querySelectorAll('.map-port-card')){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}
       portList.innerHTML=(!h.readOnly?`<button type="button" class="button primary map-btn-add-new-device" data-map-action="create-map-device">${svg('plus')}<span>${esc(tr('Ստեղծել նոր սարք'))}</span></button>`:'')+([...groups].map(([service,items])=>`<details class="map-device-group" data-service="${esc(service)}" ${collapsedDeviceGroups.has(service)?'':'open'}><summary>${icon(service)}${esc(D.serviceLabel(state,service,tr))}<span>${items.length}</span></summary><div class="map-device-items">${items.map(r=>`<details class="map-port-card ${r.p.id===view.portId?'selected':''}" data-device-card="${esc(r.p.id)}" ${expandedDeviceCards.has(r.p.id)?'open':''}><summary><span class="map-card-icon" style="color:${D.serviceColor(state,r.service)}">${icon(r.service)}</span><span><b>${esc(name(r))}</b><small>${esc(D.serviceLabel(state,r.service,tr)+' · '+r.port)}</small></span><span class="map-card-chevron" aria-hidden="true"></span></summary><div class="map-port-card-details"><span><small>${esc([r.cable,r.destination||r.floor].filter(Boolean).join(' · ')||connectionLabel(r))}</small><small>${esc(connectionLabel(r))}</small></span><button type="button" class="map-card-add" data-map-port="${esc(r.p.id)}" title="${esc(tr('Ավելացնել սարք'))}" aria-label="${esc(tr('Ավելացնել սարք')+' · '+name(r))}">${svg('plus')}</button></div></details>`).join('')}</div></details>`).join('')||`<p class="hint map-list-empty">${esc(tr(mapData.devices.length?'Բոլոր համապատասխան սարքերն արդեն տեղադրված են կամ չեն համապատասխանում որոնմանը։':'Զբաղված միացումներ չկան։ Սարքի տեսակը նշեք պորտի նշանակության դաշտում։'))}</p>`);
-      root.querySelector('.map-viewport').dataset.tool=view.placing?'place':view.tool;drawInspector();
+      root.querySelector('.map-viewport').dataset.tool=view.placing?'place':view.tool;drawInspector();scheduleLabels();
     }
 
     function createDeviceModal(preset={}){
@@ -464,17 +458,33 @@ globalThis.RackMaps=(()=>{
     const viewport=root.querySelector('.map-viewport'),canvas=root.querySelector('.map-canvas');
     let camera=view.camera?.planId===plan?.id?view.camera:null,pan=null,pinch=null,space=false;
     const pointers=new Map();
-    function paintAppearance(){
+    let labelFrame=0;
+    function scheduleLabels(){if(!labelFrame&&!abort.signal.aborted)labelFrame=requestAnimationFrame(layoutLabels);}
+    function layoutLabels(){
+      labelFrame=0;if(!canvas||!view.labels)return;
+      const bounds=canvas.getBoundingClientRect();if(!bounds.width||!bounds.height)return;
+      // Batch DOM reads before writes to avoid a layout recalculation for every label.
+      const entries=[...root.querySelectorAll('[data-map-marker]')].map(el=>{
+        const text=el.querySelector('.map-marker-label'),r=el.getBoundingClientRect(),t=text.getBoundingClientRect();
+        return {id:el.dataset.mapMarker,x:r.left-bounds.left+r.width/2,y:r.top-bounds.top+r.height/2,iconWidth:r.width,iconHeight:r.height,width:t.width,height:t.height,el,text,left:r.left-bounds.left+el.clientLeft,top:r.top-bounds.top+el.clientTop};
+      });
+      const anchors=[...root.querySelectorAll('[data-map-anchor]')].map(el=>{const r=el.getBoundingClientRect(),radius=7*(1+view.markerSize/100);return {left:r.left-bounds.left+r.width/2-radius,right:r.left-bounds.left+r.width/2+radius,top:r.top-bounds.top+r.height/2-radius,bottom:r.top-bounds.top+r.height/2+radius};});
+      const layout=resolveLabelDirections(entries,bounds,anchors);
+      for(const p of entries){const pos=layout.get(p.id);p.text.dataset.dir=pos.dir;p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:none`;}
+    }
+    document.fonts?.ready.then(scheduleLabels);
+    function paintAppearance(relayout=true){
       const markers=root.querySelector('.map-markers');
       markers?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));
       markers?.style.setProperty('--map-line-width',String(view.lineWidth));
+      if(relayout)scheduleLabels();
       const size=root.querySelector('[data-map-marker-size]'),width=root.querySelector('[data-map-line-width]');
       if(size){size.value=view.markerSize;root.querySelector('[data-marker-size-value]').textContent=(100+view.markerSize)+'%';}
       if(width){width.value=view.lineWidth;root.querySelector('[data-line-width-value]').textContent=view.lineWidth+' px';}
     }
     function saveAppearance(){paintAppearance();try{localStorage.setItem('rackmap-map-appearance',JSON.stringify({markerSize:view.markerSize,lineWidth:view.lineWidth}));}catch{}}
     root.querySelector('.map-appearance')?.addEventListener('toggle',e=>{view.appearanceOpen=e.target.open;},{signal:abort.signal});
-    function paintCamera(){if(!camera||!canvas)return;canvas.style.width=plan.width*camera.scale+'px';canvas.style.height=plan.height*camera.scale+'px';canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;paintAppearance();view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
+    function paintCamera(){if(!camera||!canvas)return;const width=plan.width*camera.scale+'px',height=plan.height*camera.scale+'px',resized=canvas.style.width!==width||canvas.style.height!==height;canvas.style.width=width;canvas.style.height=height;canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;paintAppearance(resized);view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
     function fit(){if(!viewport)return;const w=viewport.clientWidth,h=viewport.clientHeight,right=view.devicesOpen&&w>800?340:0,pad=w<600?28:130;const scale=Math.max(.27,Math.min((w-right-pad)/plan.width,(h-200)/plan.height,2));camera={planId:plan.id,scale,x:(w-right-plan.width*scale)/2,y:100+(h-200-plan.height*scale)/2,w,h};paintCamera();}
     function zoom(factor,point){if(!camera)return;point||={x:viewport.clientWidth/2,y:viewport.clientHeight/2};const next=Math.max(.27,Math.min(6,camera.scale*factor)),ratio=next/camera.scale;camera.x=point.x-(point.x-camera.x)*ratio;camera.y=point.y-(point.y-camera.y)*ratio;camera.scale=next;paintCamera();}
     function setTool(tool){view.tool=tool;view.placing=false;root.querySelectorAll('[data-map-action="select"],[data-map-action="hand"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapAction===tool)));draw();}
@@ -650,6 +660,7 @@ globalThis.RackMaps=(()=>{
           }
         }
         else if(pan&&camera){pan.moved||=Math.hypot(e.clientX-pan.x,e.clientY-pan.y)>4;camera.x=pan.cx+e.clientX-pan.x;camera.y=pan.cy+e.clientY-pan.y;viewport.classList.toggle('panning',pan.moved);paintCamera();}
+        if(dragging?.moved)scheduleLabels();
       },{signal:abort.signal});
       viewport.addEventListener('pointerup',e=>{
         pointers.delete(e.pointerId);try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);}catch{}
@@ -784,10 +795,10 @@ globalThis.RackMaps=(()=>{
     root.addEventListener('contextmenu',e=>{const el=e.target.closest('[data-map-marker]');if(!el||h.readOnly)return;e.preventDefault();const marker=mapData.markers.find(m=>m.id===el.dataset.mapMarker);view.portId=marker.portId;view.placing=false;draw();h.confirm(tr('Հեռացնել նշանը'),tr('Հեռացնե՞լ այս նշանը հատակագծից։'),()=>removeMarker(marker.id));},{signal:abort.signal});
     if(plans.length)showDevices(!!view.devicesOpen);
     draw();
-    const resize=viewport?new ResizeObserver(()=>{if(!camera)fit();else{camera.x+=(viewport.clientWidth-camera.w)/2;camera.y+=(viewport.clientHeight-camera.h)/2;camera.w=viewport.clientWidth;camera.h=viewport.clientHeight;paintCamera();}}):null;
+    const resize=viewport?new ResizeObserver(()=>{if(!camera)fit();else{camera.x+=(viewport.clientWidth-camera.w)/2;camera.y+=(viewport.clientHeight-camera.h)/2;camera.w=viewport.clientWidth;camera.h=viewport.clientHeight;paintCamera();}scheduleLabels();}):null;
 
     if(viewport){if(!camera)fit();else paintCamera();resize.observe(viewport);}
-    return {busy:()=>pointers.size>0,destroy(){resize?.disconnect();abort.abort();headerControls?.remove();topActions?.remove();mapFilters?.remove();document.body.classList.remove('map-view');}};
+    return {busy:()=>pointers.size>0,destroy(){resize?.disconnect();abort.abort();cancelAnimationFrame(labelFrame);headerControls?.remove();topActions?.remove();mapFilters?.remove();document.body.classList.remove('map-view');}};
   }
-  return {mount,exportPdf};
+  return {mount,exportPdf,resolveLabelDirections};
 })();
