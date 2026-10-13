@@ -1,6 +1,7 @@
 'use strict';
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
+const demoMode=!!globalThis.RackDemo?.enabled;
 const D=RackDomain, $=s=>document.querySelector(s), uid=()=>crypto.randomUUID?crypto.randomUUID():`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
@@ -10,11 +11,12 @@ let filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status
 const localHost=/^(localhost$|127\.0\.0\.1$|\[::1\]$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
 let storageMode=localHost?'shared':'personal',remoteConfig=null,modeBusy=false;
 try{const preferred=localStorage.getItem('rackmap-storage-mode');if(['personal','shared'].includes(preferred))storageMode=preferred;}catch{}
-const personal=()=>storageMode==='personal';
+const personal=()=>demoMode||storageMode==='personal';
 let onboardingChoice=null,onboardingVisible=false;
 try{const choice=localStorage.getItem('rackmap-workspace-choice');if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
 if(!onboardingChoice)try{const choice=document.cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('mypatch_workspace='))?.split('=')[1];if(['personal','shared','account'].includes(choice)){onboardingChoice=choice;storageMode=choice;}}catch{}
-function rememberWorkspace(){try{localStorage.removeItem(AppReset.logoutKey);localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}try{document.cookie=`mypatch_workspace=${storageMode}; Path=/; SameSite=Lax; Max-Age=15552000${location.protocol==='https:'?'; Secure':''}`;}catch{}}
+if(demoMode){storageMode='personal';onboardingChoice='personal';}
+function rememberWorkspace(){if(demoMode)return;try{localStorage.removeItem(AppReset.logoutKey);localStorage.setItem('rackmap-workspace-choice',storageMode);localStorage.setItem('rackmap-storage-mode',storageMode);}catch{}try{document.cookie=`mypatch_workspace=${storageMode}; Path=/; SameSite=Lax; Max-Age=15552000${location.protocol==='https:'?'; Secure':''}`;}catch{}}
 async function restoreRememberedWorkspace(){
   if(onboardingChoice||AppReset.isLoggedOut())return;
   await AppReset.ensureSessionCleared();
@@ -73,11 +75,12 @@ function togglePanel(k){if(k==='left'&&document.body.classList.contains('map-vie
 let selectedPortId='',selectedPortIds=new Set(),portDraft=null,portDraftDirty=false,portTimer;
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
-const recoveryKey=()=>accountMode()?'rackmap-account-'+accountUserId+'-'+activeCompanyId:personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
+if(demoMode)activeCompanyId='demo';
+const recoveryKey=()=>demoMode?'rackmap-demo-recovery':accountMode()?'rackmap-account-'+accountUserId+'-'+activeCompanyId:personal()?'rackmap-personal-recovery-'+activeCompanyId:activeCompanyId==='default'?'rackmap-recovery-v2':'rackmap-recovery-v2-'+activeCompanyId;
 function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
-const viewNames={get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր ու Սարքեր');},get search(){return tr('Մալուխներ և որոնում');},get map(){return tr('Քարտեզ');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
+const viewNames={get help(){return tr('Օգնություն');},get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր ու Սարքեր');},get search(){return tr('Մալուխներ և որոնում');},get map(){return tr('Քարտեզ');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
 const button=(label,action,id='',cls='')=>`<button type="button" class="button ${cls}" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
 const input=(name,label,value='',type='text',extra='')=>`<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${esc(value)}" ${extra}></div>`;
 const secretInput=(name,label,value='')=>`<div class="field"><label for="${name}">${label}</label><div class="secret-wrap"><input id="${name}" name="${name}" type="password" value="${esc(value)}" maxlength="200" autocomplete="off" spellcheck="false"><button type="button" class="button small secret-toggle" data-action="toggle-secret" data-id="${esc(name)}">${tr('Ցույց տալ')}</button></div></div>`;
@@ -150,11 +153,12 @@ function status(message,error=false){
     el.innerHTML=`<span class="save-status-wrap status-saved" aria-label="${esc(message)}"><svg class="save-status-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none"><circle cx="12" cy="12" r="9" stroke="#10b981" stroke-width="2"/><path class="status-check" d="M8 12.3l2.6 2.6L16 9.5" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
   }
 }
-async function api(url,options){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(!personal()||url.startsWith('/api/auth/'))await AppReset.ensureSessionCleared();if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),{...options,cache:'no-store'});const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
-function recovery(){if(resetInProgress)return;try{localStorage.setItem(recoveryKey(),JSON.stringify({schema:2,state,revision,portDraft:portDraftDirty?portDraft:null,savedAt:new Date().toISOString()}));}catch{}}
+async function api(url,options){if(demoMode)return RackDemo.request(companyUrl(url),options);if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(!personal()||url.startsWith('/api/auth/'))await AppReset.ensureSessionCleared();if(personal()&&!url.startsWith('/api/auth/'))return PersonalStore.request(companyUrl(url),options);const res=await fetch(companyUrl(url),{...options,cache:'no-store'});const data=await res.json();if(!res.ok){if(res.status===401&&authRequired&&!['/api/auth/login','/api/auth/pin'].includes(url))renderLogin();const e=new Error(tr(data.error)||tr('Կապի սխալ'));e.code=res.status;throw e;}return data;}
+function recovery(){if(resetInProgress||demoMode)return;try{localStorage.setItem(recoveryKey(),JSON.stringify({schema:2,state,revision,portDraft:portDraftDirty?portDraft:null,savedAt:new Date().toISOString()}));}catch{}}
 function banner(message){message=tr(message);$('#connectionBanner').hidden=false;$('#connectionBanner').innerHTML=`${esc(message)} <div>${button(tr('Ներբեռնել իմ տվյալները'),'backup','','small')}${button(tr('Կրկին պահել'),'save','','small')}${button(tr('Բեռնել ընդհանուր տարբերակը'),'reload','','small')}</div>`;}
 function scheduleSave(){if(resetInProgress)return;dirty=true;status(tr('Չպահված փոփոխություններ'));recovery();clearTimeout(saveTimer);if(autoSaveEnabled)saveTimer=setTimeout(()=>save(),500);}
 async function save(){
+  if(!activeCompanyId)return true;
   if(resetInProgress)return false;
   if(portDraftDirty&&!flushPortEditor())return false;
   if(!ready||conflict)return false;if(saving)return saving;
@@ -183,10 +187,14 @@ function render(){
 
   $('#companyLabel').textContent=state.company||tr('Նոր ընկերություն');renderCompanySelect();const {view,id}=route();document.body.classList.toggle('rack-view',view==='rack');zoomControls.hidden=view!=='rack';$('#breadcrumb').textContent=viewNames[view];
   document.querySelectorAll('nav a').forEach(a=>{const active=a.dataset.view===(view==='rack'?'floors':view);a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  if(view==='help'){renderHelp();applyPanels();return;}
+  if(!activeCompanyId){$('#content').innerHTML=header(tr('Նախագծեր'))+`<section class="panel"><h2>${tr('Նախագծեր դեռ չկան')}</h2>${button(tr('Նոր ընկերություն'),'company-new','','primary')}</section>`;applyPanels();return;}
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
   if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
   applyPanels();updateLiveLabel();
 }
+function renderHelp(){$('#content').innerHTML=RackHelp.html(tr,esc);RackHelp.bind($('#content'));}
+if(demoMode){const demoBadge=document.createElement('button');demoBadge.type='button';demoBadge.className='button demo-badge';demoBadge.dataset.action='demo-info';demoBadge.textContent=tr('Դեմո');demoBadge.title=tr('Դեմո ռեժիմ');$('.topbar').insertBefore(demoBadge,$('#languageToggle'));}
 function renderSetup(){
   zoomControls.hidden=true;
   $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ՆՈՐ ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ</div><h1>Սկսենք ձեր շենքից</h1><p class="muted">Նշեք ընկերությունն ու հարկերի քանակը։ Հետո ընտրեք այն հարկերը, որտեղ կան ռաքեր։</p><form id="setupForm"><div class="form-grid">${input('company',tr('Ընկերության անվանում'),'','text',tr('required maxlength="200" placeholder="Ընկերություն"'))}${input('count',tr('Հարկերի քանակ'),3,'number','required min="1" max="200"')}</div>${backupFormatField()}${styleFields()}<div class="form-actions"><button class="button primary">Ստեղծել շենքը →</button></div><div id="setupError" class="form-error" hidden></div></form></section>`;
@@ -205,7 +213,7 @@ function renderWelcome(){
   const arrow=icon('<path d="M5 12h14m-5-5 5 5-5 5"/>');
   $('#content').innerHTML=tr`<section class="welcome" aria-labelledby="welcomeTitle">
     <header class="welcome-heading"><span class="welcome-logo">${rack}</span><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1 id="welcomeTitle">Բարի գալուստ</h1><p>Բացեք ձեր նախագծերը կամ սկսեք նոր աշխատանք։</p></div></header>
-    <div class="welcome-options">
+    <div class="actions welcome-guide"><a class="button primary" href="/?demo=1" target="_blank" rel="noopener">${tr('Բացել դեմոն')}</a>${button(tr('Օգնություն'),'help-open')}</div><div class="welcome-options">
       <section class="welcome-choice welcome-team" aria-labelledby="welcomeTeamTitle">
         <div class="welcome-card-top"><span class="welcome-icon">${pin}</span><span class="welcome-tag">Թիմային աշխատանք</span></div>
         <h2 id="welcomeTeamTitle">Ունե՞ք PIN կոդ</h2><p>Բացեք ձեր թիմի նախագծերը ղեկավարից ստացած PIN կոդով։</p>
@@ -1249,7 +1257,7 @@ function renderSettings(){
     $('#content').innerHTML=header(tr('Կարգավորումներ'),currentTab[3])+settingsTabs()+'<section class="panel" id="auditLog" aria-live="polite"></section>';
     const host=$('#auditLog');host.textContent=tr('Բեռնվում է…');
     const load=async(before='')=>{try{const rows=await api('/api/audit'+(before?'?before='+encodeURIComponent(before):''));if(!host.isConnected)return;
-      const actions={'backup.restore':'Պատճենի վերականգնում','pin.rotate':'PIN-ի փոփոխություն','pin.create':'PIN-ի ստեղծում','pin.update':'PIN-ի խմբագրում','pin.delete':'PIN-ի ջնջում','pin.login':'Մուտք PIN-ով','company.create':'Ընկերության ստեղծում','project.update':'Նախագծի փոփոխություն','project.move':'Ռաքերի տեղափոխում','project.copy':'Ռաքերի պատճենում'};
+      const actions={'backup.restore':'Պատճենի վերականգնում','pin.rotate':'PIN-ի փոփոխություն','pin.create':'PIN-ի ստեղծում','pin.update':'PIN-ի խմբագրում','pin.delete':'PIN-ի ջնջում','pin.login':'Մուտք PIN-ով','company.delete':'Նախագծի ջնջում','company.create':'Ընկերության ստեղծում','project.update':'Նախագծի փոփոխություն','project.move':'Ռաքերի տեղափոխում','project.copy':'Ռաքերի պատճենում'};
       host.innerHTML='<div class="table-wrap"><table><thead><tr>'+['Ամսաթիվ','Օգտատեր','IP','Գործողություն','Օբյեկտ'].map(x=>'<th>'+esc(tr(x))+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr><td>'+esc(new Date(row.created_at).toLocaleString())+'</td><td>'+esc(row.actor)+'</td><td>'+esc(row.ip)+'</td><td>'+esc(tr(actions[row.action]||row.action))+'</td><td>'+esc(row.target)+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p>'+esc(tr('Գրառումներ չկան'))+'</p>');
       if(rows.length===100){const next=document.createElement('button');next.className='button';next.textContent=tr('Հաջորդը');next.onclick=()=>load(rows.at(-1).id);host.append(next);}
     }catch(error){if(host.isConnected)host.textContent=error.message;}};
@@ -1387,6 +1395,7 @@ function renderSettings(){
         <div class="actions">
           ${button(tr('Խմբագրել ընկերությունը'),'company','','primary')}
           ${button(tr('Ավելացնել հարկեր'),'bulk-floors')}
+          ${button(tr('Ջնջել նախագիծը'),'company-delete','','danger')}
         </div>
       </section>
 
@@ -1579,6 +1588,7 @@ function pauseForReset(){
   clearTimeout(saveTimer);clearTimeout(portTimer);
 }
 function resetAppDialog(){
+  if(demoMode){location.reload();return;}
   modal(tr('Reset · Մաքրել հավելվածը'),`<p>${tr('Կջնջվեն այս բրաուզերի բոլոր տեղային ընկերությունները, պատմությունը, չպահված փոփոխություններն ու կարգավորումները։ Նախ ներբեռնեք անհրաժեշտ պատճենները։')}</p><p>${tr('Cloud-ի և սերվերի բազաները չեն փոխվի։ Անցանց դեպքում մուտքը կփակվի ինտերնետը վերականգնվելիս։')}</p><label><input type="checkbox" name="confirmReset" required> ${tr('Հաստատում եմ այս սարքի տեղային տվյալների մաքրումը')}</label>`,async()=>{
     pauseForReset();
     if(saving)await saving;
@@ -1590,6 +1600,7 @@ function resetAppDialog(){
   $('#modalForm button[type=submit]').className='button danger';
 }
 async function logoutWorkspace(){
+  if(demoMode){location.assign('/');return;}
   if(modeBusy||companyBusy||resetInProgress)return;
   if(ready&&!await save())return;
   if(resetInProgress)return;
@@ -1605,6 +1616,7 @@ async function logoutWorkspace(){
   location.replace(location.pathname);
 }
 window.addEventListener('storage',event=>{
+  if(demoMode)return;
   if(event.key===AppReset.logoutKey&&event.newValue){
     if(dirty||portDraftDirty)recovery();
     pauseForReset();location.replace(location.pathname);return;
@@ -1612,7 +1624,7 @@ window.addEventListener('storage',event=>{
   if(event.key===AppReset.startedKey&&event.newValue){pauseForReset();toast(tr('Հավելվածը մաքրվում է…'));}
   if(event.key===AppReset.finishedKey&&event.newValue){dirty=false;portDraftDirty=false;location.replace(location.pathname);}
 });
-window.addEventListener('online',()=>AppReset.ensureSessionCleared().catch(()=>{}));
+window.addEventListener('online',()=>{if(!demoMode)AppReset.ensureSessionCleared().catch(()=>{});});
 function confirmAction(title,description,action){modal(title,`<p>${esc(description)}</p>`,async()=>action());}
 function floorModal(id){const f=state.floors.find(x=>x.id===id);modal(f?tr('Խմբագրել հարկը'):tr('Նոր հարկ'),input('name',tr('Հարկի անվանում'),f?.name||'','text','required maxlength="200"'),fd=>commit(s=>{if(f)s.floors.find(x=>x.id===id).name=fd.get('name').trim();else s.floors.push({id:uid(),name:fd.get('name').trim(),racks:[]});}),f?button(tr('Ջնջել հարկը'),'floor-delete',id,'danger'):'');}
 function rackModal(id,floorId){const found=findRack(id),r=found?.r;modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),found?.f.id||floorId)}${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div>`,fd=>commit(s=>{const target=s.floors.find(f=>f.id===fd.get('floorId'));if(r){let source=s.floors.find(f=>f.racks.some(x=>x.id===id));const edit=source.racks.find(x=>x.id===id);Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});if(source.id!==target.id){source.racks=source.racks.filter(x=>x.id!==id);target.racks.push(edit);}}else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});}),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');$('#preset').onchange=e=>{if(e.target.value)$('#u').value=e.target.value;};}
@@ -1999,16 +2011,37 @@ function renderCompanySelect(){
   const add=$('[data-action="company-new"]');if(add)add.disabled=companyBusy||!ready;
 }
 async function refreshCompanies(){companies=await api('/api/companies');renderCompanySelect();}
+async function deleteCompany(){
+  if(!activeCompanyId||!await save())return;
+  const id=activeCompanyId,name=state.company,expectedRevision=revision;
+  modal(tr('Ջնջել նախագիծը'),`<p><strong>${esc(name)}</strong> · ${state.floors.length} ${tr('Հարկեր')} · ${racks().length} ${tr('Ռաքեր')} · ${D.devices(state).length} ${tr('Սարքեր')}</p><p>${tr('Նախագիծը, դրա տվյալները, պատմությունն ու դիտման հղումները կհեռացվեն։ Մյուս նախագծերը չեն փոխվի։')}</p><p class="hint">${tr('Թիմային նախագիծը կարող է ջնջել միայն ադմինը։')}</p>${input('confirmCompanyName',tr('Հաստատման համար գրեք նախագծի ճշգրիտ անվանումը։'),'','text','required autocomplete="off" maxlength="200"')}`,async fd=>{
+    if(fd.get('confirmCompanyName')!==name)throw new Error(tr('Հաստատման համար գրեք նախագծի ճշգրիտ անվանումը։'));
+    if(activeCompanyId!==id||revision!==expectedRevision||dirty)throw new Error(tr('Նախագիծը փոխվել է։ Թարմացրեք էջը և կրկին փորձեք։'));
+    companyBusy=true;
+    try{
+      await api('/api/companies',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,revision:expectedRevision})});
+      stopLive();clearTimeout(saveTimer);clearTimeout(portTimer);
+      try{localStorage.removeItem(recoveryKey());}catch{}
+      state=D.empty();revision=0;activeCompanyId='';dirty=false;conflict=false;selectedPortId='';selectedPortIds.clear();portDraft=null;portDraftDirty=false;
+      companies=await api('/api/companies');activeCompanyId=companies[0]?.id||'';
+      if(activeCompanyId){const result=await api('/api/state');state=result.state;revision=result.revision;}
+      try{if(!demoMode){if(activeCompanyId)localStorage.setItem('rackmap-active-company',activeCompanyId);else localStorage.removeItem('rackmap-active-company');}}catch{}
+      const url=new URL(location.href);url.searchParams.delete('company');if(activeCompanyId)url.searchParams.set('company',activeCompanyId);url.hash='overview';history.replaceState(null,'',url);render();maintainLive();
+    }finally{companyBusy=false;renderCompanySelect();}
+  },button(tr('Ներբեռնել պահուստային պատճենը'),'backup'));
+  const submit=$('#modalForm button[type=submit]');submit.textContent=tr('Ջնջել նախագիծը');submit.className='button danger';submit.disabled=true;
+  $('#confirmCompanyName').oninput=e=>{submit.disabled=e.target.value!==name;};
+}
 async function switchCompany(id){
   if(companyBusy||id===activeCompanyId){renderCompanySelect();return;}
   companyBusy=true;$('#content').inert=true;renderCompanySelect();
   try{
     if(!await save())throw new Error(tr('Նախ պահպանեք կամ լուծեք ընթացիկ ընկերության չպահված փոփոխությունները։'));
-    const data=personal()?await PersonalStore.request(companyUrl('/api/state',id)):await (async()=>{const res=await fetch(companyUrl('/api/state',id),{cache:'no-store'});const data=await res.json();if(!res.ok)throw new Error(tr(data.error));return data;})();
+    const data=personal()?await (demoMode?RackDemo:PersonalStore).request(companyUrl('/api/state',id)):await (async()=>{const res=await fetch(companyUrl('/api/state',id),{cache:'no-store'});const data=await res.json();if(!res.ok)throw new Error(tr(data.error));return data;})();
     D.validate(data.state);
     activeCompanyId=id;state=data.state;revision=data.revision;dirty=false;conflict=false;selectedPortId='';portDraft=null;portDraftDirty=false;clearTimeout(portTimer);
     filters={query:'',floor:'',rack:'',type:'',service:'',vlan:'',link:'',status:'',sort:'location'};page=0;
-    try{localStorage.setItem('rackmap-active-company',id);}catch{}
+    try{if(!demoMode)localStorage.setItem('rackmap-active-company',id);}catch{}
     const url=new URL(location.href);url.searchParams.set('company',id);url.hash='overview';history.replaceState(null,'',url);
     $('#dialog').close();$('#connectionBanner').hidden=true;status(tr('Պահված է'));render();
     try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս ընկերության համար այս սարքում կա չպահված պատճեն։ Բացեք Կարգավորումները՝ այն վերականգնելու համար։'));}catch{}
@@ -2030,6 +2063,7 @@ async function backupAll(){
   download(await res.blob(),`RackMap-all-companies-${new Date().toISOString().slice(0,10)}.${cloudMode?'json':'sqlite'}`);toast(tr('Բոլոր ընկերությունների պատճենը պատրաստ է'));
 }
 async function switchStorage(mode){
+  if(demoMode){location.assign('/');return;}
   stopLive();
   onboardingChoice=mode;onboardingVisible=false;
   try{localStorage.setItem('rackmap-workspace-choice',mode);}catch{}
@@ -2168,7 +2202,7 @@ const actions={
   'scene-select':id=>{sceneController?.select(id);document.querySelectorAll('.scene-link').forEach(el=>el.classList.toggle('selected',el.dataset.link===id));},
   'connections-pdf':id=>exportConnections('pdf',id),
   'connections-xlsx':id=>exportConnections('xlsx',id),
-  'company-new':newCompany,'backup-all':backupAll,
+  'company-new':newCompany,'company-delete':deleteCompany,'help-open':()=>{modal(tr('Օգնություն'),RackHelp.html(tr,esc));RackHelp.bind($('#dialog'));},'demo-info':()=>modal(tr('Դեմո ռեժիմ'),`<p>${tr('Դեմոյի փոփոխությունները պահվում են միայն այդ ներդիրի հիշողության մեջ։ Էջը թարմացնելիս օրինակը վերականգնվում է։ Ձեր իրական նախագծերն ու մուտքը չեն փոխվում։')}</p>`,null,button(tr('Սկսել դեմոն նորից'),'demo-reset')+'<a class="button primary" href="/">'+tr('Դուրս գալ դեմոյից')+'</a>'),'demo-reset':()=>location.reload(),'backup-all':backupAll,
   save:async()=>{if(await save())toast(tr('Տվյալները պահպանված են'));},close:()=>$('#dialog').close(),
   'toggle-auto-save':async()=>{autoSaveEnabled=!autoSaveEnabled;try{localStorage.setItem('rackmap-auto-save',String(autoSaveEnabled));}catch{}if(!autoSaveEnabled){clearTimeout(saveTimer);status(tr('Ավտոմատ պահպանումն անջատված է'));}else if(dirty){await save();}render();},
   floor:id=>floorModal(id),'rack-new':id=>rackModal('',id),rack:id=>rackModal(id),
@@ -2244,7 +2278,7 @@ document.addEventListener('click',e=>{
   if(portDraftDirty&&((navigation)||control&&!['app-reset','panels-close','login-pin','login-account','toggle-left','toggle-right','backup','reload','port-discard','port-clear-confirm','port-clear-cancel'].includes(control.dataset.action))){
     if(!flushPortEditor()){e.preventDefault();return;}
   }
-  const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const fn=actions[el.dataset.action];if(fn)Promise.resolve().then(()=>fn(el.dataset.id,el)).catch(err=>toast(err.message));});
+  const el=e.target.closest('[data-action]');if(!el||el.disabled)return;if(demoMode&&['workspace-choice','account-login','account-signup','site-recover','site-recover-pin','site-recover-login'].includes(el.dataset.action)){location.assign('/');return;}const fn=actions[el.dataset.action];if(fn)Promise.resolve().then(()=>fn(el.dataset.id,el)).catch(err=>toast(err.message));});
 document.addEventListener('input',e=>{if(e.target.dataset.filter==='query'){filters.query=e.target.value;page=0;renderResults();}});
 document.addEventListener('search',e=>{if(e.target.dataset.filter==='query'){filters.query=e.target.value;page=0;renderResults();}});
 document.addEventListener('change',e=>{
@@ -2275,10 +2309,10 @@ async function init(){
   try{
     if(!onboardingChoice)await restoreRememberedWorkspace();
     if(!onboardingChoice){renderWelcome();return;}
-    await AppReset.ensureSessionCleared().catch(()=>{});
+    if(!demoMode)await AppReset.ensureSessionCleared().catch(()=>{});
     onboardingVisible=false;
     let config;
-    if(personal()){config={cloud:!localHost,authRequired:false};}
+    if(personal()){config={cloud:demoMode?false:!localHost,authRequired:false};}
     else{
       const response=await fetch('/api/config',{signal:AbortSignal.timeout(8000)});
       if(!response.ok)throw new Error(tr('Թիմային սերվերն այս պահին չի պատասխանում։'));
@@ -2291,7 +2325,8 @@ async function init(){
     $('.save-tools').insertAdjacentHTML('beforeend',button(tr('Դուրս գալ'),'logout','','small'));
     if(accountMode()){const {user}=await api('/api/auth/session');accountUserId=user.id;accountReadOnly=false;}
     companies=await api('/api/companies');
-    if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'default';
+    if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'';
+    if(!activeCompanyId){state=D.empty();revision=0;ready=true;render();return;}
     const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();maintainLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
       $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ԻՄ ՓԱՉ · ՊԱՀՊԱՆՈՒՄ</div><h1>${personal()?tr('Այս բրաուզերում պահպանումը չբացվեց'):tr('Թիմային բազան այս պահին անհասանելի է')}</h1><p>${personal()?tr('Ստուգեք բրաուզերի պահպանման թույլտվությունը և ազատ տեղը։ Գործող տվյալները չեն ջնջվել։'):tr('Կարող եք կրկին փորձել կամ աշխատել այս սարքի անձնական բազայով։ Թիմի տվյալները մնում են cloud-ում։')}</p><div class="actions"><button class="button primary" data-action="retry">Կրկին փորձել</button>${personal()?'':tr('<button class="button" data-action="personal-mode">Բացել անձնական բազան</button>')}</div><details style="margin-top:20px"><summary>Ստուգման մանրամասներ</summary><p>${esc(tr(e.message))}</p></details></section>`;
     }
@@ -2338,7 +2373,7 @@ function stopLive(){
   liveUrl='';
 }
 function maintainLive(){
-  if(!ready||resetInProgress||document.visibilityState==='hidden'){
+  if(!ready||!activeCompanyId||resetInProgress||document.visibilityState==='hidden'){
     stopLive();updateLiveLabel();return;
   }
   if(personal()){

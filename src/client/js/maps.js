@@ -67,7 +67,7 @@ globalThis.RackMaps=(()=>{
     function undo(){if(!undoStack.length)return;redoStack.push(JSON.stringify({floorPlans:getState().floorPlans||[],floors:getState().floors||[]}));applyUndoRedo(undoStack.pop());toast(tr('Հետ վերցվեց'));}
     function redo(){if(!redoStack.length)return;undoStack.push(JSON.stringify({floorPlans:getState().floorPlans||[],floors:getState().floors||[]}));applyUndoRedo(redoStack.pop());toast(tr('Կրկին կատարվեց'));}
     function button(text,action,extra=''){return `<button type="button" class="button" data-map-action="${action}" ${extra}>${esc(tr(text))}</button>`;}
-    const paths={select:'m5 3 14 10-7 1-3 7Z',hand:'M8 13V6a2 2 0 0 1 4 0v6M12 5a2 2 0 0 1 4 0v7M16 8a2 2 0 0 1 4 0v7c0 4-3 7-7 7h-1c-2 0-3-1-4-3l-4-6c-1-2 1-4 3-2l1 2',fit:'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',plus:'M12 5v14M5 12h14',minus:'M5 12h14',close:'m6 6 12 12M18 6 6 18',layers:'m3 7 9-5 9 5-9 5Zm0 5 9 5 9-5M3 17l9 5 9-5',plan:'M3 3h18v18H3ZM3 9h18M9 9v12',devices:'M3 3h7v7H3Zm11 0h7v7h-7ZM3 14h7v7H3Zm11 0h7v7h-7Z',labels:'M4 5h16M12 5v15M8 20h8',pdf:'M14 2H5v20h14V7Zm0 0v6h5M8 13h8M8 17h6',share:'M8 12 17 6M8 12l9 6M3 9h5v6H3ZM17 3h5v5h-5Zm0 13h5v5h-5Z',more:'M5 11v2M12 11v2M19 11v2',edit:'m4 16 12-12 4 4L8 20l-5 1Z',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7',fullscreen:'M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6',eye:'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',eyeOff:'m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.9M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8',undo:'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v.5a5.5 5.5 0 0 1-5.5 5.5H11',redo:'m15 14 5-5-5-5M20 9H9.5A5.5 5.5 0 0 0 4 14.5v.5A5.5 5.5 0 0 0 9.5 21H13',lock:'M7 11V7a5 5 0 0 1 10 0v4m-12 0h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z',unlock:'M7 11V7a5 5 0 0 1 9.9-1m-14.9 5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z'};
+    const paths={select:'m5 3 14 10-7 1-3 7Z',hand:'M8 13V6a2 2 0 0 1 4 0v6M12 5a2 2 0 0 1 4 0v7M16 8a2 2 0 0 1 4 0v7c0 4-3 7-7 7h-1c-2 0-3-1-4-3l-4-6c-1-2 1-4 3-2l1 2',fit:'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',plus:'M12 5v14M5 12h14',minus:'M5 12h14',close:'m6 6 12 12M18 6 6 18',layers:'m3 7 9-5 9 5-9 5Zm0 5 9 5 9-5M3 17l9 5 9-5',plan:'M3 3h18v18H3ZM3 9h18M9 9v12',devices:'M3 3h7v7H3Zm11 0h7v7h-7ZM3 14h7v7H3Zm11 0h7v7h-7Z',labels:'M4 5h16M12 5v15M8 20h8',pdf:'M14 2H5v20h14V7Zm0 0v6h5M8 13h8M8 17h6',printer:'M6 8V2h12v6 M6 18H2V8h20v10h-4 M6 14h12v8H6Z M17 11h2',share:'M8 12 17 6M8 12l9 6M3 9h5v6H3ZM17 3h5v5h-5Zm0 13h5v5h-5Z',more:'M5 11v2M12 11v2M19 11v2',edit:'m4 16 12-12 4 4L8 20l-5 1Z',trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7',fullscreen:'M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6',eye:'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',eyeOff:'m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.9M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8',undo:'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v.5a5.5 5.5 0 0 1-5.5 5.5H11',redo:'m15 14 5-5-5-5M20 9H9.5A5.5 5.5 0 0 0 4 14.5v.5A5.5 5.5 0 0 0 9.5 21H13',lock:'M7 11V7a5 5 0 0 1 10 0v4m-12 0h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z',unlock:'M7 11V7a5 5 0 0 1 9.9-1m-14.9 5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z'};
     const svg=name=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}"/></svg>`;
     const tool=(text,action,image,extra='')=>`<button type="button" class="map-tool" data-map-action="${action}" title="${esc(tr(text))}" aria-label="${esc(tr(text))}" ${extra}>${svg(image)}</button>`;
     view.tool||='select';view.filter||='all';view.labels??=true;view.markerSize=Math.min(50,Math.max(0,Number(view.markerSize)||0));view.imageOpacity=Math.min(90,Math.max(0,Number(view.imageOpacity)||0));
@@ -83,7 +83,7 @@ globalThis.RackMaps=(()=>{
             <label class="map-pill-select map-plan-select">${svg('plan')}<select data-map-plan aria-label="${esc(tr('Հատակագիծ'))}">${plans.filter(p=>p.floorId===plan.floorId).map(p=>`<option value="${esc(p.id)}" ${p.id===plan.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
             ${!h.readOnly?tool('Բեռնել հատակագիծ','upload','plus'):''}
           </div></div>
-          <div class="map-top-actions"><button type="button" class="map-command" data-map-action="map-pdf" title="${esc(tr('Քարտեզ PDF'))}" aria-label="${esc(tr('Քարտեզ PDF'))}">${svg('pdf')}</button><button type="button" class="map-command" data-map-action="share" title="${esc(tr('Կիսվել հղումով'))}" aria-label="${esc(tr('Կիսվել հղումով'))}">${svg('share')}</button>
+          <div class="map-top-actions"><button type="button" class="map-command" data-map-action="print" title="${esc(tr('Տպել հատակագիծը'))}" aria-label="${esc(tr('Տպել հատակագիծը'))}">${svg('printer')}</button><button type="button" class="map-command" data-map-action="map-pdf" title="${esc(tr('Քարտեզ PDF'))}" aria-label="${esc(tr('Քարտեզ PDF'))}">${svg('pdf')}</button><button type="button" class="map-command" data-map-action="share" title="${esc(tr('Կիսվել հղումով'))}" aria-label="${esc(tr('Կիսվել հղումով'))}">${svg('share')}</button>
             <details class="map-more"><summary class="map-tool" title="${esc(tr('Լրացուցիչ գործիքներ'))}" aria-label="${esc(tr('Լրացուցիչ գործիքներ'))}">${svg('more')}</summary><div class="map-more-menu"><label class="map-marker-size"><span>${esc(tr('Նշիչի մեծացում'))}</span><output data-marker-size-value>+${view.markerSize}%</output><input type="range" min="0" max="50" step="5" value="${view.markerSize}" data-map-marker-size aria-label="${esc(tr('Նշիչի մեծացում'))}"></label><label class="map-marker-size"><span>${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</span><output data-image-opacity-value>${view.imageOpacity}%</output><input type="range" min="0" max="90" step="10" value="${view.imageOpacity}" data-map-image-opacity aria-label="${esc(tr('Հատ. ֆոնի մաղձոտ.'))}"></label>${!h.readOnly?button('Խմբագրել հատակագիծը','edit'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}${!h.readOnly?button('Ջնջել հատակագիծը','delete'):''}</div></details>
           </div>
         </div>
@@ -162,10 +162,40 @@ globalThis.RackMaps=(()=>{
       const search=view.query.trim().toLocaleLowerCase();
       const markerMatches=m=>visibleService(m.row.service)&&(!search||[name(m.row),m.row.d?.model,m.row.endpointName,D.serviceLabel(state,m.row.service,tr),m.row.floor,m.row.rack,m.row.device,m.row.port,m.row.cable,m.row.room,m.row.vlan,m.row.connection,m.row.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
       const visible=mapData.markers.filter(markerMatches);
+      function resolveLabelDirections(markers){
+        const dirs=new Map();
+        if(markers.length<=1)return dirs;
+        const pts=markers.map(m=>{const p=D.mapMarkerLayout(m);return {id:m.id,x:p.iconX,y:p.iconY};});
+        const candidates=[{dir:'down',dx:0,dy:.045,bias:0},{dir:'up',dx:0,dy:-.045,bias:.005},{dir:'right',dx:.07,dy:0,bias:.008},{dir:'left',dx:-.07,dy:0,bias:.008}];
+        const placed=[];
+        for(const pt of pts){
+          let bestDir='down',minPen=Infinity;
+          for(const c of candidates){
+            const lx=pt.x+c.dx,ly=pt.y+c.dy;
+            let pen=c.bias;
+            if(lx<.02||lx>.98||ly<.02||ly>.98)pen+=10;
+            for(const o of pts){
+              if(o.id===pt.id)continue;
+              const d=(lx-o.x)**2+(ly-o.y)**2;
+              if(d<.004)pen+=1/(d+.0001);
+            }
+            for(const pl of placed){
+              const d=(lx-pl.x)**2+(ly-pl.y)**2;
+              if(d<.004)pen+=1.5/(d+.0001);
+            }
+            if(pen<minPen){minPen=pen;bestDir=c.dir;}
+          }
+          dirs.set(pt.id,bestDir);
+          const ch=candidates.find(c=>c.dir===bestDir)||candidates[0];
+          placed.push({x:pt.x+ch.dx,y:pt.y+ch.dy});
+        }
+        return dirs;
+      }
+      const labelDirs=resolveLabelDirections(visible);
       const legend=new Map();for(const marker of visible){const row=marker.row,key=JSON.stringify([row.service||'',row.d?.model||'',row.status]);const item=legend.get(key);if(item)item.count++;else legend.set(key,{row,count:1});}
       root.querySelector('[data-map-legend-count]').textContent=String(visible.length);
       root.querySelector('[data-map-legend-list]').innerHTML=[...legend.values()].map(({row,count})=>`<div class="map-legend-item"><i style="--legend-service:${esc(D.serviceColor(state,row.service))};--legend-status:${esc(D.statusColor(state,row.status))}"></i><span><strong>${esc(D.serviceLabel(state,row.service,tr))}</strong>${row.d?.model?`<small>${esc(row.d.model)}</small>`:''}<small>${esc(D.statusLabel(state,row.status,tr))}</small></span><b>${count}</b></div>`).join('')||`<p>${esc(tr('Քարտեզում նշաններ չկան'))}</p>`;
-      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
+      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="${esc(labelDirs.get(m.id)||'down')}" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('');
       const undoBtn=root.querySelector('[data-map-action="undo"]'),redoBtn=root.querySelector('[data-map-action="redo"]');
       if(undoBtn)undoBtn.disabled=!undoStack.length;
       if(redoBtn)redoBtn.disabled=!redoStack.length;
@@ -500,6 +530,7 @@ globalThis.RackMaps=(()=>{
         if(action==='upload')return upload();
         if(action==='share')return exportCurrent(plans.length?'maps':'devices',true);
         if(action==='shares')return manageShares();
+        if(action==='print'){window.print();return;}
         if(action==='map-pdf'||action==='panel-pdf')return exportCurrent(action==='map-pdf'?'maps':'devices');
         if(action.startsWith('zoom-')){if(!camera)fit();if(camera)zoom(action==='zoom-reset'?1/camera.scale:action==='zoom-in'?1.25:.8);return;}
         if(action==='edit')return modal(tr('Խմբագրել հատակագիծը'),`<div class="form-grid">${input('planName',tr('Անվանում'),plan.name,'text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])],plan.floorId)}</div>`,fd=>change(s=>{const p=findPlan(s);if(p)Object.assign(p,{name:String(fd.get('planName')).trim(),floorId:String(fd.get('planFloor'))});}));

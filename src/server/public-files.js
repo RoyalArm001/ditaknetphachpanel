@@ -18,6 +18,8 @@ const sources={
   'map-label-layout.js':'src/shared/map-label-layout.js',
   'handover-pdf.js':'src/shared/handover-pdf.js',
   'maps.js':'src/client/js/maps.js',
+  'help.js':'src/client/js/help.js',
+  'demo.js':'src/client/js/demo.js',
   'maps.css':'src/client/css/maps.css',
   'pdfkit.js':'node_modules/pdfkit/js/pdfkit.standalone.js',
   'pdfjs/pdf.mjs':'node_modules/pdfjs-dist/legacy/build/pdf.mjs',

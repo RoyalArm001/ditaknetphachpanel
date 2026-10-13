@@ -155,9 +155,18 @@ function createApp(options={}) {
       const read=id=>requestStore.read(id),listCompanies=()=>requestStore.list();
       if(req.method==='GET'&&url.pathname==='/api/storage')return json(res,200,{directory:requestStore.directory,database:requestStore.database,backups:requestStore.backups,cloud});
       if(req.method==='GET'&&url.pathname==='/api/companies')return json(res,200,await listCompanies());
-      if(req.method==='POST'||req.method==='PUT'){
+      if(req.method==='POST'||req.method==='PUT'||req.method==='DELETE'){
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
+      }
+      if(req.method==='DELETE'&&url.pathname==='/api/companies'){
+        if(cloud&&!accountSpace&&(!actorId.startsWith('pin:')||await store.pinRole?.(actorId.slice(4))!=='admin'))return json(res,403,{error:tr('Թիմային նախագիծը կարող է ջնջել միայն ադմինը։')});
+        const current=await read(companyId);if(!current)return json(res,404,{error:tr('Նախագիծը չի գտնվել')});
+        try{
+          const body=await readBody(req);if(!Number.isSafeInteger(body.revision)||typeof body.name!=='string')return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+          const result=await requestStore.remove(companyId,body.revision,body.name);
+          res.auditContext.action='company.delete';return json(res,200,result);
+        }catch(e){if(e.status||e instanceof SyntaxError)return json(res,e.status||400,{error:tr(e.message)});throw e;}
       }
       if(url.pathname==='/api/projects/import'){
         if(!['GET','POST'].includes(req.method))return json(res,405,{error:tr('Գործողությունը չի գտնվել')});

@@ -4,6 +4,7 @@ function openLocalRepository(options){
   const read=id=>{const x=db.prepare('SELECT revision,body FROM companies WHERE id=?').get(id);return x?{revision:x.revision,state:JSON.parse(x.body),companyId:id}:null;};
   return {...store,cloud:false,read,
     transfer:request=>require('./project-transfer').transferLocal(db,read,request),
+    remove:(id,revision,name)=>require('./project-delete').removeLocal(db,read,id,revision,name),
     list:()=>db.prepare('SELECT id,revision,body FROM companies ORDER BY rowid').all().map(x=>{const s=JSON.parse(x.body);return {id:x.id,revision:x.revision,name:s.company,floorCount:s.floors.length};}),
     create:(id,state)=>db.prepare('INSERT INTO companies VALUES(?,?,?)').run(id,0,JSON.stringify(state)),
     save:(id,state,revision)=>{

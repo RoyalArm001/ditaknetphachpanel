@@ -26,6 +26,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       const all=await get(companies.getAll()),current=all.find(x=>x.id===id);
       if(url.pathname==='/api/companies'){
         if(method==='GET')return all.map(x=>({id:x.id,revision:x.revision,name:x.state.company,floorCount:x.state.floors.length}));
+        if(method==='DELETE'){
+          if(!current)throw error(tr('Նախագիծը չի գտնվել'),404);
+          if(current.revision!==body.revision)throw error(tr('Նախագիծը փոխվել է։ Թարմացրեք էջը և կրկին փորձեք։'),409);
+          if(!body.name||body.name!==current.state.company)throw error(tr('Հաստատման համար գրեք նախագծի ճշգրիտ անվանումը։'));
+          for(const row of await get(history.getAll()))if(row.company_id===id)await get(history.delete([id,row.revision]));
+          await get(companies.delete(id));return {ok:true};
+        }
         const name=body.name?.trim();if(!name||name.length>200||!Number.isInteger(body.floorCount)||body.floorCount<1||body.floorCount>200)throw error(tr('Նշեք անունը և հարկերի քանակը'));
         if(all.some(x=>x.state.company.toLowerCase()===name.toLowerCase()))throw error(tr('Այս անունով ընկերություն արդեն կա'));
         const state={...RackDomain.empty(),...RackDomain.projectStyle(body.style),company:name,floors:Array.from({length:body.floorCount},(_,i)=>({id:crypto.randomUUID(),name:tr`${i+1}-րդ հարկ`,racks:[]}))};

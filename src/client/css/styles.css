@@ -1,6 +1,16 @@
 @font-face{font-family:MyPatch;src:url('/assets/DejaVuSans.ttf') format('truetype');font-weight:400;font-display:swap}
 .project-style{margin:20px 0;padding:14px;border:1px solid var(--line);border-radius:8px}
 .project-style summary{cursor:pointer;font-weight:600;line-height:1.6}
+.help-page{max-width:1080px;margin:0 auto;min-width:0}
+.help-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--panel);margin-bottom:22px}
+.help-hero h1{margin:6px 0 12px}.help-hero p{color:var(--muted);line-height:1.7;margin:0}
+.help-search{display:grid;gap:8px;margin-bottom:20px;font-weight:600}
+.help-articles{display:grid;gap:12px}.help-article{margin:0;min-width:0}
+.help-article summary{font-weight:700;cursor:pointer;line-height:1.6;padding:4px;overflow-wrap:anywhere}
+.help-article ol{padding-inline-start:26px;line-height:1.9}.help-article li{padding:7px 0;overflow-wrap:anywhere}
+.help-article[hidden]{display:none}.welcome-guide{margin:0 0 22px}
+.demo-badge{flex-shrink:0;border-color:#d9a441;color:var(--text);background:color-mix(in srgb,#d9a441 18%,var(--panel));font-weight:700}
+@media(max-width:600px){.help-hero{align-items:stretch;flex-direction:column;padding:18px}.help-hero .button{text-align:center}.help-article{padding:14px}.help-article ol{padding-inline-start:22px}}
 .model-save-option>label{display:flex;align-items:center;gap:10px;line-height:1.5}
 .model-save-option input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin:0;accent-color:var(--accent)}
 .project-import-racks{max-height:36vh;overflow:auto;margin:16px 0;overscroll-behavior:contain}

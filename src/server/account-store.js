@@ -8,6 +8,7 @@ function accountStore(pool,userId){
   return {
     cloud:true,directory:'My Patch',database:'Personal cloud',backups:'JSON',
     transfer:request=>require('./project-transfer').transferPostgres(pool,userId,request),
+    remove:(id,revision,name)=>require('./project-delete').removePostgres(pool,userId,id,revision,name),
     list:async()=>(await query("SELECT id,revision,body->>'company' AS name,jsonb_array_length(body->'floors') AS \"floorCount\" FROM rackmap.personal_companies WHERE user_id=$1 ORDER BY id")).rows,
     read:async id=>{const row=(await query('SELECT revision,body FROM rackmap.personal_companies WHERE user_id=$1 AND id=$2',[id])).rows[0];return row?{revision:row.revision,state:row.body,companyId:id}:null;},
     create:async(id,state)=>{D.validate(state);await query('INSERT INTO rackmap.personal_companies(user_id,id,body) VALUES($1,$2,$3)',[id,JSON.stringify(state)]);},
