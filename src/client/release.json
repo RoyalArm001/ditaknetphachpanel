@@ -1,25 +1,50 @@
 {
-  "version": "2.10.35",
+  "version": "2.10.36",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի աջ կողմում ավելացվել է նշանների չափի և բոլոր գծերի հաստության կարգավորում՝ ընտրության հիշմամբ ու սկզբնական չափերի վերականգնմամբ։"
+      "Ֆիքսվել է քարտեզի ընտրված սարքի ինսպեկտոր քարտը՝ բացառելով ուղղահայաց/հորիզոնական ավելորդ ոլորումը և ապահովելով տվյալների կոմպակտ ու ամբողջական տեղավորումը։",
+      "Ընդլայնվել է պարամետրերի սյունը, ինչի շնորհիվ «Պորտերի քանակ» և նմանատիպ պիտակներն այլևս չեն կրճատվում (...-ով)։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added right-side map controls for SVG icon size and all leader-line thicknesses, with remembered preferences and size reset."
+      "Fixed map device inspector card into a compact non-scrolling layout, eliminating vertical and horizontal card scrolling so all information fits cleanly.",
+      "Expanded detail label columns so full text like 'Port count' is never truncated with ellipses."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Справа на карте добавлена настройка размера SVG-значков и толщины всех линий привязки с сохранением выбора и сбросом размеров."
+      "Карточка выбранного устройства на карте зафиксирована в компактном виде без вертикальной и горизонтальной прокрутки, так что вся информация полностью помещается на месте.",
+      "Расширена колонка меток параметров, благодаря чему названия вроде «Количество портов» больше не обрезаются многоточием."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.10.35",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի աջ կողմում ավելացվել է նշանների չափի և բոլոր գծերի հաստության կարգավորում՝ ընտրության հիշմամբ ու սկզբնական չափերի վերականգնմամբ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added right-side map controls for SVG icon size and all leader-line thicknesses, with remembered preferences and size reset."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Справа на карте добавлена настройка размера SVG-значков и толщины всех линий привязки с сохранением выбора и сбросом размеров."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.10.34",
       "hy": {
