@@ -298,7 +298,16 @@ async function beginWorkspace(mode){
   await switchStorage(mode);
   if(fromWelcome&&ready){location.hash='overview';render();}
 }
-function floorCards(){return `<div class="floor-grid">${state.floors.map(f=>tr`<section class="floor-card"><div class="floor-title"><div><h3>${esc(f.name)}</h3><small>${f.racks.length} ռաք · ${f.racks.reduce((n,r)=>n+r.devices.length,0)} սարք</small></div>${button(tr('Խմբագրել'),'floor',f.id,'small')}</div>${f.racks.map(r=>tr`<a class="rack-link" href="#rack/${r.id}"><span class="rack-icon">▤</span><span><strong>${esc(r.name)}</strong><small>${r.u}U · ${r.devices.length} սարք ${r.location?'· '+esc(r.location):''}</small></span><span class="arrow">→</span></a>`).join('')||tr('<div class="empty" style="padding:18px">Այս հարկում ռաք դեռ չկա</div>')}<button class="floor-add" data-action="rack-new" data-id="${f.id}">＋ Ավելացնել ռաք</button></section>`).join('')}</div>`;}
+function floorCards(){return `<div class="floor-grid">${state.floors.map(f=>{
+  const linked=(f.linkedRackIds||[]).map(rid=>findRack(rid)).filter(Boolean);
+  const totalDevs=f.racks.reduce((n,r)=>n+r.devices.length,0)+linked.reduce((n,x)=>n+x.r.devices.length,0);
+  const countDesc=linked.length?`${f.racks.length} ${tr('ռաք')} (+${linked.length} ${tr('կցված')}) · ${totalDevs} ${tr('սարք')}`:`${f.racks.length} ${tr('ռաք')} · ${totalDevs} ${tr('սարք')}`;
+  const otherAvailable=racks().filter(x=>x.f.id!==f.id&&!(f.linkedRackIds||[]).includes(x.r.id));
+  const rHtml=f.racks.map(r=>tr`<a class="rack-link" href="#rack/${r.id}"><span class="rack-icon">▤</span><span><strong>${esc(r.name)}</strong><small>${r.u}U · ${r.devices.length} սարք ${r.location?'· '+esc(r.location):''}</small></span><span class="arrow">→</span></a>`).join('');
+  const lHtml=linked.map(({r,f:srcFloor})=>`<div class="rack-link linked-rack"><a class="rack-link-main" href="#rack/${r.id}" style="text-decoration:none;display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:inherit"><span class="rack-icon" title="${esc(tr('Կցված ռաք'))}">🔗</span><span><strong>${esc(r.name)}</strong> <span class="badge link-badge">${tr('Կցված')} · ${esc(srcFloor.name)}</span><small>${r.u}U · ${r.devices.length} ${tr('սարք')} ${r.location?'· '+esc(r.location):''}</small></span><span class="arrow" style="margin-left:auto">→</span></a><button type="button" class="button small danger outline" data-action="rack-unlink" data-id="${f.id}:${r.id}" title="${esc(tr('Անջատել այս հարկից'))}" style="padding:4px 8px;font-size:12px;margin-left:8px">✕</button></div>`).join('');
+  const emptyHtml=(!f.racks.length&&!linked.length)?tr('<div class="empty" style="padding:18px">Այս հարկում ռաք դեռ չկա</div>'):'';
+  return `<section class="floor-card"><div class="floor-title"><div><h3>${esc(f.name)}</h3><small>${esc(countDesc)}</small></div>${button(tr('Խմբագրել'),'floor',f.id,'small')}</div>${rHtml}${lHtml}${emptyHtml}<div class="floor-actions" style="display:flex;gap:8px;padding:8px 12px;background:#f9fbfa;border-top:1px solid var(--line)"><button class="floor-add" data-action="rack-new" data-id="${f.id}" style="margin:0;padding:8px;border:0;flex:1;background:transparent;text-align:left">＋ ${tr('Ավելացնել ռաք')}</button>${otherAvailable.length?`<button class="button small outline" data-action="rack-link-modal" data-id="${f.id}" style="padding:4px 8px;font-size:11px" title="${esc(tr('Կցել առկա ռաք'))}">🔗 ${tr('Կցել առկա ռաք')}</button>`:''}</div></section>`;
+}).join('')}</div>`;}
 function renderOverview(){const rs=racks(),ds=D.devices(state),all=D.rows(state),used=all.filter(x=>x.status==='used').length,fault=all.filter(x=>x.status==='fault').length;
   const nets=D.networks(state),hostCount=nets.reduce((n,x)=>n+x.hosts.length,0);
   const ipText=n=>{const ips=Array.isArray(n.ip)?n.ip:(n.ip?[n.ip]:[]);return ips.length?' · '+ips.map(esc).join(', '):'';};
@@ -1628,7 +1637,47 @@ window.addEventListener('storage',event=>{
 window.addEventListener('online',()=>{if(!demoMode)AppReset.ensureSessionCleared().catch(()=>{});});
 function confirmAction(title,description,action){modal(title,`<p>${esc(description)}</p>`,async()=>action());}
 function floorModal(id){const f=state.floors.find(x=>x.id===id);modal(f?tr('Խմբագրել հարկը'):tr('Նոր հարկ'),input('name',tr('Հարկի անվանում'),f?.name||'','text','required maxlength="200"'),fd=>commit(s=>{if(f)s.floors.find(x=>x.id===id).name=fd.get('name').trim();else s.floors.push({id:uid(),name:fd.get('name').trim(),racks:[]});}),f?button(tr('Ջնջել հարկը'),'floor-delete',id,'danger'):'');}
-function rackModal(id,floorId){const found=findRack(id),r=found?.r;modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),found?.f.id||floorId)}${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div>`,fd=>commit(s=>{const target=s.floors.find(f=>f.id===fd.get('floorId'));if(r){let source=s.floors.find(f=>f.racks.some(x=>x.id===id));const edit=source.racks.find(x=>x.id===id);Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});if(source.id!==target.id){source.racks=source.racks.filter(x=>x.id!==id);target.racks.push(edit);}}else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});}),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');$('#preset').onchange=e=>{if(e.target.value)$('#u').value=e.target.value;};}
+function rackModal(id,floorId){
+  const found=findRack(id),r=found?.r;
+  const currentFloorId=found?.f.id||floorId||state.floors[0]?.id;
+  const currentFloor=state.floors.find(f=>f.id===currentFloorId);
+  const otherRacks=racks().filter(x=>x.f.id!==currentFloorId&&!(currentFloor?.linkedRackIds||[]).includes(x.r.id));
+  const linkSelect=!r&&otherRacks.length?`<div class="field full">${select('linkedRackId',tr('Կամ կցել առկա ռաք այլ հարկից'),[['',tr('— Ստեղծել նոր ռաք այս հարկում —')],...otherRacks.map(({r:rk,f:fl})=>[rk.id,`${rk.name} (${fl.name} · ${rk.u}U)`])],'')}</div>`:'';
+  const linkHint=!r&&otherRacks.length?`<p class="hint full" id="linkedRackHint" hidden style="margin-top:-6px">${esc(tr('Ընտրված ռաքը կկցվի այս հարկին որպես սպասարկող ռաք։ Կարող եք օգտագործել դրա պորտերն ու սարքերը այս հարկի հատակագծում։'))}</p>`:'';
+  modal(r?tr('Խմբագրել ռաքը'):tr('Նոր ռաք'),`<div class="form-grid">${linkSelect}${linkHint}<div class="field" id="rackNameField">${input('name',tr('Ռաքի անվանում'),r?.name||'','text','required maxlength="200"')}</div>${select('floorId',tr('Տեղադրման հարկ'),state.floors.map(f=>[f.id,f.name]),currentFloorId)}<div class="field" id="presetField">${select('preset',tr('Պատրաստի չափ'),[['',tr('Հատուկ չափ')],...[6,9,12,24,42].map(n=>[n,n+'U'])],r?.u||24)}</div><div class="field" id="uField">${input('u',tr('Ռաքի բարձրություն U'),r?.u||24,'number','required min="1" max="60"')}</div><div class="field full" id="locationField">${input('location',tr('Տեղադրության նկարագրություն'),r?.location||'','text',tr('maxlength="200" placeholder="Օրինակ՝ միջանցքի աջ կողմ"'))}</div></div>`,fd=>commit(s=>{
+    const target=s.floors.find(f=>f.id===fd.get('floorId'));
+    const linkedRackId=fd.get('linkedRackId');
+    if(!r&&linkedRackId){
+      target.linkedRackIds=target.linkedRackIds||[];
+      if(!target.linkedRackIds.includes(linkedRackId))target.linkedRackIds.push(linkedRackId);
+      toast(tr('Ռաքը հաջողությամբ կցվեց հարկին'));
+      return;
+    }
+    if(r){
+      let source=s.floors.find(f=>f.racks.some(x=>x.id===id));
+      const edit=source.racks.find(x=>x.id===id);
+      Object.assign(edit,{name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim()});
+      if(source.id!==target.id){
+        source.racks=source.racks.filter(x=>x.id!==id);
+        target.racks.push(edit);
+      }
+    }else target.racks.push({id:uid(),name:fd.get('name').trim(),u:+fd.get('u'),location:fd.get('location').trim(),photo:'',devices:[]});
+  }),r?button(tr('Ջնջել ռաքը'),'rack-delete',id,'danger'):'');
+  $('#preset')?.addEventListener('change',e=>{if(e.target.value)$('#u').value=e.target.value;});
+  const linkedSelect=$('#linkedRackId');
+  if(linkedSelect){
+    linkedSelect.onchange=e=>{
+      const isLinked=!!e.target.value;
+      const nameInput=$('#name');if(nameInput)nameInput.required=!isLinked;
+      const uInput=$('#u');if(uInput)uInput.required=!isLinked;
+      $('#rackNameField')?.classList.toggle('disabled-field',isLinked);
+      $('#presetField')?.classList.toggle('disabled-field',isLinked);
+      $('#uField')?.classList.toggle('disabled-field',isLinked);
+      $('#locationField')?.classList.toggle('disabled-field',isLinked);
+      const hint=$('#linkedRackHint');if(hint)hint.hidden=!isLinked;
+    };
+  }
+}
 function deviceModal(id,rackId,position,preset={}){const found=findDevice(id),d=found?.d;
   const allRacksList=racks();
   const defaults=d||preset;
@@ -2235,6 +2284,8 @@ const actions={
   save:async()=>{if(await save())toast(tr('Տվյալները պահպանված են'));},close:()=>$('#dialog').close(),
   'toggle-auto-save':async()=>{autoSaveEnabled=!autoSaveEnabled;try{localStorage.setItem('rackmap-auto-save',String(autoSaveEnabled));}catch{}if(!autoSaveEnabled){clearTimeout(saveTimer);status(tr('Ավտոմատ պահպանումն անջատված է'));}else if(dirty){await save();}render();},
   floor:id=>floorModal(id),'rack-new':id=>rackModal('',id),rack:id=>rackModal(id),
+  'rack-link-modal':id=>{const f=state.floors.find(x=>x.id===id);if(!f)return;const available=racks().filter(x=>x.f.id!==f.id&&!(f.linkedRackIds||[]).includes(x.r.id));if(!available.length){toast(tr('Կցելու համար այլ ռաք չկա'));return;}modal(tr('Կցել առկա ռաք հարկին'),`<div class="form-grid"><div class="field full">${select('rackId',tr('Ընտրեք առկա ռաքը'),available.map(({r,f:fl})=>[r.id,`${fl.name} / ${r.name} (${r.u}U)`]))}</div></div><p class="hint" style="margin-top:12px">${esc(tr('Ընտրված ռաքը կկցվի այս հարկին որպես սպասարկող ռաք։ Կարող եք օգտագործել դրա պորտերն ու սարքերը այս հարկի հատակագծում։'))}</p>`,fd=>commit(s=>{const target=s.floors.find(x=>x.id===id);const rid=String(fd.get('rackId'));if(target&&rid){target.linkedRackIds=target.linkedRackIds||[];if(!target.linkedRackIds.includes(rid)){target.linkedRackIds.push(rid);toast(tr('Ռաքը հաջողությամբ կցվեց հարկին'));}}}));},
+  'rack-unlink':idPair=>{const [floorId,rackId]=idPair.split(':');confirmAction(tr('Անջատե՞լ ռաքը'),tr('Ռաքը կանջատվի այս հարկից։ Ֆիզիկական ռաքն ու սարքերը կմնան իրենց հիմնական հարկում։'),()=>commit(s=>{const target=s.floors.find(x=>x.id===floorId);if(target&&target.linkedRackIds){target.linkedRackIds=target.linkedRackIds.filter(x=>x!==rackId);toast(tr('Ռաքն անջատվեց հարկից'));}}));},
   'device-new':(id,el)=>deviceModal('',id,+el.dataset.pos||undefined),device:id=>deviceModal(id),'device-detail':deviceDetail,'device-move-up':id=>moveDevice(id,'up'),'device-move-down':id=>moveDevice(id,'down'),port:portModal,
   'bulk-service':service=>{
     const ids=[...selectedPortIds];

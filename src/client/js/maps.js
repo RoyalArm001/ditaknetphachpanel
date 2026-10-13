@@ -220,10 +220,11 @@ globalThis.RackMaps=(()=>{
     function createDeviceModal(preset={}){
       if(h.readOnly)return;
       const curState=getState(),allRacks=curState.floors.flatMap(f=>f.racks.map(r=>({f,r})));
-      if(!allRacks.length){toast(tr('Սարք ավելացնելու համար նախ ստեղծեք ռաք։'));return;}
-      const currentFloorRacks=allRacks.filter(x=>!plan?.floorId||x.f.id===plan.floorId);
+      const currentFloor=curState.floors.find(f=>f.id===plan?.floorId);
+      const floorRackIds=new Set([...(currentFloor?.racks||[]).map(r=>r.id),...(currentFloor?.linkedRackIds||[])]);
+      const currentFloorRacks=allRacks.filter(x=>!plan?.floorId||floorRackIds.has(x.r.id));
       const targetRacks=currentFloorRacks.length?currentFloorRacks:allRacks;
-      const panelDevices=D.devices(curState).filter(x=>(!plan?.floorId||x.f.id===plan.floorId)&&(x.d.type==='panel'||x.d.type==='switch'));
+      const panelDevices=D.devices(curState).filter(x=>(!plan?.floorId||floorRackIds.has(x.r.id))&&(x.d.type==='panel'||x.d.type==='switch'));
       const defaultType=preset.service||'wifi';
       const defaultName=preset.endpointName||(D.serviceLabel(curState,defaultType,tr)+' '+(mapData.markers.filter(m=>m.row.service===defaultType).length+1));
       const knownModels=[...new Set(D.devices(curState).map(x=>x.d.model).filter(Boolean))];

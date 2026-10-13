@@ -395,8 +395,17 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const uniqueNames=xs=>{const names=xs.map(x=>normalizeName(x.name));assert(new Set(names).size===names.length,tr('Անվանումները պետք է տարբեր լինեն'));};
     const allDevices=[],allEndpoints=[];
     uniqueNames(s.floors);
+    const allRackIds=new Set(s.floors.flatMap(f=>(f.racks||[]).map(r=>r.id)));
     for (const f of s.floors) {
       id(f.id); name(f.name); assert(Array.isArray(f.racks)&&f.racks.length<=100,tr('Ռաքերի ցանկը սխալ է'));uniqueNames(f.racks);
+      if(f.linkedRackIds!==undefined){
+        assert(Array.isArray(f.linkedRackIds)&&f.linkedRackIds.length<=100,tr('Կցված ռաքերի ցանկը սխալ է'));
+        for(const rid of f.linkedRackIds){
+          assert(typeof rid==='string'&&allRackIds.has(rid),tr('Կցված ռաքը չի գտնվել'));
+          assert(!f.racks.some(r=>r.id===rid),tr('Ռաքը չի կարող միաժամանակ լինել նույն հարկի հիմնական և կցված ռաք'));
+        }
+        assert(new Set(f.linkedRackIds).size===f.linkedRackIds.length,tr('Կցված ռաքերը չպետք է կրկնվեն'));
+      }
       for(const r of f.racks) {
         id(r.id);name(r.name);integer(r.u,1,60);text(r.location);text(r.photo,3000000);
         assert(!r.photo || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo),tr('Լուսանկարի ձևաչափը սխալ է'));
@@ -512,7 +521,12 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const all=rows(s),byId=new Map(all.map(row=>[row.p.id,row]));
     const incoming=new Map(all.filter(row=>row.p.switchPortId).map(row=>[row.p.switchPortId,row.p.id]));
     const canonical=id=>incoming.get(id)||id;
-    const onFloor=row=>!plan?.floorId||(row.p.floorId||row.f.id)===plan.floorId;
+    const onFloor=row=>{
+      if(!plan?.floorId)return true;
+      if((row.p.floorId||row.f.id)===plan.floorId)return true;
+      const planFloor=s.floors.find(f=>f.id===plan.floorId);
+      return !!(planFloor?.linkedRackIds&&planFloor.linkedRackIds.includes(row.r.id));
+    };
     const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free'&&onFloor(row));
     const placed=new Map();
     for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
@@ -561,6 +575,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
     for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
+    const validRackIds=new Set(s.floors.flatMap(f=>(f.racks||[]).map(r=>r.id)));
+    for(const f of s.floors||[]){if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>validRackIds.has(id)&&!f.racks.some(r=>r.id===id));}
   }
   return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconPaths,serviceIconNames,serviceIconSvg,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

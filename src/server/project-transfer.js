@@ -90,6 +90,7 @@ function prepare(source,target,request){
     for(const {p} of D.ports(s))if(portIds.has(p.switchPortId)){p.switchPortId='';summary.detachedLinks++;}
     for(const n of s.networks||[])n.hosts=n.hosts.filter(h=>!deviceIds.has(h.deviceId));
     for(const plan of s.floorPlans||[])plan.markers=plan.markers.filter(m=>!portIds.has(m.portId));
+    for(const f of s.floors)if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>!chosen.has(id));
   }
   D.validate(s);D.validate(t);
   const max=request.maxBytes||4*1024*1024;
