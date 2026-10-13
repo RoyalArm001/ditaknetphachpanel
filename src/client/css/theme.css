@@ -189,8 +189,7 @@
 [data-theme=dark] .cable-port{background:var(--surface-soft);color:var(--ink)}
 [data-theme=dark] .cable-connected{background:#18364e;color:#8cc4f7}
 [data-theme=dark] .cable-rack-link{background:var(--surface-soft);color:var(--accent)}
-[data-theme=dark] .link-badge{background:#0c4a6e;color:#7dd3fc}
-[data-theme=dark] .linked-rack{background:#182e2c;border-color:var(--line)}
-[data-theme=dark] .linked-rack:hover{background:#20403d}
+[data-theme=dark] .link-badge{background:#11384a;color:#7dd3fc;border:1px solid #1e526d}
+[data-theme=dark] .rack-unlink-btn:hover{color:#fca5a5;background:#451a1a}
 
 

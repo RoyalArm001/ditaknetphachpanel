@@ -1,25 +1,47 @@
 {
-  "version": "2.11.3",
+  "version": "2.11.4",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել է առկա ռաքը այլ հարկերին կցելու հնարավորություն. «Նոր ռաք» պատուհանում և հարկի քարտում կարելի է ընտրել առկա ռաքը՝ 2-րդ կամ այլ հարկը միացնելով այդ ռաքին առանց նոր ռաք ստեղծելու։ Կցված ռաքը հասանելի է հարկի քարտում, քարտեզներում և սարքերի միացումներում։"
+      "Ուղղվել է մութ ռեժիմի դիզայնը հարկերի քարտերում. վերացվել է ներքևի սպիտակ շերտը, հավասարակշռվել են բոլոր հարկերի քարտերի չափսերն ու կոճակները, և կցված ռաքերի ցուցադրումը դարձվել է միասնական ու ներդաշնակ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added support for linking existing racks to other floors: choose an existing rack in the 'New rack' dialog or floor card to share/serve that floor without creating a redundant rack. Linked racks are seamlessly integrated into floor cards, maps, and device connections."
+      "Fixed dark mode styling in floor cards: eliminated the bright bottom white bar, balanced card dimensions and buttons across all floors, and made linked rack rows consistent with the design system."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлена возможность привязки существующих стоек к другим этажам: в окне «Новая стойка» и на карточке этажа можно выбрать готовую стойку и подключить этаж к ней без создания лишней стойки. Привязанная стойка доступна на карточке этажа, на картах и в соединениях устройств."
+      "Исправлен темный режим в карточках этажей: убрана белая полоса снизу, выровнены размеры и кнопки всех карточек, а отображение привязанных стоек приведено к общему гармоничному стилю."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.11.3",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել է առկա ռաքը այլ հարկերին կցելու հնարավորություն. «Նոր ռաք» պատուհանում և հարկի քարտում կարելի է ընտրել առկա ռաքը՝ 2-րդ կամ այլ հարկը միացնելով այդ ռաքին առանց նոր ռաք ստեղծելու։ Կցված ռաքը հասանելի է հարկի քարտում, քարտեզներում և սարքերի միացումներում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added support for linking existing racks to other floors: choose an existing rack in the 'New rack' dialog or floor card to share/serve that floor without creating a redundant rack. Linked racks are seamlessly integrated into floor cards, maps, and device connections."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлена возможность привязки существующих стоек к другим этажам: в окне «Новая стойка» и на карточке этажа можно выбрать готовую стойку и подключить этаж к ней без создания лишней стойки. Привязанная стойка доступна на карточке этажа, на картах и в соединениях устройств."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.2",
       "hy": {
