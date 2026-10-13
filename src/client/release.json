@@ -1,25 +1,47 @@
 {
-  "version": "2.10.34",
+  "version": "2.10.35",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Դեմո ռեժիմում բարելավվել է հարցումների մշակումը։ Նախագծի ջնջման անվավեր հարցումները մերժվում են հստակ սխալով։"
+      "Քարտեզի աջ կողմում ավելացվել է նշանների չափի և բոլոր գծերի հաստության կարգավորում՝ ընտրության հիշմամբ ու սկզբնական չափերի վերականգնմամբ։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Improved demo request handling. Invalid project deletion requests now return a clear validation error."
+      "Added right-side map controls for SVG icon size and all leader-line thicknesses, with remembered preferences and size reset."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Улучшена обработка запросов в демо-режиме. Некорректные запросы удаления проекта отклоняются с понятной ошибкой."
+      "Справа на карте добавлена настройка размера SVG-значков и толщины всех линий привязки с сохранением выбора и сбросом размеров."
     ]
   },
-  "date": "2026-10-13",
+  "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.10.34",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Դեմո ռեժիմում բարելավվել է հարցումների մշակումը։ Նախագծի ջնջման անվավեր հարցումները մերժվում են հստակ սխալով։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Improved demo request handling. Invalid project deletion requests now return a clear validation error."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Улучшена обработка запросов в демо-режиме. Некорректные запросы удаления проекта отклоняются с понятной ошибкой."
+        ]
+      },
+      "date": "2026-10-13"
+    },
     {
       "version": "2.10.33",
       "hy": {

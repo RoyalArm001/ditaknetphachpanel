@@ -1,6 +1,10 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Նշաններ և գծեր":["Icons and lines","Значки и линии"],
+"SVG նշանների չափ":["SVG icon size","Размер SVG-значков"],
+"Գծերի հաստություն":["Line thickness","Толщина линий"],
+"Սկզբնական չափեր":["Reset sizes","Исходные размеры"],
 "Ինչպե՞ս ջնջել նախագիծը":["How do I delete a project?","Как удалить проект?"],
 "Ձախ վերևի ցանկից ընտրեք ջնջվող ընկերությունը կամ նախագիծը։ Բացեք «Կարգավորումներ → Նախագիծ» և սեղմեք «Ջնջել նախագիծը»։":["Select the company or project from the top-left list. Open Settings → Project and click Delete project.","Выберите компанию или проект в списке слева вверху. Откройте Настройки → Проект и нажмите «Удалить проект»."],
 "Նախ կարող եք ներբեռնել պահուստային պատճենը։ Հաստատման դաշտում գրեք նախագծի ճշգրիտ անվանումը, ապա սեղմեք ջնջման կոճակը։":["You can download a backup first. Type the exact project name into the confirmation field, then click the delete button.","Сначала можно скачать резервную копию. Введите точное название проекта в поле подтверждения и нажмите кнопку удаления."],
