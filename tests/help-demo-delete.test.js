@@ -44,5 +44,6 @@ test('cloud deletion rejects staff and foreign origins and audits successful adm
  await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));});
  const url='http://127.0.0.1:'+server.address().port+'/api/companies?company=a',request=extra=>fetch(url,{method:'DELETE',headers:{'Content-Type':'application/json',...extra},body:JSON.stringify({name:'a',revision:0})});
  assert.equal((await request()).status,403);assert.ok(store.read('a'));role='admin';assert.equal((await request({Origin:'https://other.example'})).status,403);
+ assert.equal((await fetch(url,{method:'DELETE',headers:{'Content-Type':'application/json'},body:'null'})).status,400);assert.ok(store.read('a'));
  assert.equal((await request()).status,200);assert.equal(store.read('a'),undefined);const log=await require('../src/server/security-store').securityStore(store).list('shared');assert.equal(log[0].action,'company.delete');assert.equal(log[0].target,'a');
 });

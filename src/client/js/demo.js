@@ -46,7 +46,7 @@
   Object.assign(root.RackDemo,createStore(seed));
   // Any API path in this demo tab is resolved in memory, including direct fetch callers.
   const fetchReal=root.fetch.bind(root);root.fetch=async(input,options={})=>{
-    const url=new URL(typeof input==='string'?input:input.url,location.href);
+    const url=new URL(typeof input==='string'||input instanceof URL?input:input.url,location.href);
     if(url.origin!==location.origin||!url.pathname.startsWith('/api/'))return fetchReal(input,options);
     try{const result=await root.RackDemo.request(url.href,{method:options.method||input.method||'GET',body:options.body||(input instanceof Request&&input.method!=='GET'?await input.clone().text():undefined)});return new Response(JSON.stringify(result),{headers:{'Content-Type':'application/json'}});}
     catch(e){return new Response(JSON.stringify({error:e.message}),{status:e.code||400,headers:{'Content-Type':'application/json'}});}

@@ -163,7 +163,7 @@ function createApp(options={}) {
         if(cloud&&!accountSpace&&(!actorId.startsWith('pin:')||await store.pinRole?.(actorId.slice(4))!=='admin'))return json(res,403,{error:tr('Թիմային նախագիծը կարող է ջնջել միայն ադմինը։')});
         const current=await read(companyId);if(!current)return json(res,404,{error:tr('Նախագիծը չի գտնվել')});
         try{
-          const body=await readBody(req);if(!Number.isSafeInteger(body.revision)||typeof body.name!=='string')return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+          const body=await readBody(req);if(!Number.isSafeInteger(body?.revision)||typeof body?.name!=='string')return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
           const result=await requestStore.remove(companyId,body.revision,body.name);
           res.auditContext.action='company.delete';return json(res,200,result);
         }catch(e){if(e.status||e instanceof SyntaxError)return json(res,e.status||400,{error:tr(e.message)});throw e;}
