@@ -36,16 +36,22 @@ function createPinAuth(store,{env=process.env,secure=true,now=()=>Date.now(),coo
     async authenticate(req,res){
       const token=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='))?.slice(cookieName.length+1);
       if(!token||token.length>500)return null;
-      const [payload,mac]=token.split('.');if(!payload||!mac||!equal(signature(payload),mac))return null;
-      try{const data=JSON.parse(Buffer.from(payload,'base64url')),id=data.id||'staff-pin';
-        // Different cloud instances may have slightly different clocks. This only
-        // permits small future issuance skew; expired tokens remain invalid.
-        if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+(sessionAge+300)*1000)return null;
-        if(!await sessions.valid(cookieName,id,data.nonce))return null;
-        // Renew daily without replacing the active session identity.
-        if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id,data.nonce);
-        return {id,method:'pin'};
-      }catch{return null;}
+      const parts=token.split('.'),[payload,mac]=parts;if(parts.length!==2||!payload||!mac||!equal(signature(payload),mac))return null;
+      let data;try{data=JSON.parse(Buffer.from(payload,'base64url'));}catch{return null;}
+      if(!data||typeof data!=='object'||Array.isArray(data))return null;
+      const id=data.id||'staff-pin';
+      // Different cloud instances may have slightly different clocks. This only
+      // permits small future issuance skew; expired tokens remain invalid.
+      if(!Object.hasOwn(hashes,id)||data.version!==fingerprint(hashes[id])||!Number.isFinite(data.exp)||data.exp<=now()||data.exp>now()+(sessionAge+300)*1000)return null;
+      // A database outage is not an invalid PIN. Keep the cookie and let the
+      // client retry instead of turning a temporary failure into a login screen.
+      let valid;
+      try{valid=await sessions.valid(cookieName,id,data.nonce);}
+      catch(cause){const error=new Error('PIN session verification unavailable',{cause});error.code='PIN_SESSION_UNAVAILABLE';throw error;}
+      if(!valid)return null;
+      // Renew daily without replacing the active session identity.
+      if(res&&!res.headersSent&&data.exp-now()<(sessionAge-86400)*1000)issue(res,id,data.nonce);
+      return {id,method:'pin'};
     },
     async login(req,res,pin){
       const ip=env.VERCEL==='1'?req.headers['x-real-ip']||'unknown':req.socket?.remoteAddress||'unknown';

@@ -1,25 +1,47 @@
 {
-  "version": "2.11.4",
+  "version": "2.11.5",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղվել է մութ ռեժիմի դիզայնը հարկերի քարտերում. վերացվել է ներքևի սպիտակ շերտը, հավասարակշռվել են բոլոր հարկերի քարտերի չափսերն ու կոճակները, և կցված ռաքերի ցուցադրումը դարձվել է միասնական ու ներդաշնակ։"
+      "Ուղղվել է PIN-ով մուտքի կրկնվող պահանջը բազայի ժամանակավոր խափանման դեպքում․ հավելվածը պահպանում է սեսիան և թույլ է տալիս կրկին փորձել՝ առանց նոր մուտքի։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed dark mode styling in floor cards: eliminated the bright bottom white bar, balanced card dimensions and buttons across all floors, and made linked rack rows consistent with the design system."
+      "Fixed repeated PIN prompts during temporary session-storage outages: the app preserves the session and offers retry instead of requiring another login."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлен темный режим в карточках этажей: убрана белая полоса снизу, выровнены размеры и кнопки всех карточек, а отображение привязанных стоек приведено к общему гармоничному стилю."
+      "Исправлен повторный запрос PIN при временном сбое хранилища сессий: приложение сохраняет вход и предлагает повторить попытку."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.11.4",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել է մութ ռեժիմի դիզայնը հարկերի քարտերում. վերացվել է ներքևի սպիտակ շերտը, հավասարակշռվել են բոլոր հարկերի քարտերի չափսերն ու կոճակները, և կցված ռաքերի ցուցադրումը դարձվել է միասնական ու ներդաշնակ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed dark mode styling in floor cards: eliminated the bright bottom white bar, balanced card dimensions and buttons across all floors, and made linked rack rows consistent with the design system."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлен темный режим в карточках этажей: убрана белая полоса снизу, выровнены размеры и кнопки всех карточек, а отображение привязанных стоек приведено к общему гармоничному стилю."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.3",
       "hy": {

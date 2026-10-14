@@ -23,11 +23,19 @@ async function restoreRememberedWorkspace(){
   // The HttpOnly session can outlive browser preferences. Recover its workspace
   // without reading or storing the PIN, and never switch an explicit choice.
   const modes=storageMode==='account'?['account','shared']:['shared','account'];
-  const sessions=await Promise.all(modes.map(async mode=>{
-    try{const response=await fetch('/api/auth/session'+(mode==='account'?'?space=account':''),{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(8000)});if(!response.ok)return null;const result=await response.json();return result.user?.id?mode:null;}catch{return null;}
+  const unavailable=()=>Object.assign(new Error(tr('Մուտքի ստուգումը ժամանակավորապես անհասանելի է։ Կրկին փորձեք։')),{code:'AUTH_UNAVAILABLE'});
+  const sessions=await Promise.allSettled(modes.map(async mode=>{
+    const response=await fetch('/api/auth/session'+(mode==='account'?'?space=account':''),{cache:'no-store',credentials:'same-origin',signal:AbortSignal.timeout(8000)});
+    if(response.status===401||response.status===404)return null;
+    const result=await response.json();
+    if(mode==='account'&&response.status===503&&result.code==='ACCOUNT_UNAVAILABLE')return null;
+    if(!response.ok)throw unavailable();
+    return result.user?.id?mode:null;
   }));
   if(onboardingChoice)return;
-  const valid=sessions.filter(Boolean);if(valid.length!==1)return;const restored=valid[0];
+  const valid=sessions.filter(x=>x.status==='fulfilled'&&x.value).map(x=>x.value);
+  if(!valid.length&&sessions.some(x=>x.status==='rejected'))throw unavailable();
+  if(valid.length!==1)return;const restored=valid[0];
   storageMode=restored;onboardingChoice=restored;rememberWorkspace();
 }
 let welcomeStep='home',accountMethod='login',accountUserId='',accountReadOnly=false;
@@ -2410,7 +2418,9 @@ async function init(){
     companies=await api('/api/companies');
     if(!companies.some(c=>c.id===activeCompanyId))activeCompanyId=companies[0]?.id||'';
     if(!activeCompanyId){state=D.empty();revision=0;ready=true;render();return;}
-    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();maintainLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
+    const data=await api('/api/state');D.validate(data.state);state=data.state;revision=data.revision;ready=true;status(tr('Պահված է'));render();maintainLive();try{if(localStorage.getItem(recoveryKey()))banner(tr('Այս սարքում կա չպահված պատճեն։ Այն կարող եք վերականգնել Կարգավորումներ բաժնից։'));}catch{}}catch(e){if(e.code===401&&authRequired){renderLogin();return;}
+      if(e.code==='AUTH_UNAVAILABLE'){ready=false;document.body.classList.remove('rack-view','login-view');$('#content').innerHTML=`<section class="panel setup"><h1>${tr('Մուտքի ստուգումը ժամանակավորապես անհասանելի է։ Կրկին փորձեք։')}</h1><div class="actions">${button(tr('Կրկին փորձել'),'retry','','primary')}</div></section>`;return;}
+      ready=false;document.body.classList.remove('rack-view','login-view');status(personal()?tr('Սարքի պահպանումն անհասանելի է'):tr('Թիմային կապն ընդհատված է'),true);
       $('#content').innerHTML=tr`<section class="panel setup"><div class="eyebrow">ԻՄ ՓԱՉ · ՊԱՀՊԱՆՈՒՄ</div><h1>${personal()?tr('Այս բրաուզերում պահպանումը չբացվեց'):tr('Թիմային բազան այս պահին անհասանելի է')}</h1><p>${personal()?tr('Ստուգեք բրաուզերի պահպանման թույլտվությունը և ազատ տեղը։ Գործող տվյալները չեն ջնջվել։'):tr('Կարող եք կրկին փորձել կամ աշխատել այս սարքի անձնական բազայով։ Թիմի տվյալները մնում են cloud-ում։')}</p><div class="actions"><button class="button primary" data-action="retry">Կրկին փորձել</button>${personal()?'':tr('<button class="button" data-action="personal-mode">Բացել անձնական բազան</button>')}</div><details style="margin-top:20px"><summary>Ստուգման մանրամասներ</summary><p>${esc(tr(e.message))}</p></details></section>`;
     }
 

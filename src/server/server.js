@@ -64,7 +64,7 @@ function createApp(options={}) {
       let requestStore=store,actorId='',pinCompanyIds=null;
       const accountSpace=url.searchParams.get('space')==='account'||url.pathname.startsWith('/api/account/');
       if(accountSpace&&url.pathname.startsWith('/api/')){
-        if(!accounts||!personalAuth)return json(res,503,{error:tr('Անձնական cloud-ը հասանելի չէ')});
+        if(!accounts||!personalAuth)return json(res,503,{code:'ACCOUNT_UNAVAILABLE',error:tr('Անձնական cloud-ը հասանելի չէ')});
         if(['POST','PUT','DELETE'].includes(req.method)){
           if(req.headers.origin&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
@@ -376,7 +376,7 @@ function createApp(options={}) {
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(file).pipe(res);
       }
       json(res,404,{error:tr('Չի գտնվել')});
-    }catch(e){const tr=require('../shared/i18n').forLanguage('hy');console.error('RackMap request failed:',e.code||e.name);if(!res.headersSent)json(res,e.code==='23505'?400:500,{error:tr('Չհաջողվեց կատարել գործողությունը')});else res.end();}
+    }catch(e){const tr=require('../shared/i18n').forLanguage('hy');console.error('RackMap request failed:',e.code||e.name);if(!res.headersSent)json(res,e.code==='PIN_SESSION_UNAVAILABLE'?503:e.code==='23505'?400:500,{...(e.code==='PIN_SESSION_UNAVAILABLE'?{code:e.code}:{}),error:tr(e.code==='PIN_SESSION_UNAVAILABLE'?'Մուտքի ստուգումը ժամանակավորապես անհասանելի է։ Կրկին փորձեք։':'Չհաջողվեց կատարել գործողությունը')});else res.end();}
   });
   let backupDay=new Date().toISOString().slice(0,10);
   const dailyBackup=cloud?null:setInterval(()=>{const today=new Date().toISOString().slice(0,10);if(today!==backupDay){try{store.backup();backupDay=today;}catch(e){console.error('Automatic backup failed:',e.message);}}},60*60*1000);

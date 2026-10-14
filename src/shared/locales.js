@@ -1,6 +1,7 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Մուտքի ստուգումը ժամանակավորապես անհասանելի է։ Կրկին փորձեք։":["Sign-in verification is temporarily unavailable. Please retry.","Проверка входа временно недоступна. Повторите попытку."],
 "Հեղինակ":["Author","Автор"],
 "Մարդը՝ նախագծի հետևում":["The person behind the project","Человек, стоящий за проектом"],
 "Սիփան Դանիելյան":["Sipan Danielyan","Сипан Даниелян"],
