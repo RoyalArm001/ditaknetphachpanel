@@ -1,6 +1,9 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"PDF ձևաչափ":["PDF format","Формат PDF"],
+"Հակիրճ սխեմա":["Compact diagram","Краткая схема"],
+"Սխեմա և մանրամասն ցանկեր":["Diagram and detailed lists","Схема и подробные списки"],
 "Մուտքի ստուգումը ժամանակավորապես անհասանելի է։ Կրկին փորձեք։":["Sign-in verification is temporarily unavailable. Please retry.","Проверка входа временно недоступна. Повторите попытку."],
 "Հեղինակ":["Author","Автор"],
 "Մարդը՝ նախագծի հետևում":["The person behind the project","Человек, стоящий за проектом"],

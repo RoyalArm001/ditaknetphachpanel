@@ -1148,8 +1148,8 @@ document.addEventListener('change',event=>{
 function pinUserDialog(id=''){
   const rows=JSON.parse($('#pinUsers')?.dataset.rows||'[]'),row=rows.find(x=>x.id===id),label=row?.label||'';
   if(id&&!row){loadPinUsers();return;}
-  const selected=new Set(row?.companyIds||companies.map(x=>x.id)),projectAccess=row?.role==='admin'?'':`<fieldset class="pin-projects"><legend>${tr('Տեսանելի նախագծեր')}</legend>${companies.map(c=>`<label class="check"><input name="companyId" value="${esc(c.id)}" type="checkbox" ${selected.has(c.id)?'checked':''}> ${esc(c.name)}</label>`).join('')}</fieldset>`;
-  modal(id?tr('Խմբագրել PIN օգտատիրոջը'):tr('Ավելացնել PIN օգտատեր'),input('pinUserName',tr('Օգտատիրոջ անուն'),label,'text','required maxlength="80"')+projectAccess+(id?`<label class="check"><input name="enabled" type="checkbox" ${row.enabled?'checked':''}> ${tr('Ակտիվ է')}</label><label class="check"><input name="rotate" type="checkbox"> ${tr('Ստեղծել նոր PIN կոդ')}</label>`:''),async fd=>{
+  const selected=new Set(row?.companyIds||companies.map(x=>x.id)),projectAccess=row?.role==='admin'?'':`<fieldset class="pin-projects"><legend>${tr('Տեսանելի նախագծեր')}</legend>${companies.map(c=>`<label class="check pin-user-option"><input name="companyId" value="${esc(c.id)}" type="checkbox" ${selected.has(c.id)?'checked':''}> <span>${esc(c.name)}</span></label>`).join('')}</fieldset>`;
+  modal(id?tr('Խմբագրել PIN օգտատիրոջը'):tr('Ավելացնել PIN օգտատեր'),input('pinUserName',tr('Օգտատիրոջ անուն'),label,'text','required maxlength="80"')+projectAccess+(id?`<label class="check pin-user-option"><input name="enabled" type="checkbox" ${row.enabled?'checked':''}> <span>${tr('Ակտիվ է')}</span></label><label class="check pin-user-option"><input name="rotate" type="checkbox"> <span>${tr('Ստեղծել նոր PIN կոդ')}</span></label>`:''),async fd=>{
     const result=await api('/api/pins',{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,label:fd.get('pinUserName'),enabled:id?fd.has('enabled'):true,rotate:fd.has('rotate'),companyIds:fd.getAll('companyId')})});
     setTimeout(()=>{
       if(result.pin){

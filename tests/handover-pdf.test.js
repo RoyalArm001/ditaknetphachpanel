@@ -47,6 +47,45 @@ test('large patch panels split schematics into pages inside the printable area',
   try{let schematics=0;for(let i=1;i<=doc.numPages;i++){const page=await doc.getPage(i),content=await page.getTextContent();if(content.items.some(x=>x.str.includes('Patch panel diagram'))){schematics++;for(const item of content.items){assert.ok(item.transform[4]>=31&&item.transform[4]+item.width<=812,`Text outside page: ${item.str}`);assert.ok(item.transform[5]>10&&item.transform[5]<580,`Text outside page: ${item.str}`);}}}assert.equal(schematics,2);}finally{await task.destroy();}
 });
 
+test('compact PDF has one page per map, no generated marker numbers or blank footer pages',async()=>{
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const chunks=await H.create(PDFDocument,fixture(),{font,kind:'maps',tr:I18n.forLanguage('en')});
+  const task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    assert.equal(doc.numPages,3);
+    for(let i=1;i<=3;i++){
+      const items=(await (await doc.getPage(i)).getTextContent()).items;
+      assert.ok(items.some(x=>x.str===`${i} / 3`));
+      assert.ok(!items.some(x=>/^\d+$/.test(x.str)&&x.transform[5]<475&&x.transform[5]>60),'No artificial marker number badges in the map');
+    }
+  }finally{await task.destroy();}
+});
+
+test('compact rack diagrams put cable names inside ports and numbers underneath',async()=>{
+  const state=fixture();state.floors[0].racks[0].devices[0].portList[0].cable='Cable A-01';
+  const chunks=await H.create(PDFDocument,state,{font,kind:'devices',rackId:'rack-a',tr:I18n.forLanguage('en')});
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    assert.equal(doc.numPages,1,'Two 24-port devices fit on one page');
+    const items=(await (await doc.getPage(1)).getTextContent()).items;
+    const cable=items.find(x=>x.str==='Cable A-01');assert.ok(cable);
+    assert.ok(items.some(x=>x.str==='1'&&x.transform[5]<cable.transform[5]&&cable.transform[5]-x.transform[5]<40));
+    assert.ok(!items.some(x=>x.str==='Port connections'));
+  }finally{await task.destroy();}
+});
+
+test('detailed lists remain available only when requested',async()=>{
+  const chunks=await H.create(PDFDocument,fixture(),{font,kind:'maps',planId:'Gym',detailed:true,tr:I18n.forLanguage('en')});
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    assert.equal(doc.numPages,5);
+    for(let i=1;i<=doc.numPages;i++){
+      const items=(await (await doc.getPage(i)).getTextContent()).items;
+      assert.ok(items.some(x=>x.str===`${i} / 5`),'Every page is a numbered content page');
+    }
+  }finally{await task.destroy();}
+});
+
 test('shared PDF uses rack selection and accepts project-defined device types',async()=>{
   const {DatabaseSync}=require('node:sqlite'),{createApp}=require('../src/server/server');
   const db=new DatabaseSync(':memory:'),state=fixture();

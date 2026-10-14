@@ -1,25 +1,53 @@
 {
-  "version": "2.11.8",
+  "version": "2.11.9",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզում մի հարկում արդեն տեղադրված սարքերն այլևս չեն կրկնվում այլ հարկերի ավելացման ցանկում։"
+      "PDF-ը լռելյայն հակիրճ սխեմա է՝ առանց ավելորդ ցանկերի և դատարկ էջերի։ Պորտերի ներսում մալուխների անուններն են, համարները՝ ներքևում։",
+      "Քարտեզի PDF-ից հեռացվել են ավելացված թվային նշումները։ Մանրամասն ցանկերը հասանելի են առանձին ընտրությամբ։",
+      "Ուղղվել է PIN օգտատիրոջ խմբագրման պատուհանի ընտրանքների դասավորությունը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Devices already placed on one floor plan no longer appear in the unplaced device list on other floors."
+      "PDF exports default to compact diagrams without extra lists or blank pages. Cable names appear inside ports, with numbers below.",
+      "Removed generated number badges from map PDFs. Detailed lists remain available as an optional format.",
+      "Fixed checkbox and label alignment in the PIN user editor."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Устройства, уже размещенные на плане одного этажа, больше не отображаются в списке добавления на других этажах."
+      "PDF по умолчанию содержит краткие схемы без лишних списков и пустых страниц. Названия кабелей внутри портов, номера — под ними.",
+      "Из PDF карты убраны дополнительные числовые метки. Подробные списки доступны отдельным форматом.",
+      "Исправлено выравнивание флажков и подписей в редакторе PIN-пользователя."
     ]
   },
-  "date": "2026-10-14",
+  "date": "2026-10-15",
   "history": [
+    {
+      "version": "2.11.8",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզում մի հարկում արդեն տեղադրված սարքերն այլևս չեն կրկնվում այլ հարկերի ավելացման ցանկում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Devices already placed on one floor plan no longer appear in the unplaced device list on other floors."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Устройства, уже размещенные на плане одного этажа, больше не отображаются в списке добавления на других этажах."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.7",
       "hy": {

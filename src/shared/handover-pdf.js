@@ -11,7 +11,7 @@
     return {plans,devices};
   }
   // Shared by the browser exporter and local PDF previews. No credentials are exported.
-  async function create(PDFDocument,state,{font,tr=x=>x,kind='maps',planId='',floorId='',rackId='',deviceType=kind==='panels'?'panel':'all',deviceId='',date=new Date(),imageOpacity=0}={}){
+  async function create(PDFDocument,state,{font,tr=x=>x,kind='maps',planId='',floorId='',rackId='',deviceType=kind==='panels'?'panel':'all',deviceId='',date=new Date(),imageOpacity=0,detailed=false}={}){
     const selection=select(state,{planId,floorId,rackId,deviceType,deviceId});
     const pdf=new PDFDocument({autoFirstPage:false,size:'A4',layout:'landscape',margin:32,bufferPages:true,info:{Title:state.company+' - '+tr(kind==='maps'?'Քարտեզ':'Սարքերի սխեմաներ'),Author:'My Patch'}});
     const chunks=[],done=new Promise((resolve,reject)=>{pdf.on('data',chunk=>chunks.push(chunk));pdf.on('end',()=>resolve(chunks));pdf.on('error',reject);});
@@ -51,10 +51,12 @@
     const scope=[scopeFloor?state.floors.find(f=>f.id===scopeFloor)?.name:tr('Բոլոր հարկերը'),planId?selection.plans.find(p=>p.id===planId)?.name:'',rackId?state.floors.flatMap(f=>f.racks).find(r=>r.id===rackId)?.name:'',deviceType==='all'?'':typeName({type:deviceType}),deviceId?selection.devices.find(x=>x.d.id===deviceId)?.d.name:''].filter(Boolean).join(' / ');
     const mapEquipment=new Map();for(const plan of selection.plans)for(const marker of plan.selectedMarkers){for(const row of [marker.row,byId.get(marker.row.p.switchPortId)].filter(Boolean))mapEquipment.set(row.d.id,row);}
     const equipment=kind==='maps'?[...mapEquipment.values()].filter(x=>(!rackId||x.r.id===rackId)&&(deviceType==='all'||x.d.type===deviceType)&&(!deviceId||x.d.id===deviceId)):selection.devices;
+    if(detailed){
     page(tr('Նախագծի PDF հաշվետվություն'),scope);
     text(tr('Բովանդակություն'),32,137,W,16,accent,30);
     const details=[tr(kind==='maps'?'Քարտեզ':kind==='all'?'Քարտեզ և սարքերի սխեմաներ':'Սարքերի սխեմաներ'),tr('Ամսաթիվ')+': '+date.toISOString().slice(0,10),tr('Հատակագծեր')+': '+(kind==='maps'||kind==='all'?selection.plans.length:0),tr('Սարքեր')+': '+equipment.length];
     details.forEach((value,i)=>text(value,32,187+i*40,W,13,ink,34));
+    }
     function equipmentTable(){
       page(tr('Սարքերի ամփոփում'),scope);let y=121;
       const cols=[['Անվանում',140],['Սարքի տեսակ',100],['Սարքի մոդել',140],['Հարկ',95],['Ռաք',95],['Սարքի IP',140],['Պորտեր',68]];
@@ -82,17 +84,17 @@
         }
         const markerLabels=markers.map(m=>{
           const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
-          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5,py-5,10,ink);pdf.roundedRect(px+3,py-9,12,8,2).fill(ink);text(m.number,px+3,py-8.5,12,6,'#ffffff',8,'center');
+          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5,py-5,10,ink);
           const name=D.endpointLabel(state,m.row,tr),size=7;
           const textW=pdf.font('Project').fontSize(size).widthOfString(name);
           const width=Math.min(104,Math.max(22,Math.ceil(textW+8)));
           const height=Math.max(13,Math.ceil(pdf.font('Project').fontSize(size).heightOfString(name,{width:width-6,lineGap:2}))+5);
           return {m,px,py,color,name,size,width,height};
         });
-        const obstacles=markerLabels.flatMap(({px,py})=>[{x:px-9,y:py-9,width:18,height:18},{x:px+2,y:py-10,width:14,height:10}]);
+        const obstacles=markerLabels.map(({px,py})=>({x:px-9,y:py-9,width:18,height:18}));
         const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:33,y:122,width:776,height:408},obstacles,2);
         for(const item of markerLabels){
-          const box=boxes.get(item.m.id);if(!box)continue; // Full names remain in the numbered device table.
+          const box=boxes.get(item.m.id);if(!box)continue;
           const end=Labels.connector({x:item.px,y:item.py},box),length=Math.hypot(end.x-item.px,end.y-item.py);
           if(length>12){const ratio=9/length;pdf.moveTo(item.px+(end.x-item.px)*ratio,item.py+(end.y-item.py)*ratio).lineTo(end.x,end.y).lineWidth(.5).strokeColor('#647a83').stroke();}
         }
@@ -102,6 +104,7 @@
           pdf.roundedRect(box.x,box.y,box.width,box.height,2).fill(ink);
           text(item.name,box.x+3,box.y+2,box.width-6,item.size,'#ffffff',box.height-3,'center');
         }
+        if(!detailed)continue;
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}
         page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);let index=0;
         for(const [service,items] of groups){const count=items.filter(m=>m.row.status!=='free').length;if(!count)continue;if(index&&index%18===0)page(tr('Քարտեզի սարքերի ամփոփում'),plan.name+' · '+floor);const at=index%18,gx=32+(at%3)*259,gy=126+Math.floor(at/3)*66;pdf.roundedRect(gx,gy,247,56,5).fill('#edf4f1');serviceSymbol(service,gx+10,gy+14,25,D.serviceColor(state,service));text(D.serviceLabel(state,service,tr),gx+46,gy+10,160,10,ink,30);text(count,gx+211,gy+17,28,14,ink,22,'center');index++;}
@@ -110,8 +113,38 @@
         table(tr('Քարտեզի սարքերի ցանկ'),plan.name+' · '+floor,[...groups.values()].flat().map(m=>({portId:m.portId,number:m.number})));
       }
     }
-    equipmentTable();
-    if(kind!=='maps'){
+    if(detailed)equipmentTable();
+    if(kind!=='maps'&&!detailed){
+      let y=bottom,currentRack='';
+      const devices=[...selection.devices].sort((a,b)=>state.floors.indexOf(a.f)-state.floors.indexOf(b.f)||a.f.racks.indexOf(a.r)-b.f.racks.indexOf(b.r)||b.d.pos-a.d.pos);
+      for(const {f,r,d} of devices){
+        const original=D.portLayout(d),bankRows=Math.max(1,...original.map(p=>p.row+1));
+        // Allow two extra columns for uplinks without giving them a mostly empty bank.
+        const layout=D.isNetworkDevice(d)?original.map(p=>({...p,column:p.column%14,row:Math.floor(p.column/14)*bankRows+p.row})):original.map((p,i)=>({...p,column:i%12,row:Math.floor(i/12)}));
+        const totalRows=Math.max(1,...layout.map(p=>p.row+1)),columns=Math.max(1,...layout.map(p=>p.column+1)),cell=(W-24)/columns;
+        const title=tr(d.type==='panel'?'Փաչ պանելի սխեմա':d.type==='switch'?'Սվիչի սխեմա':d.type==='router'?'Ռաուտերի սխեմա':'Սարքի սխեմա');
+        for(let first=0;first<totalRows;first+=6){
+          const rows=Math.min(6,totalRows-first),height=52+rows*51;
+          if(currentRack!==r.id||y+height>bottom){page(tr('Սարքերի սխեմաներ'),f.name+' / '+r.name);currentRack=r.id;y=121;}
+          pdf.roundedRect(32,y,W,height,7).fill('#edf3f2');
+          text(title+' · '+d.name,44,y+9,W-110,11,ink,18);
+          text('U'+d.pos,740,y+9,58,9,muted,18,'right');
+          const ip=D.hostsForDevice(state,d.id).map(x=>x.h.ip).filter(Boolean).join(' · ');
+          text([typeName(d),d.model,ip].filter(Boolean).join(' · '),44,y+28,W-24,8,muted,17);
+          for(const {p,column,row:portRow,optical} of layout.filter(p=>p.row>=first&&p.row<first+rows)){
+            const row=byId.get(p.id),peer=byId.get(p.switchPortId),px=44+column*cell,py=y+49+(portRow-first)*51;
+            const name=row.cable||row.endpointName||row.room||peer?.cable||peer?.endpointName||'—';
+            pdf.roundedRect(px+2,py,cell-5,32,3).fillAndStroke('#ffffff','#c9d8d5');
+            pdf.rect(px+3,py+2,2,28).fill(D.statusColor(state,row.status));
+            let size=8;while(size>6&&pdf.fontSize(size).heightOfString(name,{width:cell-15,lineGap:2})>27)size-=.5;
+            text(name,px+8,py+3,cell-15,size,ink,28,'center');
+            text(String(p.number)+(optical?' · SFP':''),px+2,py+34,cell-5,7,muted,14,'center');
+          }
+          y+=height+12;
+        }
+      }
+    }
+    if(kind!=='maps'&&detailed){
       for(const {f,r,d} of selection.devices){
         const title=tr(d.type==='panel'?'Փաչ պանելի սխեմա':d.type==='switch'?'Սվիչի սխեմա':d.type==='router'?'Ռաուտերի սխեմա':'Սարքի սխեմա');
         const layout=D.portLayout(d),totalRows=Math.max(1,...layout.map(p=>p.row+1));
@@ -137,7 +170,8 @@
       }
     }
     if(!pageNumber){page(tr(kind==='maps'?'Քարտեզ':'Սարքերի սխեմաներ'),'');text(tr('Տվյալներ չկան'),32,140,W,13,muted);}
-    for(let i=0;i<pageNumber;i++){pdf.switchToPage(i);pdf.moveTo(32,562).lineTo(810,562).strokeColor('#d8e4e2').stroke();text('My Patch · '+date.toISOString().slice(0,10),32,572,650,8,muted,15);text((i+1)+' / '+pageNumber,756,572,54,8,muted,15);}
+    // Footer text is below the content margin. Prevent PDFKit from adding overflow pages.
+    for(let i=0;i<pageNumber;i++){pdf.switchToPage(i);pdf.page.margins.bottom=0;pdf.moveTo(32,562).lineTo(810,562).strokeColor('#d8e4e2').stroke();text('My Patch · '+date.toISOString().slice(0,10),32,572,650,8,muted,15);text((i+1)+' / '+pageNumber,756,572,54,8,muted,15);}
     pdf.end();return done;
   }
   return {create,select};
