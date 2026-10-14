@@ -1,25 +1,47 @@
 {
-  "version": "2.11.6",
+  "version": "2.11.7",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքերի ցանկում փակված խմբերը (օրինակ՝ Տեսախցիկ) պահպանվում են և հաջորդ անգամ ավտոմատ չեն բացվում։"
+      "PIN կոդով մուտքն այժմ թույլատրում է մինչև 3 սարքի միաժամանակյա աշխատանք՝ չարգելափակելով մյուս սարքերը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Collapsed device groups in the floor plan map sidebar (e.g. Cameras) now persist and do not automatically reopen."
+      "PIN sign-in now supports up to 3 simultaneous devices per PIN without blocking active sessions."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Свернутые группы устройств в боковой панели карты (например, Камеры) теперь сохраняются и не открываются автоматически."
+      "Вход по PIN-коду теперь поддерживает до 3 одновременных устройств на один PIN без блокировки активных сессий."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.11.6",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքերի ցանկում փակված խմբերը (օրինակ՝ Տեսախցիկ) պահպանվում են և հաջորդ անգամ ավտոմատ չեն բացվում։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Collapsed device groups in the floor plan map sidebar (e.g. Cameras) now persist and do not automatically reopen."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Свернутые группы устройств в боковой панели карты (например, Камеры) теперь сохраняются и не открываются автоматически."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.5",
       "hy": {

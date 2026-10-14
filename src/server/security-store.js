@@ -14,8 +14,27 @@ function securityStore(store){
   }
   const digest=nonce=>createHash('sha256').update(nonce).digest('hex');
   return {
-    async claim(namespace,actor,nonce){await ensure();const hash=digest(nonce);if(pool)await pool.query('INSERT INTO rackmap.active_pin_sessions(namespace,actor,digest) VALUES($1,$2,$3) ON CONFLICT(namespace,actor) DO UPDATE SET digest=excluded.digest',[namespace,actor,hash]);else db.prepare('INSERT INTO active_pin_sessions VALUES(?,?,?) ON CONFLICT(namespace,actor) DO UPDATE SET digest=excluded.digest').run(namespace,actor,hash);},
-    async valid(namespace,actor,nonce){if(typeof nonce!=='string'||!nonce)return false;await ensure();const hash=digest(nonce);return pool?!!(await pool.query('SELECT 1 FROM rackmap.active_pin_sessions WHERE namespace=$1 AND actor=$2 AND digest=$3',[namespace,actor,hash])).rows.length:!!db.prepare('SELECT 1 FROM active_pin_sessions WHERE namespace=? AND actor=? AND digest=?').get(namespace,actor,hash);},
+    async claim(namespace,actor,nonce){
+      await ensure();
+      const hash=digest(nonce);
+      if(pool){
+        const res=await pool.query('SELECT digest FROM rackmap.active_pin_sessions WHERE namespace=$1 AND actor=$2',[namespace,actor]);
+        const current=res.rows[0]?.digest?res.rows[0].digest.split(',').filter(Boolean):[];
+        const next=[...current.filter(h=>h!==hash),hash].slice(-3).join(',');
+        await pool.query('INSERT INTO rackmap.active_pin_sessions(namespace,actor,digest) VALUES($1,$2,$3) ON CONFLICT(namespace,actor) DO UPDATE SET digest=excluded.digest',[namespace,actor,next]);
+      }else{
+        const row=db.prepare('SELECT digest FROM active_pin_sessions WHERE namespace=? AND actor=?').get(namespace,actor);
+        const current=row?.digest?row.digest.split(',').filter(Boolean):[];
+        const next=[...current.filter(h=>h!==hash),hash].slice(-3).join(',');
+        db.prepare('INSERT INTO active_pin_sessions VALUES(?,?,?) ON CONFLICT(namespace,actor) DO UPDATE SET digest=excluded.digest').run(namespace,actor,next);
+      }
+    },
+    async valid(namespace,actor,nonce){
+      if(typeof nonce!=='string'||!nonce)return false;
+      await ensure();
+      const hash=digest(nonce);
+      return pool?!!(await pool.query("SELECT 1 FROM rackmap.active_pin_sessions WHERE namespace=$1 AND actor=$2 AND (','||digest||',' LIKE '%,'||$3||',%')",[namespace,actor,hash])).rows.length:!!db.prepare("SELECT 1 FROM active_pin_sessions WHERE namespace=? AND actor=? AND (','||digest||',' LIKE '%,'||?||',%')").get(namespace,actor,hash);
+    },
     async append({space,owner='',actor,ip='',action,target=''}){await ensure();const values=[new Date().toISOString(),space,owner,String(actor).slice(0,200),String(ip).slice(0,100),String(action).slice(0,100),String(target).slice(0,200)];if(pool)await pool.query('INSERT INTO rackmap.audit_log(created_at,space,owner,actor,ip,action,target) VALUES($1,$2,$3,$4,$5,$6,$7)',values);else db.prepare('INSERT INTO audit_log(created_at,space,owner,actor,ip,action,target) VALUES(?,?,?,?,?,?,?)').run(...values);},
     async list(space,owner='',before=Number.MAX_SAFE_INTEGER){await ensure();const cursor=Number(before);if(!Number.isSafeInteger(cursor)||cursor<1)throw new Error('Invalid audit cursor');return pool?(await pool.query('SELECT * FROM rackmap.audit_log WHERE space=$1 AND owner=$2 AND id<$3 ORDER BY id DESC LIMIT 100',[space,owner,cursor])).rows:db.prepare('SELECT * FROM audit_log WHERE space=? AND owner=? AND id<? ORDER BY id DESC LIMIT 100').all(space,owner,cursor);}
   };

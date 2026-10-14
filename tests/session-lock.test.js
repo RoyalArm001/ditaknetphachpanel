@@ -4,17 +4,22 @@ const {DatabaseSync}=require('node:sqlite');
 const {createPinAuth,hashPin}=require('../src/server/pin-auth');
 const response=()=>({headers:{},setHeader(k,v){this.headers[k]=v;},getHeader(k){return this.headers[k];}});
 const request=res=>({headers:{cookie:res.headers['Set-Cookie'].at(-1).split(';')[0]}});
-test('latest PIN login invalidates the previous session across auth instances; failed login does not',async t=>{
+test('PIN login allows up to 3 devices per PIN code; 4th login evicts the oldest',async t=>{
  const db=new DatabaseSync(':memory:');t.after(()=>db.close());
  const store={db,pinAttempt:async()=>1,pinReset:async()=>{}};
  const env={RACKMAP_SESSION_SECRET:'s'.repeat(40),RACKMAP_PIN_HASHES:JSON.stringify({staff:await hashPin('12345678')})};
  let now=Date.now();const options={env,now:()=>now};
- const a=createPinAuth(store,options),b=createPinAuth(store,options),first=response(),second=response();
+ const a=createPinAuth(store,options),b=createPinAuth(store,options),first=response(),second=response(),third=response(),fourth=response();
  await a.login({headers:{}},first,'12345678');assert.equal((await b.authenticate(request(first))).id,'staff');
  assert.equal(await b.login({headers:{}},response(),'87654321'),null);
  assert.ok(await a.authenticate(request(first)));
  await b.login({headers:{}},second,'12345678');
- assert.equal(await a.authenticate(request(first)),null);assert.ok(await a.authenticate(request(second)));
+ assert.ok(await a.authenticate(request(first)));assert.ok(await a.authenticate(request(second)));
+ await a.login({headers:{}},third,'12345678');
+ assert.ok(await a.authenticate(request(first)));assert.ok(await a.authenticate(request(second)));assert.ok(await a.authenticate(request(third)));
+ await b.login({headers:{}},fourth,'12345678');
+ assert.equal(await a.authenticate(request(first)),null);
+ assert.ok(await a.authenticate(request(second)));assert.ok(await a.authenticate(request(third)));assert.ok(await a.authenticate(request(fourth)));
  now+=2*86400000;const renewed=response();assert.ok(await b.authenticate(request(second),renewed));
  assert.ok(await a.authenticate(request(renewed)));assert.ok(await a.authenticate(request(second)));
  const personal=createPinAuth(store,{...options,cookieName:'mypatch_recovery'}),recovery=response();
@@ -23,10 +28,10 @@ test('latest PIN login invalidates the previous session across auth instances; f
  assert.equal(db.prepare('SELECT count(*) AS n FROM active_pin_sessions').get().n,2);
  assert.ok(!JSON.stringify(db.prepare('SELECT * FROM active_pin_sessions').all()).includes('12345678'));
 });
-test('concurrent successful logins leave exactly one valid editing session',async t=>{
+test('concurrent successful logins allow up to 3 valid editing sessions per PIN',async t=>{
  const db=new DatabaseSync(':memory:');t.after(()=>db.close());
  const store={db,pinAttempt:async()=>1,pinReset:async()=>{}};
  const auth=createPinAuth(store,{env:{RACKMAP_SESSION_SECRET:'s'.repeat(40),RACKMAP_PIN_HASH:await hashPin('12345678')}});
- const responses=[response(),response()];await Promise.all(responses.map(r=>auth.login({headers:{}},r,'12345678')));
- const users=await Promise.all(responses.map(r=>auth.authenticate(request(r))));assert.equal(users.filter(Boolean).length,1);
+ const responses=[response(),response(),response(),response()];await Promise.all(responses.map(r=>auth.login({headers:{}},r,'12345678')));
+ const users=await Promise.all(responses.map(r=>auth.authenticate(request(r))));assert.equal(users.filter(Boolean).length,3);
 });
