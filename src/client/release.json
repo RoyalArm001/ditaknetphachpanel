@@ -1,25 +1,47 @@
 {
-  "version": "2.11.5",
+  "version": "2.11.6",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ուղղվել է PIN-ով մուտքի կրկնվող պահանջը բազայի ժամանակավոր խափանման դեպքում․ հավելվածը պահպանում է սեսիան և թույլ է տալիս կրկին փորձել՝ առանց նոր մուտքի։"
+      "Քարտեզի սարքերի ցանկում փակված խմբերը (օրինակ՝ Տեսախցիկ) պահպանվում են և հաջորդ անգամ ավտոմատ չեն բացվում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Fixed repeated PIN prompts during temporary session-storage outages: the app preserves the session and offers retry instead of requiring another login."
+      "Collapsed device groups in the floor plan map sidebar (e.g. Cameras) now persist and do not automatically reopen."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Исправлен повторный запрос PIN при временном сбое хранилища сессий: приложение сохраняет вход и предлагает повторить попытку."
+      "Свернутые группы устройств в боковой панели карты (например, Камеры) теперь сохраняются и не открываются автоматически."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.11.5",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ուղղվել է PIN-ով մուտքի կրկնվող պահանջը բազայի ժամանակավոր խափանման դեպքում․ հավելվածը պահպանում է սեսիան և թույլ է տալիս կրկին փորձել՝ առանց նոր մուտքի։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Fixed repeated PIN prompts during temporary session-storage outages: the app preserves the session and offers retry instead of requiring another login."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Исправлен повторный запрос PIN при временном сбое хранилища сессий: приложение сохраняет вход и предлагает повторить попытку."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.4",
       "hy": {

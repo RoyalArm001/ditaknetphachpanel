@@ -57,7 +57,13 @@ globalThis.RackMaps=(()=>{
   }
   function mount(root,h){
     const {tr,esc,commit,getState,modal,input,select,toast,download,save}=h,abort=new AbortController();
-    const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1,imageOpacity:0};ui.set(key,view);}const collapsedDeviceGroups=new Set(),expandedDeviceCards=new Set();
+    const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1,imageOpacity:0};ui.set(key,view);}
+    const savedCollapsed=(()=>{try{const s=JSON.parse(localStorage.getItem('rackmap-map-collapsed-groups')||'null');return Array.isArray(s)?s:null;}catch{return null;}})();
+    view.collapsedDeviceGroups||=new Set(savedCollapsed||[]);
+    if(savedCollapsed&&view.collapsedDeviceGroups.size===0){for(const s of savedCollapsed)view.collapsedDeviceGroups.add(String(s));}
+    view.expandedDeviceCards||=new Set();
+    const collapsedDeviceGroups=view.collapsedDeviceGroups,expandedDeviceCards=view.expandedDeviceCards;
+    const saveCollapsedGroups=()=>{try{localStorage.setItem('rackmap-map-collapsed-groups',JSON.stringify([...collapsedDeviceGroups]));}catch{}};
     view.selectedMarkerIds ||= new Set();
     const state=getState(),plans=state.floorPlans||[];let plan=plans.find(p=>p.id===view.planId)||plans[0];view.planId=plan?.id||'';
     if(view.historyPlanId!==view.planId){view.historyPlanId=view.planId;view.undoStack=[];view.redoStack=[];view.selectedMarkerIds.clear();}
@@ -213,6 +219,7 @@ globalThis.RackMaps=(()=>{
       const portList=root.querySelector('.map-port-list');
       for(const group of portList.querySelectorAll('.map-device-group')){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);}
       for(const card of portList.querySelectorAll('.map-port-card')){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}
+      saveCollapsedGroups();
       portList.innerHTML=(!h.readOnly?`<button type="button" class="button primary map-btn-add-new-device" data-map-action="create-map-device">${svg('plus')}<span>${esc(tr('Ստեղծել նոր սարք'))}</span></button>`:'')+([...groups].map(([service,items])=>`<details class="map-device-group" data-service="${esc(service)}" ${collapsedDeviceGroups.has(service)?'':'open'}><summary>${icon(service)}${esc(D.serviceLabel(state,service,tr))}<span>${items.length}</span></summary><div class="map-device-items">${items.map(r=>`<details class="map-port-card ${r.p.id===view.portId?'selected':''}" data-device-card="${esc(r.p.id)}" ${expandedDeviceCards.has(r.p.id)?'open':''}><summary><span class="map-card-icon" style="color:${D.serviceColor(state,r.service)}">${icon(r.service)}</span><span><b>${esc(name(r))}</b><small>${esc(D.serviceLabel(state,r.service,tr)+' · '+r.port)}</small></span><span class="map-card-chevron" aria-hidden="true"></span></summary><div class="map-port-card-details"><span><small>${esc([r.cable,r.destination||r.floor].filter(Boolean).join(' · ')||connectionLabel(r))}</small><small>${esc(connectionLabel(r))}</small></span><button type="button" class="map-card-add" data-map-port="${esc(r.p.id)}" title="${esc(tr('Ավելացնել սարք'))}" aria-label="${esc(tr('Ավելացնել սարք')+' · '+name(r))}">${svg('plus')}</button></div></details>`).join('')}</div></details>`).join('')||`<p class="hint map-list-empty">${esc(tr(mapData.devices.length?'Բոլոր համապատասխան սարքերն արդեն տեղադրված են կամ չեն համապատասխանում որոնմանը։':'Զբաղված միացումներ չկան։ Սարքի տեսակը նշեք պորտի նշանակության դաշտում։'))}</p>`);
       root.querySelector('.map-viewport').dataset.tool=view.placing?'place':view.tool;drawInspector();scheduleLabels();
     }
@@ -573,6 +580,7 @@ globalThis.RackMaps=(()=>{
     }
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     root.addEventListener('pointerdown',e=>{const more=topActions?.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
+    root.addEventListener('toggle',e=>{const group=e.target.closest?.('.map-device-group');if(group?.dataset?.service){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);saveCollapsedGroups();return;}const card=e.target.closest?.('.map-port-card');if(card?.dataset?.deviceCard){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}},{capture:true,signal:abort.signal});
     root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));saveAppearance();return;}if(e.target.matches('[data-map-line-width]')){view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));saveAppearance();return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
     const changePlan=e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.placing=false;view.camera=null;h.redraw();}};
     root.addEventListener('change',changePlan,{signal:abort.signal});
