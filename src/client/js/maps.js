@@ -106,6 +106,7 @@ globalThis.RackMaps=(()=>{
     view.tool||='select';view.filter||='all';view.labels??=true;view.markerSize=Math.min(200,Math.max(0,Number(view.markerSize)||0));view.imageOpacity=Math.min(90,Math.max(0,Number(view.imageOpacity)||0));
     const floorName=id=>state.floors.find(f=>f.id===id)?.name||tr('Առանց հարկի');
     const mapFloors=[...new Set(plans.map(p=>p.floorId))];
+    const allPlaced=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.markers||[]).map(m=>mapData.canonical(m.portId))));
     document.body.classList.add('map-view');
     root.innerHTML=plans.length?`
       <section class="map-editor" aria-label="${esc(tr('Քարտեզի խմբագրիչ'))}">
@@ -129,7 +130,7 @@ globalThis.RackMaps=(()=>{
         <aside class="map-sidebar ${view.devicesOpen?'is-open':''}" aria-label="${esc(tr('Միացված սարքեր'))}"><div class="map-sidebar-heading"><span>${svg('devices')}${esc(tr('Միացված սարքեր'))}</span>${tool('Փակել','devices-toggle','close')}</div><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field"><span>${esc(tr('Որոնում'))}</span><input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint">${esc(tr('Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>
         <div class="map-view-tools" role="group" aria-label="${esc(tr('Քարտեզի դիտում'))}">${tool('Տեղավորել էկրանին','fit','fit')}${tool('Մեծացնել','zoom-in','plus')}<button type="button" class="map-zoom-value" data-map-action="zoom-reset" data-map-zoom aria-label="100%">100%</button>${tool('Փոքրացնել','zoom-out','minus')}${tool('Ամբողջ էկրանով','fullscreen','fullscreen')}</div>
         <details class="map-legend"><summary>${esc(tr('Քարտեզի նշաններ'))} <span data-map-legend-count></span></summary><div class="map-legend-list" data-map-legend-list></div></details>
-        <div class="map-bottom-toolbar" role="toolbar" aria-label="${esc(tr('Քարտեզի գործիքներ'))}">${tool('Ընտրել (V)','select','select',`aria-pressed="${view.tool==='select'}"`)}${tool('Տեղաշարժել դաշտը (H / Space)','hand','hand',`aria-pressed="${view.tool==='hand'}"`)}<i></i>${tool('Հետ վերցնել (Ctrl+Z)','undo','undo',undoStack.length?'':'disabled')}${tool('Կրկին կատարել (Ctrl+Y)','redo','redo',redoStack.length?'':'disabled')}<i></i>${tool(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)','lock-toggle',view.locked?'lock':'unlock',`aria-pressed="${!!view.locked}"`)}${tool('Ցույց տալ անվանումները','labels','labels',`aria-pressed="${view.labels}"`)}<i></i><button type="button" class="map-command map-add-devices" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker">${svg('devices')}<span>${esc(tr('Ավելացնել սարք'))}</span><small>${mapData.devices.filter(r=>!mapData.markers.some(m=>m.portId===r.p.id)).length}</small></button></div>
+        <div class="map-bottom-toolbar" role="toolbar" aria-label="${esc(tr('Քարտեզի գործիքներ'))}">${tool('Ընտրել (V)','select','select',`aria-pressed="${view.tool==='select'}"`)}${tool('Տեղաշարժել դաշտը (H / Space)','hand','hand',`aria-pressed="${view.tool==='hand'}"`)}<i></i>${tool('Հետ վերցնել (Ctrl+Z)','undo','undo',undoStack.length?'':'disabled')}${tool('Կրկին կատարել (Ctrl+Y)','redo','redo',redoStack.length?'':'disabled')}<i></i>${tool(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)','lock-toggle',view.locked?'lock':'unlock',`aria-pressed="${!!view.locked}"`)}${tool('Ցույց տալ անվանումները','labels','labels',`aria-pressed="${view.labels}"`)}<i></i><button type="button" class="map-command map-add-devices" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker">${svg('devices')}<span>${esc(tr('Ավելացնել սարք'))}</span><small>${mapData.devices.filter(r=>!allPlaced().has(r.p.id)).length}</small></button></div>
         <p class="map-status" data-map-hint role="status"></p>
       </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
     const headerControls=root.querySelector('.map-plan-controls'),projectHeader=root.querySelector('.map-project');
@@ -199,7 +200,7 @@ globalThis.RackMaps=(()=>{
     }
     const visibleService=service=>view.filter==='all'||view.filter===service;
     function draw(){
-      if(!plan)return;const placed=new Map(mapData.markers.map(m=>[m.portId,m]));
+      if(!plan)return;const placedSet=allPlaced(),placed=new Map(mapData.markers.map(m=>[m.portId,m]));
       const search=view.query.trim().toLocaleLowerCase();
       const markerMatches=m=>visibleService(m.row.service)&&(!search||[name(m.row),m.row.d?.model,m.row.endpointName,D.serviceLabel(state,m.row.service,tr),m.row.floor,m.row.rack,m.row.device,m.row.port,m.row.cable,m.row.room,m.row.vlan,m.row.connection,m.row.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
       const visible=mapData.markers.filter(markerMatches);
@@ -214,8 +215,9 @@ globalThis.RackMaps=(()=>{
       if(lockBtn){lockBtn.setAttribute('aria-pressed',String(!!view.locked));lockBtn.innerHTML=svg(view.locked?'lock':'unlock');lockBtn.title=esc(tr(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)'));lockBtn.setAttribute('aria-label',lockBtn.title);}
       const selected=byId.get(view.portId);root.querySelector('[data-map-hint]').textContent=view.locked?tr('Քարտեզը կողպված է'):view.placing&&selected?tr('Սեղմեք հատակագծի վրա՝ սարքը տեղադրելու համար։'):view.selectedMarkerIds.size>1?tr('Քաշեք նշաններից որևէ մեկը կամ օգտագործեք սլաքները՝ բոլոր ընտրված սարքերը միասին տեղափոխելու համար։'):tr('Անիվ՝ խոշորացում · Space + քաշել՝ տեղաշարժում');
       mapFilters?.querySelectorAll('[data-map-filter]').forEach(b=>{const f=b.dataset.mapFilter;if(f==='clear'){b.hidden=(view.filter==='all'&&!search);return;}b.setAttribute('aria-pressed',String(view.filter===f));const count=b.querySelector('small');if(count)count.textContent=String(f==='all'?mapData.markers.length:mapData.markers.filter(m=>m.row.service===f).length);});
+      const addCount=root.querySelector('.map-add-devices small');if(addCount)addCount.textContent=String(mapData.devices.filter(r=>!placedSet.has(r.p.id)).length);
       const matches=r=>visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
-      const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placed.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
+      const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placedSet.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
       const portList=root.querySelector('.map-port-list');
       for(const group of portList.querySelectorAll('.map-device-group')){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);}
       for(const card of portList.querySelectorAll('.map-port-card')){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}
@@ -296,6 +298,7 @@ globalThis.RackMaps=(()=>{
           port.endpointName=endpointName;
           port.service=service;
           port.status='used';
+          if(plan?.floorId)port.floorId=plan.floorId;
           port.room=room;
           port.cable=cable;
           port.vlan=vlan;
@@ -460,7 +463,7 @@ globalThis.RackMaps=(()=>{
         queuePreview();
       }
     }
-    function place(x,y){if(!view.portId||h.readOnly)return;if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});});}
+    function place(x,y){if(!view.portId||h.readOnly)return;if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});if(target.floorId){const portRow=D.ports(s).find(x=>x.p.id===data.canonical(view.portId));if(portRow&&!portRow.p.floorId)portRow.p.floorId=target.floorId;}});}
     function moveMarker(id,x,y,anchor=false){if(h.readOnly||view.locked)return;change(s=>{const marker=findPlan(s)?.markers.find(m=>m.id===id);if(!marker)return;const layout=D.mapMarkerLayout(marker);Object.assign(marker,layout,anchor?{x,y}:{iconX:x,iconY:y});});}
     function removeMarker(id){if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}change(s=>{const p=findPlan(s);if(!p)return;const data=D.mapDevices(s,p),marker=data.markers.find(m=>m.id===id);if(!marker)return;p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);view.portId='';view.placing=false;});toast(tr('Նշանը հեռացվեց'));}
     const viewport=root.querySelector('.map-viewport'),canvas=root.querySelector('.map-canvas');

@@ -1,25 +1,47 @@
 {
-  "version": "2.11.7",
+  "version": "2.11.8",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "PIN կոդով մուտքն այժմ թույլատրում է մինչև 3 սարքի միաժամանակյա աշխատանք՝ չարգելափակելով մյուս սարքերը։"
+      "Քարտեզում մի հարկում արդեն տեղադրված սարքերն այլևս չեն կրկնվում այլ հարկերի ավելացման ցանկում։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "PIN sign-in now supports up to 3 simultaneous devices per PIN without blocking active sessions."
+      "Devices already placed on one floor plan no longer appear in the unplaced device list on other floors."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Вход по PIN-коду теперь поддерживает до 3 одновременных устройств на один PIN без блокировки активных сессий."
+      "Устройства, уже размещенные на плане одного этажа, больше не отображаются в списке добавления на других этажах."
     ]
   },
   "date": "2026-10-14",
   "history": [
+    {
+      "version": "2.11.7",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "PIN կոդով մուտքն այժմ թույլատրում է մինչև 3 սարքի միաժամանակյա աշխատանք՝ չարգելափակելով մյուս սարքերը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "PIN sign-in now supports up to 3 simultaneous devices per PIN without blocking active sessions."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Вход по PIN-коду теперь поддерживает до 3 одновременных устройств на один PIN без блокировки активных сессий."
+        ]
+      },
+      "date": "2026-10-14"
+    },
     {
       "version": "2.11.6",
       "hy": {

@@ -523,9 +523,13 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const canonical=id=>incoming.get(id)||id;
     const onFloor=row=>{
       if(!plan?.floorId)return true;
+      if((plan.markers||[]).some(m=>canonical(m.portId)===row.p.id))return true;
+      const placedOnOther=(s.floorPlans||[]).some(p=>p.id!==plan.id&&(p.markers||[]).some(m=>canonical(m.portId)===row.p.id));
+      if(placedOnOther)return false;
+      if(row.p.floorId&&row.p.floorId!==plan.floorId)return false;
       if((row.p.floorId||row.f.id)===plan.floorId)return true;
       const planFloor=s.floors.find(f=>f.id===plan.floorId);
-      return !!(planFloor?.linkedRackIds&&planFloor.linkedRackIds.includes(row.r.id));
+      return !row.p.floorId&&!!(planFloor?.linkedRackIds&&planFloor.linkedRackIds.includes(row.r.id));
     };
     const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free'&&onFloor(row));
     const placed=new Map();
