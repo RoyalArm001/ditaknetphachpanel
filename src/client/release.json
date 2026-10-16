@@ -1,25 +1,47 @@
 {
-  "version": "2.11.11",
+  "version": "2.11.12",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "VLAN-ի ընտրությունը տեղափոխվել է «Այլ տվյալներ» բացվող բաժին՝ ազատելով պորտի հիմնական խմբագրման հատվածը։"
+      "Ավելացվել են կատարված թեստերի գրանցամատյանը և նոր գաղափարի բրենդային նախնական պլանը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Moved the VLAN selector into the collapsible Other details section to keep the main port editor compact."
+      "Added a test verification register and a preliminary brand plan for the new idea."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Выбор VLAN перенесён в раскрываемый раздел «Другие данные», освободив место в основном редакторе порта."
+      "Добавлены журнал выполненных проверок и предварительный план бренда для новой идеи."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "2.11.11",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "VLAN-ի ընտրությունը տեղափոխվել է «Այլ տվյալներ» բացվող բաժին՝ ազատելով պորտի հիմնական խմբագրման հատվածը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Moved the VLAN selector into the collapsible Other details section to keep the main port editor compact."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Выбор VLAN перенесён в раскрываемый раздел «Другие данные», освободив место в основном редакторе порта."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.10",
       "hy": {
