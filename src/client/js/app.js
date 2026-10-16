@@ -1942,9 +1942,6 @@ function renderPortTools(){
     ${input('endpointName',tr('Միացված սարքի անվանում'),v.endpointName||'','text','maxlength="200" placeholder="WiFi B zone"')}
     <fieldset class="link-config"><legend>Կապի կարգավորումներ</legend>
       <div class="service-choices ${v.status==='fault'?'is-fault':''}">${D.serviceEntries(state).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${v.status!=='fault'&&(v.service||'')===key?'checked':''} ${v.status==='fault'?'disabled':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
-      ${select('vlanPreset','VLAN',[['',tr('Չնշված')],...D.networks(state).map(n=>[String(n.vlan),networkLabel(n)]),['__custom__',tr('Այլ VLAN / ձեռքով')]],v.vlan?(D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?String(v.vlan):'__custom__'):'')}
-      <div data-custom-vlan ${v.vlan&&!D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?'':'hidden'}>${input('vlan',tr('VLAN ID'),v.vlan||'','number','min="1" max="4094" step="1" placeholder="20"')}</div>
-      <p class="hint">${tr('Ընտրեք VLAN-ը ցանկից կամ ավելացրեք այլ ID։ Պորտի նշանակությունը ընտրեք առանձին։')}</p>
     </fieldset>
     ${incoming?tr`<div class="connection-path">Կապ՝ ${esc(incoming.d.name)} / ${incoming.p.number}<br><small>Նշանակությունը, VLAN-ն ու մալուխի տվյալները ընդհանուր են կապի երկու ծայրերի համար։</small></div>`:''}
     <div class="form-grid">
@@ -1953,6 +1950,8 @@ function renderPortTools(){
       ${canConnect?`<div class="field full">${select('switchPortId',tr('Միացված սվիչի պորտ'),[['',tr('Կապ չկա')],...choices],v.switchPortId)}</div>`:''}
     </div>
     <details class="port-extra"><summary>${tr('Այլ տվյալներ')}</summary><div class="form-grid">
+      ${select('vlanPreset','VLAN',[['',tr('Չնշված')],...D.networks(state).map(n=>[String(n.vlan),networkLabel(n)]),['__custom__',tr('Այլ VLAN / ձեռքով')]],v.vlan?(D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?String(v.vlan):'__custom__'):'')}
+      <div data-custom-vlan ${v.vlan&&!D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?'':'hidden'}>${input('vlan',tr('VLAN ID'),v.vlan||'','number','min="1" max="4094" step="1" placeholder="20"')}</div>
       ${select('floorId',tr('Նպատակակետի հարկ'),[['',tr('Ընտրել')],...state.floors.map(f=>[f.id,f.name])],v.floorId)}
       ${input('room',tr('Սենյակ'),v.room,'text','maxlength="200" placeholder="205"')}
       ${input('door',tr('Դուռ / տեղադրություն'),v.door,'text',tr('maxlength="200" placeholder="Աջ կողմի դուռ"'))}

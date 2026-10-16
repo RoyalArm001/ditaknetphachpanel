@@ -1,31 +1,53 @@
 {
-  "version": "2.11.10",
+  "version": "2.11.11",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "VLAN-ը կարելի է ընտրել ցանցերի անուններով ցանկից կամ մուտքագրել ձեռքով։",
-      "Ctrl/⌘-ով ընտրված պորտերը հստակ ընդգծվում են։ Կողքի ցանկը ցույց է տալիս սարքը, պորտը, հարկը, ռաքը և նշանակությունը։",
-      "Ընտրված պորտերի նշանակությունը կիրառվում է առանձին կոճակով՝ նաև ռաուտերների համար։"
+      "VLAN-ի ընտրությունը տեղափոխվել է «Այլ տվյալներ» բացվող բաժին՝ ազատելով պորտի հիմնական խմբագրման հատվածը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Choose VLANs from a list showing network names, or enter an ID manually.",
-      "Ctrl/⌘ selections highlight ports and connected endpoints. The side list shows each device, port, floor, rack and purpose.",
-      "Apply a purpose to selected ports with an explicit button, including router ports."
+      "Moved the VLAN selector into the collapsible Other details section to keep the main port editor compact."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Выбирайте VLAN из списка с названиями сетей или вводите ID вручную.",
-      "Выбор через Ctrl/⌘ выделяет порты и связанные концы соединений. Список сбоку показывает устройство, порт, этаж, стойку и назначение.",
-      "Назначение выбранных портов применяется отдельной кнопкой, в том числе для маршрутизаторов."
+      "Выбор VLAN перенесён в раскрываемый раздел «Другие данные», освободив место в основном редакторе порта."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "2.11.10",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "VLAN-ը կարելի է ընտրել ցանցերի անուններով ցանկից կամ մուտքագրել ձեռքով։",
+          "Ctrl/⌘-ով ընտրված պորտերը հստակ ընդգծվում են։ Կողքի ցանկը ցույց է տալիս սարքը, պորտը, հարկը, ռաքը և նշանակությունը։",
+          "Ընտրված պորտերի նշանակությունը կիրառվում է առանձին կոճակով՝ նաև ռաուտերների համար։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Choose VLANs from a list showing network names, or enter an ID manually.",
+          "Ctrl/⌘ selections highlight ports and connected endpoints. The side list shows each device, port, floor, rack and purpose.",
+          "Apply a purpose to selected ports with an explicit button, including router ports."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Выбирайте VLAN из списка с названиями сетей или вводите ID вручную.",
+          "Выбор через Ctrl/⌘ выделяет порты и связанные концы соединений. Список сбоку показывает устройство, порт, этаж, стойку и назначение.",
+          "Назначение выбранных портов применяется отдельной кнопкой, в том числе для маршрутизаторов."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.9",
       "hy": {
