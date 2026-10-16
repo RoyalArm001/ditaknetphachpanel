@@ -1,31 +1,53 @@
 {
-  "version": "2.11.16",
+  "version": "2.11.17",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Քարտեզի սարքի տեղեկատվական քարտը (ինսպեկտորը) տեղափոխվել է վերևի աջ անկյուն։",
-      "Քարտի չափերը և տառաչափերը փոքրացվել են՝ ավելի կոմպակտ ու հարմար տեսք ստանալու համար։",
-      "Ավելացվել է սահուն անիմացիա․ ընտրված սարքի քարտը դուրս է գալիս աջ կողմից։"
+      "Քարտեզի դաշտից հեռացվել է «Քարտեզի նշաններ» բաժինը՝ աշխատանքային տարածքն ավելի մաքուր և ազատ դարձնելու համար։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Moved the map device inspector card to the top-right corner.",
-      "Made the inspector card more compact with refined sizing, padding and typography.",
-      "Added smooth entrance animation: the device card slides in elegantly from the right edge."
+      "Removed the 'Map markers' legend widget from the floor map editor for a cleaner workspace."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Информационная карточка устройства на карте перемещена в верхний правый угол.",
-      "Уменьшены размеры карточки, отступы и шрифты для более компактного и удобного вида.",
-      "Добавлена плавная анимация: карточка выбранного устройства выезжает справа."
+      "С карты убран блок «Знаки карты» (легенда) для освобождения рабочей области."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "2.11.16",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի սարքի տեղեկատվական քարտը (ինսպեկտորը) տեղափոխվել է վերևի աջ անկյուն։",
+          "Քարտի չափերը և տառաչափերը փոքրացվել են՝ ավելի կոմպակտ ու հարմար տեսք ստանալու համար։",
+          "Ավելացվել է սահուն անիմացիա․ ընտրված սարքի քարտը դուրս է գալիս աջ կողմից։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Moved the map device inspector card to the top-right corner.",
+          "Made the inspector card more compact with refined sizing, padding and typography.",
+          "Added smooth entrance animation: the device card slides in elegantly from the right edge."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Информационная карточка устройства на карте перемещена в верхний правый угол.",
+          "Уменьшены размеры карточки, отступы и шрифты для более компактного и удобного вида.",
+          "Добавлена плавная анимация: карточка выбранного устройства выезжает справа."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.15",
       "hy": {
