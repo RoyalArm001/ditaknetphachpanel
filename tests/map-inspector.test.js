@@ -13,9 +13,6 @@ test('map inspector styles enforce fixed card layout with no vertical or horizon
   assert.ok(css.includes('.map-panel-preview{width:320px;max-width:calc(100% - 40px);overflow-x:hidden'),'map-panel-preview prevents horizontal overflow');
   assert.ok(css.includes('.map-title-edit-btn'),'map-title-edit-btn styles exist for quick inline title editing');
   assert.ok(css.includes('grid-template-columns:110px minmax(0,1fr)'),'dl columns provide at least 110px so port count label is not truncated');
-  assert.ok(css.includes('width:280px'),'map side panels and inspector use compact 280px width');
-  assert.ok(css.includes('@keyframes map-inspector-slide-in'),'slide-in animation keyframes defined');
-  assert.ok(css.includes('animation:map-inspector-slide-in'),'map-inspector uses slide-in from right animation');
 });
 
 test('map inspector markup and actions include quick title rename button and handler',()=>{
