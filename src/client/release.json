@@ -1,31 +1,53 @@
 {
-  "version": "3.0.6",
+  "version": "3.0.7",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Հատակագծի (maps) էջում ավելացվել է ռաքերի տեղադրման և կառավարման հնարավորություն։",
-      "Միացման գծերը (կաբելային ուղիները) գեղեցիկ ցուցադրվում են քարտեզի վրա՝ ավտոմատ շրջանցելով հատակագծի սև գույնով նշված պատերը։",
-      "Կողային վահանակում հասանելի են «Սարքեր» և «Ռաքեր» բաժինները, իսկ քարտեզի գործիքներում՝ միացման գծերի արագ ցուցադրման/թաքցման կոճակը։"
+      "Քարտեզի վրա ընտրված սարքի/ռաքի քարտը (ինսպեկտորը) տեղափոխվել է ձախ կողմ և սահուն բացվում է ձախից։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Added the ability to place and manage racks directly on floor plans (maps).",
-      "Visualized cable routes beautifully connecting devices to racks, automatically avoiding and routing around black walls on the floor plan.",
-      "Sidebar now includes dedicated 'Devices' and 'Racks' tabs, plus a quick toolbar toggle for cable route lines."
+      "Moved the map device/rack inspector panel to the left side with a smooth slide-in from the left."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "На странице карт (maps) добавлена возможность размещения и управления стойками прямо на плане этажа.",
-      "Кабельные трассы красиво отображают соединения устройств со стойками, автоматически огибая стены, отмеченные черным цветом.",
-      "В боковой панели добавлены вкладки «Устройства» и «Стойки», а на панели инструментов — быстрое включение/отключение линий трасс."
+      "Инспектор выбранного устройства/стойки на карте перемещен влево и плавно открывается с левой стороны."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "3.0.6",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Հատակագծի (maps) էջում ավելացվել է ռաքերի տեղադրման և կառավարման հնարավորություն։",
+          "Միացման գծերը (կաբելային ուղիները) գեղեցիկ ցուցադրվում են քարտեզի վրա՝ ավտոմատ շրջանցելով հատակագծի սև գույնով նշված պատերը։",
+          "Կողային վահանակում հասանելի են «Սարքեր» և «Ռաքեր» բաժինները, իսկ քարտեզի գործիքներում՝ միացման գծերի արագ ցուցադրման/թաքցման կոճակը։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Added the ability to place and manage racks directly on floor plans (maps).",
+          "Visualized cable routes beautifully connecting devices to racks, automatically avoiding and routing around black walls on the floor plan.",
+          "Sidebar now includes dedicated 'Devices' and 'Racks' tabs, plus a quick toolbar toggle for cable route lines."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "На странице карт (maps) добавлена возможность размещения и управления стойками прямо на плане этажа.",
+          "Кабельные трассы красиво отображают соединения устройств со стойками, автоматически огибая стены, отмеченные черным цветом.",
+          "В боковой панели добавлены вкладки «Устройства» и «Стойки», а на панели инструментов — быстрое включение/отключение линий трасс."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "3.0.5",
       "hy": {
