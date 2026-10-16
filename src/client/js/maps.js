@@ -134,6 +134,12 @@ globalThis.RackMaps=(()=>{
       </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
     const headerControls=root.querySelector('.map-plan-controls'),projectHeader=root.querySelector('.map-project');
     const topActions=root.querySelector('.map-top-actions');
+    const appearance=root.querySelector('.map-appearance');
+    if(appearance&&topActions)topActions.prepend(appearance);
+    function positionAppearance(){if(!appearance?.open)return;const panel=appearance.querySelector('.map-appearance-body');panel.style.transform='';const box=panel.getBoundingClientRect(),shift=Math.max(12-box.left,Math.min(0,document.documentElement.clientWidth-12-box.right));panel.style.transform=`translateX(${shift}px)`;}
+    window.addEventListener('resize',positionAppearance,{signal:abort.signal});
+    appearance?.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();appearance.open=false;appearance.querySelector('summary').focus();}},{signal:abort.signal});
+    document.addEventListener('pointerdown',e=>{if(appearance?.open&&!appearance.contains(e.target))appearance.open=false;},{capture:true,signal:abort.signal});
     const mapFilters=root.querySelector('.map-filters'),mapEditor=root.querySelector('.map-editor');
     const topbarTools=document.querySelector('.topbar .save-tools');
     if(topActions&&topbarTools){
@@ -494,12 +500,13 @@ globalThis.RackMaps=(()=>{
       markers?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));
       markers?.style.setProperty('--map-line-width',String(view.lineWidth));
       if(relayout)scheduleLabels();
-      const size=root.querySelector('[data-map-marker-size]'),width=root.querySelector('[data-map-line-width]');
-      if(size){size.value=view.markerSize;root.querySelector('[data-marker-size-value]').textContent=(100+view.markerSize)+'%';}
-      if(width){width.value=view.lineWidth;root.querySelector('[data-line-width-value]').textContent=view.lineWidth+' px';}
+      const size=appearance?.querySelector('[data-map-marker-size]'),width=appearance?.querySelector('[data-map-line-width]');
+      if(size){size.value=view.markerSize;appearance.querySelector('[data-marker-size-value]').textContent=(100+view.markerSize)+'%';}
+      if(width){width.value=view.lineWidth;appearance.querySelector('[data-line-width-value]').textContent=view.lineWidth+' px';}
     }
     function saveAppearance(){paintAppearance();try{localStorage.setItem('rackmap-map-appearance',JSON.stringify({markerSize:view.markerSize,lineWidth:view.lineWidth}));}catch{}}
-    root.querySelector('.map-appearance')?.addEventListener('toggle',e=>{view.appearanceOpen=e.target.open;},{signal:abort.signal});
+    appearance?.addEventListener('toggle',e=>{view.appearanceOpen=e.target.open;positionAppearance();},{signal:abort.signal});
+    appearance?.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]'))view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));else if(e.target.matches('[data-map-line-width]'))view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));else return;e.stopPropagation();saveAppearance();},{signal:abort.signal});
     function paintCamera(){if(!camera||!canvas)return;const width=plan.width*camera.scale+'px',height=plan.height*camera.scale+'px',resized=canvas.style.width!==width||canvas.style.height!==height;canvas.style.width=width;canvas.style.height=height;canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;paintAppearance(resized);view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
     function fit(){if(!viewport)return;const w=viewport.clientWidth,h=viewport.clientHeight,right=view.devicesOpen&&w>800?340:0,pad=w<600?28:130;const scale=Math.max(.27,Math.min((w-right-pad)/plan.width,(h-200)/plan.height,2));camera={planId:plan.id,scale,x:(w-right-plan.width*scale)/2,y:100+(h-200-plan.height*scale)/2,w,h};paintCamera();}
     function zoom(factor,point){if(!camera)return;point||={x:viewport.clientWidth/2,y:viewport.clientHeight/2};const next=Math.max(.27,Math.min(6,camera.scale*factor)),ratio=next/camera.scale;camera.x=point.x-(point.x-camera.x)*ratio;camera.y=point.y-(point.y-camera.y)*ratio;camera.scale=next;paintCamera();}

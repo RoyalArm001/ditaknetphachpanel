@@ -250,18 +250,19 @@ body.map-view #content:fullscreen .map-filters{top:auto;bottom:88px;left:50%;tra
   }
 }
 
-/* Compact map-wide appearance controls, above the right-side device panels. */
-.map-appearance{pointer-events:auto;flex-shrink:0;align-self:flex-end;width:250px;max-width:100%;border:1px solid var(--map-border);border-radius:12px;background:var(--map-surface);color:var(--map-text);box-shadow:0 4px 16px #0002;overflow:hidden}
-.map-appearance:not([open]){width:auto}
-.map-appearance summary{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 12px;cursor:pointer;font-size:12px;list-style:none}
+/* Appearance controls travel with the topbar, including fullscreen mode. */
+.map-appearance{position:relative;pointer-events:auto;flex-shrink:0;border:1px solid var(--map-border);border-radius:8px;background:var(--map-surface);color:var(--map-text)}
+.map-appearance summary{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;list-style:none;border-radius:7px;transition:background .15s,color .15s}
+.map-appearance summary:hover,.map-appearance[open]>summary{background:var(--map-field);color:var(--map-active)}
 .map-appearance summary::-webkit-details-marker{display:none}
 .map-appearance summary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;flex-shrink:0}
-.map-appearance summary:after{content:'+';margin-left:auto;font-size:17px}
-.map-appearance[open] summary:after{content:'−'}
-.map-appearance-body{border-top:1px solid var(--map-border);padding:4px 0 10px}
+.map-appearance summary:after{content:'';width:6px;height:6px;margin-left:4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.map-appearance[open] summary:after{transform:translateY(2px) rotate(225deg)}
+.map-appearance-body{position:absolute;z-index:35;top:calc(100% + 9px);right:0;width:270px;max-width:calc(100vw - 24px);padding:10px 0;border:1px solid var(--map-border);border-radius:12px;background:var(--map-surface);box-shadow:0 12px 32px #0003}
 .map-appearance-body>.button{display:block;margin:0 11px;min-height:32px;padding:5px 10px;font-size:11px;background:var(--map-field);color:var(--map-text);border-color:var(--map-border)}
 .map-appearance input{min-height:28px;cursor:pointer}
 .map-appearance .map-marker-size{margin:0;padding:6px 11px;gap:2px 8px}
 .map-appearance :is(summary,input,button):focus-visible{outline:2px solid var(--map-active);outline-offset:-2px}
-@media(max-width:760px){body.map-view #content:not(:fullscreen) .map-side-panels{position:absolute;top:12px}.map-appearance{margin:0 12px 8px;max-width:calc(100% - 24px)}.map-appearance[open]{max-height:240px;overflow-y:auto}}
+@media(max-width:1500px){.map-appearance summary>span,.map-appearance summary:after{display:none}.map-appearance summary{width:38px;padding:0;justify-content:center}.map-appearance-body{right:auto;left:0}}
+@media(max-width:760px){body.map-view #content:not(:fullscreen) .map-side-panels{position:absolute;top:12px}.map-appearance summary{width:34px;height:34px}.map-appearance-body{max-height:min(260px,60dvh);overflow-y:auto}}
 @media print{.map-appearance{display:none!important}}
