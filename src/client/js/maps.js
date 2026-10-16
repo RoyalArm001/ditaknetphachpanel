@@ -228,7 +228,7 @@ globalThis.RackMaps=(()=>{
           host.classList.remove('map-panel-preview');
           const rackDevices=D.devices(state).filter(d=>d.rackId===rm.rack.id);
           const installedEndpoints=mapData.markers.filter(m=>m.row.r?.id===rm.rack.id);
-          host.innerHTML=`<div class="map-inspector-heading"><span>${esc(tr('Ընտրված ռաք'))}</span>${tool('Չեղարկել ընտրությունը','deselect','close')}</div><div class="map-selected-device"><span class="map-selected-icon" style="color:#38bdf8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg></span><div><div class="map-selected-title-row"><strong>${esc(rm.rack.name)}</strong>${!h.readOnly?`<button type="button" class="map-title-edit-btn" data-map-action="edit-rack-name" title="${esc(tr('Խմբագրել անվանումը'))}" aria-label="${esc(tr('Խմբագրել անվանումը'))}">${svg('edit')}</button>`:''}</div><span>${esc(rm.floor.name)} · ${rm.rack.height}U</span></div></div>${details([['Հարկ',rm.floor.name],['U բարձրություն',rm.rack.height+'U'],['Սարքեր ռաքում',rackDevices.length],['Միացված սարքեր քարտեզում',installedEndpoints.length]])}<div class="map-inspector-actions"><button type="button" class="map-command map-action-full" data-map-action="rack-open">${svg('server')}<span>${esc(tr('Բացել ռաքը'))}</span></button>${!h.readOnly?`<button type="button" class="map-tool danger map-action-full" data-map-action="rack-remove" title="${esc(tr('Հեռացնել քարտեզից'))}" aria-label="${esc(tr('Հեռացնել քարտեզից'))}">${svg('trash')}<span>${esc(tr('Հեռացնել քարտեզից'))}</span></button>`:''}</div>`;
+          host.innerHTML=`<div class="map-inspector-heading"><span>${esc(tr('Ընտրված ռաք'))}</span>${tool('Չեղարկել ընտրությունը','deselect','close')}</div><div class="map-selected-device"><span class="map-selected-icon" style="color:#38bdf8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg></span><div><div class="map-selected-title-row"><strong>${esc(rm.rack.name)}</strong>${!h.readOnly?`<button type="button" class="map-title-edit-btn" data-map-action="edit-rack-name" title="${esc(tr('Խմբագրել անվանումը'))}" aria-label="${esc(tr('Խմբագրել անվանումը'))}">${svg('edit')}</button>`:''}</div><span>${esc(rm.floor.name)} · ${(rm.rack.u||rm.rack.height||42)}U</span></div></div>${details([['Հարկ',rm.floor.name],['U բարձրություն',(rm.rack.u||rm.rack.height||42)+'U'],['Սարքեր ռաքում',rackDevices.length],['Միացված սարքեր քարտեզում',installedEndpoints.length]])}<div class="map-inspector-actions"><button type="button" class="map-command map-action-full" data-map-action="rack-open">${svg('server')}<span>${esc(tr('Բացել ռաքը'))}</span></button>${!h.readOnly?`<button type="button" class="map-tool danger map-action-full" data-map-action="rack-remove" title="${esc(tr('Հեռացնել քարտեզից'))}" aria-label="${esc(tr('Հեռացնել քարտեզից'))}">${svg('trash')}<span>${esc(tr('Հեռացնել քարտեզից'))}</span></button>`:''}</div>`;
           host.scrollLeft=0;
           host.scrollTop=0;
           return;
@@ -275,7 +275,7 @@ globalThis.RackMaps=(()=>{
       }
       const rackMarkersHtml=(mapData.rackMarkers||[]).map(rm=>{
         const p=D.mapMarkerLayout(rm),selected=view.rackId===rm.id;
-        return `<button type="button" class="map-rack-marker ${selected?'selected':''}" data-map-rack-marker="${esc(rm.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%" title="${esc(rm.rack.name)} (${rm.rack.height}U)" aria-label="${esc(rm.rack.name)}"><div class="map-rack-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg><span class="map-rack-led"></span></div><span class="map-rack-label">${esc(rm.rack.name)}</span></button>`;
+        return `<button type="button" class="map-rack-marker ${selected?'selected':''}" data-map-rack-marker="${esc(rm.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%" title="${esc(rm.rack.name)} (${rm.rack.u||rm.rack.height||42}U)" aria-label="${esc(rm.rack.name)}"><div class="map-rack-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg><span class="map-rack-led"></span></div><span class="map-rack-label">${esc(rm.rack.name)}</span></button>`;
       }).join('');
       root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('')+rackMarkersHtml;
       const cablesLayer=root.querySelector('.map-cables-layer');
@@ -330,8 +330,9 @@ globalThis.RackMaps=(()=>{
       const unplacedCountEl=root.querySelector('[data-unplaced-count]');
       if(unplacedCountEl)unplacedCountEl.textContent=String(mapData.devices.filter(r=>!placedSet.has(r.p.id)).length);
       const floorRacksCountEl=root.querySelector('[data-floor-racks-count]');
+      const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
       const curFloor=state.floors.find(f=>f.id===plan?.floorId);
-      const curFloorRacks=curFloor?(curFloor.racks||[]):state.floors.flatMap(f=>f.racks||[]);
+      const curFloorRacks=curFloor?(allRacksList.filter(r=>(curFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
       if(floorRacksCountEl)floorRacksCountEl.textContent=String(curFloorRacks.length);
       const addCount=root.querySelector('.map-add-devices small');if(addCount)addCount.textContent=String(mapData.devices.filter(r=>!placedSet.has(r.p.id)).length);
       const portList=root.querySelector('.map-port-list');
@@ -342,7 +343,7 @@ globalThis.RackMaps=(()=>{
           const rm=(plan?.rackMarkers||[]).find(x=>x.rackId===r.id);
           const devCount=mapData.devices.filter(d=>d.r.id===r.id).length;
           const isPlacingThis=view.placingRackId===r.id;
-          return `<div class="map-rack-card ${isPlacingThis?'selected':''}"><div class="map-rack-card-info"><strong>${esc(r.name)}</strong><small>${r.height}U · ${devCount} ${esc(tr('սարք'))}</small></div>${isPlaced?`<span class="map-rack-badge">${svg('fit')}${esc(tr('Տեղադրված է'))}</span><button type="button" class="map-rack-card-btn" data-map-locate-rack="${esc(rm.id)}" title="${esc(tr('Ընտրել ռաքը'))}">${svg('fit')}</button>`:!h.readOnly?`<button type="button" class="button primary small ${isPlacingThis?'active':''}" data-map-place-rack="${esc(r.id)}">${svg('plus')}<span>${esc(tr(isPlacingThis?'Տեղադրվում է…':'Տեղադրել'))}</span></button>`:''}</div>`;
+          return `<div class="map-rack-card ${isPlacingThis?'selected':''}" ${!isPlaced && !h.readOnly ? `data-map-place-rack="${esc(r.id)}" role="button" tabindex="0"` : ''}><div class="map-rack-card-info"><strong>${esc(r.name)}</strong><small>${r.u||r.height||42}U · ${devCount} ${esc(tr('սարք'))}</small></div>${isPlaced?`<span class="map-rack-badge">${svg('fit')}${esc(tr('Տեղադրված է'))}</span><button type="button" class="map-rack-card-btn" data-map-locate-rack="${esc(rm.id)}" title="${esc(tr('Ընտրել ռաքը'))}">${svg('fit')}</button>`:!h.readOnly?`<button type="button" class="button primary small ${isPlacingThis?'active':''}" data-map-place-rack="${esc(r.id)}">${svg('plus')}<span>${esc(tr(isPlacingThis?'Տեղադրվում է…':'Տեղադրել'))}</span></button>`:''}</div>`;
         }).join('')||`<p class="hint map-list-empty">${esc(tr('Այս հարկում ռաքեր չկան'))}</p>`}</div>`;
       } else {
         const matches=r=>visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
@@ -705,9 +706,9 @@ globalThis.RackMaps=(()=>{
       if(h.readOnly)return;
       const curState=getState(),curFloor=curState.floors.find(f=>f.id===plan?.floorId)||curState.floors[0];
       if(!curFloor){toast(tr('Հարկեր չկան'));return;}
-      modal(tr('Ավելացնել ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),'', 'text','maxlength="100" required autofocus placeholder="Rack A"')}${input('height',tr('U բարձրություն'),42,'number','min="1" max="100" required')}${select('floorId',tr('Հարկ'),curState.floors.map(f=>[f.id,f.name]),curFloor.id)}</div>`,fd=>{
+      modal(tr('Ավելացնել ռաք'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),'', 'text','maxlength="100" required autofocus placeholder="Rack A"')}${input('height',tr('U բարձրություն'),42,'number','min="1" max="60" required')}${select('floorId',tr('Հարկ'),curState.floors.map(f=>[f.id,f.name]),curFloor.id)}</div>`,fd=>{
         const name=String(fd.get('name')||'').trim();if(!name)throw new Error(tr('Գրեք ռաքի անվանումը'));
-        const height=Math.min(100,Math.max(1,Number(fd.get('height'))||42));
+        const height=Math.min(60,Math.max(1,Number(fd.get('height'))||42));
         const floorId=String(fd.get('floorId')||curFloor.id);
         let newRackId='';
         change(s=>{
@@ -715,7 +716,7 @@ globalThis.RackMaps=(()=>{
           f.racks||=[];
           if(f.racks.some(r=>r.name.toLowerCase()===name.toLowerCase()))throw new Error(tr('Այդ անունով ռաք արդեն կա'));
           newRackId=crypto.randomUUID();
-          f.racks.push({id:newRackId,name,height});
+          f.racks.push({id:newRackId,name,u:height,location:'',photo:'',devices:[]});
         });
         toast(tr('Ռաքն ավելացված է'));
         if(newRackId){
@@ -727,12 +728,12 @@ globalThis.RackMaps=(()=>{
     }
     function editRackName(){
       if(h.readOnly)return;const rm=(mapData.rackMarkers||[]).find(m=>m.id===view.rackId);if(!rm)return;
-      modal(tr('Խմբագրել ռաքը'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),rm.rack.name,'text','maxlength="100" required autofocus')}${input('height',tr('U բարձրություն'),rm.rack.height,'number','min="1" max="100" required')}</div>`,fd=>{
+      modal(tr('Խմբագրել ռաքը'),`<div class="form-grid">${input('name',tr('Ռաքի անվանում'),rm.rack.name,'text','maxlength="100" required autofocus')}${input('height',tr('U բարձրություն'),rm.rack.u||rm.rack.height||42,'number','min="1" max="60" required')}</div>`,fd=>{
         const name=String(fd.get('name')||'').trim();if(!name)throw new Error(tr('Գրեք ռաքի անվանումը'));
-        const height=Math.min(100,Math.max(1,Number(fd.get('height'))||42));
+        const height=Math.min(60,Math.max(1,Number(fd.get('height'))||42));
         change(s=>{
           const allRacks=s.floors.flatMap(f=>f.racks||[]),r=allRacks.find(x=>x.id===rm.rack.id);if(!r)throw new Error(tr('Ընտրված ռաքը չի գտնվել'));
-          r.name=name;r.height=height;
+          r.name=name;r.u=height;
         });
         toast(tr('Տվյալները պահպանված են'));
       });
@@ -771,7 +772,7 @@ globalThis.RackMaps=(()=>{
     function paintCamera(){if(!camera||!canvas)return;const width=plan.width*camera.scale+'px',height=plan.height*camera.scale+'px',resized=canvas.style.width!==width||canvas.style.height!==height;canvas.style.width=width;canvas.style.height=height;canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;paintAppearance(resized);view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
     function fit(){if(!viewport)return;const w=viewport.clientWidth,h=viewport.clientHeight,right=view.devicesOpen&&w>800?340:0,pad=w<600?28:130;const scale=Math.max(.27,Math.min((w-right-pad)/plan.width,(h-200)/plan.height,2));camera={planId:plan.id,scale,x:(w-right-plan.width*scale)/2,y:100+(h-200-plan.height*scale)/2,w,h};paintCamera();}
     function zoom(factor,point){if(!camera)return;point||={x:viewport.clientWidth/2,y:viewport.clientHeight/2};const next=Math.max(.27,Math.min(6,camera.scale*factor)),ratio=next/camera.scale;camera.x=point.x-(point.x-camera.x)*ratio;camera.y=point.y-(point.y-camera.y)*ratio;camera.scale=next;paintCamera();}
-    function setTool(tool){view.tool=tool;view.placing=false;root.querySelectorAll('[data-map-action="select"],[data-map-action="hand"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapAction===tool)));draw();}
+    function setTool(tool){view.tool=tool;view.placing=false;view.placingRackId='';root.querySelectorAll('[data-map-action="select"],[data-map-action="hand"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mapAction===tool)));draw();}
     function deselect(){view.portId='';view.panelPortId='';view.rackId='';view.placing=false;view.placingRackId='';view.anchorActive=false;view.selectedMarkerIds.clear();draw();}
     const coords=e=>{const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return {x:0,y:0};return {x:Math.min(1,Math.max(0,(e.clientX-rect.left)/rect.width)),y:Math.min(1,Math.max(0,(e.clientY-rect.top)/rect.height))};};
     async function click(e){
@@ -793,7 +794,7 @@ globalThis.RackMaps=(()=>{
         draw();return;
       }
       if(placeRackBtn){
-        if(h.readOnly)return;setTool('select');view.placingRackId=placeRackBtn.dataset.mapPlaceRack;view.portId='';view.rackId='';view.placing=false;view.selectedMarkerIds.clear();toast(tr('Սեղմեք հատակագծի վրա՝ ռաքը տեղադրելու համար։'));draw();viewport?.focus({preventScroll:true});return;
+        if(h.readOnly)return;view.tool='select';view.placingRackId=placeRackBtn.dataset.mapPlaceRack;view.portId='';view.rackId='';view.placing=false;view.selectedMarkerIds.clear();toast(tr('Սեղմեք հատակագծի վրա՝ ռաքը տեղադրելու համար։'));draw();viewport?.focus({preventScroll:true});return;
       }
       if(locateRackBtn){
         view.rackId=locateRackBtn.dataset.mapLocateRack;view.portId='';view.placing=false;view.placingRackId='';view.selectedMarkerIds.clear();draw();return;
@@ -883,8 +884,8 @@ globalThis.RackMaps=(()=>{
         if(action==='edit')return upload(true);
         if(action==='delete')return h.confirm(tr('Ջնջել հատակագիծը'),tr('Կհեռացվեն միայն հատակագիծը և նշանները։ Պորտերը կմնան բազայում։'),()=>change(s=>{s.floorPlans=s.floorPlans.filter(p=>p.id!==view.planId);}));
       }
-      if(e.target.closest('.map-canvas')&&view.placing){const {x,y}=coords(e);place(x,y);}
-      else if(e.target.closest('.map-canvas')&&view.placingRackId){const {x,y}=coords(e);placeRack(view.placingRackId,x,y);draw();}
+      if(e.target.closest('.map-canvas')&&view.placing){const {x,y}=coords(e);try{place(x,y);draw();}catch(err){toast(err.message);}}
+      else if(e.target.closest('.map-canvas')&&view.placingRackId){const {x,y}=coords(e);const targetRackId=view.placingRackId;try{placeRack(targetRackId,x,y);draw();}catch(err){toast(err.message);}}
       else if(e.target===viewport||e.target===canvas||e.target===canvas?.querySelector('img'))deselect();
     }
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
@@ -946,7 +947,7 @@ globalThis.RackMaps=(()=>{
           if(!boxEl){boxEl=document.createElement('div');boxEl.className='map-selection-box';viewport.append(boxEl);}
           const vpRect=viewport.getBoundingClientRect();
           dragging={marquee:true,boxEl,startX:e.clientX,startY:e.clientY,vpLeft:vpRect.left,vpTop:vpRect.top};
-        } else if(!view.placing||space||view.tool==='hand'||e.button===1){
+        } else if((!view.placing && !view.placingRackId)||space||view.tool==='hand'||e.button===1){
           if(!camera)fit();
           pan={x:e.clientX,y:e.clientY,cx:camera?camera.x:0,cy:camera?camera.y:0,moved:false};
         }
@@ -1005,16 +1006,18 @@ globalThis.RackMaps=(()=>{
       viewport.addEventListener('pointerup',e=>{
         pointers.delete(e.pointerId);try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);}catch{}
         if(pinch){if(pointers.size===0)pinch=null;view.ignoreClickUntil=performance.now()+120;pan=null;dragging=null;return;}
-        if(view.placingRackId&&!dragging&&!pan){
+        if(view.placingRackId&&!dragging&&(!pan||!pan.moved)){
           const rect=canvas.getBoundingClientRect();
           if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){
             view.ignoreClickUntil=performance.now()+120;
             const {x,y}=coords(e);
-            try{placeRack(view.placingRackId,x,y);draw();}catch(err){toast(err.message);}
+            const targetRackId=view.placingRackId;
+            try{placeRack(targetRackId,x,y);draw();}catch(err){toast(err.message);}
           }
+          pan=null;
           return;
         }
-        if(view.placing&&!dragging&&!pan){const rect=canvas.getBoundingClientRect();if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){view.ignoreClickUntil=performance.now()+120;const {x,y}=coords(e);try{place(x,y);}catch(err){toast(err.message);}}return;}
+        if(view.placing&&!dragging&&(!pan||!pan.moved)){const rect=canvas.getBoundingClientRect();if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){view.ignoreClickUntil=performance.now()+120;const {x,y}=coords(e);try{place(x,y);draw();}catch(err){toast(err.message);}}pan=null;return;}
         if(dragging){
           if(dragging.rack){
             const {moved,id}=dragging;dragging=null;view.ignoreClickUntil=performance.now()+120;

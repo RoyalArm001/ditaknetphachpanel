@@ -566,7 +566,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       serviceCounts.set(service,seq);
       return {...marker,number:seq};
     });
-    const allRacksList=s.floors.flatMap(f=>f.racks.map(r=>({f,r})));
+    const allRacksList=s.floors.flatMap(f=>(f.racks||[]).map(r=>({f,r})));
     const rackMarkers=(plan?.rackMarkers||[]).map(rm=>{
       const item=allRacksList.find(x=>x.r.id===rm.rackId);
       return item?{...rm,rack:item.r,floor:item.f}:null;

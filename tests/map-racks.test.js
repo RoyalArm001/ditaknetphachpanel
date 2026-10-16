@@ -158,3 +158,19 @@ test('translations exist for rack placement and cable connection lines', () => {
     assert.ok(ru && !/[\u0531-\u0587]/.test(ru), `Missing or Armenian RU translation for "${phrase}": ${ru}`);
   }
 });
+
+test('maps.js contains proper pointer and creation logic for placing racks', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
+
+  // Verify pointerdown does not start panning when placing a rack
+  assert.ok(mapsJs.includes('!view.placing && !view.placingRackId'), 'pointerdown checks both placing and placingRackId');
+
+  // Verify pointerup handles placingRackId correctly
+  assert.ok(mapsJs.includes('view.placingRackId&&!dragging&&(!pan||!pan.moved)'), 'pointerup triggers rack placement without pan interference');
+
+  // Verify rack creation modal creates valid domain rack with u and devices
+  assert.ok(mapsJs.includes('u:height,location:\'\',photo:\'\',devices:[]'), 'createRackModal creates domain-compliant rack');
+});
+

@@ -1,25 +1,50 @@
 {
-  "version": "3.0.7",
+  "version": "3.0.8",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի վրա ընտրված սարքի/ռաքի քարտը (ինսպեկտորը) տեղափոխվել է ձախ կողմ և սահուն բացվում է ձախից։"
+      "Ուղղվել է քարտեզի վրա ռաքերի տեղադրման մեխանիզմը․ այժմ ռաք ընտրելուց հետո հատակագծի վրա սեղմելիս ռաքը տեղադրվում է անմիջապես։",
+      "Ուղղվել է քարտեզի վրա նոր ռաք ստեղծելու պատուհանը (U բարձրություն և տվյալների վավերացում)։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Moved the map device/rack inspector panel to the left side with a smooth slide-in from the left."
+      "Fixed rack placement on the floor plan so clicking the map immediately places the selected rack.",
+      "Fixed new rack creation modal on the map page with proper U height and validation."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Инспектор выбранного устройства/стойки на карте перемещен влево и плавно открывается с левой стороны."
+      "Исправлено размещение стоек на плане этажа: теперь клик по карте сразу размещает выбранную стойку.",
+      "Исправлено окно создания новой стойки на странице карты (U-высота и валидация данных)."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "3.0.7",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի վրա ընտրված սարքի/ռաքի քարտը (ինսպեկտորը) տեղափոխվել է ձախ կողմ և սահուն բացվում է ձախից։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Moved the map device/rack inspector panel to the left side with a smooth slide-in from the left."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Инспектор выбранного устройства/стойки на карте перемещен влево и плавно открывается с левой стороны."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "3.0.6",
       "hy": {
