@@ -15,6 +15,8 @@ test('map inspector styles enforce fixed card layout with no vertical or horizon
   assert.ok(css.includes('grid-template-columns:110px minmax(0,1fr)'),'dl columns provide at least 110px so port count label is not truncated');
   assert.ok(css.includes('.map-inspector{position:absolute;left:10px'),'map-inspector is positioned on the left');
   assert.ok(css.includes('@keyframes map-inspector-slide-in{from{transform:translateX(calc(-100% - 24px))'),'inspector slides in from the left');
+  assert.ok(css.includes('body.map-view #content:not(:fullscreen) .map-topbar{display:none!important}'),'non-fullscreen topbar is hidden so project text does not bleed into inspector');
+  assert.ok(css.includes('z-index:12'),'inspector has z-index 12 to remain cleanly above map overlays');
 });
 
 test('map inspector markup and actions include quick title rename button and handler',()=>{
@@ -26,6 +28,7 @@ test('map inspector markup and actions include quick title rename button and han
   assert.ok(js.includes('host.scrollLeft=0;'),'maps.js resets host.scrollLeft to 0 to prevent horizontal offset');
   assert.ok(js.includes('host.scrollTop=0;'),'maps.js resets host.scrollTop to 0 to prevent vertical offset');
   assert.ok(js.includes("if(view.selectedMarkerIds.size>1){"),'maps.js correctly checks selectedMarkerIds.size without TDZ error');
+  assert.ok(js.includes('if(mapBar)mapBar.hidden=!isFullscreen;'),'maps.js hides mapBar when not in fullscreen');
 });
 
 test('translations exist for quick name editing in EN and RU',()=>{

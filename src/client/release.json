@@ -1,28 +1,53 @@
 {
-  "version": "3.0.9",
+  "version": "3.0.10",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Ռաքը հատակագծի վրա տեղադրելուց հետո կողային վահանակի «Ռաքեր» բաժինն ավտոմատ թաքցվում է, իսկ ցուցակը վերադառնում է սարքերի բաժնին։",
-      "Եթե տվյալ հարկում չտեղադրված ռաքեր չկան, վերևի ներդիրների տողը թաքցվում է՝ ապահովելով մաքուր ինտերֆեյս։"
+      "Ուղղվել է քարտեզի վրա սարքի/ռաքի քարտի (ինսպեկտորի) տեքստի համընկնման խնդիրը․ նախագծի վերնագիրն այլևս չի ծածկում քարտի վերնամասը։",
+      "Բարձրացվել է ինսպեկտորի շերտային առաջնահերթությունը (z-index) և թաքցվել են ավելորդ ֆոնային տարրերը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Automatically hides the rack section/tab in the sidebar once all racks are placed on the map, returning to the device list.",
-      "Hides the sidebar tab row when there are no unplaced racks on the floor plan for a cleaner interface."
+      "Fixed text overlap on the map device/rack inspector panel where project title could bleed over the header.",
+      "Elevated inspector z-index and hidden non-fullscreen canvas topbar leftovers to keep inspector completely clear."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Секция/вкладка стоек в боковой панели автоматически скрывается после размещения всех стоек на карте, переключаясь обратно на список устройств.",
-      "Строка вкладок скрывается, когда на плане этажа нет неразмещенных стоек, обеспечивая чистый интерфейс."
+      "Исправлено наложение текста в инспекторе устройства/стойки на карте, из-за которого заголовок проекта перекрывал верхнюю часть карточки.",
+      "Повышен приоритет слоев инспектора (z-index) и скрыты лишние фоновые элементы в обычном режиме просмотра."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "3.0.9",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Ռաքը հատակագծի վրա տեղադրելուց հետո կողային վահանակի «Ռաքեր» բաժինն ավտոմատ թաքցվում է, իսկ ցուցակը վերադառնում է սարքերի բաժնին։",
+          "Եթե տվյալ հարկում չտեղադրված ռաքեր չկան, վերևի ներդիրների տողը թաքցվում է՝ ապահովելով մաքուր ինտերֆեյս։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Automatically hides the rack section/tab in the sidebar once all racks are placed on the map, returning to the device list.",
+          "Hides the sidebar tab row when there are no unplaced racks on the floor plan for a cleaner interface."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Секция/вкладка стоек в боковой панели автоматически скрывается после размещения всех стоек на карте, переключаясь обратно на список устройств.",
+          "Строка вкладок скрывается, когда на плане этажа нет неразмещенных стоек, обеспечивая чистый интерфейс."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "3.0.8",
       "hy": {
