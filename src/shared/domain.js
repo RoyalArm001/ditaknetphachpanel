@@ -55,6 +55,16 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     ['panel','Optical ODF 24-Port LC/SC 1U',24,1,24,false],
     ['panel','Optical ODF 48-Port LC/SC 2U',48,2,48,false],
 
+    // Grandstream GWN7800: copper ports exclude uplinks; P models support 802.3af/at.
+    // https://documentation.grandstream.com/knowledge-base/gwn780x-series-technical-specifications/
+    ['switch','Grandstream GWN7801',8,1,2,false,{uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7801P',8,1,2,true,{modelType:'poe-plus',poeBudget:120,uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7802',16,1,4,false,{uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7802P',16,1,4,true,{modelType:'poe-plus',poeBudget:240,uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7803',24,1,4,false,{uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7803P',24,1,4,true,{modelType:'poe-plus',poeBudget:370,uplink:'1G SFP'}],
+    ['switch','Grandstream GWN7806',48,1,6,false,{uplink:'10G SFP+'}],
+    ['switch','Grandstream GWN7806P',48,1,6,true,{modelType:'poe-plus',poeBudget:400,uplink:'10G SFP+'}],
     // MikroTik Switches
     ['switch','MikroTik CSS326-24G-2S+RM',24,1,2,false],
     ['switch','MikroTik CRS326-24G-2S+RM',24,1,2,false],
@@ -174,10 +184,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     ['organizer','2U Horizontal Cable Manager',0,2,0,false],
     ['shelf','1U 19" Cantilever Shelf',0,1,0,false],
     ['shelf','2U 19" Fixed Shelf',0,2,0,false]
-  ].map(([type,name,ports,height,sfp,poe])=>Object.freeze({type,name,ports,height,sfp,poe})));
+  ].map(([type,name,ports,height,sfp,poe,details])=>Object.freeze({type,name,ports,height,sfp,poe,...details})));
   function modelBrand(name){
     const n=String(name||'').trim();
     if(/^mikrotik/i.test(n))return 'MikroTik';
+    if(/^grand\s*stream\b/i.test(n))return 'Grandstream';
     if(/^ubiquiti/i.test(n))return 'Ubiquiti UniFi';
     if(/^cisco/i.test(n))return 'Cisco';
     if(/^tp-link/i.test(n))return 'TP-Link Omada';
@@ -264,6 +275,9 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       const txt=(m.name+' '+b+' '+(m.ports||'')+' '+(m.ports?m.ports+'p':'')+' '+(m.sfp?'sfp':'')+' '+(m.poe?'poe':'')).toLowerCase();
       return terms.every(term=>txt.includes(term));
     });
+  }
+  function filterDeviceModels(type,{brand='',ports='',poe='',query=''}={},s){
+    return searchDeviceModels(type,query,s).filter(m=>(!brand||modelBrand(m.name)===brand)&&(ports===''||m.ports===Number(ports))&&(!poe||(poe==='none'?!m.poe:poe==='poe'?m.poe:poe==='poe-plus'&&(m.modelType==='poe-plus'||m.name.includes('PoE+')))));
   }
   function saveDeviceModel(s,model){
     const item={type:model.type,name:String(model.name||'').trim(),ports:model.ports,height:model.height,sfp:model.sfp??0,poe:['poe','poe-plus'].includes(model.modelType),modelType:model.modelType||'none'};
@@ -582,5 +596,5 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const validRackIds=new Set(s.floors.flatMap(f=>(f.racks||[]).map(r=>r.id)));
     for(const f of s.floors||[]){if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>validRackIds.has(id)&&!f.racks.some(r=>r.id===id));}
   }
-  return {defaultModels,deviceModels,searchDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconPaths,serviceIconNames,serviceIconSvg,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
+  return {defaultModels,deviceModels,searchDeviceModels,filterDeviceModels,saveDeviceModel,modelBrand,modelDefaults,allCatalogModels,deviceTypeColors,autoDeviceColor,effectiveDeviceColor,findNextDevicePosition,nextDeviceName,empty,validate,serviceEntries,hasService,serviceInUse,applyProjectStyle,devices,deviceTypes,isNetworkDevice,portLayout,ports,port,rows,endpointLabel,mapMarkerLayout,mapDevices,serviceIcon,serviceIconPaths,serviceIconNames,serviceIconSvg,networks,hostsForDevice,statuses,services,serviceColor,serviceLabel,statusLabel,statusColor,projectStyle,effectiveStatus,disconnect};
 });

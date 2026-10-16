@@ -1,6 +1,15 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"PoE-ն ցանցային մալուխով նաև սնուցում է միացված սարքը։ Առանց PoE-ի միացված սարքը սնուցվում է առանձին։":["PoE also powers the connected device through its network cable. Without PoE, the connected device needs a separate power supply.","PoE также питает подключённое устройство по сетевому кабелю. Без PoE подключённому устройству нужен отдельный источник питания."],
+"Ընտրեք սարքը":["Choose a device","Выберите устройство"],
+"Արտադրող":["Manufacturer","Производитель"],
+"Բոլոր արտադրողները":["All manufacturers","Все производители"],
+"Մոդելի պորտերի քանակ":["Model port count","Количество портов модели"],
+"PoE սնուցում":["PoE power","Питание PoE"],
+"PoE / PoE+":["PoE / PoE+","PoE / PoE+"],
+"PoE ընդհանուր հզորություն":["Total PoE budget","Общий бюджет PoE"],
+"Ընտրեք արտադրողը, պորտերի քանակը և մոդելը։ Եթե մոդելը չկա, լրացրեք ձեռքով։":["Choose a manufacturer, port count and model. If your model is missing, enter it manually.","Выберите производителя, количество портов и модель. Если модели нет, введите её вручную."],
 "Այլ VLAN / ձեռքով":["Other VLAN / manual entry","Другой VLAN / вручную"],
 "Ընտրեք VLAN-ը ցանկից կամ ավելացրեք այլ ID։ Պորտի նշանակությունը ընտրեք առանձին։":["Select a VLAN from the list or enter another ID. Choose the port purpose separately.","Выберите VLAN из списка или введите другой ID. Назначение порта выбирается отдельно."],
 "Հանել ընտրությունից":["Remove from selection","Убрать из выбранных"],

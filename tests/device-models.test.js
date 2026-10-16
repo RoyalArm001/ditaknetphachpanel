@@ -5,6 +5,31 @@ test('catalog search filters by device type and all case-insensitive search term
  assert.ok(results.length>0);assert.ok(results.every(m=>m.type==='switch'&&/24/.test(m.name)&&/mikrotik/i.test(m.name)));
  assert.equal(D.searchDeviceModels('router','no-such-model',s).length,0);
 });
+
+test('manufacturer, exact copper count and PoE filters narrow models independently',()=>{
+ const state=D.empty();
+ const poe=D.filterDeviceModels('switch',{brand:'Grandstream',ports:'24',poe:'poe'},state);
+ assert.deepEqual(poe.map(m=>m.name),['Grandstream GWN7803P']);
+ assert.deepEqual(D.filterDeviceModels('switch',{brand:'Grandstream',ports:'48',poe:'none'},state).map(m=>m.name),['Grandstream GWN7806']);
+ assert.equal(D.filterDeviceModels('switch',{brand:'Grandstream',ports:'12'},state).length,0);
+ assert.equal(D.filterDeviceModels('router',{brand:'Grandstream'},state).length,0);
+ assert.ok(D.filterDeviceModels('switch',{ports:'0'},state).every(m=>m.ports===0));
+ D.saveDeviceModel(state,{type:'switch',name:'Grandstream custom 12',ports:12,sfp:2,height:1,modelType:'none'});
+ assert.equal(D.filterDeviceModels('switch',{brand:'Grandstream',ports:'12'},state).length,1);
+ assert.equal(D.modelBrand('Grand stream GWN7801P'),'Grandstream');
+});
+
+test('verified Grandstream models fill copper, uplink, PoE+ and height correctly',()=>{
+ for(const [suffix,ports,sfp,budget] of [['1',8,2,120],['2',16,4,240],['3',24,4,370],['6',48,6,400]]){
+  for(const powered of [false,true]){
+   const name=`Grandstream GWN780${suffix}${powered?'P':''}`;
+   assert.deepEqual(D.modelDefaults('switch',name,D.empty()),{ports,sfpCount:sfp,height:1,modelType:powered?'poe-plus':'none'});
+   const model=D.deviceModels('switch',D.empty()).find(m=>m.name===name);
+   assert.equal(model.poeBudget,powered?budget:undefined);
+  }
+ }
+ assert.equal(D.modelDefaults('switch','Grandstream GWN7808P',D.empty()),null,'Unverified model must not get guessed defaults');
+});
 test('custom model counts, zero copper and PoE+ round trip and replace case-insensitive duplicates',()=>{
  const s=D.empty();D.saveDeviceModel(s,{type:'switch',name:' Custom optical ',ports:0,sfp:6,height:2,modelType:'poe-plus'});
  D.validate(s);assert.deepEqual(D.modelDefaults('switch','custom OPTICAL',JSON.parse(JSON.stringify(s))),{ports:0,height:2,sfpCount:6,modelType:'poe-plus'});

@@ -1,25 +1,53 @@
 {
-  "version": "2.11.12",
+  "version": "2.11.13",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Ավելացվել են կատարված թեստերի գրանցամատյանը և նոր գաղափարի բրենդային նախնական պլանը։"
+      "Սարքի ավելացման պատուհանում նախ ընտրեք արտադրողը, պորտերի քանակը և PoE-ն, ապա՝ համապատասխան մոդելը։",
+      "Ավելացվել են Grandstream GWN7801/7802/7803/7806 մոդելները՝ PoE+ և առանց PoE տարբերակներով, SFP տվյալներով և սնուցման ընդհանուր հզորությամբ։",
+      "Մոդելի ընտրությունն ավտոմատ լրացնում է պարամետրերը՝ պահպանելով հետագա ձեռքով խմբագրումը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Added a test verification register and a preliminary brand plan for the new idea."
+      "Choose manufacturer, port count and PoE before selecting a matching device model.",
+      "Added Grandstream GWN7801/7802/7803/7806 models with PoE+ and non-PoE variants, uplink details and PoE budgets.",
+      "Model selection fills device parameters while keeping subsequent manual edits."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Добавлены журнал выполненных проверок и предварительный план бренда для новой идеи."
+      "Сначала выберите производителя, количество портов и PoE, затем подходящую модель устройства.",
+      "Добавлены Grandstream GWN7801/7802/7803/7806 с PoE+ и без PoE, данными uplink и бюджетом питания.",
+      "Выбор модели заполняет параметры с сохранением последующих ручных изменений."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "2.11.12",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Ավելացվել են կատարված թեստերի գրանցամատյանը և նոր գաղափարի բրենդային նախնական պլանը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Added a test verification register and a preliminary brand plan for the new idea."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Добавлены журнал выполненных проверок и предварительный план бренда для новой идеи."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.11",
       "hy": {
