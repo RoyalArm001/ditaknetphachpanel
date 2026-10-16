@@ -480,6 +480,17 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         assert(Array.isArray(plan.markers)&&plan.markers.length<=10000,tr('Հատակագծի տվյալները սխալ են'));
         const placed=new Set();
         for(const marker of plan.markers){id(marker.id);assert(byId.has(marker.portId)&&!placed.has(marker.portId),tr('Հատակագծի տվյալները սխալ են'));placed.add(marker.portId);assert([marker.x,marker.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));if(marker.iconX!==undefined||marker.iconY!==undefined)assert([marker.iconX,marker.iconY].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));}
+        if(plan.rackMarkers!==undefined){
+          assert(Array.isArray(plan.rackMarkers)&&plan.rackMarkers.length<=100,tr('Հատակագծի տվյալները սխալ են'));
+          const placedRacks=new Set();
+          for(const rm of plan.rackMarkers){
+            id(rm.id);text(rm.rackId);
+            assert(allRackIds.has(rm.rackId)&&!placedRacks.has(rm.rackId),tr('Հատակագծի տվյալները սխալ են'));
+            placedRacks.add(rm.rackId);
+            assert([rm.x,rm.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));
+            if(rm.iconX!==undefined||rm.iconY!==undefined)assert([rm.iconX,rm.iconY].every(v=>Number.isFinite(v)&&v>=0&&v<=1),tr('Հատակագծի տվյալները սխալ են'));
+          }
+        }
       }
     }
     for(const {d,p} of all) if(p.switchPortId){
@@ -555,7 +566,12 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       serviceCounts.set(service,seq);
       return {...marker,number:seq};
     });
-    return {devices,markers,canonical};
+    const allRacksList=s.floors.flatMap(f=>f.racks.map(r=>({f,r})));
+    const rackMarkers=(plan?.rackMarkers||[]).map(rm=>{
+      const item=allRacksList.find(x=>x.r.id===rm.rackId);
+      return item?{...rm,rack:item.r,floor:item.f}:null;
+    }).filter(Boolean);
+    return {devices,markers,canonical,rackMarkers};
   }
   const serviceIconPaths={
     lan:'M3 3h18v18H3Z M6 7h12v7h-3v3H9v-3H6Z M9 7v4 M12 7v4 M15 7v4',
@@ -592,7 +608,11 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   const serviceIconSvg = (key,state,size=24) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${serviceIcon(key,state)}"/></svg>`;
   function disconnect(s,removedIds){
     for(const {p} of ports(s)) if(removedIds.has(p.switchPortId))p.switchPortId='';
-    for(const plan of s.floorPlans||[]){plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';}
+    for(const plan of s.floorPlans||[]){
+      plan.markers=plan.markers.filter(m=>!removedIds.has(m.portId));
+      if(plan.rackMarkers)plan.rackMarkers=plan.rackMarkers.filter(rm=>!removedIds.has(rm.rackId));
+      if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';
+    }
     const validRackIds=new Set(s.floors.flatMap(f=>(f.racks||[]).map(r=>r.id)));
     for(const f of s.floors||[]){if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>validRackIds.has(id)&&!f.racks.some(r=>r.id===id));}
   }

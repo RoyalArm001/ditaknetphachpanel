@@ -3,7 +3,7 @@
 - The user has authorized automatic publication of each completed update: describe the changes, run relevant checks, commit with a descriptive message, and push without asking again. A later request to keep work local overrides this authorization.
 - Publish only files belonging to the completed update; leave unrelated local changes untouched.
 - Before each user-authorized publication, update `src/client/release.json`: use a new version and concise user-facing changes in HY, EN and RU.
-- Keep release notes in that single file. The app displays them once per version on the welcome screen.
+- Keep release notes in that single file. Never automatically open a release-notes modal. Only installed app windows show a short "App updated · v…" toast once per version; regular browser tabs show no automatic release announcement. Detailed history remains available in Settings.
 - Preserve the `history` array in `src/client/release.json`. Before changing the current version, prepend its version, date and HY/EN/RU notes to history if that version is not already present; set the new release date. Never invent missing historical releases.
 - Use a Git commit message that names the actual change. Do not claim that background push notifications or emails were sent; release notices appear inside the app.
 - Respect any user instruction to keep work local. Updating release notes does not authorize a push.

@@ -81,15 +81,19 @@ function prepare(source,target,request){
   t.floorPlans??=[];
   for(const plan of s.floorPlans||[]){
     const markers=plan.markers.filter(m=>portIds.has(m.portId));
-    if(!markers.length)continue;
-    const copy={...plan,id:map(plan.id),floorId:addFloor(plan.floorId),markers:markers.map(m=>({...m,id:map(m.id),portId:map(m.portId)}))};
+    const rackMarkers=(plan.rackMarkers||[]).filter(rm=>chosen.has(rm.rackId));
+    if(!markers.length&&!rackMarkers.length)continue;
+    const copy={...plan,id:map(plan.id),floorId:addFloor(plan.floorId),markers:markers.map(m=>({...m,id:map(m.id),portId:map(m.portId)})),rackMarkers:rackMarkers.map(rm=>({...rm,id:map(rm.id),rackId:map(rm.rackId)}))};
     rename(copy,t.floorPlans);t.floorPlans.push(copy);summary.plans++;
   }
   if(request.mode==='move'){
     for(const f of s.floors)f.racks=f.racks.filter(r=>!chosen.has(r.id));
     for(const {p} of D.ports(s))if(portIds.has(p.switchPortId)){p.switchPortId='';summary.detachedLinks++;}
     for(const n of s.networks||[])n.hosts=n.hosts.filter(h=>!deviceIds.has(h.deviceId));
-    for(const plan of s.floorPlans||[])plan.markers=plan.markers.filter(m=>!portIds.has(m.portId));
+    for(const plan of s.floorPlans||[]){
+      plan.markers=plan.markers.filter(m=>!portIds.has(m.portId));
+      if(plan.rackMarkers)plan.rackMarkers=plan.rackMarkers.filter(rm=>!chosen.has(rm.rackId));
+    }
     for(const f of s.floors)if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>!chosen.has(id));
   }
   D.validate(s);D.validate(t);

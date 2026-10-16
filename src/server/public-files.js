@@ -16,6 +16,7 @@ const sources={
   'merge-state.js':'src/shared/merge-state.js',
   'connection-report.js':'src/shared/connection-report.js',
   'map-label-layout.js':'src/shared/map-label-layout.js',
+  'map-routing.js':'src/shared/map-routing.js',
   'handover-pdf.js':'src/shared/handover-pdf.js',
   'maps.js':'src/client/js/maps.js',
   'help.js':'src/client/js/help.js',
