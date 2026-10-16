@@ -1,28 +1,53 @@
 {
-  "version": "3.0.10",
+  "version": "4.0.1",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Ուղղվել է քարտեզի վրա սարքի/ռաքի քարտի (ինսպեկտորի) տեքստի համընկնման խնդիրը․ նախագծի վերնագիրն այլևս չի ծածկում քարտի վերնամասը։",
-      "Բարձրացվել է ինսպեկտորի շերտային առաջնահերթությունը (z-index) և թաքցվել են ավելորդ ֆոնային տարրերը։"
+      "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր և հստակ տեսք։",
+      "Միացումները կարելի է ցանկացած պահի ակտիվացնել կամ թաքցնել վերևի վահանակից կամ «C» ստեղնով։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Fixed text overlap on the map device/rack inspector panel where project title could bleed over the header.",
-      "Elevated inspector z-index and hidden non-fullscreen canvas topbar leftovers to keep inspector completely clear."
+      "Cable connection lines on the map are now hidden by default for a clean, unobstructed view.",
+      "Connection lines can be easily toggled at any time from the top toolbar or with the 'C' hotkey."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Исправлено наложение текста в инспекторе устройства/стойки на карте, из-за которого заголовок проекта перекрывал верхнюю часть карточки.",
-      "Повышен приоритет слоев инспектора (z-index) и скрыты лишние фоновые элементы в обычном режиме просмотра."
+      "Линии кабельных соединений на карте теперь по умолчанию скрыты для чистого и аккуратного обзора.",
+      "Отображение соединений можно в любой момент переключить на верхней панели или клавишей «C»."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "3.0.10",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Ուղղվել է քարտեզի վրա սարքի/ռաքի քարտի (ինսպեկտորի) տեքստի համընկնման խնդիրը․ նախագծի վերնագիրն այլևս չի ծածկում քարտի վերնամասը։",
+          "Բարձրացվել է ինսպեկտորի շերտային առաջնահերթությունը (z-index) և թաքցվել են ավելորդ ֆոնային տարրերը։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Fixed text overlap on the map device/rack inspector panel where project title could bleed over the header.",
+          "Elevated inspector z-index and hidden non-fullscreen canvas topbar leftovers to keep inspector completely clear."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Исправлено наложение текста в инспекторе устройства/стойки на карте, из-за которого заголовок проекта перекрывал верхнюю часть карточки.",
+          "Повышен приоритет слоев инспектора (z-index) и скрыты лишние фоновые элементы в обычном режиме просмотра."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "3.0.9",
       "hy": {

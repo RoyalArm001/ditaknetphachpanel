@@ -206,3 +206,15 @@ test('maps.js hides rack tab when all racks are placed and switches to devices t
   assert.equal(unplacedRacks.length === 0, true, 'Tabs must be hidden when all racks placed');
 });
 
+test('cables are hidden by default on map load and plan change', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
+
+  // Verify view.showCables starts false by default
+  assert.ok(mapsJs.includes('view.showCables=false;'));
+
+  // Verify plan switch keeps cables hidden
+  assert.ok(mapsJs.includes('view.showCables=false;view.camera=null;'));
+});
+

@@ -66,7 +66,7 @@ globalThis.RackMaps=(()=>{
   function mount(root,h){
     const {tr,esc,commit,getState,modal,input,select,toast,download,save}=h,abort=new AbortController();
     const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1,imageOpacity:0};ui.set(key,view);}
-    view.showCables=(()=>{try{const v=localStorage.getItem('rackmap-map-show-cables');return v===null?true:v==='true';}catch{return true;}})();
+    view.showCables=false;try{localStorage.removeItem('rackmap-map-show-cables');}catch{}
     view.activeTab||='devices';view.rackId||='';view.placingRackId||='';
     const savedCollapsed=(()=>{try{const s=JSON.parse(localStorage.getItem('rackmap-map-collapsed-groups')||'null');return Array.isArray(s)?s:null;}catch{return null;}})();
     view.collapsedDeviceGroups||=new Set(savedCollapsed||[]);
@@ -76,7 +76,7 @@ globalThis.RackMaps=(()=>{
     const saveCollapsedGroups=()=>{try{localStorage.setItem('rackmap-map-collapsed-groups',JSON.stringify([...collapsedDeviceGroups]));}catch{}};
     view.selectedMarkerIds ||= new Set();
     const state=getState(),plans=state.floorPlans||[];let plan=plans.find(p=>p.id===view.planId)||plans[0];view.planId=plan?.id||'';
-    if(view.historyPlanId!==view.planId){view.historyPlanId=view.planId;view.undoStack=[];view.redoStack=[];view.selectedMarkerIds.clear();view.rackId='';view.placingRackId='';}
+    if(view.historyPlanId!==view.planId){view.historyPlanId=view.planId;view.undoStack=[];view.redoStack=[];view.selectedMarkerIds.clear();view.rackId='';view.placingRackId='';view.showCables=false;}
     view.undoStack ||= [];view.redoStack ||= [];
     const rows=D.rows(state),byId=new Map(rows.map(r=>[r.p.id,r]));const mapData=D.mapDevices(state,plan);view.portId=mapData.canonical(view.portId);if(!mapData.devices.some(r=>r.p.id===view.portId)&&!mapData.markers.some(m=>m.portId===view.portId)){view.portId='';view.placing=false;}
     if(view.rackId&&!(mapData.rackMarkers||[]).some(rm=>rm.id===view.rackId))view.rackId='';
@@ -856,7 +856,7 @@ globalThis.RackMaps=(()=>{
         if(action==='redo'){redo();draw();return;}
         if(action==='lock-toggle'){view.locked=!view.locked;toast(view.locked?tr('Քարտեզը կողպված է'):tr('Քարտեզն ապակողպված է'));draw();return;}
         if(action==='devices-toggle'){showDevices(!view.devicesOpen);return;}
-        if(action==='cables-toggle'){view.showCables=!view.showCables;try{localStorage.setItem('rackmap-map-show-cables',String(view.showCables));}catch{}toast(view.showCables?tr('Ցուցադրել միացումները'):tr('Թաքցնել միացումները'));draw();return;}
+        if(action==='cables-toggle'){view.showCables=!view.showCables;toast(view.showCables?tr('Ցուցադրել միացումները'):tr('Թաքցնել միացումները'));draw();return;}
         if(action==='create-map-rack'){createRackModal();return;}
         if(action==='edit-rack-name'){editRackName();return;}
         if(action==='rack-open'){const rm=(mapData.rackMarkers||[]).find(m=>m.id===view.rackId);if(rm)location.hash='#rack/'+rm.rack.id;return;}
@@ -912,7 +912,7 @@ globalThis.RackMaps=(()=>{
     root.addEventListener('pointerdown',e=>{const more=topActions?.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
     root.addEventListener('toggle',e=>{const group=e.target.closest?.('.map-device-group');if(group?.dataset?.service){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);saveCollapsedGroups();return;}const card=e.target.closest?.('.map-port-card');if(card?.dataset?.deviceCard){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}},{capture:true,signal:abort.signal});
     root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));saveAppearance();return;}if(e.target.matches('[data-map-line-width]')){view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));saveAppearance();return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
-    const changePlan=e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.rackId='';view.placing=false;view.placingRackId='';view.camera=null;collisionGrid=null;collisionPlanId=null;h.redraw();}};
+    const changePlan=e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.rackId='';view.placing=false;view.placingRackId='';view.showCables=false;view.camera=null;collisionGrid=null;collisionPlanId=null;h.redraw();}};
     root.addEventListener('change',changePlan,{signal:abort.signal});
     headerControls?.addEventListener('change',e=>{if(!root.contains(headerControls))changePlan(e);},{signal:abort.signal});
     if(viewport){
@@ -1126,7 +1126,7 @@ globalThis.RackMaps=(()=>{
       }
       if(e.altKey)return;
       if(e.key.toLowerCase()==='c'&&!e.ctrlKey&&!e.metaKey){
-        view.showCables=!view.showCables;try{localStorage.setItem('rackmap-map-show-cables',String(view.showCables));}catch{}
+        view.showCables=!view.showCables;
         toast(view.showCables?tr('Ցուցադրել միացումները'):tr('Թաքցնել միացումները'));draw();return;
       }
       if(e.key.toLowerCase()==='h'){setTool('hand');return;}if(e.key.toLowerCase()==='v'){setTool('select');return;}
