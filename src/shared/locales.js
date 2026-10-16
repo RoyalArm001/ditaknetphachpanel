@@ -1,6 +1,12 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Ավելացնել հարկ":["Add floor","Добавить этаж"],
+"Ավելացնել":["Add","Добавить"],
+"Այդ անունով հարկ արդեն կա":["A floor with that name already exists","Этаж с таким названием уже существует"],
+"Հարկերի առավելագույն քանակը 200 է":["The maximum number of floors is 200","Максимальное число этажей — 200"],
+"Ընտրեք՝ որ էջով փոխարինել գործող հատակագիծը։ Մյուս ընտրված էջերը կավելացվեն որպես նոր հատակագծեր։":["Choose which page replaces the current floor plan. Other selected pages will be added as new floor plans.","Выберите страницу для замены текущего плана. Остальные выбранные страницы будут добавлены как новые планы."],
+"Այս էջով փոխարինել գործող հատակագիծը":["Replace the current floor plan with this page","Заменить текущий план этой страницей"],
 "Յուրաքանչյուր էջի համար ընտրեք հարկ կամ բաց թողեք էջը։":["Choose a floor for each page or skip it.","Выберите этаж для каждой страницы или пропустите её."],
 "Այս էջը ո՞ր հարկին է պատկանում":["Which floor does this page belong to?","К какому этажу относится эта страница?"],
 "Ընտրեք հարկը կամ բաց թողեք":["Choose a floor or skip","Выберите этаж или пропустите"],
