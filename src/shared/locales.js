@@ -1,6 +1,12 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Այլ VLAN / ձեռքով":["Other VLAN / manual entry","Другой VLAN / вручную"],
+"Ընտրեք VLAN-ը ցանկից կամ ավելացրեք այլ ID։ Պորտի նշանակությունը ընտրեք առանձին։":["Select a VLAN from the list or enter another ID. Choose the port purpose separately.","Выберите VLAN из списка или введите другой ID. Назначение порта выбирается отдельно."],
+"Հանել ընտրությունից":["Remove from selection","Убрать из выбранных"],
+"Պորտերի նշանակություն":["Port purpose","Назначение портов"],
+"Կիրառել ընտրվածներին":["Apply to selected","Применить к выбранным"],
+"Ընտրեք պորտերի նշանակությունը":["Choose the port purpose","Выберите назначение портов"],
 "PDF ձևաչափ":["PDF format","Формат PDF"],
 "Հակիրճ սխեմա":["Compact diagram","Краткая схема"],
 "Սխեմա և մանրամասն ցանկեր":["Diagram and detailed lists","Схема и подробные списки"],

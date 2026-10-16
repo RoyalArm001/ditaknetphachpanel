@@ -1885,11 +1885,13 @@ function deviceDetail(id){const {d,r}=findDevice(id)||{};if(!d)return;const byId
 function serviceLegend(){return '<div class="service-legend">'+D.serviceEntries(state).map(([key,x])=>`<span><i style="background:${D.serviceColor(state,key)}"></i>${esc(D.serviceLabel(state,key))}</span>`).join('')+'</div>';}
 function paintPorts(){
   const byId=new Map(D.rows(state).map(x=>[x.p.id,x]));
+  const selected=new Set(selectedPortIds);if(selectedPortId)selected.add(selectedPortId);
+  for(const row of byId.values())if(selected.has(row.p.id)&&row.p.switchPortId)selected.add(row.p.switchPortId);
   document.querySelectorAll('.mini-port,.port-overview [data-action="port"]').forEach(el=>{
     const row=byId.get(el.dataset.id);if(!row)return;
     el.classList.remove('free','used','fault','service-port');
     el.classList.add(row.status);
-    el.classList.toggle('port-selected',row.p.id===selectedPortId||selectedPortIds.has(row.p.id));
+    el.classList.toggle('port-selected',selected.has(row.p.id));
     if(row.status==='fault'){
       el.style.setProperty('--port-color','var(--fault)');
       el.style.setProperty('--port-ink','#ffffff');
@@ -1900,7 +1902,7 @@ function paintPorts(){
       const rgb=color.slice(1).match(/../g).map(x=>{const v=parseInt(x,16)/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
       el.style.setProperty('--port-ink',rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722>.179?'#10242a':'#ffffff');
     }
-    el.setAttribute('aria-pressed',String(row.p.id===selectedPortId||selectedPortIds.has(row.p.id)));
+    el.setAttribute('aria-pressed',String(selected.has(row.p.id)));
     const description=`${row.device} / ${row.port}${el.classList.contains('optical-port')?' SFP':''} · ${row.status==='fault'?D.statusLabel(state,'fault'):D.serviceLabel(state,row.service)} · VLAN ${row.vlan||'—'} · ${D.statusLabel(state,row.status)} · ${row.cable} ${row.room}`;
     el.title=description;el.setAttribute('aria-label',description);
   });
@@ -1909,7 +1911,9 @@ function renderPortTools(){
   const host=$('#portTools');if(!host)return;
   if(selectedPortIds.size){
     const services=D.serviceEntries(state);
-    host.innerHTML=tr`<div class="eyebrow">ԲԱԶՄԱԿԻ ԸՆՏՐՈՒԹՅՈՒՆ</div><h2>${selectedPortIds.size} պորտ</h2><p class="hint">Ընտրված փաչ պանելի պորտերին կարող եք նշանակել ցանկացած հասանելի նշանակություն։</p><div class="bulk-service-actions">${services.map(([key])=>button(D.serviceLabel(state,key),'bulk-service',key,key?'primary':'' )).join('')}${button(tr('Չեղարկել ընտրությունը'),'bulk-clear','','small')}</div>`;
+    const rows=new Map(D.rows(state).map(row=>[row.p.id,row]));
+    const chosen=[...selectedPortIds].map(id=>rows.get(id)).filter(Boolean);
+    host.innerHTML=`<div class="eyebrow">${tr('ԲԱԶՄԱԿԻ ԸՆՏՐՈՒԹՅՈՒՆ')}</div><h2 aria-live="polite">${chosen.length} ${tr('պորտ')}</h2><ul class="selected-port-list">${chosen.map(row=>`<li><div><strong>${esc(row.device)} / ${row.port}${row.endpointName?' · '+esc(row.endpointName):''}</strong><small>${esc(row.floor)} / ${esc(row.rack)} · ${esc(D.deviceTypes(state).find(([key])=>key===row.type)?.[1]||row.type)}</small><small>${esc(D.serviceLabel(state,row.service))} · VLAN ${esc(row.vlan||'—')}${row.connection?' · '+esc(row.connection):''}</small></div><button type="button" class="button small" data-action="bulk-remove" data-id="${esc(row.p.id)}" aria-label="${esc(tr('Հանել ընտրությունից')+' · '+row.device+' / '+row.port)}">×</button></li>`).join('')}</ul>${select('bulkService',tr('Պորտերի նշանակություն'),[['__keep__',tr('Ընտրել')],...services.map(([key])=>[key,D.serviceLabel(state,key)])],'__keep__')}<div class="bulk-service-actions">${button(tr('Կիրառել ընտրվածներին'),'bulk-apply','','primary')}${button(tr('Չեղարկել ընտրությունը'),'bulk-clear','','small')}</div>`;
     return;
   }
   const item=findPort(selectedPortId);
@@ -1938,8 +1942,9 @@ function renderPortTools(){
     ${input('endpointName',tr('Միացված սարքի անվանում'),v.endpointName||'','text','maxlength="200" placeholder="WiFi B zone"')}
     <fieldset class="link-config"><legend>Կապի կարգավորումներ</legend>
       <div class="service-choices ${v.status==='fault'?'is-fault':''}">${D.serviceEntries(state).map(([key,x])=>`<label class="service-choice" style="--service-color:${D.serviceColor(state,key)}"><input type="radio" name="service" value="${key}" ${v.status!=='fault'&&(v.service||'')===key?'checked':''} ${v.status==='fault'?'disabled':''}><span><i></i>${esc(D.serviceLabel(state,key))}</span></label>`).join('')}</div>
-      ${input('vlan','VLAN',v.vlan||'','number',tr('min="1" max="4094" step="1" list="vlanChoices" placeholder="Օրինակ՝ 20"'))}<datalist id="vlanChoices">${D.networks(state).map(n=>`<option value="${esc(n.vlan)}">${esc(networkName(n))}</option>`).join('')}</datalist>
-      <p class="hint">${tr('Ընտրեք պահպանված VLAN ID-ից կամ գրեք նոր ID։ VLAN ID-ն չի փոխում պորտի նշանակությունը։')}</p>
+      ${select('vlanPreset','VLAN',[['',tr('Չնշված')],...D.networks(state).map(n=>[String(n.vlan),networkLabel(n)]),['__custom__',tr('Այլ VLAN / ձեռքով')]],v.vlan?(D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?String(v.vlan):'__custom__'):'')}
+      <div data-custom-vlan ${v.vlan&&!D.networks(state).some(n=>String(n.vlan)===String(v.vlan))?'':'hidden'}>${input('vlan',tr('VLAN ID'),v.vlan||'','number','min="1" max="4094" step="1" placeholder="20"')}</div>
+      <p class="hint">${tr('Ընտրեք VLAN-ը ցանկից կամ ավելացրեք այլ ID։ Պորտի նշանակությունը ընտրեք առանձին։')}</p>
     </fieldset>
     ${incoming?tr`<div class="connection-path">Կապ՝ ${esc(incoming.d.name)} / ${incoming.p.number}<br><small>Նշանակությունը, VLAN-ն ու մալուխի տվյալները ընդհանուր են կապի երկու ծայրերի համար։</small></div>`:''}
     <div class="form-grid">
@@ -1973,6 +1978,11 @@ function renderPortTools(){
   };
   form.addEventListener('input',stagePortDraft);
   form.addEventListener('change',e=>{
+    if(e.target.name==='vlanPreset'){
+      const custom=e.target.value==='__custom__';form.querySelector('[data-custom-vlan]').hidden=!custom;
+      if(!custom)form.elements.vlan.value=e.target.value;
+      else form.elements.vlan.focus();
+    }
     if(e.target.name==='status'){
       syncFaultState();
       stagePortDraft();
@@ -1980,6 +1990,7 @@ function renderPortTools(){
     }
     if(e.target.name==='service'&&!form.elements.vlan.value){
       form.elements.vlan.value=serviceVlan(e.target.value);
+      form.elements.vlanPreset.value=form.elements.vlan.value;
     }
     stagePortDraft();
   });
@@ -2303,7 +2314,7 @@ const actions={
     commit(s=>{
       for(const id of ids){
         const item=D.ports(s).find(x=>x.p.id===id);
-        if(!item||item.d.type!=='panel')continue;
+        if(!item||!['panel','router'].includes(item.d.type))continue;
         item.p.service=service;
         if(serviceVlan(service))item.p.vlan=serviceVlan(service);
         if(item.p.status==='free')item.p.status='used';
@@ -2311,6 +2322,8 @@ const actions={
     });
     selectedPortIds.clear();selectedPortId='';render();
   },
+  'bulk-apply':()=>{const service=$('#bulkService')?.value;if(service===undefined||service==='__keep__')return toast(tr('Ընտրեք պորտերի նշանակությունը'));actions['bulk-service'](service);},
+  'bulk-remove':id=>{selectedPortIds.delete(id);renderPortTools();paintPorts();},
   'bulk-clear':()=>{selectedPortIds.clear();renderPortTools();paintPorts();},
   'floor-delete':id=>deleteItem('floor',id),'rack-delete':id=>deleteItem('rack',id),'device-delete':id=>deleteItem('device',id),
   'port-deselect':()=>{if(!flushPortEditor())return;selectedPortId='';portDraft=null;renderPortTools();paintPorts();},
@@ -2354,10 +2367,12 @@ document.addEventListener('click',e=>{
   const port=e.target.closest('.mini-port,.port-overview [data-action="port"]');
   if(port&&(e.ctrlKey||e.metaKey)){
     e.preventDefault();
+    if(!flushPortEditor())return;
     const item=panelPortFor(port.dataset.id);
     if(item){
+      if(selectedPortId)selectedPortIds.add(selectedPortId);
       if(selectedPortIds.has(item.p.id))selectedPortIds.delete(item.p.id);else selectedPortIds.add(item.p.id);
-      selectedPortId='';renderPortTools();paintPorts();
+      selectedPortId='';panelPrefs.right=true;if(window.matchMedia('(max-width:760px)').matches)panelPrefs.left=false;applyPanels();renderPortTools();paintPorts();
     }else if(findPort(port.dataset.id)?.d.type==='switch'){
       toast(tr('Չմիացված սվիչի պորտը բազմակի ընտրության համար հասանելի չէ։ Նախ կապեք փաչ պանելի կամ ռաուտերի պորտին։'));
     }
