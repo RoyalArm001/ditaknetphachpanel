@@ -86,6 +86,41 @@ test('detailed lists remain available only when requested',async()=>{
   }finally{await task.destroy();}
 });
 
+test('A3 maps and A4 rack pages keep all text and footers within their own page bounds',async()=>{
+  const chunks=await H.create(PDFDocument,fixture(),{font,kind:'all',planId:'Gym',mapPageSize:'A3',tr:I18n.forLanguage('en')});
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    assert.equal(doc.numPages,2);
+    assert.ok((await doc.getPage(1)).view[2]>1100);
+    assert.ok((await doc.getPage(2)).view[2]<900);
+    for(let i=1;i<=doc.numPages;i++){
+      const page=await doc.getPage(i),items=(await page.getTextContent()).items;
+      assert.ok(items.some(x=>x.str===`${i} / 2`));
+      for(const item of items){assert.ok(item.transform[4]>=31&&item.transform[4]+item.width<=page.view[2]-30,item.str);assert.ok(item.transform[5]>10&&item.transform[5]<page.view[3]-10,item.str);}
+    }
+    const content=(await (await doc.getPage(2)).getTextContent()).items.map(x=>x.str).join(' ');
+    assert.ok(content.indexOf('Switch A')<content.indexOf('Panel A'),'Devices follow descending U positions');
+  }finally{await task.destroy();}
+});
+
+test('dense map chooses A3 automatically and keeps every endpoint name',async()=>{
+  const state=fixture(),D=require('../src/shared/domain'),panel=state.floors[0].racks[0].devices[0];
+  panel.portList=Array.from({length:72},(_,i)=>({...D.port(i+1,'dense-'+i),endpointName:'Endpoint-'+String(i+1).padStart(3,'0'),status:'used',service:'wifi'}));
+  state.floorPlans=state.floorPlans.slice(0,1);state.floorPlans[0].markers=panel.portList.map((p,i)=>({id:'m'+i,portId:p.id,x:.08+(i%9)*.1,y:.08+Math.floor(i/9)*.11}));
+  const chunks=await H.create(PDFDocument,state,{font,kind:'maps',tr:I18n.forLanguage('en')});
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    assert.equal(doc.numPages,1);const page=await doc.getPage(1);assert.ok(page.view[2]>1100);
+    const text=(await page.getTextContent()).items.map(x=>x.str).join(' ');
+    for(const p of panel.portList)assert.ok(text.includes(p.endpointName),p.endpointName);
+  }finally{await task.destroy();}
+});
+
+test('map export follows project floor order and natural area-name order',()=>{
+  const state=fixture(),base=state.floorPlans[0];state.floorPlans=[state.floorPlans[2],{...base,id:'z10',name:'Zone 10'},{...base,id:'z2',name:'Zone 2'}];
+  assert.deepEqual(H.select(state).plans.map(p=>p.id),['z2','z10','Upper']);
+});
+
 test('shared PDF uses rack selection and accepts project-defined device types',async()=>{
   const {DatabaseSync}=require('node:sqlite'),{createApp}=require('../src/server/server');
   const db=new DatabaseSync(':memory:'),state=fixture();

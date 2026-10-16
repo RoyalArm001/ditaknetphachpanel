@@ -1,6 +1,13 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Պատճենել PIN-ը":["Copy PIN","Скопировать PIN"],
+"PIN-ը պատճենվեց":["PIN copied","PIN скопирован"],
+"Չհաջողվեց պատճենել":["Failed to copy","Не удалось скопировать"],
+"Ցուցադրել / թաքցնել":["Show / hide","Показать / скрыть"],
+"60-ից ավելի սարքի դեպքում քարտեզն ավտոմատ արտահանվում է A3 չափով։":["Maps with more than 60 devices automatically use A3 pages.","Карты с более чем 60 устройствами автоматически экспортируются на листах A3."],
+"Քարտեզի էջի չափ":["Map page size","Размер страницы карты"],
+"Ավտոմատ՝ A4 / A3":["Automatic: A4 / A3","Автоматически: A4 / A3"],
 "PoE-ն ցանցային մալուխով նաև սնուցում է միացված սարքը։ Առանց PoE-ի միացված սարքը սնուցվում է առանձին։":["PoE also powers the connected device through its network cable. Without PoE, the connected device needs a separate power supply.","PoE также питает подключённое устройство по сетевому кабелю. Без PoE подключённому устройству нужен отдельный источник питания."],
 "Ընտրեք սարքը":["Choose a device","Выберите устройство"],
 "Արտադրող":["Manufacturer","Производитель"],

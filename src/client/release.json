@@ -1,31 +1,87 @@
 {
-  "version": "2.11.13",
+  "version": "2.11.15",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "Սարքի ավելացման պատուհանում նախ ընտրեք արտադրողը, պորտերի քանակը և PoE-ն, ապա՝ համապատասխան մոդելը։",
-      "Ավելացվել են Grandstream GWN7801/7802/7803/7806 մոդելները՝ PoE+ և առանց PoE տարբերակներով, SFP տվյալներով և սնուցման ընդհանուր հզորությամբ։",
-      "Մոդելի ընտրությունն ավտոմատ լրացնում է պարամետրերը՝ պահպանելով հետագա ձեռքով խմբագրումը։"
+      "Գրանցման և մուտքի էջերում ավելացվել է գաղտնաբառի և PIN-ի քողարկման/ցուցադրման կոճակ, ինչպես նաև անձնական PIN-ի արագ պատճենման հնարավորություն։",
+      "Ուժեղացվել է անվտանգությունը․ ավելացվել են IP brute-force սահմանափակում և origin ստուգում հաշվի ու մուտքի բոլոր հարցումների համար։",
+      "Վերացվել է գրանցման բազմաքայլ ձևի բագը․ Enter ստեղնը հաջորդում է քայլերը, իսկ թաքնված դաշտերն այլևս չեն խոչընդոտում վավերացմանը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "Choose manufacturer, port count and PoE before selecting a matching device model.",
-      "Added Grandstream GWN7801/7802/7803/7806 models with PoE+ and non-PoE variants, uplink details and PoE budgets.",
-      "Model selection fills device parameters while keeping subsequent manual edits."
+      "Added show/hide toggle for password and PIN fields, plus one-click copying for personal PINs.",
+      "Hardened authentication security with IP-based rate limiting against brute force and strict origin validation.",
+      "Fixed multi-step signup form: Enter navigates steps cleanly and hidden inputs no longer block validation."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Сначала выберите производителя, количество портов и PoE, затем подходящую модель устройства.",
-      "Добавлены Grandstream GWN7801/7802/7803/7806 с PoE+ и без PoE, данными uplink и бюджетом питания.",
-      "Выбор модели заполняет параметры с сохранением последующих ручных изменений."
+      "Добавлено переключение видимости пароля и PIN-кода, а также быстрое копирование личного PIN в буфер обмена.",
+      "Усилена безопасность авторизации: ограничение перебора паролей по IP и проверка источника запросов (origin).",
+      "Исправлена многошаговая форма регистрации: клавиша Enter корректно переключает шаги, а скрытые поля не блокируют отправку."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "2.11.14",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Քարտեզի PDF պատուհանում ընտրանքներն ու վերջնական նախադիտումը ցուցադրվում են կողք կողքի։ Ավելացվել է A4/A3 ընտրություն։",
+          "PDF քարտեզն ունի նշանների բացատրություն, իսկ 60-ից ավելի սարքի դեպքում ավտոմատ ընտրվում է A3։",
+          "Սարքերի սխեմաներն ունեն պորտերի մանրամասն տեսք, մոդել, PoE և U դիրք։ Հարկերն ու ռաքի սարքերը դասավորված են հերթականությամբ։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Map PDF options and the final preview are shown side by side, with A4/A3 page selection.",
+          "Map pages include a device legend and automatically use A3 above 60 devices.",
+          "Equipment diagrams show detailed sockets, model, PoE and U position, ordered by floor and rack position."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Настройки PDF карты и итоговый предпросмотр расположены рядом. Добавлен выбор A4/A3.",
+          "На карте появилась легенда устройств; при более чем 60 устройствах автоматически выбирается A3.",
+          "Схемы оборудования показывают порты, модель, PoE и U-позицию с порядком по этажам и расположению в стойке."
+        ]
+      },
+      "date": "2026-10-16"
+    },
+    {
+      "version": "2.11.13",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "Սարքի ավելացման պատուհանում նախ ընտրեք արտադրողը, պորտերի քանակը և PoE-ն, ապա՝ համապատասխան մոդելը։",
+          "Ավելացվել են Grandstream GWN7801/7802/7803/7806 մոդելները՝ PoE+ և առանց PoE տարբերակներով, SFP տվյալներով և սնուցման ընդհանուր հզորությամբ։",
+          "Մոդելի ընտրությունն ավտոմատ լրացնում է պարամետրերը՝ պահպանելով հետագա ձեռքով խմբագրումը։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "Choose manufacturer, port count and PoE before selecting a matching device model.",
+          "Added Grandstream GWN7801/7802/7803/7806 models with PoE+ and non-PoE variants, uplink details and PoE budgets.",
+          "Model selection fills device parameters while keeping subsequent manual edits."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Сначала выберите производителя, количество портов и PoE, затем подходящую модель устройства.",
+          "Добавлены Grandstream GWN7801/7802/7803/7806 с PoE+ и без PoE, данными uplink и бюджетом питания.",
+          "Выбор модели заполняет параметры с сохранением последующих ручных изменений."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.12",
       "hy": {

@@ -26,8 +26,8 @@ function createApp(options={}) {
     clear:res=>{configuredPinAuth?.clear(res);databasePinAuth?.clear(res);}
   }:null;
   const accountAuth=cloud?(options.auth||require('./cloud-auth').createAuth()):null;
-  const personalAuth=cloud?(options.personalAuth||(options.auth?null:require('./cloud-auth').createAuth({...process.env,RACKMAP_AUTH_ACCESS:'all-authenticated'},fetch,{cookiePrefix:'mypatch'}))):null;
-  const accounts=cloud&&store.pool?require('./account-store').createAccounts(store):null;
+  const personalAuth=options.personalAuth||(cloud?(options.auth?null:require('./cloud-auth').createAuth({...process.env,RACKMAP_AUTH_ACCESS:'all-authenticated'},fetch,{cookiePrefix:'mypatch'})):null);
+  const accounts=options.accounts||(cloud&&store.pool?require('./account-store').createAccounts(store):null);
   const authRequired=cloud||!!pinAuth;
   const auth=authRequired?{authenticate:async(req,res)=>await pinAuth?.authenticate(req,res)||await accountAuth?.authenticate(req,res),login:async(...args)=>accountAuth?.login(...args),clear:res=>{accountAuth?.clear(res);pinAuth?.clear(res);}}:null;
   const readBody=async req=>{if(req.body!==undefined){const raw=typeof req.body==='string'?req.body:Buffer.isBuffer(req.body)?req.body.toString('utf8'):JSON.stringify(req.body);if(Buffer.byteLength(raw)>(cloud?4*1024*1024:24*1024*1024)){const e=new Error('Հարցումը չափազանց մեծ է');e.code=413;throw e;}return JSON.parse(raw);}let size=0,parts=[];for await(const part of req){size+=part.length;if(size>(cloud?4*1024*1024:24*1024*1024)){const e=new Error(cloud?'Ամպային պահպանման մեկ հարցումը պետք է լինի մինչև 4 ՄԲ։ Նվազեցրեք լուսանկարների չափը։':'Տվյալները գերազանցում են 24 ՄԲ սահմանը');e.code=413;throw e;}parts.push(part);}return JSON.parse(Buffer.concat(parts).toString());};
@@ -66,23 +66,31 @@ function createApp(options={}) {
       if(accountSpace&&url.pathname.startsWith('/api/')){
         if(!accounts||!personalAuth)return json(res,503,{code:'ACCOUNT_UNAVAILABLE',error:tr('Անձնական cloud-ը հասանելի չէ')});
         if(['POST','PUT','DELETE'].includes(req.method)){
-          if(req.headers.origin&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
+          if(req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
         }
         if(req.method==='POST'&&['/api/account/login','/api/account/signup','/api/account/recover'].includes(url.pathname)){
+          const ip=process.env.VERCEL==='1'?req.headers['x-real-ip']||'unknown':req.socket?.remoteAddress||'unknown';
+          const rateKey=require('node:crypto').createHash('sha256').update('account-auth:'+ip).digest('hex');
+          if(await store.pinAttempt(rateKey)>10){
+            res.setHeader('Retry-After','900');
+            return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
+          }
           const body=await readBody(req);
           if(url.pathname.endsWith('/recover')){
             personalAuth.clear(res);
-            const user=await accounts.login(req,res,null,body.pin);
-            if(user&&!user.limited)Object.assign(res.auditContext,{space:'account',owner:user.id,actor:'account:'+user.id});
+            const pin=typeof body.pin==='string'?body.pin.trim():body.pin;
+            const user=await accounts.login(req,res,body.email||null,pin);
+            if(user&&!user.limited){Object.assign(res.auditContext,{space:'account',owner:user.id,actor:'account:'+user.id});await store.pinReset(rateKey);}
             if(user?.limited)return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
             return user?json(res,200,{user}):json(res,401,{error:tr('Անձնական PIN-ը սխալ է')});
           }
-          const identifier=body.email||body.username;
-          const loginEmail=url.pathname.endsWith('/signup')?body.email:await accounts.emailForLogin(identifier)||identifier;
-          const result=url.pathname.endsWith('/signup')?await personalAuth.signup(res,body.email,body.password,{fullName:[body.firstName,body.lastName].filter(Boolean).join(' ').trim(),phone:body.phone,username:body.username}):{user:await personalAuth.login(res,loginEmail,body.password)};
-          if(result?.confirmationRequired)return json(res,200,result);
+          const identifier=typeof (body.email||body.username)==='string'?(body.email||body.username).trim():'';
+          const loginEmail=url.pathname.endsWith('/signup')?(typeof body.email==='string'?body.email.trim():body.email):await accounts.emailForLogin(identifier)||identifier;
+          const result=url.pathname.endsWith('/signup')?await personalAuth.signup(res,typeof body.email==='string'?body.email.trim():body.email,body.password,{fullName:[body.firstName,body.lastName].filter(Boolean).join(' ').trim(),phone:body.phone,username:typeof body.username==='string'?body.username.trim():body.username}):{user:await personalAuth.login(res,loginEmail,body.password)};
+          if(result?.confirmationRequired){await store.pinReset(rateKey);return json(res,200,result);}
           if(!result?.user)return json(res,400,{error:tr('Մուտքը կամ գրանցումը չհաջողվեց։ Ստուգեք տվյալները և էլ․ փոստի հաստատումը։')});
+          await store.pinReset(rateKey);
           accounts.clear(res);
           return json(res,200,{user:result.user,pin:await accounts.provision(result.user)});
         }
@@ -97,13 +105,22 @@ function createApp(options={}) {
         if(['POST','PUT','DELETE'].includes(req.method)&&req.headers.origin&&req.headers.origin!==`${cloud?'https':'http'}://${req.headers.host}`)return json(res,403,{error:tr('Օտար էջից փոփոխությունն արգելված է')});
         if(url.pathname==='/api/auth/pin'&&req.method==='POST'&&pinAuth){
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
-          const body=await readBody(req),user=await pinAuth.login(req,res,body.pin);
+          const body=await readBody(req),pin=typeof body.pin==='string'?body.pin.trim():body.pin,user=await pinAuth.login(req,res,pin);
           if(user?.limited){res.setHeader('Retry-After','900');return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});}
           return user?json(res,200,{user}):json(res,401,{error:tr('PIN կոդը սխալ է')});
         }
         if(url.pathname==='/api/auth/login'&&req.method==='POST'){
           if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:tr('Պահանջվում է JSON')});
-          const credentials=await readBody(req);const user=await auth.login(res,credentials.email,credentials.password);
+          const ip=process.env.VERCEL==='1'?req.headers['x-real-ip']||'unknown':req.socket?.remoteAddress||'unknown';
+          const rateKey=require('node:crypto').createHash('sha256').update('auth-login:'+ip).digest('hex');
+          if(await store.pinAttempt(rateKey)>10){
+            res.setHeader('Retry-After','900');
+            return json(res,429,{error:tr('Շատ փորձեր։ Կրկին փորձեք 15 րոպեից։')});
+          }
+          const credentials=await readBody(req);
+          const email=typeof credentials.email==='string'?credentials.email.trim():credentials.email;
+          const user=await auth.login(res,email,credentials.password);
+          if(user)await store.pinReset(rateKey);
           return user?json(res,200,{user}):json(res,401,{error:tr('Մուտքը չհաջողվեց կամ RackMap-ի թույլտվությունը բացակայում է')});
         }
         if(url.pathname==='/api/auth/logout'&&req.method==='POST'){auth.clear(res);return json(res,200,{ok:true});}
@@ -197,12 +214,13 @@ function createApp(options={}) {
         if(body.revision!==current.revision)return json(res,409,{error:tr('Տվյալները փոփոխվել են այլ աշխատակցի կողմից։ Թարմացրեք էջը։')});
         body.rackId??='';
         if(!['maps','devices','all'].includes(body.kind)||!['hy','en','ru'].includes(body.language)||!['all',...Domain.deviceTypes(current.state).map(([id])=>id)].includes(body.deviceType)||![7,30,90].includes(body.days)||['floorId','rackId','deviceId','planId'].some(k=>typeof body[k]!=='string'||body[k].length>200))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
+        if(body.mapPageSize!==undefined&&!['auto','A4','A3'].includes(body.mapPageSize))return json(res,400,{error:tr('Հարցման ձևաչափը սխալ է')});
         const handover=require('../shared/handover-pdf'),selection=handover.select(current.state,body);
         if(body.kind==='maps'?!selection.plans.length:body.kind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)return json(res,400,{error:tr('Ընտրված պայմաններով տվյալներ չկան')});
         if((await viewLinks.list(scope,companyId)).length>=100)return json(res,429,{error:tr('Նախ անջատեք հին հղումներից մի քանիսը')});
         const outputTr=require('../shared/i18n').forLanguage(body.language);
         const font=options.font||process.env.RACKMAP_FONT||path.join(root,'assets','fonts','DejaVuSans.ttf');
-        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,rackId:body.rackId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,font,tr:outputTr}));
+        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,rackId:body.rackId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,mapPageSize:body.mapPageSize||'auto',font,tr:outputTr}));
         if(pdf.length>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
         const title=[current.state.company,body.planId?selection.plans.find(p=>p.id===body.planId)?.name:'',body.rackId?current.state.floors.flatMap(f=>f.racks).find(r=>r.id===body.rackId)?.name:'',body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr(Domain.deviceTypes(current.state).find(([id])=>id===body.deviceType)?.[1]||body.deviceType)].filter(Boolean).join(' · ');
         return json(res,201,await viewLinks.create(scope,companyId,title,pdf,body.days));
@@ -381,7 +399,7 @@ function createApp(options={}) {
   let backupDay=new Date().toISOString().slice(0,10);
   const dailyBackup=cloud?null:setInterval(()=>{const today=new Date().toISOString().slice(0,10);if(today!==backupDay){try{store.backup();backupDay=today;}catch(e){console.error('Automatic backup failed:',e.message);}}},60*60*1000);
   dailyBackup?.unref();
-  server.on('close',()=>{clearInterval(dailyBackup);store.close();});return server;
+  server.on('close',()=>{clearInterval(dailyBackup);store.close?.();});return server;
 }
 if(require.main===module){const accessFile=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'RackMap','access.env');if(fs.existsSync(accessFile)&&!process.env.VERCEL)process.loadEnvFile(accessFile);const port=Number(process.env.PORT||3000);createApp().listen(port,process.env.HOST||'0.0.0.0',()=>console.log(`RackMap: http://localhost:${port}\nKeep this process running to use RackMap.`));}
 module.exports={createApp};
