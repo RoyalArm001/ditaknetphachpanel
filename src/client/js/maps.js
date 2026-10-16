@@ -149,7 +149,11 @@ globalThis.RackMaps=(()=>{
     const mapFloors=[...new Set(plans.map(p=>p.floorId))];
     const allPlaced=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.markers||[]).map(m=>mapData.canonical(m.portId))));
     const currentFloor=state.floors.find(f=>f.id===plan?.floorId);
-    const floorRacks=currentFloor?(currentFloor.racks||[]):state.floors.flatMap(f=>f.racks||[]);
+    const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
+    const curFloorRacks=currentFloor?(allRacksList.filter(r=>(currentFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
+    const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
+    const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id));
+    if(unplacedRacks.length===0&&view.activeTab==='racks')view.activeTab='devices';
     document.body.classList.add('map-view');
     root.innerHTML=plans.length?`
       <section class="map-editor" aria-label="${esc(tr('Քարտեզի խմբագրիչ'))}">
@@ -161,7 +165,7 @@ globalThis.RackMaps=(()=>{
             ${!h.readOnly?tool('Բեռնել հատակագիծ','upload','plus'):''}
           </div></div>
           <div class="map-top-actions"><button type="button" class="map-command" data-map-action="print" title="${esc(tr('Տպել հատակագիծը'))}" aria-label="${esc(tr('Տպել հատակագիծը'))}">${svg('printer')}</button><button type="button" class="map-command" data-map-action="map-pdf" title="${esc(tr('Քարտեզ PDF'))}" aria-label="${esc(tr('Քարտեզ PDF'))}">${svg('pdf')}</button><button type="button" class="map-command" data-map-action="share" title="${esc(tr('Կիսվել հղումով'))}" aria-label="${esc(tr('Կիսվել հղումով'))}">${svg('share')}</button>
-            <details class="map-more"><summary class="map-tool" title="${esc(tr('Լրացուցիչ գործիքներ'))}" aria-label="${esc(tr('Լրացուցիչ գործիքներ'))}">${svg('more')}</summary><div class="map-more-menu"><label class="map-marker-size"><span>${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</span><output data-image-opacity-value>${view.imageOpacity}%</output><input type="range" min="0" max="90" step="10" value="${view.imageOpacity}" data-map-image-opacity aria-label="${esc(tr('Հատ. ֆոնի մաղձոտ.'))}"></label>${!h.readOnly?button('Խմբագրել հատակագիծը','edit'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}${!h.readOnly?button('Ջնջել հատակագիծը','delete'):''}</div></details>
+            <details class="map-more"><summary class="map-tool" title="${esc(tr('Լրացուցիչ գործիքներ'))}" aria-label="${esc(tr('Լրացուցիչ գործիքներ'))}">${svg('more')}</summary><div class="map-more-menu"><label class="map-marker-size"><span>${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</span><output data-image-opacity-value>${view.imageOpacity}%</output><input type="range" min="0" max="90" step="10" value="${view.imageOpacity}" data-map-image-opacity aria-label="${esc(tr('Հատ. ֆոնի մաղձոտ.'))}"></label>${!h.readOnly?button('Ավելացնել ռաք','create-map-rack'):''}${!h.readOnly?button('Խմբագրել հատակագիծը','edit'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}${button('Իմ հղումները','shares')}${!h.readOnly?button('Ջնջել հատակագիծը','delete'):''}</div></details>
           </div>
         </div>
         <div class="map-filters" role="group" aria-label="${esc(tr('Սարքի տեսակ'))}">${['all',...placedServices].map(id=>{const name=id==='all'?tr('Բոլորը'):D.serviceLabel(state,id,tr),count=id==='all'?mapData.markers.length:mapData.markers.filter(m=>m.row.service===id).length;return `<button type="button" data-map-filter="${esc(id)}" title="${esc(name)}" aria-label="${esc(name+' · '+count)}" aria-pressed="${view.filter===id}">${id==='all'?svg('devices'):icon(id)}<small aria-hidden="true">${count}</small></button>`;}).join('')}<button type="button" class="map-filter-clear" data-map-filter="clear" title="${esc(tr('Մաքրել ֆիլտրերը'))}" aria-label="${esc(tr('Մաքրել ֆիլտրերը'))}" ${view.filter==='all'&&!view.query.trim()?'hidden':''}>${svg('close')}</button></div>
@@ -171,7 +175,7 @@ globalThis.RackMaps=(()=>{
           <label class="map-marker-size"><span>${esc(tr('Գծերի հաստություն'))}</span><output data-line-width-value>${view.lineWidth} px</output><input type="range" min="1" max="6" step="0.5" value="${view.lineWidth}" data-map-line-width aria-label="${esc(tr('Գծերի հաստություն'))}"></label>
           ${button('Սկզբնական չափեր','appearance-reset')}
         </div></details>
-        <aside class="map-sidebar ${view.devicesOpen?'is-open':''}" aria-label="${esc(tr('Միացված սարքեր'))}"><div class="map-sidebar-heading"><span>${svg('devices')}${esc(tr('Միացված սարքեր'))}</span>${tool('Փակել','devices-toggle','close')}</div><div class="map-sidebar-tabs" role="tablist"><button type="button" class="map-sidebar-tab ${view.activeTab!=='racks'?'active':''}" data-map-tab="devices" role="tab" aria-selected="${view.activeTab!=='racks'}">${svg('devices')}<span>${esc(tr('Սարքեր'))}</span><small data-unplaced-count>${mapData.devices.filter(r=>!allPlaced().has(r.p.id)).length}</small></button><button type="button" class="map-sidebar-tab ${view.activeTab==='racks'?'active':''}" data-map-tab="racks" role="tab" aria-selected="${view.activeTab==='racks'}">${svg('server')}<span>${esc(tr('Ռաքեր'))}</span><small data-floor-racks-count>${floorRacks.length}</small></button></div><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field" ${view.activeTab==='racks'?'hidden':''}><span>${esc(tr('Որոնում'))}</span><input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint" data-tab-hint>${esc(view.activeTab==='racks'?tr('Ընտրեք ռաքը և սեղմեք հատակագծի վրա՝ այն տեղադրելու համար։'):tr('Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>
+        <aside class="map-sidebar ${view.devicesOpen?'is-open':''}" aria-label="${esc(tr('Միացված սարքեր'))}"><div class="map-sidebar-heading"><span>${svg('devices')}${esc(tr('Միացված սարքեր'))}</span>${tool('Փակել','devices-toggle','close')}</div><div class="map-sidebar-tabs" role="tablist" ${unplacedRacks.length===0?'hidden':''}><button type="button" class="map-sidebar-tab ${view.activeTab!=='racks'?'active':''}" data-map-tab="devices" role="tab" aria-selected="${view.activeTab!=='racks'}">${svg('devices')}<span>${esc(tr('Սարքեր'))}</span><small data-unplaced-count>${mapData.devices.filter(r=>!allPlaced().has(r.p.id)).length}</small></button><button type="button" class="map-sidebar-tab ${view.activeTab==='racks'?'active':''}" data-map-tab="racks" role="tab" aria-selected="${view.activeTab==='racks'}" ${unplacedRacks.length===0?'hidden':''}>${svg('server')}<span>${esc(tr('Ռաքեր'))}</span><small data-floor-racks-count>${unplacedRacks.length}</small></button></div><div id="map-device-picker" class="map-picker-body" ${view.devicesOpen?'':'hidden'}><label class="field" ${view.activeTab==='racks'?'hidden':''}><span>${esc(tr('Որոնում'))}</span><input data-map-search value="${esc(view.query)}" placeholder="${esc(tr('Սարքի տեսակ, մալուխ կամ սենյակ'))}"></label><p class="hint" data-tab-hint>${esc(view.activeTab==='racks'?tr('Ընտրեք ռաքը և սեղմեք հատակագծի վրա՝ այն տեղադրելու համար։'):tr('Ընտրեք սարքը և սեղմեք հատակագծի վրա։'))}</p><div class="map-port-list"></div></div></aside></div>
         <div class="map-view-tools" role="group" aria-label="${esc(tr('Քարտեզի դիտում'))}">${tool('Տեղավորել էկրանին','fit','fit')}${tool('Մեծացնել','zoom-in','plus')}<button type="button" class="map-zoom-value" data-map-action="zoom-reset" data-map-zoom aria-label="100%">100%</button>${tool('Փոքրացնել','zoom-out','minus')}${tool('Ամբողջ էկրանով','fullscreen','fullscreen')}</div>
         <div class="map-bottom-toolbar" role="toolbar" aria-label="${esc(tr('Քարտեզի գործիքներ'))}">${tool('Ընտրել (V)','select','select',`aria-pressed="${view.tool==='select'}"`)}${tool('Տեղաշարժել դաշտը (H / Space)','hand','hand',`aria-pressed="${view.tool==='hand'}"`)}<i></i>${tool('Հետ վերցնել (Ctrl+Z)','undo','undo',undoStack.length?'':'disabled')}${tool('Կրկին կատարել (Ctrl+Y)','redo','redo',redoStack.length?'':'disabled')}<i></i>${tool(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)','lock-toggle',view.locked?'lock':'unlock',`aria-pressed="${!!view.locked}"`)}${tool('Ցույց տալ անվանումները','labels','labels',`aria-pressed="${view.labels}"`)}${tool(view.showCables?'Թաքցնել միացումները':'Ցուցադրել միացումները','cables-toggle','cableRoutes',`aria-pressed="${!!view.showCables}"`)}<i></i><button type="button" class="map-command map-add-devices" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker">${svg('devices')}<span>${esc(tr('Ավելացնել սարք'))}</span><small>${mapData.devices.filter(r=>!allPlaced().has(r.p.id)).length}</small></button></div>
         <p class="map-status" data-map-hint role="status"></p>
@@ -333,17 +337,32 @@ globalThis.RackMaps=(()=>{
       const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
       const curFloor=state.floors.find(f=>f.id===plan?.floorId);
       const curFloorRacks=curFloor?(allRacksList.filter(r=>(curFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
-      if(floorRacksCountEl)floorRacksCountEl.textContent=String(curFloorRacks.length);
+      const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
+      const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id));
+      const sidebarTabs=root.querySelector('.map-sidebar-tabs');
+      if(sidebarTabs)sidebarTabs.hidden=unplacedRacks.length===0;
+      if(unplacedRacks.length===0&&view.activeTab==='racks'){
+        view.activeTab='devices';
+      }
+      const racksTabBtn=root.querySelector('[data-map-tab="racks"]');
+      if(racksTabBtn)racksTabBtn.hidden=unplacedRacks.length===0;
+      if(floorRacksCountEl)floorRacksCountEl.textContent=String(unplacedRacks.length);
+      root.querySelectorAll('[data-map-tab]').forEach(b=>{
+        const active=b.dataset.mapTab===view.activeTab;
+        b.classList.toggle('active',active);
+        b.setAttribute('aria-selected',String(active));
+      });
+      const searchField=root.querySelector('.map-picker-body .field');
+      if(searchField)searchField.hidden=view.activeTab==='racks';
+      const hintEl=root.querySelector('[data-tab-hint]');
+      if(hintEl)hintEl.textContent=view.activeTab==='racks'?tr('Ընտրեք ռաքը և սեղմեք հատակագծի վրա՝ այն տեղադրելու համար։'):tr('Ընտրեք սարքը և սեղմեք հատակագծի վրա։');
       const addCount=root.querySelector('.map-add-devices small');if(addCount)addCount.textContent=String(mapData.devices.filter(r=>!placedSet.has(r.p.id)).length);
       const portList=root.querySelector('.map-port-list');
       if(view.activeTab==='racks'){
-        const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
-        portList.innerHTML=(!h.readOnly?`<button type="button" class="button primary map-btn-add-new-device" data-map-action="create-map-rack">${svg('plus')}<span>${esc(tr('Ավելացնել ռաք'))}</span></button>`:'')+`<div class="map-rack-list">${curFloorRacks.map(r=>{
-          const isPlaced=placedRackIds.has(r.id);
-          const rm=(plan?.rackMarkers||[]).find(x=>x.rackId===r.id);
+        portList.innerHTML=(!h.readOnly?`<button type="button" class="button primary map-btn-add-new-device" data-map-action="create-map-rack">${svg('plus')}<span>${esc(tr('Ավելացնել ռաք'))}</span></button>`:'')+`<div class="map-rack-list">${unplacedRacks.map(r=>{
           const devCount=mapData.devices.filter(d=>d.r.id===r.id).length;
           const isPlacingThis=view.placingRackId===r.id;
-          return `<div class="map-rack-card ${isPlacingThis?'selected':''}" ${!isPlaced && !h.readOnly ? `data-map-place-rack="${esc(r.id)}" role="button" tabindex="0"` : ''}><div class="map-rack-card-info"><strong>${esc(r.name)}</strong><small>${r.u||r.height||42}U · ${devCount} ${esc(tr('սարք'))}</small></div>${isPlaced?`<span class="map-rack-badge">${svg('fit')}${esc(tr('Տեղադրված է'))}</span><button type="button" class="map-rack-card-btn" data-map-locate-rack="${esc(rm.id)}" title="${esc(tr('Ընտրել ռաքը'))}">${svg('fit')}</button>`:!h.readOnly?`<button type="button" class="button primary small ${isPlacingThis?'active':''}" data-map-place-rack="${esc(r.id)}">${svg('plus')}<span>${esc(tr(isPlacingThis?'Տեղադրվում է…':'Տեղադրել'))}</span></button>`:''}</div>`;
+          return `<div class="map-rack-card ${isPlacingThis?'selected':''}" ${!h.readOnly ? `data-map-place-rack="${esc(r.id)}" role="button" tabindex="0"` : ''}><div class="map-rack-card-info"><strong>${esc(r.name)}</strong><small>${r.u||r.height||42}U · ${devCount} ${esc(tr('սարք'))}</small></div>${!h.readOnly?`<button type="button" class="button primary small ${isPlacingThis?'active':''}" data-map-place-rack="${esc(r.id)}">${svg('plus')}<span>${esc(tr(isPlacingThis?'Տեղադրվում է…':'Տեղադրել'))}</span></button>`:''}</div>`;
         }).join('')||`<p class="hint map-list-empty">${esc(tr('Այս հարկում ռաքեր չկան'))}</p>`}</div>`;
       } else {
         const matches=r=>visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
@@ -684,6 +703,7 @@ globalThis.RackMaps=(()=>{
         else target.rackMarkers.push({id:crypto.randomUUID(),rackId,x,y,iconX:x,iconY:y});
       });
       view.placingRackId='';
+      view.activeTab='devices';
       toast(tr('Ռաքը տեղադրվեց քարտեզի վրա'));
     }
     function moveRackMarker(id,x,y){

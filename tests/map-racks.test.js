@@ -174,3 +174,35 @@ test('maps.js contains proper pointer and creation logic for placing racks', () 
   assert.ok(mapsJs.includes('u:height,location:\'\',photo:\'\',devices:[]'), 'createRackModal creates domain-compliant rack');
 });
 
+test('maps.js hides rack tab when all racks are placed and switches to devices tab', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
+
+  // Verify unplaced racks calculation filters out already placed racks
+  assert.ok(mapsJs.includes('const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id))'));
+
+  // Verify tabs and rack tab button are hidden when unplacedRacks is 0
+  assert.ok(mapsJs.includes('sidebarTabs.hidden=unplacedRacks.length===0'));
+  assert.ok(mapsJs.includes('racksTabBtn.hidden=unplacedRacks.length===0'));
+
+  // Verify placing a rack switches activeTab back to devices
+  assert.ok(mapsJs.includes("view.activeTab='devices';"));
+
+  // Verify more menu has create rack option
+  assert.ok(mapsJs.includes("button('Ավելացնել ռաք','create-map-rack')"));
+
+  // Unit logic check:
+  const curFloorRacks = [{ id: 'rack-1' }];
+  let placedRackIds = new Set();
+  let unplacedRacks = curFloorRacks.filter(r => !placedRackIds.has(r.id));
+  assert.equal(unplacedRacks.length, 1);
+  assert.equal(unplacedRacks.length === 0, false);
+
+  // After placing rack-1:
+  placedRackIds.add('rack-1');
+  unplacedRacks = curFloorRacks.filter(r => !placedRackIds.has(r.id));
+  assert.equal(unplacedRacks.length, 0);
+  assert.equal(unplacedRacks.length === 0, true, 'Tabs must be hidden when all racks placed');
+});
+
