@@ -1,6 +1,11 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Յուրաքանչյուր էջի համար ընտրեք հարկ կամ բաց թողեք էջը։":["Choose a floor for each page or skip it.","Выберите этаж для каждой страницы или пропустите её."],
+"Այս էջը ո՞ր հարկին է պատկանում":["Which floor does this page belong to?","К какому этажу относится эта страница?"],
+"Ընտրեք հարկը կամ բաց թողեք":["Choose a floor or skip","Выберите этаж или пропустите"],
+"Նախորդ էջը":["Previous page","Предыдущая страница"],
+"Հաջորդ էջը":["Next page","Следующая страница"],
 "PNG, JPEG, WebP կամ բազմաէջ PDF։ Յուրաքանչյուր էջի համար կարող եք ընտրել հարկ։":["PNG, JPEG, WebP or a multi-page PDF. You can choose a floor for each page.","PNG, JPEG, WebP или многостраничный PDF. Для каждой страницы можно выбрать этаж."],
 "Փոխարինել ֆայլը":["Replace file","Заменить файл"],
 "Ֆայլը փոխարինելիս նշաններն ու կապերը պահպանվում են։ Նոր գծագրի վրա ստուգեք դրանց դիրքերը։":["Replacing the file preserves markers and connections. Check their positions on the new drawing.","При замене файла значки и связи сохраняются. Проверьте их положение на новом плане."],

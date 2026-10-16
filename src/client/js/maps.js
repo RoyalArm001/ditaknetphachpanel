@@ -355,7 +355,7 @@ globalThis.RackMaps=(()=>{
 
     function upload(replacing=false){
       const targetId=replacing?plan.id:null,floors=[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])];
-      let pages=1,loading=false,fileError='',generation=0;
+      let pages=1,loading=false,fileError='',generation=0,currentPage=1;const pageImages=new Map();
       modal(tr(replacing?'Խմբագրել հատակագիծը':'Բեռնել հատակագիծ'),`<div class="form-grid">${input('planName',tr('Անվանում'),replacing?plan.name:'','text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),floors,replacing?plan.floorId:'')}<label class="field">${esc(tr(replacing?'Փոխարինել ֆայլը':'Հատակագծի ֆայլ'))}<input name="planFile" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" ${replacing?'':'required'}></label>${replacing?input('pdfPage',tr('PDF էջ'),1,'number','required min="1" max="1"'):''}</div><p class="hint">${esc(tr(replacing?'Ֆայլը փոխարինելիս նշաններն ու կապերը պահպանվում են։ Նոր գծագրի վրա ստուգեք դրանց դիրքերը։':'Ընտրեք մեկ PDF և յուրաքանչյուր էջին նշանակեք հարկ։ Ավելորդ էջերը կարող եք բաց թողնել։'))}</p><p class="hint" data-plan-loading role="status" hidden>${esc(tr('Ֆայլը մշակվում է…'))}</p><div class="map-import-pages" data-plan-pages></div>`,async fd=>{
         if(loading)throw new Error(tr('Ֆայլը մշակվում է…'));if(fileError)throw new Error(fileError);
         const file=fd.get('planFile'),hasFile=file?.size>0,name=String(fd.get('planName')).trim(),floorId=String(fd.get('planFloor'));
@@ -366,7 +366,9 @@ globalThis.RackMaps=(()=>{
           let projectedSize=new Blob([JSON.stringify(getState())]).size;
           for(let page=1;page<=pages;page++){
             const floor=pages>1?String(fd.get('pageFloor'+page)):floorId;if(floor==='__skip')continue;
-            const image=await readPlan(file,page,tr),pageName=pages>1?String(fd.get('pageName'+page)).trim():name;
+            if(floor==='__choose')throw new Error(tr('Յուրաքանչյուր էջի համար ընտրեք հարկ կամ բաց թողեք էջը։'));
+            const image=pageImages.get(page)||await readPlan(file,page,tr),pageName=pages>1?String(fd.get('pageName'+page)).trim():name;
+            if(!pageName)throw new Error(tr('Անվանում'));
             const entry={id:crypto.randomUUID(),name:pageName,floorId:floor,...image,markers:[]};
             projectedSize+=new Blob([JSON.stringify(entry)]).size;
             if(projectedSize>h.maxBytes-16384)throw new Error(tr('Հատակագիծը չի տեղավորվում բազայում։ Փոքրացրեք ֆայլը։'));
@@ -382,16 +384,31 @@ globalThis.RackMaps=(()=>{
         });
       });
       const form=document.querySelector('#modalForm'),field=form.elements.planFile,status=form.querySelector('[data-plan-loading]'),list=form.querySelector('[data-plan-pages]');
+      const submit=form.querySelector('[type=submit]');
+      async function showPage(number){
+        currentPage=number;const token=generation;
+        list.querySelectorAll('[data-import-page]').forEach(el=>{el.hidden=Number(el.dataset.importPage)!==number;});
+        submit.hidden=number<pages;
+        const card=list.querySelector(`[data-import-page="${number}"]`);if(!card)return;
+        const preview=card.querySelector('img'),hint=card.querySelector('[data-preview-status]');
+        try{const image=pageImages.get(number)||await readPlan(field.files[0],number,tr);if(token!==generation||!form.isConnected)return;pageImages.set(number,image);preview.src=image.image;preview.hidden=false;hint.hidden=true;}
+        catch(error){if(token===generation&&form.isConnected){hint.textContent=error.message;}}
+      }
+      function advance(){const choice=form.elements['pageFloor'+currentPage],name=form.elements['pageName'+currentPage];if(choice.value==='__choose'||(choice.value!=='__skip'&&!name.value.trim())){const box=form.querySelector('#formError');box.textContent=tr('Յուրաքանչյուր էջի համար ընտրեք հարկ կամ բաց թողեք էջը։');box.hidden=false;choice.focus();return;}form.querySelector('#formError').hidden=true;void showPage(Math.min(pages,currentPage+1));}
+      list.addEventListener('click',e=>{if(e.target.closest('[data-page-next]'))advance();if(e.target.closest('[data-page-back]'))void showPage(Math.max(1,currentPage-1));});
+      form.addEventListener('submit',e=>{if(!replacing&&pages>1&&currentPage<pages){e.preventDefault();e.stopImmediatePropagation();advance();}},{capture:true});
       field.addEventListener('change',async()=>{
-        const token=++generation,file=field.files[0];pages=1;fileError='';field.setCustomValidity('');list.innerHTML='';
+        const token=++generation,file=field.files[0];pages=1;currentPage=1;pageImages.clear();submit.hidden=false;fileError='';field.setCustomValidity('');list.innerHTML='';
+        form.elements.planName.closest('.field').hidden=false;form.elements.planFloor.closest('.field').hidden=false;
         loading=!!file;status.hidden=!loading;form.querySelector('[type=submit]').disabled=loading;form.querySelector('#formError').hidden=true;
         if(replacing){form.elements.pdfPage.max='1';form.elements.pdfPage.value='1';}
         if(!file)return;
         try{
           const count=await planPageCount(file,tr);if(token!==generation||!form.isConnected)return;pages=count;
+          if(!replacing&&pages>1){form.elements.planName.closest('.field').hidden=true;form.elements.planFloor.closest('.field').hidden=true;}
           if(!form.elements.planName.value.trim())form.elements.planName.value=file.name.replace(/\.[^.]+$/,'').slice(0,180);
           if(replacing){form.elements.pdfPage.max=String(pages);form.elements.pdfPage.value='1';}
-          else if(pages>1)list.innerHTML=`<h3>${esc(tr('Էջերի հարկերը'))}</h3>`+Array.from({length:pages},(_,i)=>{const page=i+1;return `<section class="map-import-page"><strong>${esc(tr('PDF էջ'))} ${page}</strong><div class="form-grid">${input('pageName'+page,tr('Անվանում'),form.elements.planName.value.slice(0,180)+' · '+page,'text','required maxlength="200"')}${select('pageFloor'+page,tr('Հարկ'),[['__skip',tr('Բաց թողնել էջը')],...floors],form.elements.planFloor.value)}</div></section>`;}).join('');
+          else if(pages>1){list.innerHTML=`<h3>${esc(tr('Էջերի հարկերը'))}</h3>`+Array.from({length:pages},(_,i)=>{const page=i+1;return `<section class="map-import-page" data-import-page="${page}" ${page===1?'':'hidden'}><strong>${esc(tr('PDF էջ'))} ${page} / ${pages}</strong><p data-preview-status class="hint" role="status">${esc(tr('Ֆայլը մշակվում է…'))}</p><img class="map-import-preview" alt="${esc(tr('PDF էջ'))} ${page}" hidden><div class="form-grid">${input('pageName'+page,tr('Անվանում'),form.elements.planName.value.slice(0,180)+' · '+page,'text','maxlength="200"')}${select('pageFloor'+page,tr('Այս էջը ո՞ր հարկին է պատկանում'),[['__choose',tr('Ընտրեք հարկը կամ բաց թողեք')],...floors,['__skip',tr('Բաց թողնել էջը')]],'__choose')}</div><div class="actions">${page>1?`<button type="button" class="button" data-page-back>${esc(tr('Նախորդ էջը'))}</button>`:''}${page<pages?`<button type="button" class="button primary" data-page-next>${esc(tr('Հաջորդ էջը'))}</button>`:''}</div></section>`;}).join('');void showPage(1);}
         }catch(error){if(token!==generation||!form.isConnected)return;fileError=error.message;field.setCustomValidity(fileError);const box=form.querySelector('#formError');box.hidden=false;box.textContent=fileError;}
         finally{if(token===generation&&form.isConnected){loading=false;status.hidden=true;form.querySelector('[type=submit]').disabled=false;}}
       });
