@@ -255,6 +255,7 @@ body.map-view #content:fullscreen .map-filters{top:auto;bottom:88px;left:50%;tra
 .map-appearance summary{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;list-style:none;border-radius:7px;transition:background .15s,color .15s}
 .map-appearance summary:hover,.map-appearance[open]>summary{background:var(--map-field);color:var(--map-active)}
 .map-appearance summary::-webkit-details-marker{display:none}
+.map-appearance summary>span{display:none}
 .map-appearance summary svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;flex-shrink:0}
 .map-appearance summary:after{content:'';width:6px;height:6px;margin-left:4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}
 .map-appearance[open] summary:after{transform:translateY(2px) rotate(225deg)}

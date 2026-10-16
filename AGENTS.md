@@ -7,3 +7,4 @@
 - Preserve the `history` array in `src/client/release.json`. Before changing the current version, prepend its version, date and HY/EN/RU notes to history if that version is not already present; set the new release date. Never invent missing historical releases.
 - Use a Git commit message that names the actual change. Do not claim that background push notifications or emails were sent; release notices appear inside the app.
 - Respect any user instruction to keep work local. Updating release notes does not authorize a push.
+- Release numbering follows the user's convention: the final component must not exceed 10. After a release ending in .10, increment the major component and restart at .0.1 (for example, 2.11.10 → 3.0.1). Preserve already published version numbers in history; correct the current release to 3.0.1 after the legacy 2.11.19 sequence.
