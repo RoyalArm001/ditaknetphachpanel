@@ -274,3 +274,4 @@ body.map-view #content:fullscreen .map-filters{top:auto;bottom:88px;left:50%;tra
 .map-filters button small{position:absolute;display:grid;top:1px;right:1px;min-width:16px;height:15px;padding:0 3px;border-radius:5px;font-size:9px;font-weight:700;line-height:1;background:var(--map-field);color:var(--map-text);font-variant-numeric:tabular-nums;pointer-events:none}
 .map-filters button[aria-pressed=true] small{background:var(--map-active);color:var(--map-surface)}
 .map-filters .map-filter-clear{padding:7px}
+.map-import-pages{display:grid;gap:12px;margin-top:16px}.map-import-pages:empty{display:none}.map-import-pages h3{margin:0;font-size:15px}.map-import-page{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft)}.map-import-page>strong{display:block;margin-bottom:10px;font-size:13px}.map-import-page .form-grid{gap:12px}

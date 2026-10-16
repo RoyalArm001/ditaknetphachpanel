@@ -1,28 +1,53 @@
 {
-  "version": "3.0.1",
+  "version": "3.0.2",
   "hy": {
     "title": "Հավելվածն ունի թարմացում",
     "changes": [
-      "«Նշաններ և գծեր» կոճակը բոլոր էկրաններին ցուցադրվում է առանց տեքստի։",
-      "Թողարկումների համարակալումն ուղղվել է՝ 3.0.1։"
+      "Հատակագծի խմբագրման պատուհանում կարող եք փոխարինել նկարը կամ PDF էջը՝ պահպանելով սարքերի նշաններն ու կապերը։",
+      "Բազմաէջ PDF-ը բեռնեք մեկ անգամ, յուրաքանչյուր էջի համար ընտրեք հարկն ու անվանումը կամ բաց թողեք էջը։"
     ]
   },
   "en": {
     "title": "App update",
     "changes": [
-      "The Symbols and lines button now appears without text on every screen size.",
-      "Corrected the release numbering to 3.0.1."
+      "Replace a floor plan image or PDF page while preserving device markers and connections.",
+      "Upload a multi-page PDF once, then assign a floor and name to each page or skip pages."
     ]
   },
   "ru": {
     "title": "Обновление приложения",
     "changes": [
-      "Кнопка «Значки и линии» теперь отображается без текста на всех экранах.",
-      "Нумерация выпусков исправлена на 3.0.1."
+      "Заменяйте изображение плана или страницу PDF с сохранением значков устройств и связей.",
+      "Загрузите многостраничный PDF один раз и выберите этаж и название для каждой страницы или пропустите ненужные."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "3.0.1",
+      "hy": {
+        "title": "Հավելվածն ունի թարմացում",
+        "changes": [
+          "«Նշաններ և գծեր» կոճակը բոլոր էկրաններին ցուցադրվում է առանց տեքստի։",
+          "Թողարկումների համարակալումն ուղղվել է՝ 3.0.1։"
+        ]
+      },
+      "en": {
+        "title": "App update",
+        "changes": [
+          "The Symbols and lines button now appears without text on every screen size.",
+          "Corrected the release numbering to 3.0.1."
+        ]
+      },
+      "ru": {
+        "title": "Обновление приложения",
+        "changes": [
+          "Кнопка «Значки и линии» теперь отображается без текста на всех экранах.",
+          "Нумерация выпусков исправлена на 3.0.1."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "2.11.19",
       "hy": {

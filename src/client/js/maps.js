@@ -55,6 +55,14 @@ globalThis.RackMaps=(()=>{
     if(image.length>2500000)throw new Error(tr('Հատակագիծը չափազանց մեծ է'));
     return {image,width:canvas.width,height:canvas.height};
   }
+  async function planPageCount(file,tr){
+    if(file.size>30*1024*1024)throw new Error(tr('Հատակագծի ֆայլը պետք է լինի մինչև 30 ՄԲ'));
+    if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))return 1;
+    const lib=await import('/pdfjs/pdf.mjs');lib.GlobalWorkerOptions.workerSrc='/pdfjs/pdf.worker.mjs';
+    const task=lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,useWasm:false});
+    let locked=false;task.onPassword=()=>{locked=true;void task.destroy();};
+    try{return (await task.promise).numPages;}catch(error){if(locked)throw new Error(tr('Բեռնեք առանց գաղտնաբառի PDF'));throw error;}finally{await task.destroy();}
+  }
   function mount(root,h){
     const {tr,esc,commit,getState,modal,input,select,toast,download,save}=h,abort=new AbortController();
     const key=h.projectKey;let view=ui.get(key);if(!view){view={planId:'',portId:'',query:'',zoom:1,imageOpacity:0};ui.set(key,view);}
@@ -133,7 +141,7 @@ globalThis.RackMaps=(()=>{
         <div class="map-view-tools" role="group" aria-label="${esc(tr('Քարտեզի դիտում'))}">${tool('Տեղավորել էկրանին','fit','fit')}${tool('Մեծացնել','zoom-in','plus')}<button type="button" class="map-zoom-value" data-map-action="zoom-reset" data-map-zoom aria-label="100%">100%</button>${tool('Փոքրացնել','zoom-out','minus')}${tool('Ամբողջ էկրանով','fullscreen','fullscreen')}</div>
         <div class="map-bottom-toolbar" role="toolbar" aria-label="${esc(tr('Քարտեզի գործիքներ'))}">${tool('Ընտրել (V)','select','select',`aria-pressed="${view.tool==='select'}"`)}${tool('Տեղաշարժել դաշտը (H / Space)','hand','hand',`aria-pressed="${view.tool==='hand'}"`)}<i></i>${tool('Հետ վերցնել (Ctrl+Z)','undo','undo',undoStack.length?'':'disabled')}${tool('Կրկին կատարել (Ctrl+Y)','redo','redo',redoStack.length?'':'disabled')}<i></i>${tool(view.locked?'Ապակողպել դաշտը':'Կողպել դաշտը (Lock)','lock-toggle',view.locked?'lock':'unlock',`aria-pressed="${!!view.locked}"`)}${tool('Ցույց տալ անվանումները','labels','labels',`aria-pressed="${view.labels}"`)}<i></i><button type="button" class="map-command map-add-devices" data-map-action="devices-toggle" aria-expanded="${!!view.devicesOpen}" aria-controls="map-device-picker">${svg('devices')}<span>${esc(tr('Ավելացնել սարք'))}</span><small>${mapData.devices.filter(r=>!allPlaced().has(r.p.id)).length}</small></button></div>
         <p class="map-status" data-map-hint role="status"></p>
-      </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
+      </section>`:`<section class="map-empty-editor"><div>${svg('plan')}<span class="eyebrow">${esc(state.company)}</span><h1>${esc(tr('Քարտեզի խմբագրիչ'))}</h1><p>${esc(tr('Բեռնեք հատակագիծը և տեղադրեք միացված սարքերը համապատասխան տեղերում։'))}</p><p class="hint">${esc(tr('PNG, JPEG, WebP կամ բազմաէջ PDF։ Յուրաքանչյուր էջի համար կարող եք ընտրել հարկ։'))}</p>${!h.readOnly?button('Բեռնել հատակագիծ','upload'):''}${button('Սարքերի սխեմաներ PDF','panel-pdf',D.devices(state).length?'':'disabled')}</div></section>`;
     const headerControls=root.querySelector('.map-plan-controls'),projectHeader=root.querySelector('.map-project');
     const topActions=root.querySelector('.map-top-actions');
     const appearance=root.querySelector('.map-appearance');
@@ -345,10 +353,47 @@ globalThis.RackMaps=(()=>{
       createDeviceModal({service:row.service,model:row.d?.model||'',endpointName:nextName,room:row.room||'',cable:'',vlan:row.vlan||''});
     }
 
-    async function upload(){
-      modal(tr('Բեռնել հատակագիծ'),`<div class="form-grid">${input('planName',tr('Անվանում'),'','text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])],'')}${input('pdfPage',tr('PDF էջ'),1,'number','required min="1" max="10000"')}<label class="field">${esc(tr('Հատակագծի ֆայլ'))}<input name="planFile" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" required></label></div><p class="hint">${esc(tr('PNG, JPEG, WebP կամ PDF։ Յուրաքանչյուր PDF էջը բեռնեք որպես առանձին հատակագիծ։'))}</p>`,async fd=>{
-        const file=fd.get('planFile'),image=await readPlan(file,+fd.get('pdfPage'),tr),id=crypto.randomUUID();
-        change(s=>{s.floorPlans||=[];s.floorPlans.push({id,name:String(fd.get('planName')).trim(),floorId:String(fd.get('planFloor')),...image,markers:[]});if(new Blob([JSON.stringify(s)]).size>h.maxBytes-16384)throw new Error(tr('Հատակագիծը չի տեղավորվում բազայում։ Փոքրացրեք ֆայլը։'));view.planId=id;view.zoom=1;});
+    function upload(replacing=false){
+      const targetId=replacing?plan.id:null,floors=[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])];
+      let pages=1,loading=false,fileError='',generation=0;
+      modal(tr(replacing?'Խմբագրել հատակագիծը':'Բեռնել հատակագիծ'),`<div class="form-grid">${input('planName',tr('Անվանում'),replacing?plan.name:'','text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),floors,replacing?plan.floorId:'')}<label class="field">${esc(tr(replacing?'Փոխարինել ֆայլը':'Հատակագծի ֆայլ'))}<input name="planFile" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" ${replacing?'':'required'}></label>${replacing?input('pdfPage',tr('PDF էջ'),1,'number','required min="1" max="1"'):''}</div><p class="hint">${esc(tr(replacing?'Ֆայլը փոխարինելիս նշաններն ու կապերը պահպանվում են։ Նոր գծագրի վրա ստուգեք դրանց դիրքերը։':'Ընտրեք մեկ PDF և յուրաքանչյուր էջին նշանակեք հարկ։ Ավելորդ էջերը կարող եք բաց թողնել։'))}</p><p class="hint" data-plan-loading role="status" hidden>${esc(tr('Ֆայլը մշակվում է…'))}</p><div class="map-import-pages" data-plan-pages></div>`,async fd=>{
+        if(loading)throw new Error(tr('Ֆայլը մշակվում է…'));if(fileError)throw new Error(fileError);
+        const file=fd.get('planFile'),hasFile=file?.size>0,name=String(fd.get('planName')).trim(),floorId=String(fd.get('planFloor'));
+        const additions=[];let replacement;
+        if(replacing){if(hasFile)replacement=await readPlan(file,+fd.get('pdfPage'),tr);}
+        else{
+          if(!hasFile)throw new Error(tr('Ընտրեք PNG, JPEG, WebP կամ PDF'));
+          let projectedSize=new Blob([JSON.stringify(getState())]).size;
+          for(let page=1;page<=pages;page++){
+            const floor=pages>1?String(fd.get('pageFloor'+page)):floorId;if(floor==='__skip')continue;
+            const image=await readPlan(file,page,tr),pageName=pages>1?String(fd.get('pageName'+page)).trim():name;
+            const entry={id:crypto.randomUUID(),name:pageName,floorId:floor,...image,markers:[]};
+            projectedSize+=new Blob([JSON.stringify(entry)]).size;
+            if(projectedSize>h.maxBytes-16384)throw new Error(tr('Հատակագիծը չի տեղավորվում բազայում։ Փոքրացրեք ֆայլը։'));
+            additions.push(entry);
+          }
+          if(!additions.length)throw new Error(tr('Ընտրեք առնվազն մեկ էջ'));
+        }
+        change(s=>{
+          if(replacing){const target=s.floorPlans.find(p=>p.id===targetId);if(!target)throw new Error(tr('Չի գտնվել'));Object.assign(target,{name,floorId},replacement||{});}
+          else{s.floorPlans||=[];s.floorPlans.push(...additions);}
+          if(new Blob([JSON.stringify(s)]).size>h.maxBytes-16384)throw new Error(tr('Հատակագիծը չի տեղավորվում բազայում։ Փոքրացրեք ֆայլը։'));
+          view.planId=replacing?targetId:additions[0].id;view.camera=null;view.zoom=1;
+        });
+      });
+      const form=document.querySelector('#modalForm'),field=form.elements.planFile,status=form.querySelector('[data-plan-loading]'),list=form.querySelector('[data-plan-pages]');
+      field.addEventListener('change',async()=>{
+        const token=++generation,file=field.files[0];pages=1;fileError='';field.setCustomValidity('');list.innerHTML='';
+        loading=!!file;status.hidden=!loading;form.querySelector('[type=submit]').disabled=loading;form.querySelector('#formError').hidden=true;
+        if(replacing){form.elements.pdfPage.max='1';form.elements.pdfPage.value='1';}
+        if(!file)return;
+        try{
+          const count=await planPageCount(file,tr);if(token!==generation||!form.isConnected)return;pages=count;
+          if(!form.elements.planName.value.trim())form.elements.planName.value=file.name.replace(/\.[^.]+$/,'').slice(0,180);
+          if(replacing){form.elements.pdfPage.max=String(pages);form.elements.pdfPage.value='1';}
+          else if(pages>1)list.innerHTML=`<h3>${esc(tr('Էջերի հարկերը'))}</h3>`+Array.from({length:pages},(_,i)=>{const page=i+1;return `<section class="map-import-page"><strong>${esc(tr('PDF էջ'))} ${page}</strong><div class="form-grid">${input('pageName'+page,tr('Անվանում'),form.elements.planName.value.slice(0,180)+' · '+page,'text','required maxlength="200"')}${select('pageFloor'+page,tr('Հարկ'),[['__skip',tr('Բաց թողնել էջը')],...floors],form.elements.planFloor.value)}</div></section>`;}).join('');
+        }catch(error){if(token!==generation||!form.isConnected)return;fileError=error.message;field.setCustomValidity(fileError);const box=form.querySelector('#formError');box.hidden=false;box.textContent=fileError;}
+        finally{if(token===generation&&form.isConnected){loading=false;status.hidden=true;form.querySelector('[type=submit]').disabled=false;}}
       });
     }
     async function manageShares(){
@@ -590,7 +635,7 @@ globalThis.RackMaps=(()=>{
         if(action==='print'){window.print();return;}
         if(action==='map-pdf'||action==='panel-pdf')return exportCurrent(action==='map-pdf'?'maps':'devices');
         if(action.startsWith('zoom-')){if(!camera)fit();if(camera)zoom(action==='zoom-reset'?1/camera.scale:action==='zoom-in'?1.25:.8);return;}
-        if(action==='edit')return modal(tr('Խմբագրել հատակագիծը'),`<div class="form-grid">${input('planName',tr('Անվանում'),plan.name,'text','required maxlength="200"')}${select('planFloor',tr('Հարկ'),[['',tr('Չնշել')],...getState().floors.map(f=>[f.id,f.name])],plan.floorId)}</div>`,fd=>change(s=>{const p=findPlan(s);if(p)Object.assign(p,{name:String(fd.get('planName')).trim(),floorId:String(fd.get('planFloor'))});}));
+        if(action==='edit')return upload(true);
         if(action==='delete')return h.confirm(tr('Ջնջել հատակագիծը'),tr('Կհեռացվեն միայն հատակագիծը և նշանները։ Պորտերը կմնան բազայում։'),()=>change(s=>{s.floorPlans=s.floorPlans.filter(p=>p.id!==view.planId);}));
       }
       if(e.target.closest('.map-canvas')&&view.placing){const {x,y}=coords(e);place(x,y);}else if(e.target===viewport||e.target===canvas||e.target===canvas?.querySelector('img'))deselect();

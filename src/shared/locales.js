@@ -1,6 +1,14 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"PNG, JPEG, WebP կամ բազմաէջ PDF։ Յուրաքանչյուր էջի համար կարող եք ընտրել հարկ։":["PNG, JPEG, WebP or a multi-page PDF. You can choose a floor for each page.","PNG, JPEG, WebP или многостраничный PDF. Для каждой страницы можно выбрать этаж."],
+"Փոխարինել ֆայլը":["Replace file","Заменить файл"],
+"Ֆայլը փոխարինելիս նշաններն ու կապերը պահպանվում են։ Նոր գծագրի վրա ստուգեք դրանց դիրքերը։":["Replacing the file preserves markers and connections. Check their positions on the new drawing.","При замене файла значки и связи сохраняются. Проверьте их положение на новом плане."],
+"Ընտրեք մեկ PDF և յուրաքանչյուր էջին նշանակեք հարկ։ Ավելորդ էջերը կարող եք բաց թողնել։":["Choose one PDF and assign a floor to each page. You can skip unwanted pages.","Выберите один PDF и назначьте этаж каждой странице. Ненужные страницы можно пропустить."],
+"Ֆայլը մշակվում է…":["Processing file…","Обработка файла…"],
+"Ընտրեք առնվազն մեկ էջ":["Select at least one page","Выберите хотя бы одну страницу"],
+"Էջերի հարկերը":["Floors for each page","Этажи для страниц"],
+"Բաց թողնել էջը":["Skip page","Пропустить страницу"],
 "Պատճենել PIN-ը":["Copy PIN","Скопировать PIN"],
 "PIN-ը պատճենվեց":["PIN copied","PIN скопирован"],
 "Չհաջողվեց պատճենել":["Failed to copy","Не удалось скопировать"],
