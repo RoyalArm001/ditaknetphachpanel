@@ -148,9 +148,9 @@ globalThis.RackMaps=(()=>{
     const floorName=id=>state.floors.find(f=>f.id===id)?.name||tr('Առանց հարկի');
     const mapFloors=[...new Set(plans.map(p=>p.floorId))];
     const allPlaced=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.markers||[]).map(m=>mapData.canonical(m.portId))));
-    const currentFloor=state.floors.find(f=>f.id===plan?.floorId);
+    const curFloor=state.floors.find(f=>f.id===plan?.floorId);
     const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
-    const curFloorRacks=currentFloor?(allRacksList.filter(r=>(currentFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
+    const curFloorRacks=curFloor?(allRacksList.filter(r=>(curFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
     const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
     const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id));
     if(unplacedRacks.length===0&&view.activeTab==='racks')view.activeTab='devices';

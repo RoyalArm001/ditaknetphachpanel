@@ -218,3 +218,80 @@ test('cables are hidden by default on map load and plan change', () => {
   assert.ok(mapsJs.includes('view.showCables=false;view.camera=null;'));
 });
 
+test('RackMaps.mount executes cleanly without ReferenceError on curFloor', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const vm = require('node:vm');
+  const mapsSource = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
+  const D = require('../src/shared/domain.js');
+
+  const createEl = () => ({
+    textContent: '',
+    querySelectorAll: () => [],
+    querySelector: () => createEl(),
+    setAttribute: () => {},
+    addEventListener: () => {},
+    appendChild: () => {},
+    prepend: () => {},
+    insertBefore: () => {},
+    after: () => {},
+    remove: () => {},
+    contains: () => false,
+    dataset: {},
+    style: { setProperty: () => {} },
+    classList: { add: () => {}, remove: () => {}, toggle: () => {} }
+  });
+
+  const root = createEl();
+  const doc = {
+    body: root,
+    createElement: () => createEl(),
+    querySelector: () => createEl(),
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+    removeEventListener: () => {}
+  };
+
+  const ctx = {
+    document: doc,
+    localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
+    window: { addEventListener: () => {}, matchMedia: () => ({ matches: false }), requestAnimationFrame: () => 1, cancelAnimationFrame: () => {} },
+    requestAnimationFrame: () => 1,
+    cancelAnimationFrame: () => {},
+    ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
+    AbortController: class { signal = {} },
+    Set, Map, Array, Object, String, Number, Math, JSON,
+    RackDomain: D
+  };
+  ctx.globalThis = ctx;
+  const context = vm.createContext(ctx);
+  vm.runInContext(mapsSource, context);
+
+  const state = D.empty();
+  state.floors = [
+    { id: 'floor-1', name: 'Floor 1', racks: [{ id: 'rack-1', name: 'Rack 1', u: 42, devices: [] }], linkedRackIds: [] }
+  ];
+  state.floorPlans = [
+    { id: 'plan-1', name: 'Plan 1', floorId: 'floor-1', width: 800, height: 600, image: '', markers: [], rackMarkers: [] }
+  ];
+
+  const h = {
+    projectKey: 'test',
+    tr: x => x,
+    esc: x => x,
+    commit: () => {},
+    getState: () => state,
+    modal: () => {},
+    input: () => '',
+    select: () => '',
+    toast: () => {},
+    download: () => {},
+    save: () => {},
+    redraw: () => {}
+  };
+
+  assert.doesNotThrow(() => {
+    context.RackMaps.mount(root, h);
+  });
+});
+

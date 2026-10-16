@@ -1,28 +1,53 @@
 {
-  "version": "4.0.1",
+  "version": "4.0.2",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր և հստակ տեսք։",
-      "Միացումները կարելի է ցանկացած պահի ակտիվացնել կամ թաքցնել վերևի վահանակից կամ «C» ստեղնով։"
+      "Ուղղվել է քարտեզի բացման ժամանակ հարկի տվյալների ստուգման խնդիրը (curFloor սխալը)։",
+      "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր տեսք։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Cable connection lines on the map are now hidden by default for a clean, unobstructed view.",
-      "Connection lines can be easily toggled at any time from the top toolbar or with the 'C' hotkey."
+      "Fixed floor variable reference error (curFloor) during map view initialization.",
+      "Cable connection lines on the map are hidden by default for a clean view."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Линии кабельных соединений на карте теперь по умолчанию скрыты для чистого и аккуратного обзора.",
-      "Отображение соединений можно в любой момент переключить на верхней панели или клавишей «C»."
+      "Исправлена ошибка ссылки на переменную этажа (curFloor) при открытии карты.",
+      "Линии кабельных соединений на карте по умолчанию скрыты для чистого обзора."
     ]
   },
   "date": "2026-10-16",
   "history": [
+    {
+      "version": "4.0.1",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր և հստակ տեսք։",
+          "Միացումները կարելի է ցանկացած պահի ակտիվացնել կամ թաքցնել վերևի վահանակից կամ «C» ստեղնով։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Cable connection lines on the map are now hidden by default for a clean, unobstructed view.",
+          "Connection lines can be easily toggled at any time from the top toolbar or with the 'C' hotkey."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Линии кабельных соединений на карте теперь по умолчанию скрыты для чистого и аккуратного обзора.",
+          "Отображение соединений можно в любой момент переключить на верхней панели или клавишей «C»."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "3.0.10",
       "hy": {
