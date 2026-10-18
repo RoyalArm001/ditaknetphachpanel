@@ -507,6 +507,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const incoming=new Map(all.filter(x=>x.p.switchPortId).map(x=>[x.p.switchPortId,x]));
     const normalize=value=>String(value??'').normalize('NFKC').toLocaleLowerCase();
     const terms=normalize(filter.query).trim().split(/\s+/).filter(Boolean),hostText=new Map();
+    const serviceSelection=filter.services?new Set(String(filter.services).split(',').filter(Boolean)):null;
     if(terms.length)for(const n of networks(s))for(const h of n.hosts){if(h.deviceId)hostText.set(h.deviceId,(hostText.get(h.deviceId)||'')+' '+[n.name,n.vlan,n.ip,h.ip,h.username,h.name].join(' '));}
     const result=all.map(x=>{
       const {f,r,d,p}=x, source=(isNetworkDevice(d)&&!p.switchPortId)?incoming.get(p.id):x;
@@ -521,6 +522,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       if(filter.floor&&x.f.id!==filter.floor&&x.destinationId!==filter.floor)return false;
       if(filter.rack&&x.r.id!==filter.rack||filter.status&&x.status!==filter.status||filter.type&&x.type!==filter.type)return false;
       if(filter.service&&(filter.service==='__none__'?!!x.service:x.service!==filter.service))return false;
+      if(serviceSelection&&!serviceSelection.has(x.service||'__none__'))return false;
       if(filter.vlan&&(filter.vlan==='__none__'?!!x.vlan:String(x.vlan)!==String(filter.vlan)))return false;
       if(filter.link==='linked'&&!x.connection||filter.link==='unlinked'&&!!x.connection)return false;
       if(!terms.length)return true;

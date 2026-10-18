@@ -2099,7 +2099,35 @@ async function uploadPhoto(id,file){if(!file)return;if(!['image/png','image/jpeg
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 async function backup(){const data={application:'RackMap',schema:2,exportedAt:new Date().toISOString(),state,portDraft:portDraftDirty?portDraft:null},format=state.backupFormat||'json';const blob=format==='xlsx'?new Blob([await ProjectFile.encode(data,tr)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}):new Blob([JSON.stringify(data,null,2)],{type:'application/json'});download(blob,'MyPatch-'+new Date().toISOString().slice(0,10)+'.'+format);}
-async function exportReport(type){if(personal())return exportPersonal(type);const exportCompany=activeCompanyId,exportFilters={...filters};if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));const res=await fetch(companyUrl(`/api/export.${type}?${new URLSearchParams(exportFilters)}`,exportCompany));if(!res.ok)throw new Error((await res.json()).error);download(await res.blob(),`RackMap.${type}`);toast(tr('Հաշվետվությունը պատրաստ է'));}
+function openPdfExportOptions(){
+  const baseRows=D.rows(state,{...filters,service:'',services:''});
+  const counts=new Map();for(const row of baseRows){const key=row.service||'__none__';counts.set(key,(counts.get(key)||0)+1);}
+  const options=[['__none__',tr('Չնշված')],...D.serviceEntries(state).filter(([key])=>key).map(([key])=>[key,D.serviceLabel(state,key)])]
+    .filter(([key])=>counts.has(key));
+  const list=options.map(([key,label])=>`<label class="pdf-service-option"><input type="checkbox" name="pdfService" value="${esc(key)}"><span>${esc(label)}</span><strong>${counts.get(key)||0}</strong></label>`).join('');
+  const body=`<p class="hint">${tr('Ընտրեք՝ արտահանել բոլոր ֆիլտրված տվյալները, թե միայն որոշ նշանակություններ, օրինակ՝ վարդակները։')}</p><fieldset class="pdf-export-scope"><legend>${tr('Արտահանման շրջանակ')}</legend><label><input type="radio" name="pdfScope" value="all" checked> ${tr('Բոլոր ֆիլտրված պորտերը')}</label><label><input type="radio" name="pdfScope" value="services"> ${tr('Միայն ընտրված նշանակությունները')}</label></fieldset><fieldset id="pdfServiceOptions" class="pdf-service-options" disabled><legend>${tr('Ընտրեք նշանակությունները')}</legend>${list||`<p class="hint">${tr('Այս ֆիլտրերով նշանակություններ չեն գտնվել։')}</p>`}</fieldset>`;
+  modal(tr('PDF արտահանման ընտրություն'),body,async fd=>{
+    const exportFilters={...filters};
+    if(fd.get('pdfScope')==='services'){
+      const selected=fd.getAll('pdfService').map(String);
+      if(!selected.length)throw new Error(tr('Ընտրեք առնվազն մեկ նշանակություն։'));
+      exportFilters.service='';
+      exportFilters.services=selected.join(',');
+    }else delete exportFilters.services;
+    if(personal())return exportPersonal('pdf',exportFilters);
+    const exportCompany=activeCompanyId;
+    if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));
+    const res=await fetch(companyUrl(`/api/export.pdf?${new URLSearchParams(exportFilters)}`,exportCompany));
+    if(!res.ok)throw new Error((await res.json()).error);
+    download(await res.blob(),'RackMap.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));
+  });
+  const form=$('#modalForm'),scope=form?.querySelectorAll('[name="pdfScope"]'),fieldset=$('#pdfServiceOptions');
+  const sync=()=>{if(fieldset)fieldset.disabled=form.querySelector('[name="pdfScope"]:checked')?.value!=='services';};
+  scope?.forEach(radio=>radio.addEventListener('change',sync));
+  sync();
+  const submit=form?.querySelector('button[type="submit"]');if(submit)submit.textContent=tr('Արտահանել PDF');
+}
+async function exportReport(type){if(type==='pdf')return openPdfExportOptions();if(personal())return exportPersonal(type);const exportCompany=activeCompanyId,exportFilters={...filters};if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));const res=await fetch(companyUrl(`/api/export.${type}?${new URLSearchParams(exportFilters)}`,exportCompany));if(!res.ok)throw new Error((await res.json()).error);download(await res.blob(),`RackMap.${type}`);toast(tr('Հաշվետվությունը պատրաստ է'));}
 async function readBackupFile(file){if(file.size>24*1024*1024)throw new Error(tr('Ֆայլը չափազանց մեծ է'));let data;try{data=/\.xlsx$/i.test(file.name)?await ProjectFile.decode(file):JSON.parse(await file.text());}catch{throw new Error(tr('Պահուստային ֆայլը վնասված է կամ չի աջակցվում'));}
   if(data.format==='ditaknet-rackmap-cloud'&&data.version===1&&Array.isArray(data.companies)){
     if(!data.companies.length)throw new Error(tr('Պահուստային պատճենում ընկերություններ չկան'));
@@ -2212,9 +2240,9 @@ async function connectCloud(){
     await switchStorage('shared');
   });
 }
-async function exportPersonal(type){
+async function exportPersonal(type,exportFilters=filters){
   if(!await save())return;
-  if(type==='pdf'){location.hash='settings/reports';await new Promise(resolve=>setTimeout(resolve,50));if($('#results'))$('#results').innerHTML=resultsTable(D.rows(state,filters));window.print();renderResults();return;}
+  if(type==='pdf'){$('#dialog')?.close();location.hash='settings/reports';await new Promise(resolve=>setTimeout(resolve,50));if($('#results'))$('#results').innerHTML=resultsTable(D.rows(state,exportFilters));window.print();renderResults();return;}
   if(!window.ExcelJS)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/exceljs.min.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Excel գործիքը չբեռնվեց։ Միացեք ցանցին և կրկին փորձեք։')));document.head.append(script);});
   const book=new ExcelJS.Workbook(),sheet=book.addWorksheet(tr('Միացումներ'));const fields=['floor','rack','device','port','switchName','switchPort','status','cable','destination','room','door','side','connection','service','vlan','notes'];
   sheet.addRow([tr('Հարկ'),tr('Ռաք'),tr('Սարք'),tr('Պորտ'),tr('Սվիչ'),tr('Սվիչի պորտ'),tr('Վիճակ'),tr('Մալուխ'),tr('Հարկ՝ նպատակակետ'),tr('Սենյակ'),tr('Դուռ'),tr('Կողմ'),tr('Կապ'),tr('Նշանակություն'),'VLAN',tr('Նշումներ')]);

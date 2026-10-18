@@ -341,6 +341,14 @@ body.right-collapsed .rack-side{display:none}
 .cable-filter-grid .field span{font-size:11px;font-weight:700;color:var(--muted)}
 .cable-filter-grid select{width:100%;height:38px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field,#fff);color:var(--ink);font-size:12px}
 .cable-stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.pdf-export-scope,.pdf-service-options{display:grid;gap:10px;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:10px}
+.pdf-export-scope label{display:flex;align-items:center;gap:9px}
+.pdf-service-options{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));max-height:42vh;overflow:auto}
+.pdf-service-options:disabled{opacity:.55}
+.pdf-service-option{display:flex;align-items:center;gap:9px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-soft,#f4f7f6);cursor:pointer}
+.pdf-service-option span{flex:1;overflow-wrap:anywhere}
+.pdf-service-option strong{color:var(--muted);font-size:12px}
+.pdf-service-options legend,.pdf-export-scope legend{padding:0 5px;color:var(--muted);font-size:12px;font-weight:700}
 .cable-stat{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff);color:var(--ink);cursor:pointer;font-size:12px;transition:all .15s ease}
 .cable-stat:hover{border-color:var(--accent);background:var(--surface-soft,#f4f7f6)}
 .cable-stat[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:#fff}

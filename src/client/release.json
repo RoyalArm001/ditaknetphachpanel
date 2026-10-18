@@ -1,25 +1,41 @@
 {
-  "version": "4.0.3",
+  "version": "4.0.4",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Ռաքի սվիչների և երթուղիչների զույգ պորտերի համարները ցուցադրվում են վերևում, կենտերը՝ ներքևում։"
+      "PDF հաշվետվության մեջ կարելի է ընտրել միայն անհրաժեշտ նշանակությունները, օրինակ՝ վարդակները։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Even numbered switch and router ports now appear on the top row, with odd numbered ports below."
+      "PDF reports can now include only selected service types, such as outlets."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Чётные порты коммутаторов и маршрутизаторов теперь отображаются в верхнем ряду, нечётные — в нижнем."
+      "В PDF-отчёте можно выбрать только нужные типы назначения, например розетки."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.3",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Ռաքի սվիչների և երթուղիչների զույգ պորտերի համարները ցուցադրվում են վերևում, կենտերը՝ ներքևում։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["Even numbered switch and router ports now appear on the top row, with odd numbered ports below."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Чётные порты коммутаторов и маршрутизаторов теперь отображаются в верхнем ряду, нечётные — в нижнем."]
+      }
+    },
     {
       "version": "4.0.2",
       "hy": {
