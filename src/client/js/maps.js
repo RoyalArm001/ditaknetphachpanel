@@ -105,9 +105,10 @@ globalThis.RackMaps=(()=>{
     const pathTreeCache=new Map();
     function getTreeForRack(grid,rm){
       if(!grid||!Routing)return null;
-      const key=`${plan.id}:${rm.id}:${rm.x.toFixed(4)}:${rm.y.toFixed(4)}`;
+      const position=D.mapMarkerLayout(rm);
+      const key=`${plan.id}:${rm.id}:${position.iconX.toFixed(4)}:${position.iconY.toFixed(4)}`;
       if(pathTreeCache.has(key))return pathTreeCache.get(key);
-      const tree=Routing.computeShortestPathTree(grid,rm.x,rm.y);
+      const tree=Routing.computeShortestPathTree(grid,position.iconX,position.iconY);
       pathTreeCache.set(key,tree);
       return tree;
     }
@@ -313,10 +314,10 @@ globalThis.RackMaps=(()=>{
           for(const m of visible){
             const targetRack=rmList.find(rm=>rm.rackId===m.row.r?.id);
             if(!targetRack)continue;
-            const mPos=D.mapMarkerLayout(m);
+            const mPos=markerLayout(m);
             const tree=getTreeForRack(grid,targetRack);
             if(!tree||!Routing)continue;
-            const points=Routing.routeDeviceToRack(tree,mPos.x,mPos.y,grid?.isWall);
+            const points=Routing.routeDeviceToRack(tree,mPos.iconX,mPos.iconY,grid?.isWall);
             if(!points?.length)continue;
             const isDevSelected=m.portId===view.portId||view.selectedMarkerIds.has(m.id);
             const isRackSelected=view.rackId===targetRack.id;
