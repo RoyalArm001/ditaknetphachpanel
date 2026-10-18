@@ -1,25 +1,41 @@
 {
-  "version": "4.0.8",
+  "version": "4.0.9",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Հատակագծի թափանցիկության կարգավորումը հիմա կիրառվում և պահպանվում է քարտեզում։"
+      "Մոտ գտնվող սարքերի նշանները քարտեզում ավտոմատ միացվում են տեսանելի գծերով։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Floor plan opacity now applies immediately and stays saved on the map."
+      "Nearby device markers are now visually connected on the map."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Прозрачность плана теперь сразу применяется и сохраняется на карте."
+      "Близко расположенные значки устройств теперь автоматически соединяются на карте."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.8",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Հատակագծի թափանցիկության կարգավորումը հիմա կիրառվում և պահպանվում է քարտեզում։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["Floor plan opacity now applies immediately and stays saved on the map."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Прозрачность плана теперь сразу применяется и сохраняется на карте."]
+      }
+    },
     {
       "version": "4.0.7",
       "date": "2026-10-18",
