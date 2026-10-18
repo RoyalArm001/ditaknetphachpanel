@@ -558,7 +558,9 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       const planFloor=s.floors.find(f=>f.id===plan.floorId);
       return !row.p.floorId&&!!(planFloor?.linkedRackIds&&planFloor.linkedRackIds.includes(row.r.id));
     };
-    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&row.status!=='free'&&onFloor(row));
+    // Free ports can still be planned as map endpoints when they already have an
+    // assigned service or endpoint label. Unconfigured equipment ports stay out.
+    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&(row.status!=='free'||!!(row.service||row.endpointName))&&onFloor(row));
     const placed=new Map();
     for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
     const serviceCounts=new Map();
