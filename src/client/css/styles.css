@@ -331,8 +331,9 @@ body.right-collapsed .rack-side{display:none}
 [data-theme=dark] .backup-status-badge.warning{background:#3d2f0a;color:#fdd663}
 
 /* Cable search & reports styles */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 .cable-filters{padding:18px 20px;border-radius:14px;margin-bottom:18px;background:var(--surface,#fff);border:1px solid var(--line)}
-.cable-query{position:relative;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cable-query{position:relative;display:flex;align-items:center;gap:10px;margin-bottom:10px;min-width:0}
 .cable-query-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none;flex-shrink:0}
 .cable-query input{flex:1;min-width:0;height:42px;padding:8px 12px 8px 38px;border:1px solid var(--line);border-radius:10px;background:var(--field,#fff);color:var(--ink);font-size:13px}
 .cable-query input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(22,121,111,.15)}
@@ -358,8 +359,10 @@ body.right-collapsed .rack-side{display:none}
 .cable-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;border:1px solid var(--line);background:var(--surface-soft,#edf3f3);color:var(--ink);font-size:11px;font-weight:600}
 button.cable-chip{cursor:pointer}
 button.cable-chip:hover{background:var(--line);border-color:var(--muted)}
-.cable-result-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
-.cable-result-tools>div{display:flex;align-items:center;gap:12px}
+.cable-result-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface-soft,#f4f7f6);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.cable-result-tools .result-count{margin:0;line-height:1.4;font-weight:650;color:var(--ink)}
+.cable-result-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cable-result-controls label{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
 .cable-result-tools select{height:34px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--field,#fff);color:var(--ink);font-size:12px}
 .cable-table{background:var(--surface,#fff);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
 .cable-identity{display:flex;align-items:center;gap:10px}
@@ -373,6 +376,7 @@ button.cable-chip:hover{background:var(--line);border-color:var(--muted)}
 .cable-note{display:block;color:var(--muted);font-size:10px;margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cable-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0;font-size:12px;font-weight:600;color:var(--muted)}
 .cable-pagination .button{min-height:34px;padding:6px 14px}
+@media(max-width:760px){.cable-filters{padding:14px;margin-bottom:14px}.cable-query{gap:7px}.cable-query .button{padding:8px 10px}.cable-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.cable-filter-grid select{font-size:12px}.cable-stats{flex-wrap:nowrap;overflow-x:auto;padding:2px 1px 8px;margin-bottom:10px;scrollbar-width:thin}.cable-stat{flex:0 0 auto}.cable-result-tools{align-items:stretch;flex-direction:column;gap:9px}.cable-result-controls{justify-content:space-between;gap:8px}.cable-result-controls label{flex:1;justify-content:space-between}.cable-result-controls select{max-width:58%;min-width:0}}
 .rack-link-main{display:flex;align-items:center;gap:13px;flex:1;min-width:0;color:inherit;text-decoration:none}
 .rack-link-end{display:flex;align-items:center;gap:8px;margin-left:auto}
 .rack-link-end .arrow{color:var(--muted);text-decoration:none;font-size:14px}

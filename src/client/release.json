@@ -1,25 +1,41 @@
 {
-  "version": "4.0.4",
+  "version": "4.0.5",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "PDF հաշվետվության մեջ կարելի է ընտրել միայն անհրաժեշտ նշանակությունները, օրինակ՝ վարդակները։"
+      "Որոնման դաշտի տեսքը կարգավորվել է, արդյունքների հաշվիչն ու կառավարիչները հավասարեցված են։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "PDF reports can now include only selected service types, such as outlets."
+      "The search field layout is fixed, and the result count and controls are aligned."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "В PDF-отчёте можно выбрать только нужные типы назначения, например розетки."
+      "Исправлено оформление поиска и выравнивание счётчика с элементами управления результатами."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.4",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["PDF հաշվետվության մեջ կարելի է ընտրել միայն անհրաժեշտ նշանակությունները, օրինակ՝ վարդակները։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["PDF reports can now include only selected service types, such as outlets."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["В PDF-отчёте можно выбрать только нужные типы назначения, например розетки."]
+      }
+    },
     {
       "version": "4.0.3",
       "date": "2026-10-18",
