@@ -151,10 +151,11 @@ globalThis.RackMaps=(()=>{
     const floorName=id=>state.floors.find(f=>f.id===id)?.name||tr('Առանց հարկի');
     const mapFloors=[...new Set(plans.map(p=>p.floorId))];
     const allPlaced=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.markers||[]).map(m=>mapData.canonical(m.portId))));
+    const allPlacedRacks=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.rackMarkers||[]).map(rm=>rm.rackId)));
     const curFloor=state.floors.find(f=>f.id===plan?.floorId);
     const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
     const curFloorRacks=curFloor?(allRacksList.filter(r=>(curFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
-    const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
+    const placedRackIds=allPlacedRacks();
     const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id));
     if(unplacedRacks.length===0&&view.activeTab==='racks')view.activeTab='devices';
     document.body.classList.add('map-view');
@@ -350,7 +351,7 @@ globalThis.RackMaps=(()=>{
       const allRacksList=state.floors.flatMap(f=>(f.racks||[]));
       const curFloor=state.floors.find(f=>f.id===plan?.floorId);
       const curFloorRacks=curFloor?(allRacksList.filter(r=>(curFloor.racks||[]).some(x=>x.id===r.id)||(curFloor.linkedRackIds||[]).includes(r.id))):allRacksList;
-      const placedRackIds=new Set((plan?.rackMarkers||[]).map(rm=>rm.rackId));
+      const placedRackIds=allPlacedRacks();
       const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id));
       const sidebarTabs=root.querySelector('.map-sidebar-tabs');
       if(sidebarTabs)sidebarTabs.hidden=unplacedRacks.length===0;
@@ -702,7 +703,7 @@ globalThis.RackMaps=(()=>{
         queuePreview();
       }
     }
-    function place(x,y){if(!view.portId||h.readOnly)return;if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});if(target.floorId){const portRow=D.ports(s).find(x=>x.p.id===data.canonical(view.portId));if(portRow&&!portRow.p.floorId)portRow.p.floorId=target.floorId;}});}
+    function place(x,y){if(!view.portId||h.readOnly)return;if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}view.placing=false;change(s=>{const target=findPlan(s);if(!target)return;const data=D.mapDevices(s,target),existing=data.markers.find(m=>m.portId===view.portId);if(!existing&&!data.devices.some(r=>r.p.id===view.portId))return;const position={x,y,iconX:x,iconY:y},marker=existing&&target.markers.find(m=>m.id===existing.id);if(marker)Object.assign(marker,position);else target.markers.push({id:crypto.randomUUID(),portId:view.portId,...position});if(target.floorId){const portRow=D.ports(s).find(x=>x.p.id===data.canonical(view.portId));if(portRow&&portRow.p.floorId!==target.floorId)portRow.p.floorId=target.floorId;}});}
     function moveMarker(id,x,y,anchor=false){if(h.readOnly||view.locked)return;change(s=>{const marker=findPlan(s)?.markers.find(m=>m.id===id);if(!marker)return;const layout=D.mapMarkerLayout(marker);Object.assign(marker,layout,anchor?{x,y}:{iconX:x,iconY:y});});}
     function removeMarker(id){if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}change(s=>{const p=findPlan(s);if(!p)return;const data=D.mapDevices(s,p),marker=data.markers.find(m=>m.id===id);if(!marker)return;p.markers=p.markers.filter(m=>data.canonical(m.portId)!==marker.portId);view.portId='';view.placing=false;});toast(tr('Նշանը հեռացվեց'));}
     function placeRack(rackId,x,y){

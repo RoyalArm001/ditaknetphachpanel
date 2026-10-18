@@ -1,25 +1,41 @@
 {
-  "version": "5.0.1",
+  "version": "5.0.2",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Նույն կետում գտնվող քարտեզի նշանները դասավորվում են շուրջը և հստակ միանում ընդհանուր դիրքին։"
+      "Չտեղադրված սարքերը կարելի է տեղադրել ցանկացած հարկի հատակագծում․ ընտրելիս հարկը թարմացվում է։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Map markers at the same point now fan out and visibly connect to their shared location."
+      "Unplaced endpoints can be placed on any floor plan; their floor updates when placed."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Значки в одной точке теперь разводятся вокруг неё и наглядно соединяются с общим местом."
+      "Неразмещённые точки можно размещать на любом этаже; при размещении их этаж обновляется."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "5.0.1",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Նույն կետում գտնվող քարտեզի նշանները դասավորվում են շուրջը և հստակ միանում ընդհանուր դիրքին։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["Map markers at the same point now fan out and visibly connect to their shared location."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Значки в одной точке теперь разводятся вокруг неё и наглядно соединяются с общим местом."]
+      }
+    },
     {
       "version": "4.0.10",
       "date": "2026-10-18",
