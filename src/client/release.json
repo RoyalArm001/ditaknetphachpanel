@@ -1,25 +1,47 @@
 {
-  "version": "5.0.4",
+  "version": "5.0.5",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Մալուխի գիծը հիմա հասնում է քարտեզի վրա երևացող սարքի ու ռաքի նշանների կենտրոնին։"
+      "Քարտեզի կողային վահանակից հեռացվել են պասիվ (չնշանակված) պորտերը․ ցուցադրվում են միայն իրական սարքերը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Cable routes now end at the visible device and rack markers on the map."
+      "Passive and unassigned ports without a configured service are hidden from the map devices sidebar."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Кабельные линии теперь доходят до видимых значков устройств и стоек на карте."
+      "Пассивные и неназначенные порты без выбранного типа устройства скрыты из боковой панели карты."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "5.0.4",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Մալուխի գիծը հիմա հասնում է քարտեզի վրա երևացող սարքի ու ռաքի նշանների կենտրոնին։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Cable routes now end at the visible device and rack markers on the map."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Кабельные линии теперь доходят до видимых значков устройств и стоек на карте."
+        ]
+      }
+    },
     {
       "version": "5.0.3",
       "date": "2026-10-18",

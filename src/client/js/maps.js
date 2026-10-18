@@ -380,7 +380,7 @@ globalThis.RackMaps=(()=>{
           return `<div class="map-rack-card ${isPlacingThis?'selected':''}" ${!h.readOnly ? `data-map-place-rack="${esc(r.id)}" role="button" tabindex="0"` : ''}><div class="map-rack-card-info"><strong>${esc(r.name)}</strong><small>${r.u||r.height||42}U · ${devCount} ${esc(tr('սարք'))}</small></div>${!h.readOnly?`<button type="button" class="button primary small ${isPlacingThis?'active':''}" data-map-place-rack="${esc(r.id)}">${svg('plus')}<span>${esc(tr(isPlacingThis?'Տեղադրվում է…':'Տեղադրել'))}</span></button>`:''}</div>`;
         }).join('')||`<p class="hint map-list-empty">${esc(tr('Այս հարկում ռաքեր չկան'))}</p>`}</div>`;
       } else {
-        const matches=r=>visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
+        const matches=r=>!!r.service&&visibleService(r.service)&&(!search||[name(r),r.d?.model,r.endpointName,D.serviceLabel(state,r.service,tr),r.floor,r.rack,r.device,r.port,r.cable,r.room,r.vlan,r.connection,r.switchName].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));
         const groups=new Map();for(const row of mapData.devices.filter(r=>matches(r)&&!placedSet.has(r.p.id))){if(!groups.has(row.service))groups.set(row.service,[]);groups.get(row.service).push(row);}
         for(const group of portList.querySelectorAll('.map-device-group')){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);}
         for(const card of portList.querySelectorAll('.map-port-card')){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}
@@ -410,7 +410,7 @@ globalThis.RackMaps=(()=>{
       }
       panelOptions.push(['new',tr('＋ Ստեղծել նոր սարք ռաքում')]);
       modal(tr('Ստեղծել նոր սարք'),`<div class="form-grid">
-        ${select('deviceService',tr('Սարքի տեսակ'),D.serviceEntries(curState).map(([k])=>[k,D.serviceLabel(curState,k,tr)]),defaultType)}
+        ${select('deviceService',tr('Սարքի տեսակ'),D.serviceEntries(curState).filter(([k])=>k).map(([k])=>[k,D.serviceLabel(curState,k,tr)]),defaultType)}
         ${input('endpointName',tr('Սարքի անվանում'),defaultName,'text','required maxlength="200" placeholder="WiFi AP-01"')}
         ${input('deviceModel',tr('Սարքի մոդել'),preset.model||'','text','maxlength="200" list="knownMapModels" placeholder="UniFi / MikroTik / Hikvision"')}
         ${select('targetPanelId',tr('Միացման սարք / պանել'),panelOptions,panelOptions[0]?.[0]||'new')}

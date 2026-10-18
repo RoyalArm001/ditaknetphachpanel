@@ -562,7 +562,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const placedOnOther=new Set((s.floorPlans||[]).filter(other=>other.id!==plan?.id).flatMap(other=>(other.markers||[]).map(marker=>canonical(marker.portId))));
     // Any unplaced, labeled endpoint can be assigned to a floor by placing it
     // there. Endpoints already placed on another plan remain exclusive to it.
-    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&(row.status!=='free'||!!(row.service||row.endpointName))&&!placedOnOther.has(row.p.id)&&(onFloor(row)||!placedOnCurrent.has(row.p.id)));
+    // Passive ports without an assigned service are excluded from candidate devices.
+    const devices=all.filter(row=>canonical(row.p.id)===row.p.id&&(!!row.service||placedOnCurrent.has(row.p.id))&&!placedOnOther.has(row.p.id)&&(onFloor(row)||!placedOnCurrent.has(row.p.id)));
     const placed=new Map();
     for(const marker of plan?.markers||[]){const portId=canonical(marker.portId),row=byId.get(portId);if(!row)continue;const previous=placed.get(portId);if(!previous||marker.portId===portId)placed.set(portId,{...marker,portId,row});}
     const serviceCounts=new Map();

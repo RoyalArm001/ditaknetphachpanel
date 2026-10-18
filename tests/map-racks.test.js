@@ -304,3 +304,71 @@ test('RackMaps.mount executes cleanly without ReferenceError on curFloor', () =>
   });
 });
 
+test('passive ports without an assigned service are excluded from mapDevices candidate list', () => {
+  const state = D.empty();
+  const port1 = D.port(1, 'port-1');
+  port1.status = 'used';
+  port1.service = 'wifi';
+  port1.endpointName = 'AP-1';
+
+  const portPassiveFree = D.port(2, 'port-2');
+  portPassiveFree.status = 'free';
+  portPassiveFree.service = '';
+
+  const portPassiveFault = D.port(3, 'port-3');
+  portPassiveFault.status = 'fault';
+  portPassiveFault.service = '';
+
+  const portPassiveUsed = D.port(4, 'port-4');
+  portPassiveUsed.status = 'used';
+  portPassiveUsed.service = '';
+
+  const dev = {
+    id: 'dev-1',
+    name: 'Patch 1',
+    type: 'panel',
+    pos: 1,
+    height: 1,
+    model: '',
+    color: '#397cc4',
+    portList: [port1, portPassiveFree, portPassiveFault, portPassiveUsed]
+  };
+
+  state.floors = [
+    {
+      id: 'floor-1',
+      name: 'Floor 1',
+      racks: [{ id: 'rack-1', name: 'Rack 1', u: 42, devices: [dev] }]
+    }
+  ];
+
+  state.floorPlans = [
+    {
+      id: 'plan-1',
+      floorId: 'floor-1',
+      name: 'Plan 1',
+      width: 1000,
+      height: 600,
+      image: 'data:image/jpeg;base64,123',
+      markers: [],
+      rackMarkers: []
+    }
+  ];
+
+  const mapped = D.mapDevices(state, state.floorPlans[0]);
+  assert.equal(mapped.devices.length, 1);
+  assert.equal(mapped.devices[0].p.id, 'port-1');
+
+  // If a passive port was already placed on this plan as a marker, it is preserved
+  state.floorPlans[0].markers = [
+    { id: 'm-3', portId: 'port-3', x: 0.5, y: 0.5 }
+  ];
+  const mappedWithPlaced = D.mapDevices(state, state.floorPlans[0]);
+  assert.equal(mappedWithPlaced.devices.length, 2);
+  assert.ok(mappedWithPlaced.devices.some(d => d.p.id === 'port-1'));
+  assert.ok(mappedWithPlaced.devices.some(d => d.p.id === 'port-3'));
+  assert.equal(mappedWithPlaced.markers.length, 1);
+  assert.equal(mappedWithPlaced.markers[0].portId, 'port-3');
+});
+
+
