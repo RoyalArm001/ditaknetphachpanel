@@ -1,25 +1,41 @@
 {
-  "version": "4.0.6",
+  "version": "4.0.7",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզին դրված ռաքի և սարքի հաշվիչներն այլևս չեն մնում հին արժեքի վրա։"
+      "Մալուխների ուղիները շրջանցում են հատակագծի պատերը և միանում միայն իրենց ռաքին։ Գծերը դարձել են ավելի հստակ։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Rack and device counts now update correctly after placing them on the map."
+      "Cable routes avoid floor-plan walls, connect only to their assigned rack, and are easier to distinguish."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Счётчики стоек и устройств обновляются после их размещения на карте."
+      "Кабельные маршруты обходят стены плана, ведут только к назначенной стойке и стали заметнее."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.6",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Քարտեզին դրված ռաքի և սարքի հաշվիչներն այլևս չեն մնում հին արժեքի վրա։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["Rack and device counts now update correctly after placing them on the map."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Счётчики стоек и устройств обновляются после их размещения на карте."]
+      }
+    },
     {
       "version": "4.0.5",
       "date": "2026-10-18",

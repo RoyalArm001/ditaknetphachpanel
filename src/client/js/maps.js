@@ -89,7 +89,8 @@ globalThis.RackMaps=(()=>{
       if(!imgEl||!imgEl.complete||!imgEl.naturalWidth)return null;
       try{
         const off=document.createElement('canvas');
-        const w=150,h=Math.max(1,Math.round((imgEl.naturalHeight/imgEl.naturalWidth)*w));
+        const longest=Math.max(imgEl.naturalWidth,imgEl.naturalHeight),scale=Math.min(1,320/longest);
+        const w=Math.max(80,Math.round(imgEl.naturalWidth*scale)),h=Math.max(80,Math.round(imgEl.naturalHeight*scale));
         off.width=w;off.height=h;
         const ctx=off.getContext('2d');
         ctx.drawImage(imgEl,0,0,w,h);
@@ -291,27 +292,21 @@ globalThis.RackMaps=(()=>{
           const hasSelection=!!view.portId||!!view.rackId||view.selectedMarkerIds.size>0;
           const cablePolys=[];
           for(const m of visible){
-            let targetRack=rmList.find(rm=>rm.rackId===m.row.r?.id);
-            if(!targetRack){
-              if(rmList.length===1)targetRack=rmList[0];
-              else{
-                const mPos=D.mapMarkerLayout(m);let bestD=Infinity;
-                for(const rm of rmList){const d=Math.hypot(rm.x-mPos.x,rm.y-mPos.y);if(d<bestD){bestD=d;targetRack=rm;}}
-              }
-            }
+            const targetRack=rmList.find(rm=>rm.rackId===m.row.r?.id);
             if(!targetRack)continue;
             const mPos=D.mapMarkerLayout(m);
             const tree=getTreeForRack(grid,targetRack);
-            let points;
-            if(tree&&Routing){points=Routing.routeDeviceToRack(tree,mPos.x,mPos.y,grid?.isWall);}
-            else{points=[{x:mPos.x,y:mPos.y},{x:targetRack.x,y:targetRack.y}];}
+            if(!tree||!Routing)continue;
+            const points=Routing.routeDeviceToRack(tree,mPos.x,mPos.y,grid?.isWall);
+            if(!points?.length)continue;
             const isDevSelected=m.portId===view.portId||view.selectedMarkerIds.has(m.id);
             const isRackSelected=view.rackId===targetRack.id;
             const isHighlighted=isDevSelected||isRackSelected;
             const isDimmed=hasSelection&&!isHighlighted;
             const color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
             const ptsAttr=Routing?Routing.formatSvgPoints(points):points.map(p=>`${(p.x*100).toFixed(2)},${(p.y*100).toFixed(2)}`).join(' ');
-            cablePolys.push(`<polyline class="map-cable-path ${isHighlighted?'highlighted':''} ${isDimmed?'dimmed':''}" data-cable-marker="${esc(m.id)}" data-cable-rack="${esc(targetRack.id)}" points="${ptsAttr}" style="--cable-color:${color}" vector-effect="non-scaling-stroke"/>`);
+            const attrs=`data-cable-marker="${esc(m.id)}" data-cable-rack="${esc(targetRack.id)}" points="${ptsAttr}" style="--cable-color:${color}" vector-effect="non-scaling-stroke"`;
+            cablePolys.push(`<polyline class="map-cable-halo ${isDimmed?'dimmed':''}" ${attrs}/><polyline class="map-cable-path ${isHighlighted?'highlighted':''} ${isDimmed?'dimmed':''}" ${attrs}/>`);
           }
           cablesLayer.innerHTML=cablePolys.join('');
         }

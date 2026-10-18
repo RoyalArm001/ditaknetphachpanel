@@ -41,21 +41,18 @@
 
     for(let y=0;y<rows;y++){
       for(let x=0;x<cols;x++){
-        // Sample corresponding pixel in data
-        const px=Math.min(width-1,Math.floor((x+0.5)*scaleX));
-        const py=Math.min(height-1,Math.floor((y+0.5)*scaleY));
-        const idx=(py*width+px)*4;
-        const r=data[idx],g=data[idx+1],b=data[idx+2],a=data[idx+3];
-        // Dark pixels (black walls, e.g. R,G,B < 110 and alpha >= 50)
-        const lum=0.299*r+0.587*g+0.114*b;
-        const wall=a>=50&&lum<110;
         const cell=y*cols+x;
-        if(wall){
-          isWall[cell]=1;
-          cost[cell]=80; // High obstacle penalty
-        } else {
-          cost[cell]=1; // Free space
+        // Sample a small cross instead of one pixel so thin PDF wall strokes
+        // survive downscaling and don't disappear between grid-cell centers.
+        let darkSamples=0;
+        for(const [ox,oy] of [[.5,.5],[.2,.2],[.8,.2],[.2,.8],[.8,.8]]){
+          const px=Math.min(width-1,Math.floor((x+ox)*scaleX));
+          const py=Math.min(height-1,Math.floor((y+oy)*scaleY));
+          const idx=(py*width+px)*4,lum=.299*data[idx]+.587*data[idx+1]+.114*data[idx+2];
+          if(data[idx+3]>=50&&lum<110)darkSamples++;
         }
+        isWall[cell]=darkSamples>=2?1:0;
+        cost[cell]=isWall[cell]?Infinity:1;
       }
     }
 
@@ -76,7 +73,7 @@
           }
           if(nearWall)break;
         }
-        if(nearWall)cost[cell]=3;
+        if(nearWall)cost[cell]=4;
       }
     }
 
@@ -93,8 +90,8 @@
 
     while(true){
       // If cell is a wall (ignoring immediate start and end cells in case devices sit on wall edge)
-      const isStart=Math.abs(gx0-startX)<=1&&Math.abs(gy0-startY)<=1;
-      const isEnd=Math.abs(gx0-endX)<=1&&Math.abs(gy0-endY)<=1;
+      const isStart=gx0===startX&&gy0===startY;
+      const isEnd=gx0===endX&&gy0===endY;
       if(!isStart&&!isEnd&&isWall[gy0*cols+gx0])return false;
 
       if(gx0===gx1&&gy0===gy1)break;
@@ -105,15 +102,33 @@
     return true;
   }
 
+  function nearestOpenCell(grid,x,y,maxRadius=8){
+    const {cols,rows,isWall}=grid;
+    const gx=Math.max(0,Math.min(cols-1,Math.round(x*(cols-1))));
+    const gy=Math.max(0,Math.min(rows-1,Math.round(y*(rows-1))));
+    if(!isWall[gy*cols+gx])return gy*cols+gx;
+    for(let radius=1;radius<=maxRadius;radius++){
+      let best=-1,bestDistance=Infinity;
+      for(let dy=-radius;dy<=radius;dy++)for(let dx=-radius;dx<=radius;dx++){
+        if(Math.max(Math.abs(dx),Math.abs(dy))!==radius)continue;
+        const nx=gx+dx,ny=gy+dy;
+        if(nx<0||nx>=cols||ny<0||ny>=rows)continue;
+        const idx=ny*cols+nx;if(isWall[idx])continue;
+        const distance=dx*dx+dy*dy;if(distance<bestDistance){best=idx;bestDistance=distance;}
+      }
+      if(best!==-1)return best;
+    }
+    return -1;
+  }
+
   function computeShortestPathTree(grid,targetNormX,targetNormY){
     const {cols,rows,cost}=grid;
     const size=cols*rows;
     const dist=new Float32Array(size).fill(Infinity);
     const parent=new Int32Array(size).fill(-1);
 
-    const tgx=Math.max(0,Math.min(cols-1,Math.round(targetNormX*(cols-1))));
-    const tgy=Math.max(0,Math.min(rows-1,Math.round(targetNormY*(rows-1))));
-    const startIdx=tgy*cols+tgx;
+    const startIdx=nearestOpenCell(grid,targetNormX,targetNormY);
+    if(startIdx<0)return null;
 
     dist[startIdx]=0;
     const heap=new MinHeap();
@@ -134,6 +149,9 @@
         const nx=cx+dirs[i][0],ny=cy+dirs[i][1],weight=dirs[i][2];
         if(nx<0||nx>=cols||ny<0||ny>=rows)continue;
         const nIdx=ny*cols+nx;
+        if(grid.isWall[nIdx])continue;
+        // Prevent diagonal steps through the corner of two touching walls.
+        if(dirs[i][0]&&dirs[i][1]&&(grid.isWall[cy*cols+nx]||grid.isWall[ny*cols+cx]))continue;
         const alt=currDist+weight*cost[nIdx];
         if(alt<dist[nIdx]){
           dist[nIdx]=alt;
@@ -143,14 +161,13 @@
       }
     }
 
-    return {cols,rows,dist,parent,targetNormX,targetNormY,startIdx};
+    return {cols,rows,dist,parent,isWall,targetNormX,targetNormY,startIdx};
   }
 
   function routeDeviceToRack(tree,devNormX,devNormY,isWall){
     const {cols,rows,parent,startIdx,targetNormX,targetNormY}=tree;
-    const dgx=Math.max(0,Math.min(cols-1,Math.round(devNormX*(cols-1))));
-    const dgy=Math.max(0,Math.min(rows-1,Math.round(devNormY*(rows-1))));
-    const devIdx=dgy*cols+dgx;
+    const devIdx=nearestOpenCell(tree,devNormX,devNormY);
+    if(devIdx<0)return null;
 
     // Check direct line of sight first
     if(hasLineOfSight(devNormX,devNormY,targetNormX,targetNormY,isWall,cols,rows)){
