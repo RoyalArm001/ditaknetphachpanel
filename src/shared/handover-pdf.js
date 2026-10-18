@@ -11,6 +11,28 @@
     plans.sort((a,b)=>state.floors.findIndex(f=>f.id===a.floorId)-state.floors.findIndex(f=>f.id===b.floorId)||a.name.localeCompare(b.name,undefined,{numeric:true}));
     return {plans,devices};
   }
+  function layoutMapMarkers(markers,plan,scale){
+    const positions=new Map(markers.map(marker=>[marker.id,D.mapMarkerLayout(marker)]));
+    const remaining=[...markers],clusters=[],tolerance=Math.max(12,Math.min(36,Math.max(plan.width,plan.height)*.005));
+    while(remaining.length){
+      const first=remaining.shift(),firstPos=positions.get(first.id),group=[first];
+      for(let i=remaining.length-1;i>=0;i--){const pos=positions.get(remaining[i].id);if(Math.hypot((pos.x-firstPos.x)*plan.width,(pos.y-firstPos.y)*plan.height)<=tolerance)group.push(...remaining.splice(i,1));}
+      if(group.length<2)continue;
+      if(group.length>5){
+        const x=group.reduce((sum,m)=>sum+positions.get(m.id).x,0)/group.length,y=group.reduce((sum,m)=>sum+positions.get(m.id).y,0)/group.length;
+        clusters.push({members:group,x,y});
+        for(const marker of group){const pos=positions.get(marker.id);positions.set(marker.id,{...pos,iconX:x,iconY:y});}
+        continue;
+      }
+      let spread=0;for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const a=positions.get(group[i].id),b=positions.get(group[j].id);spread=Math.max(spread,Math.hypot((a.iconX-b.iconX)*plan.width,(a.iconY-b.iconY)*plan.height));}
+      if(spread>14)continue;
+      const centerX=group.reduce((sum,m)=>sum+positions.get(m.id).x,0)/group.length,centerY=group.reduce((sum,m)=>sum+positions.get(m.id).y,0)/group.length;
+      const labelRadius=group.length*50/(2*Math.PI*Math.max(.1,scale)*plan.width);
+      const radius=Math.min(.16,Math.max(.02*Math.sqrt(group.length/2),labelRadius)),radiusY=radius*plan.width/plan.height;
+      group.forEach((marker,i)=>{const angle=-Math.PI/2+2*Math.PI*i/group.length,pos=positions.get(marker.id);positions.set(marker.id,{...pos,iconX:Math.min(.98,Math.max(.02,centerX+Math.cos(angle)*radius)),iconY:Math.min(.98,Math.max(.02,centerY+Math.sin(angle)*radiusY))});});
+    }
+    return {positions,clusters};
+  }
   // Shared by the browser exporter and local PDF previews. No credentials are exported.
   async function create(PDFDocument,state,{font,tr=x=>x,kind='maps',planId='',floorId='',rackId='',deviceType=kind==='panels'?'panel':'all',deviceId='',date=new Date(),imageOpacity=0,detailed=false,mapPageSize='auto'}={}){
     const selection=select(state,{planId,floorId,rackId,deviceType,deviceId});
@@ -22,8 +44,8 @@
     const typeName=d=>tr({panel:'Փաչ պանել',switch:'Սվիչ',router:'Ռաուտեր'}[d.type]||state.deviceTypes?.find(t=>t.id===d.type)?.name||d.type);
     function text(value,x,y,width,size=10,color=ink,height=30,align='left'){pdf.font('Project').fontSize(size).fillColor(color).text(String(value??''),x,y,{width,height,ellipsis:true,lineGap:2,align});}
     function serviceSymbol(service,x,y,size,color){pdf.save().translate(x,y).scale(size/24).path(D.serviceIcon(service,state)).lineWidth(2).strokeColor(color).stroke().restore();}
-    function page(title,subtitle,size='A4'){
-      pdf.addPage({size,layout:'landscape'});pageNumber++;
+    function page(title,subtitle,size='A4',layout='landscape'){
+      pdf.addPage({size,layout});pageNumber++;
       pdf.rect(0,0,pdf.page.width,7).fill(accent);
       text(state.company||'My Patch',32,24,pdf.page.width-280,20,ink,32);
       text(title,32,61,pdf.page.width-64,13,accent,22);text(subtitle||'',32,84,pdf.page.width-64,9,muted,20);
@@ -69,40 +91,43 @@
       const plans=selection.plans;
       for(const plan of plans){
         const floor=state.floors.find(f=>f.id===plan.floorId)?.name||'';
-        const markers=plan.selectedMarkers,size=mapPageSize==='A3'||mapPageSize==='auto'&&markers.length>60?'A3':'A4';
-        page(tr('Քարտեզ')+' · '+plan.name,tr('Հարկ')+' · '+floor,size);
-        const mapW=pdf.page.width-64,mapH=pdf.page.height-211;
+        const markers=plan.selectedMarkers,size=mapPageSize==='A3'||mapPageSize==='auto'&&markers.length>30?'A3':'A4';
+        const orientation=plan.width/Math.max(1,plan.height)<1.2?'portrait':'landscape';
+        page(tr('Քարտեզ')+' · '+plan.name,tr('Հարկ')+' · '+floor,size,orientation);
+        const mapW=pdf.page.width-64,legendColumns=pdf.page.width<700?2:4;
+        const markerLabelsCount=Math.min(8,new Set(markers.map(m=>m.row.service)).size),legendRows=Math.max(1,Math.ceil(markerLabelsCount/legendColumns));
+        const legendY=pdf.page.height-33-legendRows*18,mapTop=119,mapH=Math.max(100,legendY-mapTop-18);
         text(markers.length+' '+tr('սարք')+' · '+size,pdf.page.width-212,30,180,10,muted,20,'right');
-        pdf.roundedRect(32,121,mapW,mapH,6).fillAndStroke('#f7f9fa','#d8e4e2');
-        const scale=Math.min((mapW-24)/plan.width,(mapH-24)/plan.height),w=plan.width*scale,h=plan.height*scale,x=32+(mapW-w)/2,y=121+(mapH-h)/2;
+        pdf.roundedRect(32,mapTop,mapW,mapH,6).fillAndStroke('#f7f9fa','#d8e4e2');
+        const scale=Math.min((mapW-24)/plan.width,(mapH-24)/plan.height),w=plan.width*scale,h=plan.height*scale,x=32+(mapW-w)/2,y=mapTop+(mapH-h)/2;
         pdf.image(plan.image,x,y,{width:w,height:h});
         if(imageOpacity>0)pdf.save().fillOpacity(Math.min(90,imageOpacity)/100).rect(x,y,w,h).fill('#ffffff').restore();
-        for(const m of markers){
-          if(!m.anchorVisible)continue;
-          const p=D.mapMarkerLayout(m),color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
-          const ax=x+p.x*w,ay=y+p.y*h,ix=x+p.iconX*w,iy=y+p.iconY*h;
-          if(Math.hypot(ax-ix,ay-iy)>3){
-            pdf.moveTo(ax,ay).lineTo(ix,iy).lineWidth(1).strokeColor(color).stroke();
-            pdf.circle(ax,ay,2.5).fillAndStroke(color,'#ffffff');
-          }
+        const markerLayout=layoutMapMarkers(markers,plan,scale),positions=markerLayout.positions;
+        const clusteredIds=new Set(markerLayout.clusters.flatMap(cluster=>cluster.members.map(m=>m.id))),clusterCards=[];
+        for(const cluster of markerLayout.clusters){
+          const cx=x+cluster.x*w,cy=y+cluster.y*h,columns=2,rows=Math.ceil(cluster.members.length/columns),cardWidth=Math.min(180,w-16),cardHeight=Math.min(mapH-16,22+rows*15);
+          const clampBox=(left,top)=>({x:Math.max(x,Math.min(x+w-cardWidth,left)),y:Math.max(y,Math.min(y+h-cardHeight,top)),width:cardWidth,height:cardHeight});
+          const candidates=[clampBox(cx+15,cy-cardHeight/2),clampBox(cx-cardWidth-15,cy-cardHeight/2),clampBox(cx-cardWidth/2,cy+15),clampBox(cx-cardWidth/2,cy-cardHeight-15)];
+          const clusterIds=new Set(cluster.members.map(m=>m.id));
+          const score=box=>{const collisions=markers.filter(m=>!clusterIds.has(m.id)).filter(m=>{const p=positions.get(m.id),px=x+p.iconX*w,py=y+p.iconY*h;return px>=box.x-10&&px<=box.x+box.width+10&&py>=box.y-10&&py<=box.y+box.height+10;}).length;const gapX=Math.max(box.x-cx,0,cx-(box.x+box.width)),gapY=Math.max(box.y-cy,0,cy-(box.y+box.height));return collisions*100000+Math.hypot(gapX,gapY);};
+          const box=candidates.sort((a,b)=>score(a)-score(b))[0];
+          pdf.circle(cx,cy,11).fillAndStroke('#ffffff',accent);text(String(cluster.members.length),cx-9,cy-5,18,9,accent,13,'center');
+          pdf.roundedRect(box.x,box.y,box.width,box.height,4).fillAndStroke('#ffffff','#9db5b6');
+          text(cluster.members.length+' '+tr('սարք'),box.x+7,box.y+5,box.width-14,8,ink,14);
+          cluster.members.forEach((m,i)=>{const col=i%columns,row=Math.floor(i/columns),cellWidth=(box.width-16)/columns,tx=box.x+8+col*cellWidth,ty=box.y+21+row*15,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);serviceSymbol(m.row.service,tx,ty+2,9,color);text(D.endpointLabel(state,m.row,tr),tx+12,ty,cellWidth-14,6.5,ink,13);});
+          clusterCards.push(box);
         }
-        const markerLabels=markers.map(m=>{
-          const p=D.mapMarkerLayout(m),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
-          pdf.circle(px,py,8).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5,py-5,10,ink);
-          const name=D.endpointLabel(state,m.row,tr),size=mapW>900?8:7;
-          const textW=pdf.font('Project').fontSize(size).widthOfString(name);
-          const width=Math.min(104,Math.max(22,Math.ceil(textW+8)));
-          const height=Math.max(13,Math.ceil(pdf.font('Project').fontSize(size).heightOfString(name,{width:width-6,lineGap:2}))+5);
-          return {m,px,py,color,name,size,width,height};
+        const markerLabels=markers.filter(m=>!clusteredIds.has(m.id)).map(m=>{
+          const p=positions.get(m.id),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
+          pdf.circle(px,py,9).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5.5,py-5.5,11,ink);
+          const name=D.endpointLabel(state,m.row,tr),fontSize=size==='A3'?9:8;
+          const textW=pdf.font('Project').fontSize(fontSize).widthOfString(name);
+          const width=Math.min(size==='A3'?86:74,Math.max(24,Math.ceil(textW+8)));
+          const height=Math.min(36,Math.max(15,Math.ceil(pdf.font('Project').fontSize(fontSize).heightOfString(name,{width:width-6,lineGap:1}))+5));
+          return {m,px,py,color,name,size:fontSize,width,height};
         });
-        const obstacles=markerLabels.map(({px,py})=>({x:px-9,y:py-9,width:18,height:18}));
-        const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:36,y:125,width:mapW-8,height:mapH-8},obstacles,2);
-        for(const item of markerLabels){
-          const box=boxes.get(item.m.id);if(!box)continue;
-          const end=Labels.connector({x:item.px,y:item.py},box),length=Math.hypot(end.x-item.px,end.y-item.py);
-          if(length>12){const ratio=9/length;pdf.moveTo(item.px+(end.x-item.px)*ratio,item.py+(end.y-item.py)*ratio).lineTo(end.x,end.y).lineWidth(.5).strokeColor('#647a83').stroke();}
-        }
-        // Draw label backgrounds last so connectors cannot cross the text.
+        const obstacles=markerLabels.map(({px,py})=>({x:px-9,y:py-9,width:18,height:18})).concat(clusterCards);
+        const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:x+4,y:y+4,width:w-8,height:h-8},obstacles,2,32);
         for(const item of markerLabels){
           const box=boxes.get(item.m.id);if(!box)continue;
           pdf.roundedRect(box.x,box.y,box.width,box.height,2).fill(ink);
@@ -111,7 +136,7 @@
         const legendGroups=new Map();for(const m of markers)legendGroups.set(m.row.service,(legendGroups.get(m.row.service)||0)+1);
         const entries=[...legendGroups];
         const legend=entries.length>8?[...entries.slice(0,7),[null,entries.slice(7).reduce((sum,x)=>sum+x[1],0)]]:entries;
-        legend.forEach(([service,count],i)=>{const lx=36+(i%4)*(mapW/4),ly=pdf.page.height-79+Math.floor(i/4)*18;if(service!==null)serviceSymbol(service,lx,ly,12,D.serviceColor(state,service));text((service===null?tr('Այլ'):D.serviceLabel(state,service,tr))+' · '+count,lx+18,ly+1,mapW/4-26,8,muted,16);});
+        legend.forEach(([service,count],i)=>{const cellWidth=mapW/legendColumns,lx=36+(i%legendColumns)*cellWidth,ly=legendY+Math.floor(i/legendColumns)*18;if(service!==null)serviceSymbol(service,lx,ly,12,D.serviceColor(state,service));text((service===null?tr('Այլ'):D.serviceLabel(state,service,tr))+' · '+count,lx+18,ly+1,cellWidth-26,8,muted,16);});
         if(!markers.length)text(tr('Սարքեր դեռ տեղադրված չեն'),36,pdf.page.height-78,mapW-8,9,muted,18);
         if(!detailed)continue;
         const groups=new Map();for(const marker of markers){const key=marker.row.service;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(marker);}

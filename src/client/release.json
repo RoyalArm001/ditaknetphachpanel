@@ -1,25 +1,47 @@
 {
-  "version": "5.0.6",
+  "version": "5.0.7",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի գծերն այժմ ճիշտ միանում են նշաններին և չեն կտրում պատերի անկյունները։"
+      "PDF քարտեզում սարքերի անունները երևում են նշանների կողքին, իսկ նույն տեղում գտնվողները խմբավորվում են՝ առանց կապող գծերի։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Map routes now connect to the visible markers and avoid cutting across wall corners."
+      "Map PDFs keep device names beside markers and group co-located devices without connector lines."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Линии на карте теперь соединяются с видимыми значками и обходят углы стен."
+      "В PDF-картах названия устройств остаются рядом со значками, а устройства в одном месте группируются без соединительных линий."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "5.0.6",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի գծերն այժմ ճիշտ միանում են նշաններին և չեն կտրում պատերի անկյունները։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Map routes now connect to the visible markers and avoid cutting across wall corners."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Линии на карте теперь соединяются с видимыми значками и обходят углы стен."
+        ]
+      }
+    },
     {
       "version": "5.0.5",
       "date": "2026-10-18",

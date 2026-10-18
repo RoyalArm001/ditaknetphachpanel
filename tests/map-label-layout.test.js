@@ -25,3 +25,14 @@ test('edge labels stay inside bounds; impossible labels do not cover other text'
   assert.ok(boxes.get('left').x>=0&&boxes.get('right').x+90<=320);
   assert.ok(!intersects(boxes.get('left'),boxes.get('right')));
 });
+
+test('bounded map labels stay beside their markers instead of drifting across the page',()=>{
+  const items=Array.from({length:32},(_,i)=>({id:String(i),x:200+(i%4),y:140+Math.floor(i/4),width:62,height:17,radius:10}));
+  const obstacles=items.map(item=>({x:item.x-9,y:item.y-9,width:18,height:18}));
+  const boxes=layout(items,{x:20,y:20,width:360,height:260},obstacles,2,32);
+  for(const item of items){
+    const box=boxes.get(item.id);
+    assert.ok(box,'Every device keeps its label');
+    assert.ok(Math.hypot(box.x+box.width/2-item.x,box.y+box.height/2-item.y)<=32,'Labels stay within the local map area');
+  }
+});

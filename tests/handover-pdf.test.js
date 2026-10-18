@@ -116,6 +116,21 @@ test('dense map chooses A3 automatically and keeps every endpoint name',async()=
   }finally{await task.destroy();}
 });
 
+test('co-located map devices export as one nearby, readable group on a portrait floor plan',async()=>{
+  const state=fixture(),D=require('../src/shared/domain'),panel=state.floors[0].racks[0].devices[0];
+  panel.portList=Array.from({length:8},(_,i)=>({...D.port(i+1,`cluster-${i}`),status:'used',service:i%2?'camera':'wifi',endpointName:`Endpoint ${i+1}`}));
+  state.floorPlans=state.floorPlans.slice(0,1);state.floorPlans[0].width=state.floorPlans[0].height=1000;
+  state.floorPlans[0].markers=panel.portList.map((p,i)=>({id:`cluster-${i}`,portId:p.id,x:.5+i*.001,y:.5+i*.001,iconX:.5+i*.001,iconY:.5+i*.001}));
+  const chunks=await H.create(PDFDocument,state,{font,kind:'maps',planId:'Gym',tr:I18n.forLanguage('en')});
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{
+    const page=await doc.getPage(1),items=(await page.getTextContent()).items;
+    assert.ok(page.view[2]<700&&page.view[3]>800,'Square plans use a portrait page so the map fills more of the page');
+    assert.ok(items.some(x=>x.str==='8 devices'),'The shared location is identified as a group');
+    for(let i=1;i<=8;i++)assert.ok(items.some(x=>x.str===`Endpoint ${i}`),`Endpoint ${i} remains visible`);
+  }finally{await task.destroy();}
+});
+
 test('map export follows project floor order and natural area-name order',()=>{
   const state=fixture(),base=state.floorPlans[0];state.floorPlans=[state.floorPlans[2],{...base,id:'z10',name:'Zone 10'},{...base,id:'z2',name:'Zone 2'}];
   assert.deepEqual(H.select(state).plans.map(p=>p.id),['z2','z10','Upper']);
