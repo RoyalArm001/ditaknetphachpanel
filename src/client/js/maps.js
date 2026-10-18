@@ -141,7 +141,7 @@ globalThis.RackMaps=(()=>{
     const svg=name=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}"/></svg>`;
     const tool=(text,action,image,extra='')=>`<button type="button" class="map-tool" data-map-action="${action}" title="${esc(tr(text))}" aria-label="${esc(tr(text))}" ${extra}>${svg(image)}</button>`;
     // Appearance is a local viewing preference; changing it never moves devices or edits project data.
-    try{const saved=JSON.parse(localStorage.getItem('rackmap-map-appearance')||'null');if(saved){view.markerSize=saved.markerSize;view.lineWidth=saved.lineWidth;}}catch{}
+    try{const saved=JSON.parse(localStorage.getItem('rackmap-map-appearance')||'null');if(saved){view.markerSize=saved.markerSize;view.lineWidth=saved.lineWidth;if(Number.isFinite(Number(saved.imageOpacity)))view.imageOpacity=Number(saved.imageOpacity);}}catch{}
     view.lineWidth=Math.min(6,Math.max(1,Number(view.lineWidth)||1.5));
     view.tool||='select';view.filter??='all';view.labels??=true;view.markerSize=Math.min(200,Math.max(0,Number(view.markerSize)||0));view.imageOpacity=Math.min(90,Math.max(0,Number(view.imageOpacity)||0));
     const placedServices=[...new Set(mapData.markers.map(m=>m.row.service))];
@@ -158,7 +158,7 @@ globalThis.RackMaps=(()=>{
     document.body.classList.add('map-view');
     root.innerHTML=plans.length?`
       <section class="map-editor" aria-label="${esc(tr('Քարտեզի խմբագրիչ'))}">
-        <div class="map-viewport" tabindex="0" aria-label="${esc(tr('Հատակագծի աշխատանքային դաշտ'))}"><div class="map-canvas"><img width="${plan.width}" height="${plan.height}" src="${plan.image}" alt="${esc(plan.name)}" draggable="false"><svg class="map-cables-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-markers"></div></div></div>
+        <div class="map-viewport" tabindex="0" aria-label="${esc(tr('Հատակագծի աշխատանքային դաշտ'))}"><div class="map-canvas"><img width="${plan.width}" height="${plan.height}" src="${plan.image}" alt="${esc(plan.name)}" draggable="false" style="opacity:${1-view.imageOpacity/100}"><svg class="map-cables-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg><div class="map-markers"></div></div></div>
         <div class="map-topbar">
           <div class="map-project"><span class="map-project-name">${esc(state.company)}</span><div class="map-plan-controls">
             <label class="map-pill-select">${svg('layers')}<select data-map-floor aria-label="${esc(tr('Հարկ'))}">${mapFloors.map(id=>`<option value="${esc(id)}" ${id===plan.floorId?'selected':''}>${esc(floorName(id))}</option>`).join('')}</select></label>
@@ -776,12 +776,17 @@ globalThis.RackMaps=(()=>{
       markers?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));
       markers?.style.setProperty('--map-line-width',String(view.lineWidth));
       root.querySelector('.map-cables-layer')?.style.setProperty('--map-line-width',String(view.lineWidth));
+      root.querySelector('.map-canvas > img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));
+      const opacity=root.querySelector('[data-map-image-opacity]'),opacityValue=root.querySelector('[data-image-opacity-value]');
+      if(opacity)opacity.value=view.imageOpacity;
+      if(opacityValue)opacityValue.textContent=view.imageOpacity+'%';
       if(relayout)scheduleLabels();
       const size=appearance?.querySelector('[data-map-marker-size]'),width=appearance?.querySelector('[data-map-line-width]');
       if(size){size.value=view.markerSize;appearance.querySelector('[data-marker-size-value]').textContent=(100+view.markerSize)+'%';}
       if(width){width.value=view.lineWidth;appearance.querySelector('[data-line-width-value]').textContent=view.lineWidth+' px';}
     }
-    function saveAppearance(){paintAppearance();try{localStorage.setItem('rackmap-map-appearance',JSON.stringify({markerSize:view.markerSize,lineWidth:view.lineWidth}));}catch{}}
+    function saveAppearance(){paintAppearance();try{localStorage.setItem('rackmap-map-appearance',JSON.stringify({markerSize:view.markerSize,lineWidth:view.lineWidth,imageOpacity:view.imageOpacity}));}catch{}}
+    topActions?.addEventListener('input',e=>{if(!e.target.matches('[data-map-image-opacity]'))return;view.imageOpacity=Math.min(90,Math.max(0,Number(e.target.value)||0));saveAppearance();},{signal:abort.signal});
     appearance?.addEventListener('toggle',e=>{view.appearanceOpen=e.target.open;positionAppearance();},{signal:abort.signal});
     appearance?.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]'))view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));else if(e.target.matches('[data-map-line-width]'))view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));else return;e.stopPropagation();saveAppearance();},{signal:abort.signal});
     function paintCamera(){if(!camera||!canvas)return;const width=plan.width*camera.scale+'px',height=plan.height*camera.scale+'px',resized=canvas.style.width!==width||canvas.style.height!==height;canvas.style.width=width;canvas.style.height=height;canvas.style.transform=`translate(${camera.x}px,${camera.y}px)`;paintAppearance(resized);view.camera=camera;root.querySelector('[data-map-zoom]').textContent=Math.round(camera.scale*100)+'%';}
@@ -892,7 +897,7 @@ globalThis.RackMaps=(()=>{
         if(action==='upload')return upload();
         if(action==='share')return exportCurrent(plans.length?'maps':'devices',true);
         if(action==='shares')return manageShares();
-        if(action==='appearance-reset'){view.markerSize=0;view.lineWidth=1.5;saveAppearance();return;}
+        if(action==='appearance-reset'){view.markerSize=0;view.lineWidth=1.5;view.imageOpacity=0;saveAppearance();return;}
         if(action==='print'){window.print();return;}
         if(action==='map-pdf'||action==='panel-pdf')return exportCurrent(action==='map-pdf'?'maps':'devices');
         if(action.startsWith('zoom-')){if(!camera)fit();if(camera)zoom(action==='zoom-reset'?1/camera.scale:action==='zoom-in'?1.25:.8);return;}
@@ -906,7 +911,7 @@ globalThis.RackMaps=(()=>{
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
     root.addEventListener('pointerdown',e=>{const more=topActions?.querySelector('.map-more');if(more?.open&&!more.contains(e.target))more.open=false;},{capture:true,signal:abort.signal});
     root.addEventListener('toggle',e=>{const group=e.target.closest?.('.map-device-group');if(group?.dataset?.service){if(group.open)collapsedDeviceGroups.delete(group.dataset.service);else collapsedDeviceGroups.add(group.dataset.service);saveCollapsedGroups();return;}const card=e.target.closest?.('.map-port-card');if(card?.dataset?.deviceCard){if(card.open)expandedDeviceCards.add(card.dataset.deviceCard);else expandedDeviceCards.delete(card.dataset.deviceCard);}},{capture:true,signal:abort.signal});
-    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));saveAppearance();return;}if(e.target.matches('[data-map-line-width]')){view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));saveAppearance();return;}if(e.target.matches('[data-map-image-opacity]')){view.imageOpacity=Number(e.target.value);root.querySelector('[data-image-opacity-value]').textContent=view.imageOpacity+'%';root.querySelector('.map-canvas>img')?.style.setProperty('opacity',String(1-view.imageOpacity/100));return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
+    root.addEventListener('input',e=>{if(e.target.matches('[data-map-marker-size]')){view.markerSize=Math.min(200,Math.max(0,Number(e.target.value)||0));saveAppearance();return;}if(e.target.matches('[data-map-line-width]')){view.lineWidth=Math.min(6,Math.max(1,Number(e.target.value)||1.5));saveAppearance();return;}if(e.target.matches('[data-map-search]')){view.query=e.target.value;draw();}},{signal:abort.signal});
     const changePlan=e=>{if(e.target.matches('[data-map-plan],[data-map-floor]')){const selected=e.target.matches('[data-map-plan]')?e.target.value:plans.find(p=>p.floorId===e.target.value)?.id;if(!selected)return;view.planId=selected;view.portId='';view.panelPortId='';view.rackId='';view.placing=false;view.placingRackId='';view.showCables=false;view.camera=null;collisionGrid=null;collisionPlanId=null;h.redraw();}};
     root.addEventListener('change',changePlan,{signal:abort.signal});
     headerControls?.addEventListener('change',e=>{if(!root.contains(headerControls))changePlan(e);},{signal:abort.signal});
