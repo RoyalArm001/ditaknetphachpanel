@@ -1,28 +1,50 @@
 {
-  "version": "4.0.2",
+  "version": "4.0.3",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Ուղղվել է քարտեզի բացման ժամանակ հարկի տվյալների ստուգման խնդիրը (curFloor սխալը)։",
-      "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր տեսք։"
+      "Ռաքի սվիչների և երթուղիչների զույգ պորտերի համարները ցուցադրվում են վերևում, կենտերը՝ ներքևում։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Fixed floor variable reference error (curFloor) during map view initialization.",
-      "Cable connection lines on the map are hidden by default for a clean view."
+      "Even numbered switch and router ports now appear on the top row, with odd numbered ports below."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Исправлена ошибка ссылки на переменную этажа (curFloor) при открытии карты.",
-      "Линии кабельных соединений на карте по умолчанию скрыты для чистого обзора."
+      "Чётные порты коммутаторов и маршрутизаторов теперь отображаются в верхнем ряду, нечётные — в нижнем."
     ]
   },
-  "date": "2026-10-16",
+  "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.2",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Ուղղվել է քարտեզի բացման ժամանակ հարկի տվյալների ստուգման խնդիրը (curFloor սխալը)։",
+          "Քարտեզի վրա մալուխների միացման գծերը լռելյայն այժմ միշտ թաքցված են՝ ապահովելով մաքուր տեսք։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Fixed floor variable reference error (curFloor) during map view initialization.",
+          "Cable connection lines on the map are hidden by default for a clean view."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Исправлена ошибка ссылки на переменную этажа (curFloor) при открытии карты.",
+          "Линии кабельных соединений на карте по умолчанию скрыты для чистого обзора."
+        ]
+      },
+      "date": "2026-10-16"
+    },
     {
       "version": "4.0.1",
       "hy": {

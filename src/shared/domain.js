@@ -322,7 +322,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
     const columns=Math.ceil(copper/2),opticalColumns=Math.ceil(sfpCount/2);
     return d.portList.map((p,i)=>{
       const optical=i>=copper,index=optical?i-copper:i;
-      return {p,optical,row:isNetworkDevice(d)?index%2:Math.floor(i/24),column:isNetworkDevice(d)?Math.floor(index/2)+(optical?columns+1:0):i%24,columns:isNetworkDevice(d)?columns+(sfpCount?1+opticalColumns:0):24,rows:isNetworkDevice(d)?2:Math.ceil(d.portList.length/24)};
+      return {p,optical,row:isNetworkDevice(d)?(index%2===0?1:0):Math.floor(i/24),column:isNetworkDevice(d)?Math.floor(index/2)+(optical?columns+1:0):i%24,columns:isNetworkDevice(d)?columns+(sfpCount?1+opticalColumns:0):24,rows:isNetworkDevice(d)?2:Math.ceil(d.portList.length/24)};
     });
   }
   const serviceColor = (s,key) => s.serviceColors?.[key] || s.serviceTypes?.find(type=>type.id===key)?.color || services[key]?.color || services[''].color;
