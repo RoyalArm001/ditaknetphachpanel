@@ -334,7 +334,7 @@ globalThis.RackMaps=(()=>{
       const planImg=root.querySelector('.map-canvas > img');
       if(planImg&&!planImg.dataset.boundLoad){
         planImg.dataset.boundLoad='true';
-        planImg.addEventListener('load',()=>{collisionGrid=null;collisionPlanId=null;getCollisionGrid();draw();});
+        planImg.addEventListener('load',()=>{collisionGrid=null;collisionPlanId=null;pathTreeCache.clear();getCollisionGrid();draw();});
       }
       const undoBtn=root.querySelector('[data-map-action="undo"]'),redoBtn=root.querySelector('[data-map-action="redo"]');
       if(undoBtn)undoBtn.disabled=!undoStack.length;

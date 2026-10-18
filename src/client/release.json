@@ -1,25 +1,47 @@
 {
-  "version": "5.0.5",
+  "version": "5.0.6",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի կողային վահանակից հեռացվել են պասիվ (չնշանակված) պորտերը․ ցուցադրվում են միայն իրական սարքերը։"
+      "Քարտեզի գծերն այժմ ճիշտ միանում են նշաններին և չեն կտրում պատերի անկյունները։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Passive and unassigned ports without a configured service are hidden from the map devices sidebar."
+      "Map routes now connect to the visible markers and avoid cutting across wall corners."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Пассивные и неназначенные порты без выбранного типа устройства скрыты из боковой панели карты."
+      "Линии на карте теперь соединяются с видимыми значками и обходят углы стен."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "5.0.5",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի կողային վահանակից հեռացվել են պասիվ (չնշանակված) պորտերը․ ցուցադրվում են միայն իրական սարքերը։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Passive and unassigned ports without a configured service are hidden from the map devices sidebar."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Пассивные и неназначенные порты без выбранного типа устройства скрыты из боковой панели карты."
+        ]
+      }
+    },
     {
       "version": "5.0.4",
       "date": "2026-10-18",

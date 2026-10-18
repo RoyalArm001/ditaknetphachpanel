@@ -96,8 +96,13 @@
 
       if(gx0===gx1&&gy0===gy1)break;
       const e2=2*err;
-      if(e2>-dy){err-=dy;gx0+=sx;}
-      if(e2<dx){err+=dx;gy0+=sy;}
+      const stepX=e2>-dy,stepY=e2<dx;
+      const nextX=stepX?gx0+sx:gx0,nextY=stepY?gy0+sy:gy0;
+      // Match the grid search: don't smooth a route diagonally through a wall corner.
+      if(stepX&&stepY&&(isWall[gy0*cols+nextX]||isWall[nextY*cols+gx0]))return false;
+      if(stepX)err-=dy;
+      if(stepY)err+=dx;
+      gx0=nextX;gy0=nextY;
     }
     return true;
   }
@@ -173,6 +178,8 @@
     if(hasLineOfSight(devNormX,devNormY,targetNormX,targetNormY,isWall,cols,rows)){
       return [{x:devNormX,y:devNormY},{x:targetNormX,y:targetNormY}];
     }
+    // A disconnected device cell must not silently become a straight line through walls.
+    if(!Number.isFinite(tree.dist[devIdx]))return null;
 
     // Follow parent pointers towards rack
     const rawPath=[{x:devNormX,y:devNormY}];
