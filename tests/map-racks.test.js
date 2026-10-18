@@ -179,7 +179,9 @@ test('maps.js hides rack tab when all racks are placed and switches to devices t
   const path = require('node:path');
   const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
 
-  // Verify unplaced racks calculation filters out already placed racks
+  // Verify unplaced racks calculation filters out already placed racks across all plans
+  assert.ok(mapsJs.includes('const allPlacedRacks=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.rackMarkers||[]).map(rm=>rm.rackId)));'));
+  assert.ok(mapsJs.includes('const placedRackIds=allPlacedRacks();'));
   assert.ok(mapsJs.includes('const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id))'));
 
   // Verify tabs and rack tab button are hidden when unplacedRacks is 0
@@ -199,11 +201,18 @@ test('maps.js hides rack tab when all racks are placed and switches to devices t
   assert.equal(unplacedRacks.length, 1);
   assert.equal(unplacedRacks.length === 0, false);
 
-  // After placing rack-1:
-  placedRackIds.add('rack-1');
-  unplacedRacks = curFloorRacks.filter(r => !placedRackIds.has(r.id));
+  // After placing rack-1 on any floor plan in the project:
+  const floorPlans = [
+    { id: 'plan-1', floorId: 'floor-1', rackMarkers: [{ rackId: 'rack-1' }] },
+    { id: 'plan-2', floorId: 'floor-2', rackMarkers: [] }
+  ];
+  const allPlacedRacks = new Set(floorPlans.flatMap(p => (p.rackMarkers || []).map(rm => rm.rackId)));
+  assert.equal(allPlacedRacks.has('rack-1'), true);
+
+  // When viewing plan-2 (floor 2), rack-1 placed on floor 1 must be considered placed:
+  unplacedRacks = curFloorRacks.filter(r => !allPlacedRacks.has(r.id));
   assert.equal(unplacedRacks.length, 0);
-  assert.equal(unplacedRacks.length === 0, true, 'Tabs must be hidden when all racks placed');
+  assert.equal(unplacedRacks.length === 0, true, 'Tabs must be hidden when rack is placed on another plan');
 });
 
 test('cables are hidden by default on map load and plan change', () => {

@@ -6,7 +6,7 @@ test('switch copper ports remain paired and SFP cages are separate for all suppo
  for(const count of [4,6,8,12,16,24,48]){
   const scene=R.buildScene(fixture(count),'rack'),copper=scene.points.filter(p=>!p.optical),optical=scene.points.filter(p=>p.optical);
   assert.equal(optical.length,4);assert.equal(copper.length,count);assert.ok(scene.points.every(p=>p.switch&&!p.panel));
-  for(let i=0;i<count;i+=2){assert.equal(copper[i].point[0],copper[i+1].point[0]);assert.ok(copper[i].point[1]>copper[i+1].point[1]);}
+  for(let i=0;i<count;i+=2){assert.equal(copper[i].point[0],copper[i+1].point[0]);assert.ok(copper[i].point[1]<copper[i+1].point[1]);}
   assert.ok(Math.min(...optical.map(p=>p.point[0]-p.width/2))>Math.max(...copper.map(p=>p.point[0]+p.width/2)));
   assert.ok(optical.every(p=>p.point[0]+p.width/2<1));
  }

@@ -1,25 +1,50 @@
 {
-  "version": "5.0.2",
+  "version": "5.0.3",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Չտեղադրված սարքերը կարելի է տեղադրել ցանկացած հարկի հատակագծում․ ընտրելիս հարկը թարմացվում է։"
+      "Տեղադրված ռաքերն այլևս չեն ցուցադրվում որպես չտեղադրված (թաքցվում է «Ռաքեր» ներդիրը մյուս հարկերում ևս)։",
+      "Ուղղվել է պատերը շրջանցող մալուխների երթուղավորման հաշվարկը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Unplaced endpoints can be placed on any floor plan; their floor updates when placed."
+      "Placed racks are excluded from unplaced racks across all floor plans, hiding the rack tab once placed.",
+      "Fixed wall-avoidance routing tree calculation for map cable routes."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Неразмещённые точки можно размещать на любом этаже; при размещении их этаж обновляется."
+      "Размещенные стойки исключены из неразмещенных на всех планах этажей, скрывая вкладку стоек после размещения.",
+      "Исправлен расчет дерева обхода стен для кабельных трасс на карте."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "5.0.2",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Չտեղադրված սարքերը կարելի է տեղադրել ցանկացած հարկի հատակագծում․ ընտրելիս հարկը թարմացվում է։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Unplaced endpoints can be placed on any floor plan; their floor updates when placed."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Неразмещённые точки можно размещать на любом этаже; при размещении их этаж обновляется."
+        ]
+      }
+    },
     {
       "version": "5.0.1",
       "date": "2026-10-18",

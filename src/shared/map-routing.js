@@ -122,7 +122,7 @@
   }
 
   function computeShortestPathTree(grid,targetNormX,targetNormY){
-    const {cols,rows,cost}=grid;
+    const {cols,rows,cost,isWall}=grid;
     const size=cols*rows;
     const dist=new Float32Array(size).fill(Infinity);
     const parent=new Int32Array(size).fill(-1);
