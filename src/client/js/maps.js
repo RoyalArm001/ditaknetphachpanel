@@ -79,6 +79,8 @@ globalThis.RackMaps=(()=>{
     if(view.historyPlanId!==view.planId){view.historyPlanId=view.planId;view.undoStack=[];view.redoStack=[];view.selectedMarkerIds.clear();view.rackId='';view.placingRackId='';view.showCables=false;}
     view.undoStack ||= [];view.redoStack ||= [];
     const rows=D.rows(state),byId=new Map(rows.map(r=>[r.p.id,r]));const mapData=D.mapDevices(state,plan);view.portId=mapData.canonical(view.portId);if(!mapData.devices.some(r=>r.p.id===view.portId)&&!mapData.markers.some(m=>m.portId===view.portId)){view.portId='';view.placing=false;}
+    view.autoIconPositions=new Map();
+    const markerLayout=marker=>{const layout=D.mapMarkerLayout(marker),auto=view.autoIconPositions.get(marker.id);return auto?{...layout,...auto}:layout;};
     if(view.rackId&&!(mapData.rackMarkers||[]).some(rm=>rm.id===view.rackId))view.rackId='';
     let dragging=null;
     let collisionGrid=null,collisionPlanId=null;
@@ -282,16 +284,23 @@ globalThis.RackMaps=(()=>{
         const p=D.mapMarkerLayout(rm),selected=view.rackId===rm.id;
         return `<button type="button" class="map-rack-marker ${selected?'selected':''}" data-map-rack-marker="${esc(rm.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%" title="${esc(rm.rack.name)} (${rm.rack.u||rm.rack.height||42}U)" aria-label="${esc(rm.rack.name)}"><div class="map-rack-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg><span class="map-rack-led"></span></div><span class="map-rack-label">${esc(rm.rack.name)}</span></button>`;
       }).join('');
+      view.autoIconPositions.clear();
       const remaining=[...visible],autoEdges=[],placeTolerance=Math.max(12,Math.min(36,Math.max(plan.width,plan.height)*.005));
       while(remaining.length){
         const first=remaining.shift(),firstPos=D.mapMarkerLayout(first),group=[first];
         for(let i=remaining.length-1;i>=0;i--){const pos=D.mapMarkerLayout(remaining[i]);if(Math.hypot((pos.x-firstPos.x)*plan.width,(pos.y-firstPos.y)*plan.height)<=placeTolerance)group.push(...remaining.splice(i,1));}
         if(group.length<2)continue;
+        let iconSpread=0;for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const a=D.mapMarkerLayout(group[i]),b=D.mapMarkerLayout(group[j]);iconSpread=Math.max(iconSpread,Math.hypot((a.iconX-b.iconX)*plan.width,(a.iconY-b.iconY)*plan.height));}
+        if(iconSpread<=14){
+          const centerX=group.reduce((sum,m)=>sum+D.mapMarkerLayout(m).x,0)/group.length,centerY=group.reduce((sum,m)=>sum+D.mapMarkerLayout(m).y,0)/group.length;
+          const radiusX=Math.min(.05,.02*Math.sqrt(group.length/2)),radiusY=radiusX*plan.width/plan.height;
+          group.forEach((m,i)=>{const angle=-Math.PI/2+2*Math.PI*i/group.length;view.autoIconPositions.set(m.id,{iconX:Math.min(.98,Math.max(.02,centerX+Math.cos(angle)*radiusX)),iconY:Math.min(.98,Math.max(.02,centerY+Math.sin(angle)*radiusY))});});
+        }
         const connected=new Set([group[0]]),pending=new Set(group.slice(1));
-        while(pending.size){let best=null,bestDistance=Infinity,from=null;for(const a of connected){const pa=D.mapMarkerLayout(a);for(const b of pending){const pb=D.mapMarkerLayout(b),distance=Math.hypot((pa.iconX-pb.iconX)*plan.width,(pa.iconY-pb.iconY)*plan.height);if(distance<bestDistance){best=b;bestDistance=distance;from=a;}}}if(!best)break;connected.add(best);pending.delete(best);autoEdges.push([from,best]);}
+        while(pending.size){let best=null,bestDistance=Infinity,from=null;for(const a of connected){const pa=markerLayout(a);for(const b of pending){const pb=markerLayout(b),distance=Math.hypot((pa.iconX-pb.iconX)*plan.width,(pa.iconY-pb.iconY)*plan.height);if(distance<bestDistance){best=b;bestDistance=distance;from=a;}}}if(!best)break;connected.add(best);pending.delete(best);autoEdges.push([from,best]);}
       }
-      const autoLinks=autoEdges.map(([a,b])=>{const pa=D.mapMarkerLayout(a),pb=D.mapMarkerLayout(b);return `<line class="map-auto-link-halo" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" vector-effect="non-scaling-stroke"/><line class="map-auto-link" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" stroke="${D.serviceColor(state,a.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('');
-      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${autoLinks}${visible.filter(m=>m.anchorVisible).map(m=>{const p=D.mapMarkerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=D.mapMarkerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('')+rackMarkersHtml;
+      const autoLinks=autoEdges.map(([a,b])=>{const pa=markerLayout(a),pb=markerLayout(b);return `<line class="map-auto-link-halo" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" vector-effect="non-scaling-stroke"/><line class="map-auto-link" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" stroke="${D.serviceColor(state,a.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('');
+      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${autoLinks}${visible.filter(m=>m.anchorVisible).map(m=>{const p=markerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=markerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('')+rackMarkersHtml;
       const cablesLayer=root.querySelector('.map-cables-layer');
       if(cablesLayer){
         if(!view.showCables||!(mapData.rackMarkers||[]).length){
@@ -960,7 +969,7 @@ globalThis.RackMaps=(()=>{
             if(isBatch){
               const list=[...view.selectedMarkerIds].map(mid=>{
                 const m=mapData.markers.find(x=>x.id===mid);if(!m)return null;
-                const l=D.mapMarkerLayout(m);
+                const l=markerLayout(m);
                 const mEl=root.querySelector(`[data-map-marker="${CSS.escape(mid)}"]`);
                 const aEl=root.querySelector(`[data-map-anchor="${CSS.escape(mid)}"]`);
                 return {id:mid,origIconX:l.iconX,origIconY:l.iconY,origX:l.x,origY:l.y,mEl,aEl};
@@ -1096,7 +1105,7 @@ globalThis.RackMaps=(()=>{
                 const p=findPlan(s);if(!p)return;
                 for(const item of list){
                   const m=p.markers.find(x=>x.id===item.id);if(!m)continue;
-                  const l=D.mapMarkerLayout(m);
+                  const l=markerLayout(m);
                   m.iconX=Math.min(1,Math.max(0,l.iconX+dx));
                   m.iconY=Math.min(1,Math.max(0,l.iconY+dy));
                 }
@@ -1185,7 +1194,7 @@ globalThis.RackMaps=(()=>{
             const p=findPlan(s);if(!p)return;
             for(const mid of view.selectedMarkerIds){
               const m=p.markers.find(x=>x.id===mid);if(!m)continue;
-              const l=D.mapMarkerLayout(m);
+              const l=markerLayout(m);
               m.iconX=Math.min(1,Math.max(0,l.iconX+dx));
               m.iconY=Math.min(1,Math.max(0,l.iconY+dy));
             }
@@ -1195,7 +1204,7 @@ globalThis.RackMaps=(()=>{
         return;
       }
       const selected=mapData.markers.find(m=>m.portId===view.portId);if(!selected)return;
-      const layout=D.mapMarkerLayout(selected),anchor=e.target.matches('[data-map-anchor]')||view.anchorActive,x=anchor?layout.x:layout.iconX,y=anchor?layout.y:layout.iconY;
+      const layout=markerLayout(selected),anchor=e.target.matches('[data-map-anchor]')||view.anchorActive,x=anchor?layout.x:layout.iconX,y=anchor?layout.y:layout.iconY;
       try{moveMarker(selected.id,Math.min(1,Math.max(0,x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0))),Math.min(1,Math.max(0,y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0))),anchor);root.querySelector('.map-viewport')?.focus({preventScroll:true});}catch(err){toast(err.message);}
     },{signal:abort.signal});
     window.addEventListener('keyup',e=>{if(e.code==='Space'){space=false;viewport?.classList.remove('hand-key');}},{signal:abort.signal});

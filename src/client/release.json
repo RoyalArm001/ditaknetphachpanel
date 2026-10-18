@@ -1,25 +1,41 @@
 {
-  "version": "4.0.10",
+  "version": "5.0.1",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Ազատ, բայց անվանում կամ սարքի տեսակ ունեցող պորտերն այժմ երևում են քարտեզի տեղադրման ցանկում։"
+      "Նույն կետում գտնվող քարտեզի նշանները դասավորվում են շուրջը և հստակ միանում ընդհանուր դիրքին։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Free ports with an endpoint name or assigned service now appear in the map placement list."
+      "Map markers at the same point now fan out and visibly connect to their shared location."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Свободные порты с именем точки или назначенным типом теперь отображаются в списке карты."
+      "Значки в одной точке теперь разводятся вокруг неё и наглядно соединяются с общим местом."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.10",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Ազատ, բայց անվանում կամ սարքի տեսակ ունեցող պորտերն այժմ երևում են քարտեզի տեղադրման ցանկում։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["Free ports with an endpoint name or assigned service now appear in the map placement list."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Свободные порты с именем точки или назначенным типом теперь отображаются в списке карты."]
+      }
+    },
     {
       "version": "4.0.9",
       "date": "2026-10-18",
