@@ -1,25 +1,41 @@
 {
-  "version": "4.0.5",
+  "version": "4.0.6",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Որոնման դաշտի տեսքը կարգավորվել է, արդյունքների հաշվիչն ու կառավարիչները հավասարեցված են։"
+      "Քարտեզին դրված ռաքի և սարքի հաշվիչներն այլևս չեն մնում հին արժեքի վրա։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "The search field layout is fixed, and the result count and controls are aligned."
+      "Rack and device counts now update correctly after placing them on the map."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Исправлено оформление поиска и выравнивание счётчика с элементами управления результатами."
+      "Счётчики стоек и устройств обновляются после их размещения на карте."
     ]
   },
   "date": "2026-10-18",
   "history": [
+    {
+      "version": "4.0.5",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": ["Որոնման դաշտի տեսքը կարգավորվել է, արդյունքների հաշվիչն ու կառավարիչները հավասարեցված են։"]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": ["The search field layout is fixed, and the result count and controls are aligned."]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": ["Исправлено оформление поиска и выравнивание счётчика с элементами управления результатами."]
+      }
+    },
     {
       "version": "4.0.4",
       "date": "2026-10-18",

@@ -695,6 +695,8 @@ globalThis.RackMaps=(()=>{
     function placeRack(rackId,x,y){
       if(!rackId||h.readOnly)return;
       if(view.locked){toast(tr('Քարտեզը կողպված է'));return;}
+      view.placingRackId='';
+      view.activeTab='devices';
       change(s=>{
         const target=findPlan(s);if(!target)return;
         target.rackMarkers||=[];
@@ -702,8 +704,6 @@ globalThis.RackMaps=(()=>{
         if(existing){existing.x=x;existing.y=y;existing.iconX=x;existing.iconY=y;}
         else target.rackMarkers.push({id:crypto.randomUUID(),rackId,x,y,iconX:x,iconY:y});
       });
-      view.placingRackId='';
-      view.activeTab='devices';
       toast(tr('Ռաքը տեղադրվեց քարտեզի վրա'));
     }
     function moveRackMarker(id,x,y){
@@ -904,8 +904,8 @@ globalThis.RackMaps=(()=>{
         if(action==='edit')return upload(true);
         if(action==='delete')return h.confirm(tr('Ջնջել հատակագիծը'),tr('Կհեռացվեն միայն հատակագիծը և նշանները։ Պորտերը կմնան բազայում։'),()=>change(s=>{s.floorPlans=s.floorPlans.filter(p=>p.id!==view.planId);}));
       }
-      if(e.target.closest('.map-canvas')&&view.placing){const {x,y}=coords(e);try{place(x,y);draw();}catch(err){toast(err.message);}}
-      else if(e.target.closest('.map-canvas')&&view.placingRackId){const {x,y}=coords(e);const targetRackId=view.placingRackId;try{placeRack(targetRackId,x,y);draw();}catch(err){toast(err.message);}}
+      if(e.target.closest('.map-canvas')&&view.placing){const {x,y}=coords(e);try{place(x,y);}catch(err){toast(err.message);}}
+      else if(e.target.closest('.map-canvas')&&view.placingRackId){const {x,y}=coords(e);const targetRackId=view.placingRackId;try{placeRack(targetRackId,x,y);}catch(err){toast(err.message);}}
       else if(e.target===viewport||e.target===canvas||e.target===canvas?.querySelector('img'))deselect();
     }
     root.addEventListener('click',e=>{click(e).catch(err=>toast(err.message));},{signal:abort.signal});
@@ -1032,12 +1032,12 @@ globalThis.RackMaps=(()=>{
             view.ignoreClickUntil=performance.now()+120;
             const {x,y}=coords(e);
             const targetRackId=view.placingRackId;
-            try{placeRack(targetRackId,x,y);draw();}catch(err){toast(err.message);}
+            try{placeRack(targetRackId,x,y);}catch(err){toast(err.message);}
           }
           pan=null;
           return;
         }
-        if(view.placing&&!dragging&&(!pan||!pan.moved)){const rect=canvas.getBoundingClientRect();if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){view.ignoreClickUntil=performance.now()+120;const {x,y}=coords(e);try{place(x,y);draw();}catch(err){toast(err.message);}}pan=null;return;}
+        if(view.placing&&!dragging&&(!pan||!pan.moved)){const rect=canvas.getBoundingClientRect();if(e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom){view.ignoreClickUntil=performance.now()+120;const {x,y}=coords(e);try{place(x,y);}catch(err){toast(err.message);}}pan=null;return;}
         if(dragging){
           if(dragging.rack){
             const {moved,id}=dragging;dragging=null;view.ignoreClickUntil=performance.now()+120;
