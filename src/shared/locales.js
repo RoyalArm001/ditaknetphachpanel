@@ -1,6 +1,11 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Սարք / նշանակություն":["Device / purpose","Устройство / назначение"],
+"Ընդամենը պորտեր":["Total ports","Всего портов"],
+"Չօգտագործված պորտեր":["Unused ports","Неиспользуемые порты"],
+"Դատարկ ազատ պորտերը խմբավորված են միջակայքով։":["Empty free ports are grouped into ranges.","Свободные порты без данных сгруппированы в диапазоны."],
+"Շարունակություն":["Continued","Продолжение"],
 "Միացման գծեր (կաբելային ուղիներ)":["Connection lines (cable routes)","Линии соединений (кабельные трассы)"],
 "Ցուցադրել միացումները":["Show connections","Показать соединения"],
 "Թաքցնել միացումները":["Hide connections","Скрыть соединения"],

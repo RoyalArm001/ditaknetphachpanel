@@ -1,25 +1,47 @@
 {
-  "version": "5.0.8",
+  "version": "5.0.9",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Բոլոր PDF արտահանումների յուրաքանչյուր էջում ավելացվել են SMART TECH լոգոն և ընկերության ստորագիրը։"
+      "PDF հաշվետվությունները դասավորված են ըստ հարկի, ռաքի և սարքի՝ հստակ սյունակներով, պատկերակներով ու կարգավիճակներով։ Դատարկ ազատ պորտերը խմբավորվում են միջակայքով։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Every page of all PDF exports now includes the SMART TECH logo and company attribution."
+      "PDF reports now group floors, racks and devices with clear columns, icons and status labels. Empty free ports are summarized as ranges."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "На каждой странице всех экспортируемых PDF добавлены логотип SMART TECH и подпись компании."
+      "PDF-отчёты сгруппированы по этажам, стойкам и устройствам с понятными столбцами, значками и статусами. Свободные порты без данных объединены в диапазоны."
     ]
   },
   "date": "2026-10-19",
   "history": [
+    {
+      "version": "5.0.8",
+      "date": "2026-10-19",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Բոլոր PDF արտահանումների յուրաքանչյուր էջում ավելացվել են SMART TECH լոգոն և ընկերության ստորագիրը։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Every page of all PDF exports now includes the SMART TECH logo and company attribution."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "На каждой странице всех экспортируемых PDF добавлены логотип SMART TECH и подпись компании."
+        ]
+      }
+    },
     {
       "version": "5.0.7",
       "date": "2026-10-18",

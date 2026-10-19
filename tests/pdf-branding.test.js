@@ -47,12 +47,13 @@ test('all map and equipment PDF pages carry the logo and attribution in HY, EN a
 
 function browserContext(state){
   const downloads=[],requests=[];
-  const context=vm.createContext({state,D,PDFDocument,Uint8Array,Blob,Promise,Date,window:{PDFDocument},RackHandover:H,RackI18n:{language:'hy'},tr:I18n.forLanguage('hy'),filters:{},save:async()=>true,toast(){},
+  const context=vm.createContext({state,D,RackDomain:D,RackMapLabels:require('../src/shared/map-label-layout'),PDFDocument,Uint8Array,Blob,Promise,Date,window:{PDFDocument},RackI18n:{language:'hy'},tr:I18n.forLanguage('hy'),filters:{},save:async()=>true,toast(){},
     fetch:async url=>{requests.push(url);const bytes=url.endsWith('.ttf')?fs.readFileSync(font):logo;return {ok:true,arrayBuffer:async()=>Uint8Array.from(bytes).buffer};},
     download:(blob,name)=>downloads.push({blob,name}),RackConnections:require('../src/shared/connection-report'),
     findRack:id=>{for(const f of state.floors){const r=f.racks.find(r=>r.id===id);if(r)return {f,r};}}
   });
   vm.runInContext(fs.readFileSync(require.resolve('../src/shared/pdf-branding'),'utf8'),context);
+  vm.runInContext(fs.readFileSync(require.resolve('../src/shared/handover-pdf'),'utf8'),context);
   return {context,downloads,requests};
 }
 
@@ -68,6 +69,7 @@ test('browser connection report embeds branding on every continued page',async()
 
 test('personal PDF downloads a branded, filtered report without opening browser print',async()=>{
   const state=fixture(),{context,downloads}=browserContext(state);
+  state.floors[0].racks[0].devices.forEach(device=>device.portList.forEach(port=>{port.cable='Cable '+port.number;}));
   const source=fs.readFileSync(require.resolve('../src/client/js/app'),'utf8');
   vm.runInContext(source.slice(source.indexOf('async function exportPersonal('),source.indexOf('\nasync function exportConnections(')),context);
   await context.exportPersonal('pdf',{rack:'rack-a'});
@@ -79,6 +81,7 @@ test('personal PDF downloads a branded, filtered report without opening browser 
 test('server search PDF reserves footer space and serves the original logo asset',async()=>{
   const {DatabaseSync}=require('node:sqlite'),{createApp}=require('../src/server/server');
   const db=new DatabaseSync(':memory:'),state=fixture();
+  state.floors[0].racks[0].devices.forEach(device=>device.portList.forEach(port=>{port.cable='Cable '+port.number;}));
   const server=createApp({cloud:true,auth:{authenticate:async()=>({id:'test-user'})},store:{db,read:async()=>({state,revision:1}),close(){}},font});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const base=`http://127.0.0.1:${server.address().port}`;
