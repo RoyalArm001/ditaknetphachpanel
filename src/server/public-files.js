@@ -18,6 +18,8 @@ const sources={
   'map-label-layout.js':'src/shared/map-label-layout.js',
   'map-routing.js':'src/shared/map-routing.js',
   'handover-pdf.js':'src/shared/handover-pdf.js',
+  'pdf-branding.js':'src/shared/pdf-branding.js',
+  'assets/smart-tech.png':'assets/branding/smart-tech.png',
   'maps.js':'src/client/js/maps.js',
   'help.js':'src/client/js/help.js',
   'demo.js':'src/client/js/demo.js',

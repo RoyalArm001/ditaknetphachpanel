@@ -1,25 +1,47 @@
 {
-  "version": "5.0.7",
+  "version": "5.0.8",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "PDF քարտեզում սարքերի անունները երևում են նշանների կողքին, իսկ նույն տեղում գտնվողները խմբավորվում են՝ առանց կապող գծերի։"
+      "Բոլոր PDF արտահանումների յուրաքանչյուր էջում ավելացվել են SMART TECH լոգոն և ընկերության ստորագիրը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Map PDFs keep device names beside markers and group co-located devices without connector lines."
+      "Every page of all PDF exports now includes the SMART TECH logo and company attribution."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "В PDF-картах названия устройств остаются рядом со значками, а устройства в одном месте группируются без соединительных линий."
+      "На каждой странице всех экспортируемых PDF добавлены логотип SMART TECH и подпись компании."
     ]
   },
-  "date": "2026-10-18",
+  "date": "2026-10-19",
   "history": [
+    {
+      "version": "5.0.7",
+      "date": "2026-10-18",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "PDF քարտեզում սարքերի անունները երևում են նշանների կողքին, իսկ նույն տեղում գտնվողները խմբավորվում են՝ առանց կապող գծերի։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Map PDFs keep device names beside markers and group co-located devices without connector lines."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "В PDF-картах названия устройств остаются рядом со значками, а устройства в одном месте группируются без соединительных линий."
+        ]
+      }
+    },
     {
       "version": "5.0.6",
       "date": "2026-10-18",

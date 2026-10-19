@@ -2242,7 +2242,12 @@ async function connectCloud(){
 }
 async function exportPersonal(type,exportFilters=filters){
   if(!await save())return;
-  if(type==='pdf'){$('#dialog')?.close();location.hash='settings/reports';await new Promise(resolve=>setTimeout(resolve,50));if($('#results'))$('#results').innerHTML=resultsTable(D.rows(state,exportFilters));window.print();renderResults();return;}
+  if(type==='pdf'){
+    if(!window.PDFDocument)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/pdfkit.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(script);});
+    const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
+    const chunks=await RackHandover.createPortReport(PDFDocument,state,{font:new Uint8Array(await response.arrayBuffer()),filters:exportFilters,tr,language:globalThis.RackI18n?.language||'hy'});
+    download(new Blob(chunks,{type:'application/pdf'}),'MyPatch-personal.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));return;
+  }
   if(!window.ExcelJS)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/exceljs.min.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Excel գործիքը չբեռնվեց։ Միացեք ցանցին և կրկին փորձեք։')));document.head.append(script);});
   const book=new ExcelJS.Workbook(),sheet=book.addWorksheet(tr('Միացումներ'));const fields=['floor','rack','device','port','switchName','switchPort','status','cable','destination','room','door','side','connection','service','vlan','notes'];
   sheet.addRow([tr('Հարկ'),tr('Ռաք'),tr('Սարք'),tr('Պորտ'),tr('Սվիչ'),tr('Սվիչի պորտ'),tr('Վիճակ'),tr('Մալուխ'),tr('Հարկ՝ նպատակակետ'),tr('Սենյակ'),tr('Դուռ'),tr('Կողմ'),tr('Կապ'),tr('Նշանակություն'),'VLAN',tr('Նշումներ')]);
@@ -2272,15 +2277,16 @@ async function exportConnections(type,rackId){
   }else{
     if(!window.PDFDocument)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/pdfkit.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(script);});
     const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
-    const pdf=new PDFDocument({size:'A4',layout:'landscape',margin:32,info:{Title:`${state.company} — ${tr('Կապերի քարտեզ')}`,Author:'My Patch'}});
+    const logo=await RackPdfBranding.loadLogo();
+    const pdf=new PDFDocument({size:'A4',layout:'landscape',margin:32,bufferPages:true,info:{Title:`${state.company} — ${tr('Կապերի քարտեզ')}`,Author:'My Patch'}});
     const chunks=[],done=new Promise((resolve,reject)=>{pdf.on('data',x=>chunks.push(x));pdf.on('end',()=>resolve(chunks));pdf.on('error',reject);});
     pdf.registerFont('Project',new Uint8Array(await response.arrayBuffer())).font('Project');
     const widths=[178,178,96,88,92,54,90],heads=[tr('Սկզբնակետ'),tr('Վերջնակետ'),tr('Ստուգման արդյունք'),tr('Մալուխ'),tr('Նշանակություն'),'VLAN',tr('Նշումներ')];
     let page=0,y=0;
     const write=(value,x,top,width,height,size=8,color='#173e43')=>pdf.font('Project').fontSize(size).fillColor(color).text(String(value||'—'),x+5,top+5,{width:width-10,height:height-10,ellipsis:true});
     const header=()=>{if(page)pdf.addPage();page++;pdf.rect(0,0,842,7).fill('#138478');write(state.company,32,22,778,28,17);write(`${tr('Կապերի քարտեզ')} · ${found.f.name} / ${found.r.name}`,32,52,778,24,11,'#138478');write(`${tr('Կապված')}: ${report.summary.linked}    ${tr('Չկապված')}: ${report.summary.unlinked}    ${tr('Կրկնված')}: ${report.summary.duplicate}    ${tr('Սխալ կապ')}: ${report.summary.wrong}`,32,77,778,22,9);y=110;pdf.rect(32,y,778,29).fill('#e8f2ef');let x=32;heads.forEach((head,i)=>{write(head,x,y,widths[i],29,7);x+=widths[i];});y+=29;};
-    header();for(const row of rows){const h=38;if(y+h>552)header();if(Math.floor((y-139)/h)%2)pdf.rect(32,y,778,h).fill('#f5f9f8');let x=32;row.forEach((value,i)=>{write(value,x,y,widths[i],h,7);x+=widths[i];});pdf.moveTo(32,y+h).lineTo(810,y+h).strokeColor('#dce7e4').stroke();y+=h;}
-    if(!rows.length)write(tr('Կապեր չկան'),40,y+14,760,28,11);pdf.end();download(new Blob(await done,{type:'application/pdf'}),name);
+    header();for(const row of rows){const h=38;if(y+h>RackPdfBranding.contentBottom(pdf))header();if(Math.floor((y-139)/h)%2)pdf.rect(32,y,778,h).fill('#f5f9f8');let x=32;row.forEach((value,i)=>{write(value,x,y,widths[i],h,7);x+=widths[i];});pdf.moveTo(32,y+h).lineTo(810,y+h).strokeColor('#dce7e4').stroke();y+=h;}
+    if(!rows.length)write(tr('Կապեր չկան'),40,y+14,760,28,11);RackPdfBranding.stamp(pdf,logo);pdf.end();download(new Blob(await done,{type:'application/pdf'}),name);
   }
   toast(tr('Հաշվետվությունը պատրաստ է'));
 }

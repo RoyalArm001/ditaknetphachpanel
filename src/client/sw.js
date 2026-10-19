@@ -1,6 +1,6 @@
 'use strict';
 const CACHE='ditaknet-shell-v5-__BUILD_ID__';
-const SHELL=['/share.html','/share-view.js','/share.css','/maps.css','/maps.js','/map-label-layout.js','/map-routing.js','/handover-pdf.js','/pdfkit.js','/pdfjs/pdf.mjs','/pdfjs/pdf.worker.mjs','/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/merge-state.js','/domain.js','/connection-report.js','/personal-store.js','/project-file.js','/live.js','/app-reset.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
+const SHELL=['/share.html','/share-view.js','/share.css','/maps.css','/maps.js','/map-label-layout.js','/map-routing.js','/pdf-branding.js','/assets/smart-tech.png','/handover-pdf.js','/pdfkit.js','/pdfjs/pdf.mjs','/pdfjs/pdf.worker.mjs','/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/merge-state.js','/domain.js','/connection-report.js','/personal-store.js','/project-file.js','/live.js','/app-reset.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
 SHELL.push('/help.js','/demo.js');
 async function digest(response){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',await response.arrayBuffer()))].map(n=>n.toString(16).padStart(2,'0')).join('');}
 async function installSections(){

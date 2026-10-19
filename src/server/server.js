@@ -363,25 +363,9 @@ function createApp(options={}) {
         }
         const font=options.font||process.env.RACKMAP_FONT||(fs.existsSync(path.join(root,'assets','fonts','DejaVuSans.ttf'))?path.join(root,'assets','fonts','DejaVuSans.ttf'):'C:/Windows/Fonts/sylfaen.ttf');
         if(!fs.existsSync(font))return json(res,503,{error:tr('Հայերեն PDF-ի համար նշեք RACKMAP_FONT տառատեսակի ֆայլը')});
-        const pdf=new PDFDocument({size:'A4',margin:40,bufferPages:true,info:{Title:'RackMap '+state.company,Author:tr('Սիփան Դանիելյան · royalarm.uk'),Subject:tr('Սպասարկող՝ ditaknet.com')}});
-        const chunks=[];pdf.on('data',b=>chunks.push(b));
-        pdf.on('end',()=>{if(cloud&&chunks.reduce((n,b)=>n+b.length,0)>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="RackMap.pdf"'});res.end(Buffer.concat(chunks));});
-        pdf.font(font).fontSize(21).fillColor('#174E50').text(state.company||'RackMap');
-        pdf.fontSize(12).fillColor('#333333').text(tr('Ցանցային միացումների հաշվետվություն'));pdf.fontSize(9).text(new Date().toLocaleString({hy:'hy-AM',en:'en-US',ru:'ru-RU'}[lang]));pdf.moveDown();
-        const filterLabels=[url.searchParams.get('query'),state.floors.find(x=>x.id===url.searchParams.get('floor'))?.name,Domain.devices(state).find(x=>x.r.id===url.searchParams.get('rack'))?.r.name,Domain.statusLabel(state,url.searchParams.get('status'),tr)].filter(Boolean);
-        if(filterLabels.length)pdf.text(filterLabels.join(' / '));pdf.text(tr`Պորտերի քանակ՝ ${rows.length}`).moveDown();
-        for(const row of rows){
-          const lines=[`${row.floor} / ${row.rack} / ${row.device} / ${row.port}`,tr`Վիճակ՝ ${Domain.statusLabel(state,row.status,tr)}    Մալուխ՝ ${row.cable||'—'}`,tr`Նշանակություն՝ ${Domain.serviceLabel(state,row.service,tr)}    VLAN՝ ${row.vlan||'—'}`,tr`Տեղադրություն՝ ${[row.destination,row.room,row.door,row.side].filter(Boolean).join(' / ')||'—'}`,tr`Կապ՝ ${row.connection||'—'}`,row.notes?tr`Նշումներ՝ ${row.notes}`:''].filter(Boolean);
-          lines.splice(1,0,`${tr('Սվիչ')}: ${row.switchName||'—'} · ${tr('Սվիչի պորտ')}: ${row.switchPort===''?'—':row.switchPort}`);
-          for(let i=0;i<lines.length;i++){
-            pdf.fontSize(i===0?11:9);const h=pdf.heightOfString(lines[i],{width:515});
-            if(pdf.y+h>785)pdf.addPage();pdf.fillColor(i===0?'#174E50':'#333333').text(lines[i],{width:515});
-          }
-          pdf.moveDown(.7);
-        }
-        if(!rows.length)pdf.text(tr('Ընտրված ֆիլտրերով պորտեր չկան։'));
-        const range=pdf.bufferedPageRange();for(let i=0;i<range.count;i++){pdf.switchToPage(i);pdf.fontSize(8).fillColor('#777777').text(`${i+1} / ${range.count}`,40,810,{lineBreak:false});}
-        pdf.end();return;
+        const chunks=await require('../shared/handover-pdf').createPortReport(PDFDocument,state,{font,tr,language:lang,filters:Object.fromEntries(url.searchParams)});
+        if(cloud&&chunks.reduce((n,b)=>n+b.length,0)>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
+        res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="RackMap.pdf"'});res.end(Buffer.concat(chunks));return;
       }
       if(req.method==='GET'&&url.pathname==='/sw.js'){
         const manifest=require('./asset-manifest').assetManifest(),id=require('node:crypto').createHash('sha256').update(JSON.stringify(manifest)).digest('hex').slice(0,12);
