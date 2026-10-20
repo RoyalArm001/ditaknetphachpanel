@@ -57,3 +57,18 @@ test('label pointers stop before the icon and are omitted when there is no free 
   assert.equal(pointer(point,{...box,y:110},{radius:12}),null);
   assert.equal(pointer(point,{x:80,y:90,width:40,height:20}),null);
 });
+
+test('PDF labels adapt to crowded circular devices without overlapping or moving far away',()=>{
+  const items=Array.from({length:24},(_,i)=>({id:String(i),x:150+(i%4)*28,y:150+Math.floor(i/4)*28,width:20,height:12,radius:10}));
+  const bounds={x:0,y:0,width:500,height:500},icons=items.map(p=>({x:p.x-9,y:p.y-9,width:18,height:18,cx:p.x,cy:p.y,radius:9}));
+  const before=JSON.stringify(items),boxes=layout(items,bounds,icons,1,40,{minScale:5.5/7});
+  assert.ok([...boxes.values()].some(b=>b.scale<1));
+  for(const item of items){
+    const box=boxes.get(item.id);assert.ok(box.scale>=5.5/7&&box.scale<=1);
+    assert.ok(Math.hypot(box.x+box.width/2-item.x,box.y+box.height/2-item.y)<=40);
+    for(const [other,b] of boxes)if(other!==item.id)assert.ok(!intersects(box,b));
+    for(const icon of icons)assert.ok(Math.hypot(icon.cx-Math.max(box.x,Math.min(box.x+box.width,icon.cx)),icon.cy-Math.max(box.y,Math.min(box.y+box.height,icon.cy)))>=9);
+  }
+  assert.equal(JSON.stringify(items),before);
+  assert.deepEqual(boxes,layout([...items].reverse(),bounds,icons,1,40,{minScale:5.5/7}));
+});

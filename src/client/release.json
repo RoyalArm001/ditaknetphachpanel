@@ -1,25 +1,47 @@
 {
-  "version": "6.0.1",
+  "version": "6.0.2",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի և PDF-ի սարքերի անունների պիտակներն ավելի փոքր են։ Փոքր ուղղորդող ծայրն այժմ ցույց է տալիս համապատասխան սարքը։"
+      "Քարտեզի և PDF-ի պիտակները խիտ հատվածներում ավտոմատ փոքրանում են՝ ըստ ազատ տարածքի։ Zoom-ից չափը չի կուտակվում, իսկ A3 էջը չի մեծացնում սարքերի անունները։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Device name labels are more compact on maps and in PDFs. A small pointer now identifies the corresponding device."
+      "Map and PDF labels shrink automatically to fit crowded areas. Repeated zooming does not compound their size, and A3 pages no longer enlarge device names."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Подписи устройств на карте и в PDF стали компактнее. Небольшой указатель направлен на соответствующее устройство."
+      "Подписи на карте и в PDF автоматически уменьшаются в плотных участках. Масштабирование не накапливает размер, а страницы A3 больше не увеличивают названия устройств."
     ]
   },
   "date": "2026-10-20",
   "history": [
+    {
+      "version": "6.0.1",
+      "date": "2026-10-20",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի և PDF-ի սարքերի անունների պիտակներն ավելի փոքր են։ Փոքր ուղղորդող ծայրն այժմ ցույց է տալիս համապատասխան սարքը։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Device name labels are more compact on maps and in PDFs. A small pointer now identifies the corresponding device."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Подписи устройств на карте и в PDF стали компактнее. Небольшой указатель направлен на соответствующее устройство."
+        ]
+      }
+    },
     {
       "version": "5.0.10",
       "date": "2026-10-20",

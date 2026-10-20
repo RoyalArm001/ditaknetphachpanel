@@ -111,8 +111,9 @@ test('dense map chooses A3 automatically and keeps every endpoint name',async()=
   const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
   try{
     assert.equal(doc.numPages,1);const page=await doc.getPage(1);assert.ok(page.view[2]>1100);
-    const text=(await page.getTextContent()).items.map(x=>x.str).join(' ');
+    const items=(await page.getTextContent()).items,text=items.map(x=>x.str).join(' ');
     for(const p of panel.portList)assert.ok(text.includes(p.endpointName),p.endpointName);
+    for(const item of items.filter(x=>x.str.startsWith('Endpoint-')))assert.ok(item.transform[3]>=5.49&&item.transform[3]<=7.01,'A3 never enlarges device names');
   }finally{await task.destroy();}
 });
 

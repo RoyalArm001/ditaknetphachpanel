@@ -3,32 +3,44 @@ globalThis.RackMaps=(()=>{
   const D=globalThis.RackDomain,Routing=globalThis.RackMapRouting,ui=new Map();let pdfLoading;
   // Measure in screen pixels: normalized distances ignore text length, zoom and icon size.
   function resolveLabelDirections(items,bounds,anchors=[]){
-    const gap=6,pad=3,placed=new Map(),directions=['down','up','right','left'];
+    const gap=6,pad=2,placed=new Map(),directions=['down','up','right','left'];
     const area=(a,b)=>a.left>=b.right||a.right<=b.left||a.top>=b.bottom||a.bottom<=b.top?0:(Math.min(a.right,b.right)-Math.max(a.left,b.left))*(Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
     const box=(x,y,w,h)=>({left:x-w/2,right:x+w/2,top:y-h/2,bottom:y+h/2});
     const icons=items.map(p=>box(p.x,p.y,p.iconWidth+pad*2,p.iconHeight+pad*2)).concat(anchors);
     const edge={left:0,top:0,right:bounds.width,bottom:bounds.height};
     const ordered=[...items].sort((a,b)=>String(a.id).localeCompare(String(b.id)));
-    // A second pass lets early labels account for the later labels as well.
     for(let pass=0;pass<2;pass++)for(const p of ordered){
       let best;
       const coincident=ordered.filter(q=>Math.abs(q.x-p.x)<.01&&Math.abs(q.y-p.y)<.01).length;
-      const choices=directions.map(dir=>({dir,shift:0}));
-      if(coincident>4)for(let row=1;row<=Math.ceil(coincident/2);row++)for(const dir of ['right','left'])for(const sign of [1,-1])choices.push({dir,shift:sign*row*(p.height+pad*2)});
-      for(const [rank,{dir,shift}] of choices.entries()) {
-        const x=p.x+(dir==='left'?-(p.iconWidth+p.width)/2-gap:dir==='right'?(p.iconWidth+p.width)/2+gap:0);
-        const y=p.y+(dir==='up'?-(p.iconHeight+p.height)/2-gap:dir==='down'?(p.iconHeight+p.height)/2+gap:0) + shift;
-        const rect=box(x,y,p.width,p.height),padded=box(x,y,p.width+pad*2,p.height+pad*2);
-        const overlap=icons.reduce((sum,b)=>sum+area(rect,b),0)+[...placed].reduce((sum,[id,b])=>sum+(id===p.id?0:area(padded,b)),0);
-        const outside=Math.max(0,p.width*p.height-area(rect,edge));
-        const score=Math.round((overlap+outside*2)*1000)/1000+rank*.001;
-        if(!best||score<best.score)best={...rect,dir,score};
+      // Always start from the natural 9px label; repeated zooms cannot compound its size.
+      for(const scale of [1,.9,.8,7/9]){
+        const width=p.width*scale,height=p.height*scale;
+        const choices=directions.map(dir=>({dir,shift:0}));
+        for(let row=1;row<=(coincident>4?Math.ceil(coincident/2):1);row++)for(const dir of ['right','left'])for(const sign of [1,-1])choices.push({dir,shift:sign*row*(height+pad*2)});
+        for(const [rank,{dir,shift}] of choices.entries()){
+          const x=p.x+(dir==='left'?-(p.iconWidth+width)/2-gap:dir==='right'?(p.iconWidth+width)/2+gap:0);
+          const y=p.y+(dir==='up'?-(p.iconHeight+height)/2-gap:dir==='down'?(p.iconHeight+height)/2+gap:0)+shift;
+          const rect=box(x,y,width,height),padded=box(x,y,width+pad*2,height+pad*2);
+          const overlap=icons.reduce((sum,b)=>sum+area(rect,b),0)+[...placed].reduce((sum,[id,b])=>sum+(id===p.id?0:area(padded,b)),0);
+          const outside=Math.max(0,width*height-area(rect,edge));
+          const score=Math.round((overlap+outside*2)*1000)/1000+(1-scale)*.05+rank*.001;
+          if(!best||score<best.score)best={...rect,dir,score,scale};
+        }
+        if(best.score<.1)break;
       }
       placed.set(p.id,best);
     }
+    if([...placed.values()].some(p=>p.score>=.1)&&globalThis.RackMapLabels){
+      const obstacles=items.map(p=>({x:p.x-p.iconWidth/2,y:p.y-p.iconHeight/2,width:p.iconWidth,height:p.iconHeight,cx:p.x,cy:p.y,radius:Math.max(p.iconWidth,p.iconHeight)/2})).concat(anchors.map(a=>({x:a.left,y:a.top,width:a.right-a.left,height:a.bottom-a.top})));
+      const fitted=globalThis.RackMapLabels.layout(items.map(p=>({...p,radius:Math.max(p.iconWidth,p.iconHeight)/2+3})),{x:0,y:0,width:bounds.width,height:bounds.height},obstacles,1,80,{minScale:7/9});
+      for(const p of items){
+        const b=fitted.get(p.id);if(!b)continue;
+        const dx=b.x+b.width/2-p.x,dy=b.y+b.height/2-p.y;
+        placed.set(p.id,{left:b.x,top:b.y,right:b.x+b.width,bottom:b.y+b.height,scale:b.scale,dir:Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up'});
+      }
+    }
     return placed;
   }
-  const loadScript=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>{s.remove();reject(new Error('PDF tools could not load'));};document.head.append(s);});
   async function exportPdf(state,kind,planId,tr,options={}){
     if(!globalThis.PDFDocument){pdfLoading||=loadScript('/pdfkit.js').catch(e=>{pdfLoading=null;throw e;});await pdfLoading;}
     const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
@@ -770,7 +782,8 @@ globalThis.RackMaps=(()=>{
     function layoutLabels(){
       labelFrame=0;if(!canvas||!view.labels)return;
       const bounds=canvas.getBoundingClientRect();if(!bounds.width||!bounds.height)return;
-      // Batch DOM reads before writes to avoid a layout recalculation for every label.
+      // Clear only the previous visual scale, then batch measurements at the natural size.
+      for(const text of root.querySelectorAll('.map-marker-label'))text.style.transform='none';
       const entries=[...root.querySelectorAll('[data-map-marker]')].map(el=>{
         const text=el.querySelector('.map-marker-label'),r=el.getBoundingClientRect(),t=text.getBoundingClientRect();
         return {id:el.dataset.mapMarker,x:r.left-bounds.left+r.width/2,y:r.top-bounds.top+r.height/2,iconWidth:r.width,iconHeight:r.height,width:t.width,height:t.height,el,text,left:r.left-bounds.left+el.clientLeft,top:r.top-bounds.top+el.clientTop};
@@ -778,16 +791,16 @@ globalThis.RackMaps=(()=>{
       const anchors=[...root.querySelectorAll('[data-map-anchor]')].map(el=>{const r=el.getBoundingClientRect(),radius=7*(1+view.markerSize/100);return {left:r.left-bounds.left+r.width/2-radius,right:r.left-bounds.left+r.width/2+radius,top:r.top-bounds.top+r.height/2-radius,bottom:r.top-bounds.top+r.height/2+radius};});
       const layout=resolveLabelDirections(entries,bounds,anchors);
       for(const p of entries){
-        const pos=layout.get(p.id),box={x:pos.left,y:pos.top,width:p.width,height:p.height};
+        const pos=layout.get(p.id),labelScale=pos.scale||1,box={x:pos.left,y:pos.top,width:pos.right-pos.left,height:pos.bottom-pos.top};
         const tip=globalThis.RackMapLabels.pointer(p,box,{radius:Math.max(p.iconWidth,p.iconHeight)/2});
         p.text.dataset.dir=pos.dir;
-        p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:none`;
+        p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:scale(${labelScale});transform-origin:top left`;
         if(tip){
           const x=Math.min(...tip.map(q=>q.x)),y=Math.min(...tip.map(q=>q.y));
           const w=Math.max(...tip.map(q=>q.x))-x,h=Math.max(...tip.map(q=>q.y))-y;
           const style=p.text.style;
-          style.setProperty('--tip-display','block');style.setProperty('--tip-x',(x-pos.left-1)+'px');style.setProperty('--tip-y',(y-pos.top-1)+'px');
-          style.setProperty('--tip-width',w+'px');style.setProperty('--tip-height',h+'px');
+          style.setProperty('--tip-display','block');style.setProperty('--tip-x',((x-pos.left)/labelScale-1)+'px');style.setProperty('--tip-y',((y-pos.top)/labelScale-1)+'px');
+          style.setProperty('--tip-width',(w/labelScale)+'px');style.setProperty('--tip-height',(h/labelScale)+'px');
           style.setProperty('--tip-points',tip.map(q=>((q.x-x)/w*100)+'% '+((q.y-y)/h*100)+'%').join(','));
         }
       }

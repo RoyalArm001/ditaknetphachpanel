@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const context=vm.createContext({});vm.runInContext(fs.readFileSync(require.resolve('../src/client/js/maps'),'utf8'),context);
+const context=vm.createContext({RackMapLabels:require('../src/shared/map-label-layout')});vm.runInContext(fs.readFileSync(require.resolve('../src/client/js/maps'),'utf8'),context);
 const layout=context.RackMaps.resolveLabelDirections;
 const item=(id,x,y,width=40,iconWidth=30)=>({id,x,y,width,height:22,iconWidth,iconHeight:iconWidth});
 const overlap=(a,b)=>Math.min(a.right,b.right)>Math.max(a.left,b.left)+.01&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+.01;
@@ -38,4 +38,19 @@ test('a shared SVG keeps all eight device names readable around its common posit
   assert.ok(rect.left>=0&&rect.right<=500&&rect.top>=0&&rect.bottom<=450);
   for(const [other,box] of result)if(other!==id)assert.ok(!overlap(rect,box),id+' overlaps '+other);
  }
+});
+
+test('crowded labels shrink to fit, stay capped at their natural size and restore after zooming in',()=>{
+ const points=Array.from({length:24},(_,i)=>item(String(i),100+(i%4)*30,100+Math.floor(i/4)*30,36,20));
+ points.forEach(p=>p.height=18);
+ const before=JSON.stringify(points),bounds={width:500,height:500},compact=layout(points,bounds);
+ assert.ok([...compact.values()].some(p=>p.scale<1));
+ for(const [id,box] of compact){
+  assert.ok(box.scale>=7/9&&box.scale<=1);
+  for(const [other,rect] of compact)if(id!==other)assert.ok(!overlap(box,rect));
+ }
+ const zoomed=layout(points.map(p=>({...p,x:p.x*3,y:p.y*3})),{width:1500,height:1500});
+ assert.ok([...zoomed.values()].every(p=>p.scale===1));
+ assert.equal(JSON.stringify([...layout(points,bounds)]),JSON.stringify([...compact]),'Zooming back never compounds scaling');
+ assert.equal(JSON.stringify(points),before);
 });

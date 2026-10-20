@@ -125,20 +125,21 @@
         const markerLabels=markers.filter(m=>!clusteredIds.has(m.id)).map(m=>{
           const p=positions.get(m.id),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
           if(markerLayout.leaders.has(m.id)){pdf.circle(px,py,9).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5.5,py-5.5,11,ink);}
-          const name=D.endpointLabel(state,m.row,tr),fontSize=size==='A3'?8:7;
+          const name=D.endpointLabel(state,m.row,tr),fontSize=7;
           const textW=pdf.font('Project').fontSize(fontSize).widthOfString(name);
           const width=Math.min(size==='A3'?78:68,Math.max(18,Math.ceil(textW+6)));
           const height=Math.min(32,Math.max(12,Math.ceil(pdf.font('Project').fontSize(fontSize).heightOfString(name,{width:width-6,lineGap:2}))+3));
           return {m,px,py,color,name,size:fontSize,width,height};
         });
-        const obstacles=markerLabels.map(({px,py})=>({x:px-9,y:py-9,width:18,height:18})).concat(clusterCards);
-        const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:x+4,y:y+4,width:w-8,height:h-8},obstacles,2,32);
+        const obstacles=markerLabels.map(({px,py})=>({x:px-9,y:py-9,width:18,height:18,cx:px,cy:py,radius:9})).concat(clusterCards);
+        const boxes=Labels.layout(markerLabels.map(item=>({id:item.m.id,x:item.px,y:item.py,width:item.width,height:item.height,radius:10})),{x:x+4,y:y+4,width:w-8,height:h-8},obstacles,1,40,{minScale:5.5/7});
         for(const item of markerLabels){
           const box=boxes.get(item.m.id);if(!box)continue;
           const tip=Labels.pointer({x:item.px,y:item.py},box,{length:4,halfWidth:2,radius:9});
           if(tip)pdf.moveTo(tip[0].x,tip[0].y).lineTo(tip[1].x,tip[1].y).lineTo(tip[2].x,tip[2].y).closePath().fill(ink);
-          pdf.roundedRect(box.x,box.y,box.width,box.height,2).fill(ink);
-          text(item.name,box.x+3,box.y+2,box.width-6,item.size,'#ffffff',box.height-3,'center');
+          const labelScale=box.scale||1;
+          pdf.roundedRect(box.x,box.y,box.width,box.height,2*labelScale).fill(ink);
+          pdf.font('Project').fontSize(item.size*labelScale).fillColor('#ffffff').text(item.name,box.x+3*labelScale,box.y+2*labelScale,{width:box.width-6*labelScale,height:box.height-3*labelScale,ellipsis:true,lineGap:2*labelScale,align:'center'});
         }
         const legendGroups=new Map();for(const m of markers)legendGroups.set(m.row.service,(legendGroups.get(m.row.service)||0)+1);
         const entries=[...legendGroups];
