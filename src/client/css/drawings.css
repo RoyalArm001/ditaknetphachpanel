@@ -1,4 +1,38 @@
 .drawing-page{--drawing-edge:var(--line,#d4e2e5);--drawing-panel:var(--surface,#fff);--drawing-ink:var(--ink,#19383f);color:var(--drawing-ink)}
+.drawing-view{height:100dvh;overflow:hidden}
+.drawing-view .workspace{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+.drawing-view .topbar{flex:0 0 54px;min-height:54px;height:54px}
+.drawing-view footer,.drawing-view .mobile-nav-handle{display:none}
+.drawing-view #content{flex:1;min-height:0;max-width:none;width:100%;height:100dvh;padding:0;margin:0;overflow:hidden;zoom:1}
+.drawing-view .workspace>#content{height:0}
+.drawing-view .drawing-page{display:flex;flex-direction:column;height:100%;min-height:0}
+.drawing-view .drawing-heading{flex:none;margin:0;padding:8px 12px;gap:12px}
+.drawing-view .drawing-heading h1{font-size:19px;margin:0}
+.drawing-view .drawing-heading .eyebrow,.drawing-view .drawing-heading p{display:none}
+.drawing-view .drawing-toolbar{flex:none;padding:6px 10px;gap:8px;border-radius:0}
+.drawing-view .drawing-sheet-picker>span{display:none}
+.drawing-view .drawing-toolbar .button{padding-inline:8px}
+.drawing-view .drawing-workspace{flex:1;min-height:0;height:auto;max-height:none;border-radius:0;grid-template-columns:176px minmax(0,1fr) 224px}
+.drawing-view .drawing-board{min-height:0;grid-column:2;grid-row:1}
+.drawing-view .drawing-library{grid-column:1;grid-row:1}
+.drawing-view .drawing-inspector{grid-column:3;grid-row:1}
+.drawing-view .drawing-workspace.library-collapsed{grid-template-columns:0 minmax(0,1fr) 224px}
+.drawing-view .drawing-workspace.inspector-collapsed{grid-template-columns:176px minmax(0,1fr) 0}
+.drawing-view .drawing-workspace.library-collapsed.inspector-collapsed{grid-template-columns:0 minmax(0,1fr) 0}
+.drawing-view :is(.drawing-library,.drawing-inspector)[hidden]{display:none}
+#content:fullscreen{height:100dvh!important;width:100vw;background:var(--bg,#f4f7f7)}
+.drawing-cad-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:5px 10px;border:1px solid var(--drawing-edge);border-top:0;background:var(--drawing-panel);font-size:11px;flex:none}
+.drawing-cad-toolbar output{margin-right:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.drawing-key-hint{margin-left:auto;color:var(--muted);white-space:nowrap}
+.drawing-grid{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.drawing-snap-target{fill:#fff9;stroke:#e27911;stroke-width:1.5;pointer-events:none}
+.drawing-calibration-line{fill:none;stroke:#c73e78;stroke-width:2;stroke-dasharray:5 3;pointer-events:none}
+.drawing-measurement{border:1px solid var(--drawing-edge);border-radius:8px;padding:10px;margin:12px 0}
+.drawing-measurement strong{display:block;font-size:19px;margin-top:6px;font-variant-numeric:tabular-nums}
+.drawing-measurement p{font-size:11px;line-height:1.6;color:var(--muted);margin-bottom:0}
+.drawing-coordinates{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drawing-inspector .drawing-check{display:flex;align-items:center;gap:8px}.drawing-inspector .drawing-check input{width:auto}
+.drawing-desktop-notice{margin:30px auto;max-width:720px}
 .drawing-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}
 .drawing-heading h1{margin:4px 0 6px}.drawing-heading p{margin:0;color:var(--muted,#607b80);font-size:13px}
 .drawing-actions,.drawing-toolset,.drawing-zoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}

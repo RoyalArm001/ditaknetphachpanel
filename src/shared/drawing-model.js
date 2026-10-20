@@ -3,13 +3,15 @@
   else root.RackDrawingModel=factory();
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
+  const G=typeof module==='object'?require('./drawing-geometry'):globalThis.RackDrawingGeometry;
   const tr=text=>globalThis.RackI18n?.t(text)||text;
   const clamp=v=>Math.max(0,Math.min(1,v));
   const point=p=>({x:clamp(p.x),y:clamp(p.y)});
   const freshId=()=>globalThis.crypto.randomUUID();
   function routePoints(route,nodes){
     const from=nodes.find(n=>n.id===route.from),to=nodes.find(n=>n.id===route.to);
-    return from&&to?[point(from),...(route.points||[]).map(point),point(to)]:[];
+    const points=from&&to?[point(from),...(route.points||[]).map(point),point(to)]:[];
+    return route.orthogonal?G.orthogonal(points):points;
   }
   function removeNode(sheet,id){
     sheet.nodes=sheet.nodes.filter(n=>n.id!==id);
@@ -31,12 +33,25 @@
   function validate(state,h){
     const {id,name,text,integer,assert,hasService}=h;
     const position=p=>assert(p&&[p.x,p.y].every(v=>Number.isFinite(v)&&v>=0&&v<=1),'Invalid drawing coordinates');
+    function drafting(sheet){
+      if(sheet.calibration!==undefined){
+        const c=sheet.calibration;assert(c&&typeof c==='object','Invalid drawing calibration');
+        position(c.a);position(c.b);
+        assert(Number.isFinite(c.meters)&&c.meters>0&&c.meters<=100000&&G.distance(c.a,c.b,sheet)>=2,'Invalid drawing calibration');
+      }
+      if(sheet.drafting!==undefined){
+        const settings=sheet.drafting;assert(settings&&typeof settings==='object'&&!Array.isArray(settings),'Invalid drafting settings');
+        for(const flag of ['grid','snap','ortho'])if(settings[flag]!==undefined)assert(typeof settings[flag]==='boolean','Invalid drafting settings');
+        if(settings.step!==undefined)assert(Number.isFinite(settings.step)&&settings.step>=.001&&settings.step<=100,'Invalid grid spacing');
+      }
+    }
     function routes(list,nodes){
       assert(Array.isArray(list)&&list.length<=2000,'Invalid drawing routes');
       for(const r of list){
         id(r.id);name(r.name);text(r.notes,2000);
         assert(r.from!==r.to&&nodes.has(r.from)&&nodes.has(r.to),'Invalid drawing connection');
         assert(Array.isArray(r.points)&&r.points.length<=128,'Invalid drawing bends');
+        if(r.orthogonal!==undefined)assert(typeof r.orthogonal==='boolean','Invalid drawing route mode');
         r.points.forEach(position);
       }
     }
@@ -46,6 +61,7 @@
         id(sheet.id);name(sheet.name);text(sheet.floorId);text(sheet.sourceName);
         assert(!sheet.floorId||state.floors.some(f=>f.id===sheet.floorId),'Invalid drawing floor');
         integer(sheet.width,1,3000);integer(sheet.height,1,3000);text(sheet.image,2500000);
+        drafting(sheet);
         assert(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(sheet.image),'Invalid drawing image');
         assert(Array.isArray(sheet.nodes)&&sheet.nodes.length<=1000,'Maximum 1000 drawing devices');
         const ids=new Set();
@@ -57,8 +73,9 @@
         routes(sheet.routes,ids);
       }
     }
-    for(const plan of state.floorPlans||[])if(plan.plannedRoutes!==undefined){
-      routes(plan.plannedRoutes,new Set([...(plan.markers||[]),...(plan.rackMarkers||[])].map(m=>m.id)));
+    for(const plan of state.floorPlans||[]){
+      drafting(plan);
+      if(plan.plannedRoutes!==undefined)routes(plan.plannedRoutes,new Set([...(plan.markers||[]),...(plan.rackMarkers||[])].map(m=>m.id)));
     }
   }
   function mapSheet(state,plan,D){
@@ -86,6 +103,7 @@
       }
     }
     plan.plannedRoutes=structuredClone(sheet.routes);
+    for(const key of ['calibration','drafting'])if(sheet[key]!==undefined)plan[key]=structuredClone(sheet[key]);else delete plan[key];
   }
   function exportToMap(state,sheetId,options,D,uid=freshId){
     const sheet=state.drawings?.find(s=>s.id===sheetId),floor=state.floors.find(f=>f.id===options.floorId);
@@ -93,6 +111,7 @@
     if((state.floorPlans||[]).length>=30)throw new Error(tr('Առավելագույնը՝ 30 հատակագիծ'));
     const plan={id:uid(),name:uniqueName(sheet.name,(state.floorPlans||[]).map(p=>p.name)),floorId:floor.id,
       width:sheet.width,height:sheet.height,image:sheet.image,markers:[],rackMarkers:[],plannedRoutes:[],drawingSourceId:sheet.id};
+    for(const key of ['calibration','drafting'])if(sheet[key]!==undefined)plan[key]=structuredClone(sheet[key]);
     const newRack=name=>{
       const r={id:uid(),name:uniqueName(name,floor.racks.map(r=>r.name)),u:42,location:'',photo:'',devices:[]};
       floor.racks.push(r);return r;

@@ -532,8 +532,8 @@ globalThis.RackMaps=(()=>{
         change(s=>{
           const neededFloors=new Set(replacing&&pages===1?[floorId]:additions.map(p=>p.floorId));
           for(const floor of draftFloors)if(neededFloors.has(floor.id))s.floors.push(floor);
-          if(replacing&&pages===1){const target=s.floorPlans.find(p=>p.id===targetId);if(!target)throw new Error(tr('Չի գտնվել'));Object.assign(target,{name,floorId},replacement||{});}
-          else{s.floorPlans||=[];for(const entry of additions){if(entry.id===targetId){const target=s.floorPlans.find(p=>p.id===targetId);if(!target)throw new Error(tr('Չի գտնվել'));Object.assign(target,entry);}else s.floorPlans.push(entry);}}
+          if(replacing&&pages===1){const target=s.floorPlans.find(p=>p.id===targetId);if(!target)throw new Error(tr('Չի գտնվել'));if(replacement)delete target.calibration;Object.assign(target,{name,floorId},replacement||{});}
+          else{s.floorPlans||=[];for(const entry of additions){if(entry.id===targetId){const target=s.floorPlans.find(p=>p.id===targetId);if(!target)throw new Error(tr('Չի գտնվել'));delete target.calibration;Object.assign(target,entry);}else s.floorPlans.push(entry);}}
           if(new Blob([JSON.stringify(s)]).size>h.maxBytes-16384)throw new Error(tr('Հատակագիծը չի տեղավորվում բազայում։ Փոքրացրեք ֆայլը։'));
           view.planId=replacing&&pages===1?targetId:additions[0].id;view.camera=null;view.zoom=1;
         });

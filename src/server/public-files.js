@@ -19,6 +19,7 @@ const sources={
   'map-marker-groups.js':'src/shared/map-marker-groups.js',
   'map-routing.js':'src/shared/map-routing.js',
   'drawing-model.js':'src/shared/drawing-model.js',
+  'drawing-geometry.js':'src/shared/drawing-geometry.js',
   'drawings.js':'src/client/js/drawings.js',
   'drawings.css':'src/client/css/drawings.css',
   'handover-pdf.js':'src/shared/handover-pdf.js',

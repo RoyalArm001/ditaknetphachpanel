@@ -494,7 +494,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         }
       }
     }
-    if(s.drawings!==undefined||(s.floorPlans||[]).some(p=>p.plannedRoutes!==undefined))Drawing.validate(s,{id,name,text,integer,assert,hasService});
+    if(s.drawings!==undefined||(s.floorPlans||[]).some(p=>p.plannedRoutes!==undefined||p.calibration!==undefined||p.drafting!==undefined))Drawing.validate(s,{id,name,text,integer,assert,hasService});
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
       const validTarget=to&&to.d.id!==d.id&&((d.type==='panel'&&isNetworkDevice(to.d))||(d.type==='router'&&isNetworkDevice(to.d)));

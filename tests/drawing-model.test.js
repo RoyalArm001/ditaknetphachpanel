@@ -15,6 +15,32 @@ test('drafts persist without creating real inventory; validates types and routes
   const bad=structuredClone(s);bad.drawings[0].routes[0].to='missing';assert.throws(()=>D.validate(bad),/connection/);
   bad.drawings[0].routes[0].to='n3';bad.drawings[0].nodes[0].x=2;assert.throws(()=>D.validate(bad),/coordinates/);
 });
+
+test('calibration, grid settings and orthogonal paths survive map export and editing',()=>{
+  const s=fixture(),draft=s.drawings[0];
+  draft.calibration={a:{x:.1,y:.1},b:{x:.6,y:.1},meters:12};
+  draft.drafting={grid:true,snap:true,ortho:true,step:.5};
+  draft.routes[0].orthogonal=true;D.validate(s);
+  const plan=M.exportToMap(s,draft.id,{floorId:'f2'},D),copy=M.mapSheet(s,plan,D);
+  assert.deepEqual(copy.calibration,draft.calibration);assert.deepEqual(copy.drafting,draft.drafting);
+  assert.equal(copy.routes[0].orthogonal,true);
+  copy.calibration.meters=18;copy.drafting.step=1;
+  M.updateMap(s,plan.id,copy,D);D.validate(s);
+  assert.equal(plan.calibration.meters,18);assert.equal(plan.drafting.step,1);
+  assert.equal(draft.calibration.meters,12);assert.equal(draft.drafting.step,.5);
+  delete copy.calibration;M.updateMap(s,plan.id,copy,D);assert.equal(plan.calibration,undefined);
+});
+
+test('invalid scales and drafting settings cannot enter saved projects',()=>{
+  for(const calibration of [
+    {a:{x:.1,y:.1},b:{x:.1,y:.1},meters:10},
+    {a:{x:.1,y:.1},b:{x:.5,y:.1},meters:0},
+    {a:{x:-1,y:.1},b:{x:.5,y:.1},meters:10}
+  ]){const s=fixture();s.drawings[0].calibration=calibration;assert.throws(()=>D.validate(s));}
+  for(const drafting of [{step:0},{step:101},{snap:'true'}]){
+    const s=fixture();s.drawings[0].drafting=drafting;assert.throws(()=>D.validate(s));
+  }
+});
 test('export preserves floor, icons, cable bends and maps names to real port markers',()=>{
   const s=fixture(),source=structuredClone(s.drawings[0]);const plan=M.exportToMap(s,'draft',{floorId:'f2'},D);
   assert.equal(plan.floorId,'f2');assert.equal(plan.markers.length,2);assert.equal(plan.rackMarkers.length,1);

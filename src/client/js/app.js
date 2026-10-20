@@ -68,7 +68,7 @@ let networkActiveTab='all';
 try{const p=JSON.parse(localStorage.getItem('rackmap-panels'));if(p)for(const k of ['left','right'])if(typeof p[k]==='boolean')panelPrefs[k]=p[k];}catch{}
 function applyPanels(){
   for(const k of ['left','right']){
-    const open=k==='left'&&document.body.classList.contains('map-view')&&!window.matchMedia('(max-width:760px)').matches?mapNavOpen:panelPrefs[k];
+    const open=k==='left'&&(document.body.classList.contains('map-view')||document.body.classList.contains('drawing-view'))&&!window.matchMedia('(max-width:760px)').matches?mapNavOpen:panelPrefs[k];
     document.body.classList.toggle(k+'-collapsed',!open);
     const panel=$('#'+k+'Panel');if(panel)panel.inert=!panelPrefs[k]&&!(k==='left'&&!window.matchMedia('(max-width:760px)').matches);
     document.querySelectorAll('[data-action="toggle-'+k+'"]').forEach(toggle=>toggle.setAttribute('aria-expanded',String(open)));
@@ -79,7 +79,7 @@ function applyPanels(){
   const panelBackdrop=$('#panelBackdrop');if(panelBackdrop)panelBackdrop.hidden=!overlay||!ready;
   document.body.classList.toggle('mobile-panel-open',!!overlay&&ready);
 }
-function togglePanel(k){if(k==='left'&&document.body.classList.contains('map-view')&&!window.matchMedia('(max-width:760px)').matches){mapNavOpen=!mapNavOpen;applyPanels();return;}panelPrefs[k]=!panelPrefs[k];if(window.matchMedia('(max-width:760px)').matches&&panelPrefs[k])panelPrefs[k==='left'?'right':'left']=false;applyPanels();try{localStorage.setItem('rackmap-panels',JSON.stringify(panelPrefs));}catch{}}
+function togglePanel(k){if(k==='left'&&(document.body.classList.contains('map-view')||document.body.classList.contains('drawing-view'))&&!window.matchMedia('(max-width:760px)').matches){mapNavOpen=!mapNavOpen;applyPanels();return;}panelPrefs[k]=!panelPrefs[k];if(window.matchMedia('(max-width:760px)').matches&&panelPrefs[k])panelPrefs[k==='left'?'right':'left']=false;applyPanels();try{localStorage.setItem('rackmap-panels',JSON.stringify(panelPrefs));}catch{}}
 let selectedPortId='',selectedPortIds=new Set(),portDraft=null,portDraftDirty=false,portTimer;
 let activeCompanyId=new URLSearchParams(location.search).get('company')||'default',companies=[],companyBusy=false;
 if(!new URLSearchParams(location.search).has('company'))try{activeCompanyId=localStorage.getItem('rackmap-active-company')||'default';}catch{}
@@ -199,7 +199,7 @@ function render(){
   if(view==='author'){$('#content').innerHTML=RackHelp.author(tr,esc);applyPanels();return;}
   if(!activeCompanyId){$('#content').innerHTML=header(tr('Նախագծեր'))+`<section class="panel"><h2>${tr('Նախագծեր դեռ չկան')}</h2>${button(tr('Նոր ընկերություն'),'company-new','','primary')}</section>`;applyPanels();return;}
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
-  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,requestedPlanId:id,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='drawing')mapController=RackDrawings.mount($('#content'),{tr,esc,commit,getState:()=>state,modal,input,select,toast,confirm:confirmAction,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId,mapPlanId:id?.startsWith('map-')?id.slice(4):'',drawingId:id?.startsWith('map-')?'':id});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
+  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,requestedPlanId:id,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='drawing')mapController=RackDrawings.mount($('#content'),{tr,esc,commit,layoutChanged:applyPanels,getState:()=>state,modal,input,select,toast,confirm:confirmAction,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId,mapPlanId:id?.startsWith('map-')?id.slice(4):'',drawingId:id?.startsWith('map-')?'':id});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
   applyPanels();updateLiveLabel();
 }
 function renderHelp(){$('#content').innerHTML=RackHelp.html(tr,esc);RackHelp.bind($('#content'));}
