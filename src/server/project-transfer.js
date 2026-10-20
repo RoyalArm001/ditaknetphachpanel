@@ -84,6 +84,11 @@ function prepare(source,target,request){
     const rackMarkers=(plan.rackMarkers||[]).filter(rm=>chosen.has(rm.rackId));
     if(!markers.length&&!rackMarkers.length)continue;
     const copy={...plan,id:map(plan.id),floorId:addFloor(plan.floorId),markers:markers.map(m=>({...m,id:map(m.id),portId:map(m.portId)})),rackMarkers:rackMarkers.map(rm=>({...rm,id:map(rm.id),rackId:map(rm.rackId)}))};
+    if(plan.plannedRoutes){
+      const present=new Set([...markers,...rackMarkers].map(m=>m.id));
+      copy.plannedRoutes=plan.plannedRoutes.filter(r=>present.has(r.from)&&present.has(r.to)).map(r=>({...structuredClone(r),id:map(r.id),from:map(r.from),to:map(r.to)}));
+      delete copy.drawingSourceId;
+    }
     rename(copy,t.floorPlans);t.floorPlans.push(copy);summary.plans++;
   }
   if(request.mode==='move'){
@@ -96,6 +101,7 @@ function prepare(source,target,request){
     }
     for(const f of s.floors)if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>!chosen.has(id));
   }
+  require('../shared/drawing-model').pruneMapRoutes(s);
   D.validate(s);D.validate(t);
   const max=request.maxBytes||4*1024*1024;
   if([s,t].some(state=>Buffer.byteLength(JSON.stringify({state,revision:0}))>max))fail('Ներմուծումից հետո նախագիծը գերազանցում է պահպանման չափի սահմանը։',413);

@@ -88,7 +88,7 @@ const recoveryKey=()=>demoMode?'rackmap-demo-recovery':accountMode()?'rackmap-ac
 function companyUrl(url,id=activeCompanyId){const u=new URL(url,location.href);u.searchParams.set('company',id);if(accountMode())u.searchParams.set('space','account');u.searchParams.set('lang',globalThis.RackI18n?.language||'hy');return u.pathname+u.search;}
 
 
-const viewNames={get author(){return tr('Հեղինակ');},get help(){return tr('Օգնություն');},get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր ու Սարքեր');},get search(){return tr('Մալուխներ և որոնում');},get map(){return tr('Քարտեզ');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
+const viewNames={get author(){return tr('Հեղինակ');},get help(){return tr('Օգնություն');},get overview(){return tr('Ընդհանուր տեսք');},get floors(){return tr('Հարկեր և ռաքեր');},get networks(){return tr('Ցանցեր ու Սարքեր');},get search(){return tr('Մալուխներ և որոնում');},get map(){return tr('Քարտեզ');},get drawing(){return tr('Գծագրություն');},get reports(){return tr('Հաշվետվություններ');},get settings(){return tr('Կարգավորումներ');},get rack(){return tr('Ռաքի տեսք');},get connections(){return tr('3D կապեր');}};
 const button=(label,action,id='',cls='')=>`<button type="button" class="button ${cls}" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
 const input=(name,label,value='',type='text',extra='')=>type==='password'?`<div class="field password-field"><label for="${name}">${label}</label><div class="password-input-wrap"><input id="${name}" name="${name}" type="password" value="${esc(value)}" ${extra}><button type="button" class="password-toggle-btn" data-action="toggle-password" data-target="${name}" aria-label="${esc(tr('Ցուցադրել / թաքցնել'))}" title="${esc(tr('Ցուցադրել / թաքցնել'))}"><svg viewBox="0 0 24 24" class="eye-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>`:`<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${esc(value)}" ${extra}></div>`;
 const secretInput=(name,label,value='')=>`<div class="field"><label for="${name}">${label}</label><div class="secret-wrap"><input id="${name}" name="${name}" type="password" value="${esc(value)}" maxlength="200" autocomplete="off" spellcheck="false"><button type="button" class="button small secret-toggle" data-action="toggle-secret" data-id="${esc(name)}">${tr('Ցույց տալ')}</button></div></div>`;
@@ -184,7 +184,7 @@ async function save(){
   })();
   try{return await saving;}finally{saving=null;}
 }
-function commit(fn,redraw=true){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
+function commit(fn,redraw=true){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);RackDrawingModel.pruneMapRoutes(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
 function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return v==='reports'?{view:'settings',id:'reports'}:{view:viewNames[v]?v:'overview',id};}
 let mapController=null;
 function render(){
@@ -199,7 +199,7 @@ function render(){
   if(view==='author'){$('#content').innerHTML=RackHelp.author(tr,esc);applyPanels();return;}
   if(!activeCompanyId){$('#content').innerHTML=header(tr('Նախագծեր'))+`<section class="panel"><h2>${tr('Նախագծեր դեռ չկան')}</h2>${button(tr('Նոր ընկերություն'),'company-new','','primary')}</section>`;applyPanels();return;}
   if(!state.company&&view!=='settings'&&!accountReadOnly){renderSetup();applyPanels();return;}
-  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
+  if(view==='overview')renderOverview();else if(view==='floors')renderFloors();else if(view==='map')mapController=RackMaps.mount($('#content'),{tr,esc,commit,api,requestedPlanId:id,canShare:!personal(),getRevision:()=>revision,getState:()=>state,modal,input,select,toast,download,save,confirm:confirmAction,redraw:render,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId});else if(view==='drawing')mapController=RackDrawings.mount($('#content'),{tr,esc,commit,getState:()=>state,modal,input,select,toast,confirm:confirmAction,readOnly:accountReadOnly,maxBytes:maxStateBytes,projectKey:storageMode+':'+accountUserId+':'+activeCompanyId,mapPlanId:id?.startsWith('map-')?id.slice(4):'',drawingId:id?.startsWith('map-')?'':id});else if(view==='networks')renderNetworks();else if(view==='rack')renderRack(id);else if(view==='connections')renderConnections(id);else if(view==='search'||view==='reports')renderSearch(view);else renderSettings();
   applyPanels();updateLiveLabel();
 }
 function renderHelp(){$('#content').innerHTML=RackHelp.html(tr,esc);RackHelp.bind($('#content'));}
@@ -2472,7 +2472,7 @@ document.addEventListener('change',e=>{
 });
 window.addEventListener('hashchange',()=>{if(ready){$('#dialog').close();render();$('#content').scrollTop=0;window.scrollTo(0,0);}});
 window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||saving||portDraftDirty){recovery();e.preventDefault();e.returnValue='';}});
-window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
+window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(!ready)return;if(route().view==='rack')render();else applyPanels();});
 window.matchMedia('(max-width:1150px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 async function init(){
   if(location.protocol==='file:'){

@@ -270,7 +270,9 @@ test('RackMaps.mount executes cleanly without ReferenceError on curFloor', () =>
     ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
     AbortController: class { signal = {} },
     Set, Map, Array, Object, String, Number, Math, JSON,
-    RackDomain: D
+    RackDomain: D,
+    RackMapMarkerGroups: require('../src/shared/map-marker-groups'),
+    RackMapLabels: require('../src/shared/map-label-layout')
   };
   ctx.globalThis = ctx;
   const context = vm.createContext(ctx);

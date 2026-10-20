@@ -3,6 +3,7 @@
   else root.RackDomain = factory();
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
+const Drawing=typeof module==='object'?require('./drawing-model'):globalThis.RackDrawingModel;
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
   const statuses = {get free(){return tr('Ազատ');}, get used(){return tr('Զբաղված');}, get fault(){return tr('Անսարք');}};
@@ -16,7 +17,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
   };
   const serviceEntries = s => [...Object.entries(services).filter(([key])=>!s.hiddenServices?.includes(key)),...(s.serviceTypes||[]).map(type=>[type.id,{label:type.name,color:type.color}])];
   const hasService = (s,key) => key==='' || serviceEntries(s).some(([id])=>id===key);
-  const serviceInUse = (s,key) => ports(s).some(({p})=>p.service===key)||networks(s).some(n=>n.name===key);
+  const serviceInUse = (s,key) => ports(s).some(({p})=>p.service===key)||networks(s).some(n=>n.name===key)||(s.drawings||[]).some(d=>d.nodes.some(n=>n.kind==='device'&&n.service===key));
   const applyProjectStyle = (s,style) => {
     for(const [key] of serviceEntries(s))if(key&&!hasService(style,key)&&serviceInUse(s,key))throw new Error(tr('Օգտագործվող տեսակը ջնջելուց առաջ փոխեք այն ցանցերում և պորտերում։'));
     Object.assign(s,style);
@@ -493,6 +494,7 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
         }
       }
     }
+    if(s.drawings!==undefined||(s.floorPlans||[]).some(p=>p.plannedRoutes!==undefined))Drawing.validate(s,{id,name,text,integer,assert,hasService});
     for(const {d,p} of all) if(p.switchPortId){
       const to=byId.get(p.switchPortId);
       const validTarget=to&&to.d.id!==d.id&&((d.type==='panel'&&isNetworkDevice(to.d))||(d.type==='router'&&isNetworkDevice(to.d)));
@@ -620,6 +622,8 @@ const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.red
       if(plan.rackMarkers)plan.rackMarkers=plan.rackMarkers.filter(rm=>!removedIds.has(rm.rackId));
       if(plan.floorId&&!s.floors.some(f=>f.id===plan.floorId))plan.floorId='';
     }
+    for(const draft of s.drawings||[])if(draft.floorId&&!s.floors.some(f=>f.id===draft.floorId))draft.floorId='';
+    Drawing?.pruneMapRoutes(s);
     const validRackIds=new Set(s.floors.flatMap(f=>(f.racks||[]).map(r=>r.id)));
     for(const f of s.floors||[]){if(f.linkedRackIds)f.linkedRackIds=f.linkedRackIds.filter(id=>validRackIds.has(id)&&!f.racks.some(r=>r.id===id));}
   }
