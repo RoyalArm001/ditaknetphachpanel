@@ -1,14 +1,17 @@
 .drawing-page{--drawing-edge:var(--line,#d4e2e5);--drawing-panel:var(--surface,#fff);--drawing-ink:var(--ink,#19383f);color:var(--drawing-ink)}
 .drawing-view{height:100dvh;overflow:hidden}
 .drawing-view .workspace{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
-.drawing-view .topbar{flex:0 0 54px;min-height:54px;height:54px}
+.drawing-view .topbar{flex:0 0 54px;min-height:54px;height:54px;padding:0 12px;gap:8px}
+.drawing-view .topbar #breadcrumb{display:inline-flex;flex:none;margin-right:4px}
+.drawing-view .topbar .drawing-actions{flex:1;min-width:0;flex-wrap:nowrap;margin-right:auto}
+.drawing-view .topbar .drawing-actions .button{white-space:nowrap;padding:8px 10px}
+.drawing-view #storageModeLabel{display:none}
+.drawing-toolbar>.drawing-actions{margin-left:auto}
+.drawing-page>.drawing-actions{flex:none;padding:8px 10px}
 .drawing-view footer,.drawing-view .mobile-nav-handle{display:none}
 .drawing-view #content{flex:1;min-height:0;max-width:none;width:100%;height:100dvh;padding:0;margin:0;overflow:hidden;zoom:1}
 .drawing-view .workspace>#content{height:0}
 .drawing-view .drawing-page{display:flex;flex-direction:column;height:100%;min-height:0}
-.drawing-view .drawing-heading{flex:none;margin:0;padding:8px 12px;gap:12px}
-.drawing-view .drawing-heading h1{font-size:19px;margin:0}
-.drawing-view .drawing-heading .eyebrow,.drawing-view .drawing-heading p{display:none}
 .drawing-view .drawing-toolbar{flex:none;padding:6px 10px;gap:8px;border-radius:0}
 .drawing-view .drawing-sheet-picker>span{display:none}
 .drawing-view .drawing-toolbar .button{padding-inline:8px}
@@ -33,8 +36,6 @@
 .drawing-coordinates{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .drawing-inspector .drawing-check{display:flex;align-items:center;gap:8px}.drawing-inspector .drawing-check input{width:auto}
 .drawing-desktop-notice{margin:30px auto;max-width:720px}
-.drawing-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}
-.drawing-heading h1{margin:4px 0 6px}.drawing-heading p{margin:0;color:var(--muted,#607b80);font-size:13px}
 .drawing-actions,.drawing-toolset,.drawing-zoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .drawing-toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px;background:var(--drawing-panel);border:1px solid var(--drawing-edge);border-radius:14px 14px 0 0}
 .drawing-sheet-picker{display:flex;align-items:center;gap:8px;max-width:330px;min-width:150px;font-size:12px}.drawing-sheet-picker select{min-width:0;max-width:230px}

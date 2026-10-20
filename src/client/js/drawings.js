@@ -17,7 +17,7 @@ globalThis.RackDrawings=(()=>{
   function mount(root,h){
     const {tr,esc,getState}=h,abort=new AbortController(),signal=abort.signal;
     const key=h.projectKey||'default',v=views.get(key)||{id:'',zoom:1,tool:'select',selected:''};views.set(key,v);
-    let undo=[],redo=[],pending=null,drag=null,disposed=false,importing=false,resize,calibrationStart=null,cursor=null,spaceTool=null,viewportSize=null,lastTap=null;
+    let undo=[],redo=[],pending=null,drag=null,disposed=false,importing=false,resize,calibrationStart=null,cursor=null,spaceTool=null,viewportSize=null,lastTap=null,headerActions=null;
     const desktop=window.matchMedia('(min-width:1024px) and (pointer:fine)');
     const isMap=()=>!!h.mapPlanId;
     if(h.drawingId)v.id=h.drawingId;
@@ -52,17 +52,31 @@ globalThis.RackDrawings=(()=>{
     const button=(action,text,extra='')=>`<button type="button" class="button small" data-draw-action="${action}" ${extra}>${esc(tr(text))}</button>`;
     const types=()=>D.serviceEntries(getState()).filter(([id])=>id).map(([id])=>[id,D.serviceLabel(getState(),id,tr)]);
     function icon(n){return n.kind==='rack'?rackIcon:D.serviceIconSvg(n.service,getState(),20);}
+    function clearHeaderActions(){
+      if(headerActions){headerActions.onclick=null;headerActions.remove();headerActions=null;}
+    }
+    function placeHeaderActions(){
+      if(!headerActions)return;
+      const fullscreen=document.fullscreenElement===root,breadcrumb=document.querySelector('.topbar #breadcrumb');
+      if(!fullscreen&&breadcrumb)breadcrumb.after(headerActions);
+      else {
+        const toolbar=root.querySelector('.drawing-toolbar');
+        if(toolbar)toolbar.append(headerActions);
+        else root.querySelector('.drawing-page')?.prepend(headerActions);
+      }
+      headerActions.querySelector('[data-draw-action="fullscreen"]').setAttribute('aria-pressed',String(fullscreen));
+    }
     function render(){
       const s=sheet();if(s&&!isMap())v.id=s.id;
       resize?.disconnect();viewportSize=null;
+      clearHeaderActions();
       document.body.classList.toggle('drawing-view',desktop.matches);
       if(!desktop.matches){
         root.innerHTML=`<section class="drawing-empty drawing-desktop-notice">${rackIcon}<h1>${esc(tr('Գծագրություն՝ համակարգչով'))}</h1><p>${esc(tr('Այս գործիքները նախատեսված են մկնիկով և ստեղնաշարով աշխատանքի համար։ Բացեք համակարգչով՝ առնվազն 1024px լայնությամբ պատուհանում։'))}</p><a class="button" href="#map">${esc(tr('Վերադառնալ քարտեզ'))}</a></section>`;
         return;
       }
-      root.innerHTML=`<section class="drawing-page">
-        <header class="drawing-heading"><div><div class="eyebrow">${esc(tr(isMap()?'ՔԱՐՏԵԶԻ ԽՄԲԱԳՐՈՒՄ':'ՆԱԽԱԳԾՄԱՆ ԱՇԽԱՏԱՆՔԱՅԻՆ ՏԱՐԱԾՔ'))}</div><h1>${esc(tr('Գծագրություն'))}</h1><p>${esc(tr('Նախ տեղադրեք սարքերը, հետո նշեք մալուխների անցման ուղիները։'))}</p></div>
-        <div class="drawing-actions">${button('fullscreen','Ամբողջ էկրանով')}${isMap()?`<a class="button" href="#map/${esc(h.mapPlanId)}">${esc(tr('Վերադառնալ քարտեզ'))}</a>`:!h.readOnly?button('import','＋ PDF / նկար')+button('export','Արտահանել դեպի քարտեզ',s?'':'disabled'):''}</div></header>
+      root.innerHTML=`<section class="drawing-page" aria-label="${esc(tr('Գծագրություն'))}">
+        <div class="drawing-actions" role="group" aria-label="${esc(tr('Գծագրության գործիքներ'))}">${button('fullscreen','Ամբողջ էկրանով')}${isMap()?`<a class="button small" href="#map/${esc(h.mapPlanId)}">${esc(tr('Վերադառնալ քարտեզ'))}</a>`:!h.readOnly?button('import','＋ PDF / նկար')+button('export','Արտահանել դեպի քարտեզ',s?'':'disabled'):''}</div>
         ${s?`<div class="drawing-toolbar">
           <label class="drawing-sheet-picker"><span>${esc(tr('Գծագրություն'))}</span>${isMap()?`<strong>${esc(s.name)}</strong>`:`<select data-draw-sheet>${options((getState().drawings||[]).map(d=>[d.id,d.name]),s.id)}</select>`}</label>
           <div class="drawing-toolset" role="toolbar" aria-label="${esc(tr('Գծագրության գործիքներ'))}">
@@ -103,6 +117,13 @@ globalThis.RackDrawings=(()=>{
         </div>`:`<div class="drawing-empty">${rackIcon}<h2>${esc(tr('Սկսեք նոր գծագրությունից'))}</h2><p>${esc(tr('Ներմուծեք PDF կամ հատակագծի նկար։ Սարքերն ու մալուխները կավելացնեք այստեղ։'))}</p>${!h.readOnly?button('import','＋ PDF / նկար'):''}</div>`}
         <input type="file" data-draw-file accept=".pdf,image/png,image/jpeg,image/webp" hidden>
       </section>`;
+      headerActions=root.querySelector('.drawing-actions');
+      headerActions.onclick=e=>{
+        if(root.contains(headerActions))return;
+        const button=e.target.closest('[data-draw-action]');
+        if(button&&!button.disabled)try{handleAction(button.dataset.drawAction);}catch(err){fail(err);}
+      };
+      placeHeaderActions();
       if(s){
         paint();panels();v.fitted=true;
         resize?.observe(root.querySelector('.drawing-viewport'));
@@ -503,6 +524,7 @@ globalThis.RackDrawings=(()=>{
     const releaseSpace=()=>{if(spaceTool!==null){v.tool=spaceTool;spaceTool=null;status();}};
     window.addEventListener('keyup',e=>{if(e.code==='Space')releaseSpace();},{signal});
     window.addEventListener('blur',()=>{releaseSpace();drag=null;paint();},{signal});
+    document.addEventListener('fullscreenchange',placeHeaderActions,{signal});
     desktop.addEventListener('change',()=>{pending=null;drag=null;calibrationStart=null;cursor=null;render();h.layoutChanged?.();},{signal});
     resize=new ResizeObserver(entries=>{
       if(!sheet()||!desktop.matches)return;
@@ -512,7 +534,7 @@ globalThis.RackDrawings=(()=>{
       viewportSize={width:rect.width,height:rect.height};
     });
     render();
-    return {destroy(){disposed=true;abort.abort();resize.disconnect();document.body.classList.remove('drawing-view');},busy(){return importing||!!drag||!!pending||!!calibrationStart;}};
+    return {destroy(){disposed=true;abort.abort();resize.disconnect();clearHeaderActions();document.body.classList.remove('drawing-view');},busy(){return importing||!!drag||!!pending||!!calibrationStart;}};
   }
   return {mount,mapRoutes};
 })();

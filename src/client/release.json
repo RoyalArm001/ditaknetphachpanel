@@ -1,25 +1,47 @@
 {
-  "version": "6.0.5",
+  "version": "6.0.6",
   "date": "2026-10-20",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի տեխնիկական թարմացում՝ ռաքերի տեղադրման, սարքի տեսակի ընտրության և հարկի կապի գործող ուղղումների պահպանմամբ։"
+      "Գծագրության առանձին վերնամասը հանվել է․ PDF ներմուծումը, քարտեզ արտահանումը և ամբողջ էկրանով բացելը տեղափոխվել են վերևի ընդհանուր վահանակ՝ աշխատանքային տարածքն ազատելու համար։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Map maintenance update preserving the existing fixes for rack placement, device type selection and floor assignment."
+      "Removed the separate Drawing header. PDF import, map export and fullscreen controls now sit in the main top bar, freeing more workspace."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Техническое обновление карты с сохранением исправлений размещения стоек, выбора типа устройства и привязки к этажу."
+      "Убрана отдельная шапка чертежа. Импорт PDF, экспорт на карту и полноэкранный режим перенесены в общую верхнюю панель, освобождая рабочее пространство."
     ]
   },
   "history": [
+    {
+      "version": "6.0.5",
+      "date": "2026-10-20",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի տեխնիկական թարմացում՝ ռաքերի տեղադրման, սարքի տեսակի ընտրության և հարկի կապի գործող ուղղումների պահպանմամբ։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Map maintenance update preserving the existing fixes for rack placement, device type selection and floor assignment."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Техническое обновление карты с сохранением исправлений размещения стоек, выбора типа устройства и привязки к этажу."
+        ]
+      }
+    },
     {
       "version": "6.0.4",
       "date": "2026-10-20",
