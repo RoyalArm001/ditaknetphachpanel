@@ -136,6 +136,18 @@ test('map export follows project floor order and natural area-name order',()=>{
   assert.deepEqual(H.select(state).plans.map(p=>p.id),['z2','z10','Upper']);
 });
 
+test('nearby identical map symbols share one PDF icon while retaining both endpoint names',async()=>{
+  const state=fixture(),plan=state.floorPlans[0];
+  plan.markers.forEach((m,i)=>Object.assign(m,{x:.4+i*.005,y:.4,iconX:.4+i*.005,iconY:.4}));
+  state.floors[0].racks[0].devices[0].portList[0].endpointName='R14';
+  state.floors[0].racks[0].devices[0].portList[1].endpointName='R14.1';
+  let icons=0;class CountIcons extends PDFDocument{circle(x,y,r){if(r===9)icons++;return super.circle(x,y,r);}}
+  const before=JSON.stringify(state),chunks=await H.create(CountIcons,state,{font,kind:'maps',planId:plan.id});
+  assert.equal(icons,1);assert.equal(JSON.stringify(state),before);
+  const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(Buffer.concat(chunks))}),doc=await task.promise;
+  try{const names=(await (await doc.getPage(1)).getTextContent()).items.map(x=>x.str);assert.ok(names.includes('R14'));assert.ok(names.includes('R14.1'));}finally{await task.destroy();}
+});
+
 test('shared PDF uses rack selection and accepts project-defined device types',async()=>{
   const {DatabaseSync}=require('node:sqlite'),{createApp}=require('../src/server/server');
   const db=new DatabaseSync(':memory:'),state=fixture();
@@ -143,10 +155,12 @@ test('shared PDF uses rack selection and accepts project-defined device types',a
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const base=`http://127.0.0.1:${server.address().port}`;
   try{
-    const response=await fetch(base+'/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'devices',floorId:'minus-one',rackId:'rack-b',planId:'',deviceId:'',deviceType:'ups',language:'en',days:7,revision:1})});
+    for(const showItSpecialist of [undefined,true,false]){
+    const response=await fetch(base+'/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'devices',floorId:'minus-one',rackId:'rack-b',planId:'',deviceId:'',deviceType:'ups',language:'en',days:7,revision:1,showItSpecialist})});
     assert.equal(response.status,201,await response.clone().text());
     const {token}=await response.json(),pdf=await fetch(base+'/api/shared/'+token);
     const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs'),task=pdfjs.getDocument({data:new Uint8Array(await pdf.arrayBuffer())}),doc=await task.promise;
-    try{let text='';for(let i=1;i<=doc.numPages;i++)text+=(await (await doc.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ');assert.match(text,/UPS-1500/);assert.doesNotMatch(text,/CAT6-A|CAT6-C|SW-24-PoE/);}finally{await task.destroy();}
+    try{let text='';for(let i=1;i<=doc.numPages;i++)text+=(await (await doc.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ');assert.match(text,/UPS-1500/);assert.doesNotMatch(text,/CAT6-A|CAT6-C|SW-24-PoE/);assert.equal(text.includes('ՏՏ Սիփան Դանիելյան'),showItSpecialist===true);}finally{await task.destroy();}
+    }
   }finally{await new Promise(resolve=>server.close(resolve));db.close();}
 });

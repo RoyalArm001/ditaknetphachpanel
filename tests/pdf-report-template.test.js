@@ -14,7 +14,7 @@ async function read(chunks){
         assert.ok(item.transform[5]>18&&item.transform[5]<page.view[3]-15,'Text stays within page height: '+item.str);
       }
       assert.ok(items.some(x=>x.str===`${i} / ${doc.numPages}`));
-      assert.ok(items.some(x=>x.str==='Տնօրեն Վ․ Խաչատրայան / ՏՏ Սիփան Դանիելյան'));
+      assert.ok(items.some(x=>x.str==='Տնօրեն Վ․ Խաչատրայան'));
       pages.push(items.map(x=>x.str).join(' '));
     }
     return pages;

@@ -12,9 +12,12 @@ globalThis.RackMaps=(()=>{
     // A second pass lets early labels account for the later labels as well.
     for(let pass=0;pass<2;pass++)for(const p of ordered){
       let best;
-      for(const [rank,dir] of directions.entries()){
+      const coincident=ordered.filter(q=>Math.abs(q.x-p.x)<.01&&Math.abs(q.y-p.y)<.01).length;
+      const choices=directions.map(dir=>({dir,shift:0}));
+      if(coincident>4)for(let row=1;row<=Math.ceil(coincident/2);row++)for(const dir of ['right','left'])for(const sign of [1,-1])choices.push({dir,shift:sign*row*(p.height+pad*2)});
+      for(const [rank,{dir,shift}] of choices.entries()) {
         const x=p.x+(dir==='left'?-(p.iconWidth+p.width)/2-gap:dir==='right'?(p.iconWidth+p.width)/2+gap:0);
-        const y=p.y+(dir==='up'?-(p.iconHeight+p.height)/2-gap:dir==='down'?(p.iconHeight+p.height)/2+gap:0);
+        const y=p.y+(dir==='up'?-(p.iconHeight+p.height)/2-gap:dir==='down'?(p.iconHeight+p.height)/2+gap:0) + shift;
         const rect=box(x,y,p.width,p.height),padded=box(x,y,p.width+pad*2,p.height+pad*2);
         const overlap=icons.reduce((sum,b)=>sum+area(rect,b),0)+[...placed].reduce((sum,[id,b])=>sum+(id===p.id?0:area(padded,b)),0);
         const outside=Math.max(0,p.width*p.height-area(rect,edge));
@@ -286,23 +289,9 @@ globalThis.RackMaps=(()=>{
         const p=D.mapMarkerLayout(rm),selected=view.rackId===rm.id;
         return `<button type="button" class="map-rack-marker ${selected?'selected':''}" data-map-rack-marker="${esc(rm.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%" title="${esc(rm.rack.name)} (${rm.rack.u||rm.rack.height||42}U)" aria-label="${esc(rm.rack.name)}"><div class="map-rack-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg><span class="map-rack-led"></span></div><span class="map-rack-label">${esc(rm.rack.name)}</span></button>`;
       }).join('');
-      view.autoIconPositions.clear();
-      const remaining=[...visible],autoEdges=[],placeTolerance=Math.max(12,Math.min(36,Math.max(plan.width,plan.height)*.005));
-      while(remaining.length){
-        const first=remaining.shift(),firstPos=D.mapMarkerLayout(first),group=[first];
-        for(let i=remaining.length-1;i>=0;i--){const pos=D.mapMarkerLayout(remaining[i]);if(Math.hypot((pos.x-firstPos.x)*plan.width,(pos.y-firstPos.y)*plan.height)<=placeTolerance)group.push(...remaining.splice(i,1));}
-        if(group.length<2)continue;
-        let iconSpread=0;for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const a=D.mapMarkerLayout(group[i]),b=D.mapMarkerLayout(group[j]);iconSpread=Math.max(iconSpread,Math.hypot((a.iconX-b.iconX)*plan.width,(a.iconY-b.iconY)*plan.height));}
-        if(iconSpread<=14){
-          const centerX=group.reduce((sum,m)=>sum+D.mapMarkerLayout(m).x,0)/group.length,centerY=group.reduce((sum,m)=>sum+D.mapMarkerLayout(m).y,0)/group.length;
-          const radiusX=Math.min(.05,.02*Math.sqrt(group.length/2)),radiusY=radiusX*plan.width/plan.height;
-          group.forEach((m,i)=>{const angle=-Math.PI/2+2*Math.PI*i/group.length;view.autoIconPositions.set(m.id,{iconX:Math.min(.98,Math.max(.02,centerX+Math.cos(angle)*radiusX)),iconY:Math.min(.98,Math.max(.02,centerY+Math.sin(angle)*radiusY))});});
-        }
-        const connected=new Set([group[0]]),pending=new Set(group.slice(1));
-        while(pending.size){let best=null,bestDistance=Infinity,from=null;for(const a of connected){const pa=markerLayout(a);for(const b of pending){const pb=markerLayout(b),distance=Math.hypot((pa.iconX-pb.iconX)*plan.width,(pa.iconY-pb.iconY)*plan.height);if(distance<bestDistance){best=b;bestDistance=distance;from=a;}}}if(!best)break;connected.add(best);pending.delete(best);autoEdges.push([from,best]);}
-      }
-      const autoLinks=autoEdges.map(([a,b])=>{const pa=markerLayout(a),pb=markerLayout(b);return `<line class="map-auto-link-halo" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" vector-effect="non-scaling-stroke"/><line class="map-auto-link" x1="${pa.iconX*100}" y1="${pa.iconY*100}" x2="${pb.iconX*100}" y2="${pb.iconY*100}" stroke="${D.serviceColor(state,a.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('');
+      const markerGroups=groupMarkers(visible),autoLinks='';
       root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${autoLinks}${visible.filter(m=>m.anchorVisible).map(m=>{const p=markerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=markerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('')+rackMarkersHtml;
+      globalThis.RackMapMarkerGroups.decorate(root.querySelector('.map-markers'),markerGroups);
       const cablesLayer=root.querySelector('.map-cables-layer');
       if(cablesLayer){
         if(!view.showCables||!(mapData.rackMarkers||[]).length){
@@ -614,7 +603,7 @@ globalThis.RackMaps=(()=>{
         html+='</div>';
         return html;
       }
-      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfMapSize',tr('Քարտեզի էջի չափ'),[['auto',tr('Ավտոմատ՝ A4 / A3')],['A4','A4'],['A3','A3']],'auto')}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfRack',tr('Ռաք'),[],'')}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}${!sharing?select('pdfDetailed',tr('PDF ձևաչափ'),[['compact',tr('Հակիրճ սխեմա')],['detailed',tr('Սխեմա և մանրամասն ցանկեր')]],'compact'):''}${!sharing?`<div class="field full"><label for="pdfImageOpacity">${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</label><input id="pdfImageOpacity" name="pdfImageOpacity" type="range" min="0" max="90" step="10" value="${view.imageOpacity}" style="width:100%;accent-color:#137f79"></div>`:''}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p><div data-pdf-preview>${buildPreview(defaultFloor,'all','','',kind)}</div>${!sharing?`<section class="map-pdf-proof" data-pdf-proof aria-busy="true"><p role="status" data-pdf-proof-status>${esc(tr('Բեռնվում է…'))}</p><div class="map-pdf-proof-tools"><button type="button" class="button small" data-pdf-prev disabled>←</button><output data-pdf-page>—</output><button type="button" class="button small" data-pdf-next disabled>→</button><button type="button" class="button small" data-pdf-retry>${esc(tr('Թարմացնել նախադիտումը'))}</button></div><div class="map-pdf-proof-page"><canvas data-pdf-canvas hidden></canvas></div></section>`:''}`,async fd=>{
+      modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում'),`<div class="form-grid">${select('pdfLanguage',tr('PDF լեզու'),[['hy','Հայերեն'],['en','English'],['ru','Русский']],language)}${select('pdfKind',tr('Բովանդակություն'),[['maps',tr('Քարտեզ')],['devices',tr('Սարքերի սխեմաներ')],['all',tr('Քարտեզ և սարքերի սխեմաներ')]],kind)}${select('pdfMapSize',tr('Քարտեզի էջի չափ'),[['auto',tr('Ավտոմատ՝ A4 / A3')],['A4','A4'],['A3','A3']],'auto')}${select('pdfFloor',tr('Հարկ'),[['',tr('Բոլոր հարկերը')],...current.floors.map(f=>[f.id,f.name])],defaultFloor)}${select('pdfRack',tr('Ռաք'),[],'')}${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}${select('pdfDevice',tr('Սարք'),[],'')}${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}${!sharing?select('pdfDetailed',tr('PDF ձևաչափ'),[['compact',tr('Հակիրճ սխեմա')],['detailed',tr('Սխեմա և մանրամասն ցանկեր')]],'compact'):''}${!sharing?`<div class="field full"><label for="pdfImageOpacity">${esc(tr('Հատ. ֆոնի մաղձոտ.'))}</label><input id="pdfImageOpacity" name="pdfImageOpacity" type="range" min="0" max="90" step="10" value="${view.imageOpacity}" style="width:100%;accent-color:#137f79"></div>`:''}${sharing?select('shareDays',tr('Հղման ժամկետ'),[[7,tr('7 օր')],[30,tr('30 օր')],[90,tr('90 օր')]],30):''}</div>${sharing?`<p class="hint">${esc(tr('Հղումն ունեցողը կարող է դիտել և ներբեռնել միայն ընտրված PDF պատճենը։ Բազան խմբագրել հնարավոր չէ։ Հետագա փոփոխությունները չեն փոխում այս պատճենը։'))}</p>`:''}<label class="check pdf-attribution-option"><input type="checkbox" name="showItSpecialist"><span>${esc(tr('Ցուցադրել ՏՏ մասնագետին'))}<small>ՏՏ Սիփան Դանիելյան</small></span></label><p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p><div data-pdf-preview>${buildPreview(defaultFloor,'all','','',kind)}</div>${!sharing?`<section class="map-pdf-proof" data-pdf-proof aria-busy="true"><p role="status" data-pdf-proof-status>${esc(tr('Բեռնվում է…'))}</p><div class="map-pdf-proof-tools"><button type="button" class="button small" data-pdf-prev disabled>←</button><output data-pdf-page>—</output><button type="button" class="button small" data-pdf-next disabled>→</button><button type="button" class="button small" data-pdf-retry>${esc(tr('Թարմացնել նախադիտումը'))}</button></div><div class="map-pdf-proof-page"><canvas data-pdf-canvas hidden></canvas></div></section>`:''}`,async fd=>{
         if(!sharing){
           if(!previewBlob)throw new Error(tr('Նախ սպասեք PDF նախադիտմանը'));
           download(previewBlob,previewName);toast(tr('Հաշվետվությունը պատրաստ է'));return;
@@ -624,7 +613,7 @@ globalThis.RackMaps=(()=>{
         if(outputKind==='maps'?!selection.plans.length:outputKind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
         if(sharing){
           if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));
-          await h.api('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:outputKind,floorId,rackId,deviceType,deviceId,planId,mapPageSize:String(fd.get('pdfMapSize')),language:String(fd.get('pdfLanguage')),days:Number(fd.get('shareDays')),revision:h.getRevision()})});
+          await h.api('/api/shares',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:outputKind,floorId,rackId,deviceType,deviceId,planId,mapPageSize:String(fd.get('pdfMapSize')),showItSpecialist:fd.has('showItSpecialist'),language:String(fd.get('pdfLanguage')),days:Number(fd.get('shareDays')),revision:h.getRevision()})});
           setTimeout(()=>manageShares().catch(err=>toast(err.message)),0);return;
         }
       });
@@ -679,7 +668,7 @@ globalThis.RackMaps=(()=>{
           try{
             await clearDocument();if(ticket!==generation||closed)return;
             const fd=new FormData(form),snapshot=structuredClone(getState()),outputKind=String(fd.get('pdfKind')),planId=String(fd.get('pdfPlan'));
-            const options={mapPageSize:String(fd.get('pdfMapSize')),detailed:fd.get('pdfDetailed')==='detailed',floorId:String(fd.get('pdfFloor')),rackId:String(fd.get('pdfRack')),deviceType:String(fd.get('pdfType')),deviceId:String(fd.get('pdfDevice')),imageOpacity:Math.min(90,Math.max(0,Number(fd.get('pdfImageOpacity'))||0))};
+            const options={mapPageSize:String(fd.get('pdfMapSize')),showItSpecialist:fd.has('showItSpecialist'),detailed:fd.get('pdfDetailed')==='detailed',floorId:String(fd.get('pdfFloor')),rackId:String(fd.get('pdfRack')),deviceType:String(fd.get('pdfType')),deviceId:String(fd.get('pdfDevice')),imageOpacity:Math.min(90,Math.max(0,Number(fd.get('pdfImageOpacity'))||0))};
             const selection=RackHandover.select(snapshot,{...options,planId});
             if(outputKind==='maps'?!selection.plans.length:outputKind==='devices'?!selection.devices.length:!selection.plans.length&&!selection.devices.length)throw new Error(tr('Ընտրված պայմաններով տվյալներ չկան'));
             const blob=await exportPdf(snapshot,outputKind,planId,RackI18n.forLanguage(String(fd.get('pdfLanguage'))),options);
@@ -791,6 +780,19 @@ globalThis.RackMaps=(()=>{
       for(const p of entries){const pos=layout.get(p.id);p.text.dataset.dir=pos.dir;p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:none`;}
     }
     document.fonts?.ready.then(scheduleLabels);
+    function groupMarkers(markers) {
+      const scale=camera?.scale||1;
+      const groups=globalThis.RackMapMarkerGroups.group(markers.map(m=>{const p=D.mapMarkerLayout(m);return {id:m.id,kind:m.row.service,x:p.iconX,y:p.iconY};}),{width:plan.width*scale,height:plan.height*scale,diameter:20*(1+view.markerSize/100)});
+      view.autoIconPositions.clear();
+      for(const group of groups)for(const member of group.members)view.autoIconPositions.set(member.id,{iconX:group.x,iconY:group.y});
+      return groups;
+    }
+    function refreshMarkerGroups() {
+      if(dragging)return;
+      const host=root.querySelector('.map-markers');if(!host)return;
+      const visibleIds=new Set([...host.querySelectorAll('[data-map-marker]')].map(el=>el.dataset.mapMarker));
+      globalThis.RackMapMarkerGroups.decorate(host,groupMarkers(mapData.markers.filter(m=>visibleIds.has(m.id))));
+    }
     function paintAppearance(relayout=true){
       const markers=root.querySelector('.map-markers');
       markers?.style.setProperty('--map-marker-scale',String(1+view.markerSize/100));
@@ -800,7 +802,7 @@ globalThis.RackMaps=(()=>{
       const opacity=root.querySelector('[data-map-image-opacity]'),opacityValue=root.querySelector('[data-image-opacity-value]');
       if(opacity)opacity.value=view.imageOpacity;
       if(opacityValue)opacityValue.textContent=view.imageOpacity+'%';
-      if(relayout)scheduleLabels();
+      if(relayout){refreshMarkerGroups();scheduleLabels();}
       const size=appearance?.querySelector('[data-map-marker-size]'),width=appearance?.querySelector('[data-map-line-width]');
       if(size){size.value=view.markerSize;appearance.querySelector('[data-marker-size-value]').textContent=(100+view.markerSize)+'%';}
       if(width){width.value=view.lineWidth;appearance.querySelector('[data-line-width-value]').textContent=view.lineWidth+' px';}
@@ -956,6 +958,10 @@ globalThis.RackMaps=(()=>{
         const el=e.target.closest('[data-map-marker],[data-map-anchor]');
         if(el&&view.tool==='select'&&!space&&e.button===0){
           const id=el.dataset.mapMarker||el.dataset.mapAnchor,marker=mapData.markers.find(m=>m.id===id);
+          if(e.shiftKey||e.ctrlKey||e.metaKey){
+            if(view.selectedMarkerIds.has(id))view.selectedMarkerIds.delete(id);else view.selectedMarkerIds.add(id);
+            view.portId=view.selectedMarkerIds.size===1?mapData.markers.find(m=>m.id===[...view.selectedMarkerIds][0])?.portId||'':'';
+          }
           if(!view.selectedMarkerIds.has(id)&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey){
             view.selectedMarkerIds.clear();
             view.selectedMarkerIds.add(id);
@@ -1107,7 +1113,7 @@ globalThis.RackMaps=(()=>{
                 const p=findPlan(s);if(!p)return;
                 for(const item of list){
                   const m=p.markers.find(x=>x.id===item.id);if(!m)continue;
-                  const l=markerLayout(m);
+                  const l=D.mapMarkerLayout(m);
                   m.iconX=Math.min(1,Math.max(0,l.iconX+dx));
                   m.iconY=Math.min(1,Math.max(0,l.iconY+dy));
                 }
@@ -1196,7 +1202,7 @@ globalThis.RackMaps=(()=>{
             const p=findPlan(s);if(!p)return;
             for(const mid of view.selectedMarkerIds){
               const m=p.markers.find(x=>x.id===mid);if(!m)continue;
-              const l=markerLayout(m);
+              const l=D.mapMarkerLayout(m);
               m.iconX=Math.min(1,Math.max(0,l.iconX+dx));
               m.iconY=Math.min(1,Math.max(0,l.iconY+dy));
             }
@@ -1206,7 +1212,7 @@ globalThis.RackMaps=(()=>{
         return;
       }
       const selected=mapData.markers.find(m=>m.portId===view.portId);if(!selected)return;
-      const layout=markerLayout(selected),anchor=e.target.matches('[data-map-anchor]')||view.anchorActive,x=anchor?layout.x:layout.iconX,y=anchor?layout.y:layout.iconY;
+      const layout=D.mapMarkerLayout(selected),anchor=e.target.matches('[data-map-anchor]')||view.anchorActive,x=anchor?layout.x:layout.iconX,y=anchor?layout.y:layout.iconY;
       try{moveMarker(selected.id,Math.min(1,Math.max(0,x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0))),Math.min(1,Math.max(0,y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0))),anchor);root.querySelector('.map-viewport')?.focus({preventScroll:true});}catch(err){toast(err.message);}
     },{signal:abort.signal});
     window.addEventListener('keyup',e=>{if(e.code==='Space'){space=false;viewport?.classList.remove('hand-key');}},{signal:abort.signal});

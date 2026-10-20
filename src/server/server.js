@@ -220,7 +220,7 @@ function createApp(options={}) {
         if((await viewLinks.list(scope,companyId)).length>=100)return json(res,429,{error:tr('Նախ անջատեք հին հղումներից մի քանիսը')});
         const outputTr=require('../shared/i18n').forLanguage(body.language);
         const font=options.font||process.env.RACKMAP_FONT||path.join(root,'assets','fonts','DejaVuSans.ttf');
-        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,rackId:body.rackId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,mapPageSize:body.mapPageSize||'auto',font,tr:outputTr}));
+        const pdf=Buffer.concat(await handover.create(PDFDocument,current.state,{kind:body.kind,floorId:body.floorId,rackId:body.rackId,planId:body.planId,deviceType:body.deviceType,deviceId:body.deviceId,mapPageSize:body.mapPageSize||'auto',font,tr:outputTr,showItSpecialist:body.showItSpecialist===true}));
         if(pdf.length>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
         const title=[current.state.company,body.planId?selection.plans.find(p=>p.id===body.planId)?.name:'',body.rackId?current.state.floors.flatMap(f=>f.racks).find(r=>r.id===body.rackId)?.name:'',body.floorId?current.state.floors.find(f=>f.id===body.floorId)?.name:outputTr('Բոլոր հարկերը'),outputTr(body.kind==='maps'?'Քարտեզ':body.kind==='devices'?'Սարքերի սխեմաներ':'Քարտեզ և սարքերի սխեմաներ'),body.deviceId?selection.devices.find(x=>x.d.id===body.deviceId)?.d.name:body.deviceType==='all'?'':outputTr(Domain.deviceTypes(current.state).find(([id])=>id===body.deviceType)?.[1]||body.deviceType)].filter(Boolean).join(' · ');
         return json(res,201,await viewLinks.create(scope,companyId,title,pdf,body.days));
@@ -363,7 +363,7 @@ function createApp(options={}) {
         }
         const font=options.font||process.env.RACKMAP_FONT||(fs.existsSync(path.join(root,'assets','fonts','DejaVuSans.ttf'))?path.join(root,'assets','fonts','DejaVuSans.ttf'):'C:/Windows/Fonts/sylfaen.ttf');
         if(!fs.existsSync(font))return json(res,503,{error:tr('Հայերեն PDF-ի համար նշեք RACKMAP_FONT տառատեսակի ֆայլը')});
-        const chunks=await require('../shared/handover-pdf').createPortReport(PDFDocument,state,{font,tr,language:lang,filters:Object.fromEntries(url.searchParams)});
+        const chunks=await require('../shared/handover-pdf').createPortReport(PDFDocument,state,{font,tr,language:lang,filters:Object.fromEntries(url.searchParams),showItSpecialist:url.searchParams.get('showItSpecialist')==='1'});
         if(cloud&&chunks.reduce((n,b)=>n+b.length,0)>4*1024*1024)return json(res,413,{error:tr('Հաշվետվությունը մեծ է։ Արտահանեք առանձին հարկերով կամ ռաքերով։')});
         res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="RackMap.pdf"'});res.end(Buffer.concat(chunks));return;
       }

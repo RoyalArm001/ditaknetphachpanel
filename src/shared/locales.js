@@ -1,6 +1,7 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Ցուցադրել ՏՏ մասնագետին":["Show IT specialist","Показывать ИТ-специалиста"],
 "Սարք / նշանակություն":["Device / purpose","Устройство / назначение"],
 "Ընդամենը պորտեր":["Total ports","Всего портов"],
 "Չօգտագործված պորտեր":["Unused ports","Неиспользуемые порты"],

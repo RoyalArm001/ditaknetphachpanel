@@ -7,7 +7,7 @@
   });
 })(globalThis,function(readLogo){
   'use strict';
-  const attribution='Տնօրեն Վ․ Խաչատրայան / ՏՏ Սիփան Դանիելյան';
+  const director='Տնօրեն Վ․ Խաչատրայան',specialist='ՏՏ Սիփան Դանիելյան';
   const bottomMargin=76;
   let logoPromise;
   function loadLogo(){
@@ -16,7 +16,8 @@
   }
   function contentBottom(pdf){return pdf.page.height-bottomMargin;}
   // All exporters reserve this area before laying out content and stamp buffered pages once.
-  function stamp(pdf,logo,{font='Project',date=new Date(),margin=32}={}){
+  function stamp(pdf,logo,{font='Project',date=new Date(),margin=32,showItSpecialist=false}={}){
+    const attribution=director+(showItSpecialist===true?' / '+specialist:'');
     const range=pdf.bufferedPageRange(),logoImage=pdf.openImage(logo);
     for(let i=0;i<range.count;i++){
       pdf.switchToPage(range.start+i);

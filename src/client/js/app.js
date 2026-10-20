@@ -989,6 +989,9 @@ function hostModal(value){
     if(current)Object.assign(current,next);else target.hosts.push(next);
   }),host?button(tr('Ջնջել'),'host-delete',networkId+'/'+host.id,'danger'):'');
 }
+function pdfSpecialistOption(){
+  return `<label class="check pdf-attribution-option"><input type="checkbox" name="showItSpecialist"><span>${esc(tr('Ցուցադրել ՏՏ մասնագետին'))}<small>ՏՏ Սիփան Դանիելյան</small></span></label>`;
+}
 async function openSelectivePdfModal(defaultKind='devices'){
   const current=state, language=globalThis.RackI18n?.language||'hy';
   const body=`<div class="form-grid">
@@ -999,7 +1002,7 @@ async function openSelectivePdfModal(defaultKind='devices'){
     ${select('pdfType',tr('Սարքի տեսակ'),[['all',tr('Բոլոր սարքերը')],...D.deviceTypes(current)],'all')}
     ${select('pdfDevice',tr('Սարք'),[],'')}
     ${select('pdfPlan',tr('Տարածք / հատակագիծ'),[],'')}
-  </div><p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p>`;
+  </div>${pdfSpecialistOption()}<p class="hint">${esc(tr('Արտահանումը ներառում է միայն ընտրված հարկը, տարածքը, ռաքը և սարքերը։'))}</p>`;
   modal(tr('Ընտրովի PDF'),body,async fd=>{
     const kind=String(fd.get('pdfKind')),floorId=String(fd.get('pdfFloor')),rackId=String(fd.get('pdfRack')),deviceType=String(fd.get('pdfType')),deviceId=String(fd.get('pdfDevice')),planId=String(fd.get('pdfPlan'));
     const sel=RackHandover.select(current,{floorId,rackId,deviceType,deviceId,planId});
@@ -1008,7 +1011,7 @@ async function openSelectivePdfModal(defaultKind='devices'){
     const fontRes=await fetch('/assets/DejaVuSans.ttf');if(!fontRes.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
     const font=new Uint8Array(await fontRes.arrayBuffer());
     const outputTr=globalThis.RackI18n?.forLanguage?.(String(fd.get('pdfLanguage')))||tr;
-    const chunks=await RackHandover.create(PDFDocument,current,{kind,floorId,rackId,deviceType,deviceId,planId,font,tr:outputTr});
+    const chunks=await RackHandover.create(PDFDocument,current,{kind,floorId,rackId,deviceType,deviceId,planId,font,tr:outputTr,showItSpecialist:fd.has('showItSpecialist')});
     download(new Blob(chunks,{type:'application/pdf'}),`${current.company||'MyPatch'} - Handover.pdf`);
     toast(tr('Հաշվետվությունը պատրաստ է'));
   });
@@ -2105,19 +2108,19 @@ function openPdfExportOptions(){
   const options=[['__none__',tr('Չնշված')],...D.serviceEntries(state).filter(([key])=>key).map(([key])=>[key,D.serviceLabel(state,key)])]
     .filter(([key])=>counts.has(key));
   const list=options.map(([key,label])=>`<label class="pdf-service-option"><input type="checkbox" name="pdfService" value="${esc(key)}"><span>${esc(label)}</span><strong>${counts.get(key)||0}</strong></label>`).join('');
-  const body=`<p class="hint">${tr('Ընտրեք՝ արտահանել բոլոր ֆիլտրված տվյալները, թե միայն որոշ նշանակություններ, օրինակ՝ վարդակները։')}</p><fieldset class="pdf-export-scope"><legend>${tr('Արտահանման շրջանակ')}</legend><label><input type="radio" name="pdfScope" value="all" checked> ${tr('Բոլոր ֆիլտրված պորտերը')}</label><label><input type="radio" name="pdfScope" value="services"> ${tr('Միայն ընտրված նշանակությունները')}</label></fieldset><fieldset id="pdfServiceOptions" class="pdf-service-options" disabled><legend>${tr('Ընտրեք նշանակությունները')}</legend>${list||`<p class="hint">${tr('Այս ֆիլտրերով նշանակություններ չեն գտնվել։')}</p>`}</fieldset>`;
+  const body=`<p class="hint">${tr('Ընտրեք՝ արտահանել բոլոր ֆիլտրված տվյալները, թե միայն որոշ նշանակություններ, օրինակ՝ վարդակները։')}</p><fieldset class="pdf-export-scope"><legend>${tr('Արտահանման շրջանակ')}</legend><label><input type="radio" name="pdfScope" value="all" checked> ${tr('Բոլոր ֆիլտրված պորտերը')}</label><label><input type="radio" name="pdfScope" value="services"> ${tr('Միայն ընտրված նշանակությունները')}</label></fieldset><fieldset id="pdfServiceOptions" class="pdf-service-options" disabled><legend>${tr('Ընտրեք նշանակությունները')}</legend>${list||`<p class="hint">${tr('Այս ֆիլտրերով նշանակություններ չեն գտնվել։')}</p>`}</fieldset>${pdfSpecialistOption()}`;
   modal(tr('PDF արտահանման ընտրություն'),body,async fd=>{
-    const exportFilters={...filters};
+    const exportFilters={...filters},showItSpecialist=fd.has('showItSpecialist');
     if(fd.get('pdfScope')==='services'){
       const selected=fd.getAll('pdfService').map(String);
       if(!selected.length)throw new Error(tr('Ընտրեք առնվազն մեկ նշանակություն։'));
       exportFilters.service='';
       exportFilters.services=selected.join(',');
     }else delete exportFilters.services;
-    if(personal())return exportPersonal('pdf',exportFilters);
+    if(personal())return exportPersonal('pdf',exportFilters,{showItSpecialist});
     const exportCompany=activeCompanyId;
     if(!await save())throw new Error(tr('Նախ պահպանեք փոփոխությունները'));
-    const res=await fetch(companyUrl(`/api/export.pdf?${new URLSearchParams(exportFilters)}`,exportCompany));
+    const res=await fetch(companyUrl(`/api/export.pdf?${new URLSearchParams({...exportFilters,showItSpecialist:showItSpecialist?'1':'0'})}`,exportCompany));
     if(!res.ok)throw new Error((await res.json()).error);
     download(await res.blob(),'RackMap.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));
   });
@@ -2240,12 +2243,12 @@ async function connectCloud(){
     await switchStorage('shared');
   });
 }
-async function exportPersonal(type,exportFilters=filters){
+async function exportPersonal(type,exportFilters=filters,{showItSpecialist=false}={}){
   if(!await save())return;
   if(type==='pdf'){
     if(!window.PDFDocument)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/pdfkit.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(script);});
     const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
-    const chunks=await RackHandover.createPortReport(PDFDocument,state,{font:new Uint8Array(await response.arrayBuffer()),filters:exportFilters,tr,language:globalThis.RackI18n?.language||'hy'});
+    const chunks=await RackHandover.createPortReport(PDFDocument,state,{font:new Uint8Array(await response.arrayBuffer()),filters:exportFilters,tr,language:globalThis.RackI18n?.language||'hy',showItSpecialist});
     download(new Blob(chunks,{type:'application/pdf'}),'MyPatch-personal.pdf');toast(tr('Հաշվետվությունը պատրաստ է'));return;
   }
   if(!window.ExcelJS)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/exceljs.min.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Excel գործիքը չբեռնվեց։ Միացեք ցանցին և կրկին փորձեք։')));document.head.append(script);});
@@ -2254,7 +2257,11 @@ async function exportPersonal(type,exportFilters=filters){
   for(const row of D.rows(state,filters))sheet.addRow(fields.map(k=>k==='status'?D.statusLabel(state,row[k]):k==='service'?D.serviceLabel(state,row[k]):row[k]));
   sheet.columns.forEach(c=>c.width=22);download(new Blob([await book.xlsx.writeBuffer()]),'MyPatch-personal.xlsx');
 }
-async function exportConnections(type,rackId){
+function openConnectionPdfOptions(rackId){
+  modal(tr('PDF արտահանման ընտրություն'),pdfSpecialistOption(),fd=>exportConnections('pdf',rackId,{showItSpecialist:fd.has('showItSpecialist')}));
+  const submit=$('#modalForm')?.querySelector('button[type="submit"]');if(submit)submit.textContent=tr('Արտահանել PDF');
+}
+async function exportConnections(type,rackId,{showItSpecialist=false}={}){
   const found=findRack(rackId);if(!found)return;
   const report=RackConnections.inspect(state,rackId);
   const label=x=>x?`${x.f.name} / ${x.r.name} / ${x.d.name} / ${x.p.number}`:tr('Պորտը չի գտնվել');
@@ -2277,7 +2284,7 @@ async function exportConnections(type,rackId){
   }else{
     if(!window.PDFDocument)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/pdfkit.js';script.onload=resolve;script.onerror=()=>reject(new Error(tr('Չհաջողվեց կատարել գործողությունը')));document.head.append(script);});
     const response=await fetch('/assets/DejaVuSans.ttf');if(!response.ok)throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
-    const chunks=await RackHandover.createConnectionReport(PDFDocument,state,{font:new Uint8Array(await response.arrayBuffer()),tr,report});
+    const chunks=await RackHandover.createConnectionReport(PDFDocument,state,{font:new Uint8Array(await response.arrayBuffer()),tr,report,showItSpecialist});
     download(new Blob(chunks,{type:'application/pdf'}),name);
   }
   toast(tr('Հաշվետվությունը պատրաստ է'));
@@ -2360,7 +2367,7 @@ const actions={
   'scene-animation':()=>sceneController?.toggleAnimation(),
   'scene-reset':()=>{sceneController?.reset();document.querySelectorAll('.scene-link').forEach(el=>el.classList.remove('selected'));},
   'scene-select':id=>{sceneController?.select(id);document.querySelectorAll('.scene-link').forEach(el=>el.classList.toggle('selected',el.dataset.link===id));},
-  'connections-pdf':id=>exportConnections('pdf',id),
+  'connections-pdf':id=>openConnectionPdfOptions(id),
   'connections-xlsx':id=>exportConnections('xlsx',id),
   'company-new':newCompany,'company-delete':deleteCompany,'help-open':()=>{modal(tr('Օգնություն'),RackHelp.html(tr,esc));RackHelp.bind($('#dialog'));},'demo-info':()=>modal(tr('Դեմո ռեժիմ'),`<p>${tr('Դեմոյի փոփոխությունները պահվում են միայն այդ ներդիրի հիշողության մեջ։ Էջը թարմացնելիս օրինակը վերականգնվում է։ Ձեր իրական նախագծերն ու մուտքը չեն փոխվում։')}</p>`,null,button(tr('Սկսել դեմոն նորից'),'demo-reset')+'<a class="button primary" href="/">'+tr('Դուրս գալ դեմոյից')+'</a>'),'demo-reset':()=>location.reload(),'backup-all':backupAll,
   save:async()=>{if(await save())toast(tr('Տվյալները պահպանված են'));},close:()=>$('#dialog').close(),

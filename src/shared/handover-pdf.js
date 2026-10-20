@@ -1,4 +1,4 @@
-(function(root,factory){if(typeof module==='object')module.exports=factory(require('./domain'),require('./map-label-layout'),require('./pdf-branding'));else root.RackHandover=factory(root.RackDomain,root.RackMapLabels,root.RackPdfBranding);})(globalThis,function(D,Labels,Branding){
+(function(root,factory){if(typeof module==='object')module.exports=factory(require('./domain'),require('./map-label-layout'),require('./pdf-branding'),require('./map-marker-groups'));else root.RackHandover=factory(root.RackDomain,root.RackMapLabels,root.RackPdfBranding,root.RackMapMarkerGroups);})(globalThis,function(D,Labels,Branding,MarkerGroups){
   'use strict';
   function select(state,{planId='',floorId='',rackId='',deviceType='all',deviceId=''}={}){
     const all=D.ports(state),byPort=new Map(all.map(x=>[x.p.id,x]));
@@ -24,6 +24,7 @@
         for(const marker of group){const pos=positions.get(marker.id);positions.set(marker.id,{...pos,iconX:x,iconY:y});}
         continue;
       }
+      if(group.every(m=>m.row.service===first.row.service))continue;
       let spread=0;for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const a=positions.get(group[i].id),b=positions.get(group[j].id);spread=Math.max(spread,Math.hypot((a.iconX-b.iconX)*plan.width,(a.iconY-b.iconY)*plan.height));}
       if(spread>14)continue;
       const centerX=group.reduce((sum,m)=>sum+positions.get(m.id).x,0)/group.length,centerY=group.reduce((sum,m)=>sum+positions.get(m.id).y,0)/group.length;
@@ -31,10 +32,14 @@
       const radius=Math.min(.16,Math.max(.02*Math.sqrt(group.length/2),labelRadius)),radiusY=radius*plan.width/plan.height;
       group.forEach((marker,i)=>{const angle=-Math.PI/2+2*Math.PI*i/group.length,pos=positions.get(marker.id);positions.set(marker.id,{...pos,iconX:Math.min(.98,Math.max(.02,centerX+Math.cos(angle)*radius)),iconY:Math.min(.98,Math.max(.02,centerY+Math.sin(angle)*radiusY))});});
     }
-    return {positions,clusters};
+    const clustered=new Set(clusters.flatMap(cluster=>cluster.members.map(m=>m.id)));
+    const groups=MarkerGroups.group(markers.filter(m=>!clustered.has(m.id)).map(m=>{const p=positions.get(m.id);return {id:m.id,kind:m.row.service,x:p.iconX,y:p.iconY};}),{width:plan.width*scale,height:plan.height*scale,diameter:18});
+    const leaders=new Set(groups.map(group=>group.members[0].id));
+    for(const group of groups)for(const member of group.members)positions.set(member.id,{...positions.get(member.id),iconX:group.x,iconY:group.y});
+    return {positions,clusters,leaders};
   }
   // Shared by the browser exporter and local PDF previews. No credentials are exported.
-  async function create(PDFDocument,state,{font,tr=x=>x,kind='maps',planId='',floorId='',rackId='',deviceType=kind==='panels'?'panel':'all',deviceId='',date=new Date(),imageOpacity=0,detailed=false,mapPageSize='auto'}={}){
+  async function create(PDFDocument,state,{font,tr=x=>x,kind='maps',planId='',floorId='',rackId='',deviceType=kind==='panels'?'panel':'all',deviceId='',date=new Date(),imageOpacity=0,detailed=false,mapPageSize='auto',showItSpecialist=false}={}){
     const selection=select(state,{planId,floorId,rackId,deviceType,deviceId}),logo=await Branding.loadLogo();
     const pdf=new PDFDocument({autoFirstPage:false,size:'A4',layout:'landscape',margin:32,bufferPages:true,info:{Title:state.company+' - '+tr(kind==='maps'?'Քարտեզ':'Սարքերի սխեմաներ'),Author:'My Patch'}});
     const chunks=[],done=new Promise((resolve,reject)=>{pdf.on('data',chunk=>chunks.push(chunk));pdf.on('end',()=>resolve(chunks));pdf.on('error',reject);});
@@ -119,7 +124,7 @@
         }
         const markerLabels=markers.filter(m=>!clusteredIds.has(m.id)).map(m=>{
           const p=positions.get(m.id),px=x+p.iconX*w,py=y+p.iconY*h,color=m.row.status==='fault'?'#d35352':D.serviceColor(state,m.row.service);
-          pdf.circle(px,py,9).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5.5,py-5.5,11,ink);
+          if(markerLayout.leaders.has(m.id)){pdf.circle(px,py,9).fillAndStroke('#ffffff',color);serviceSymbol(m.row.service,px-5.5,py-5.5,11,ink);}
           const name=D.endpointLabel(state,m.row,tr),fontSize=size==='A3'?9:8;
           const textW=pdf.font('Project').fontSize(fontSize).widthOfString(name);
           const width=Math.min(size==='A3'?86:74,Math.max(24,Math.ceil(textW+8)));
@@ -191,7 +196,7 @@
       for(const {f,r,d} of devices)table(tr('Պորտերի միացումներ'),d.name+' · '+f.name+' / '+r.name,d.portList.map(p=>({portId:p.id,number:p.number})));
     }
     if(!pageNumber){page(tr(kind==='maps'?'Քարտեզ':'Սարքերի սխեմաներ'),'');text(tr('Տվյալներ չկան'),32,140,W,13,muted);}
-    Branding.stamp(pdf,logo,{date});
+    Branding.stamp(pdf,logo,{date,showItSpecialist});
     pdf.end();return done;
   }
   function reportGroups(rows){
@@ -204,7 +209,7 @@
     }
     return groups;
   }
-  async function paperReport(PDFDocument,state,{font,tr=x=>x,date=new Date(),title,stats,groups,columns,hint='',emptyText=tr('Ընտրված ֆիլտրերով պորտեր չկան։')}){
+  async function paperReport(PDFDocument,state,{font,tr=x=>x,date=new Date(),title,stats,groups,columns,hint='',emptyText=tr('Ընտրված ֆիլտրերով պորտեր չկան։'),showItSpecialist=false}){
     const logo=await Branding.loadLogo();
     const pdf=new PDFDocument({autoFirstPage:false,size:'A4',layout:'landscape',margin:32,bufferPages:true,info:{Title:state.company+' - '+title,Author:'SMART TECH / My Patch'}});
     const chunks=[],done=new Promise((resolve,reject)=>{pdf.on('data',chunk=>chunks.push(chunk));pdf.on('end',()=>resolve(chunks));pdf.on('error',reject);});
@@ -307,10 +312,10 @@
       y+=16;
     }
     if(!groups.length)write(emptyText,32,y+18,W,11,muted);
-    Branding.stamp(pdf,logo,{date});pdf.end();return done;
+    Branding.stamp(pdf,logo,{date,showItSpecialist});pdf.end();return done;
   }
   // Personal/offline and server reports share the same readable document template.
-  async function createPortReport(PDFDocument,state,{font,tr=x=>x,filters={},date=new Date()}={}){
+  async function createPortReport(PDFDocument,state,{font,tr=x=>x,filters={},date=new Date(),showItSpecialist=false}={}){
     const rows=D.rows(state,filters),all=D.rows(state),byId=new Map(all.map(row=>[row.p.id,row])),incoming=new Map(all.filter(row=>row.p.switchPortId).map(row=>[row.p.switchPortId,row]));
     const groups=reportGroups(rows);let compressed=false;
     const blank=row=>row.status==='free'&&![row.endpointName,row.cable,row.destination,row.room,row.door,row.side,row.notes,row.service,row.vlan,row.connection,row.p.switchPortId].some(Boolean);
@@ -329,9 +334,9 @@
     }
     const stats=[{label:tr('Ընդամենը պորտեր'),value:rows.length},...['used','free','fault'].map(status=>({label:D.statusLabel(state,status,tr),value:rows.filter(row=>row.status===status).length,color:({free:'#237255',used:'#266799',fault:'#b03a34'})[status]}))];
     const columns=[['Պորտ',42],['Սարք / նշանակություն',164],['Մալուխ',100],['Տեղադրություն',142],['Կապ',174],['VLAN',52],['Վիճակ',103.89]].map(([label,width])=>({label,width}));
-    return paperReport(PDFDocument,state,{font,tr,date,title:tr('Ցանցային միացումների հաշվետվություն'),stats,groups,columns,hint:compressed?tr('Դատարկ ազատ պորտերը խմբավորված են միջակայքով։'):''});
+    return paperReport(PDFDocument,state,{font,tr,date,showItSpecialist,title:tr('Ցանցային միացումների հաշվետվություն'),stats,groups,columns,hint:compressed?tr('Դատարկ ազատ պորտերը խմբավորված են միջակայքով։'):''});
   }
-  async function createConnectionReport(PDFDocument,state,{font,tr=x=>x,report,date=new Date()}={}){
+  async function createConnectionReport(PDFDocument,state,{font,tr=x=>x,report,date=new Date(),showItSpecialist=false}={}){
     const rows=D.rows(state),byId=new Map(rows.map(row=>[row.p.id,row]));
     const issueNames={unlinked:tr('Չկապված'),duplicate:tr('Կրկնված'),wrong:tr('Սխալ կապ')};
     const colors={linked:'#237255',unlinked:'#91601d',duplicate:'#7856a5',wrong:'#b03a34'};
@@ -343,7 +348,7 @@
     });
     const stats=Object.entries(report.summary).map(([key,value])=>({label:key==='linked'?tr('Կապված'):issueNames[key],value,color:colors[key]}));
     const columns=[['Պորտ',42],['Սարք / նշանակություն',164],['Մալուխ',118],['Վերջնակետ',232],['VLAN',66],['Ստուգման արդյունք',155.89]].map(([label,width])=>({label,width}));
-    return paperReport(PDFDocument,state,{font,tr,date,title:tr('Կապերի քարտեզ և աուդիտ'),stats,groups,columns,emptyText:tr('Կապեր չկան')});
+    return paperReport(PDFDocument,state,{font,tr,date,showItSpecialist,title:tr('Կապերի քարտեզ և աուդիտ'),stats,groups,columns,emptyText:tr('Կապեր չկան')});
   }
   return {create,select,createPortReport,createConnectionReport};
 });

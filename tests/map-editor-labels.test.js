@@ -30,3 +30,12 @@ test('selection/render order does not change layout, including a 200-device map'
  const bounds={width:3100,height:1100},a=layout(points,bounds),b=layout([...points].reverse(),bounds);
  assert.equal(JSON.stringify([...a]),JSON.stringify([...b]));assert.ok([...a.values()].every(p=>p.dir==='down'));
 });
+
+test('a shared SVG keeps all eight device names readable around its common position',()=>{
+ const points=Array.from({length:8},(_,i)=>item(String(i),250,220,54));
+ const result=layout(points,{width:500,height:450});
+ for(const [id,rect] of result){
+  assert.ok(rect.left>=0&&rect.right<=500&&rect.top>=0&&rect.bottom<=450);
+  for(const [other,box] of result)if(other!==id)assert.ok(!overlap(rect,box),id+' overlaps '+other);
+ }
+});
