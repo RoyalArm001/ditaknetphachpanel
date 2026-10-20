@@ -1,4 +1,5 @@
 'use strict';
+const hasSourceSnippet=require('./helpers/source-snippet');
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -6,11 +7,11 @@ const path=require('node:path');
 
 test('maps.js persists collapsed device groups across redraws and sessions',()=>{
   const code=fs.readFileSync(path.join(__dirname,'../src/client/js/maps.js'),'utf8');
-  assert.ok(code.includes('rackmap-map-collapsed-groups'),'maps.js uses rackmap-map-collapsed-groups localStorage key');
-  assert.ok(code.includes('saveCollapsedGroups'),'maps.js defines and uses saveCollapsedGroups helper');
-  assert.ok(code.includes("root.addEventListener('toggle'"),'maps.js listens for toggle events on root container');
-  assert.ok(code.includes('capture:true'),'maps.js captures toggle events since toggle does not bubble');
-  assert.ok(code.includes("collapsedDeviceGroups.has(service)?'':'open'"),'maps.js leaves open attribute off when service is collapsed');
+  assert.ok(hasSourceSnippet(code,'rackmap-map-collapsed-groups'),'maps.js uses rackmap-map-collapsed-groups localStorage key');
+  assert.ok(hasSourceSnippet(code,'saveCollapsedGroups'),'maps.js defines and uses saveCollapsedGroups helper');
+  assert.ok(hasSourceSnippet(code,"root.addEventListener('toggle'"),'maps.js listens for toggle events on root container');
+  assert.ok(hasSourceSnippet(code,'capture:true'),'maps.js captures toggle events since toggle does not bubble');
+  assert.ok(hasSourceSnippet(code,"collapsedDeviceGroups.has(service)?'':'open'"),'maps.js leaves open attribute off when service is collapsed');
 });
 
 test('collapsed device groups preserve closed state and do not automatically reopen',()=>{

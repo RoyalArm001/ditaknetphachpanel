@@ -1,4 +1,5 @@
 'use strict';
+const hasSourceSnippet=require('./helpers/source-snippet');
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -28,11 +29,11 @@ test('map marker label directions support 4-way collision avoidance styles',()=>
 
 test('maps.js includes printer icon, print action button and resolveLabelDirections',()=>{
   const js=fs.readFileSync(path.join(__dirname,'../src/client/js/maps.js'),'utf8');
-  assert.ok(js.includes('printer:'),'printer path exists in paths');
-  assert.ok(js.includes('data-map-action="print"'),'print button exists in top actions');
-  assert.ok(js.includes("if(action==='print'){window.print();return;}"),'print action triggers window.print');
-  assert.ok(js.includes('resolveLabelDirections'),'resolveLabelDirections is defined to prevent label collisions');
-  assert.ok(js.includes('data-dir='),'label element receives data-dir attribute');
+  assert.ok(hasSourceSnippet(js,'printer:'),'printer path exists in paths');
+  assert.ok(hasSourceSnippet(js,'data-map-action="print"'),'print button exists in top actions');
+  assert.ok(hasSourceSnippet(js,"if(action==='print'){window.print();return;}"),'print action triggers window.print');
+  assert.ok(hasSourceSnippet(js,'resolveLabelDirections'),'resolveLabelDirections is defined to prevent label collisions');
+  assert.ok(hasSourceSnippet(js,'data-dir='),'label element receives data-dir attribute');
 });
 
 test('translations exist for printing floor plan in EN and RU',()=>{

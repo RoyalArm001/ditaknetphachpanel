@@ -1,4 +1,5 @@
 'use strict';
+const hasSourceSnippet=require('./helpers/source-snippet');
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -21,14 +22,14 @@ test('map inspector styles enforce fixed card layout with no vertical or horizon
 
 test('map inspector markup and actions include quick title rename button and handler',()=>{
   const js=fs.readFileSync(path.join(__dirname,'../src/client/js/maps.js'),'utf8');
-  assert.ok(js.includes('data-map-action="edit-endpoint-name"'),'maps.js has edit-endpoint-name action trigger');
-  assert.ok(js.includes('map-title-edit-btn'),'maps.js renders pencil button next to endpoint title');
-  assert.ok(js.includes('function editEndpointName()'),'maps.js defines editEndpointName handler');
-  assert.ok(js.includes("if(action==='edit-endpoint-name'){editEndpointName();return;}"),'maps.js routes click to editEndpointName');
-  assert.ok(js.includes('host.scrollLeft=0;'),'maps.js resets host.scrollLeft to 0 to prevent horizontal offset');
-  assert.ok(js.includes('host.scrollTop=0;'),'maps.js resets host.scrollTop to 0 to prevent vertical offset');
-  assert.ok(js.includes("if(view.selectedMarkerIds.size>1){"),'maps.js correctly checks selectedMarkerIds.size without TDZ error');
-  assert.ok(js.includes('if(mapBar)mapBar.hidden=!isFullscreen;'),'maps.js hides mapBar when not in fullscreen');
+  assert.ok(hasSourceSnippet(js,'data-map-action="edit-endpoint-name"'),'maps.js has edit-endpoint-name action trigger');
+  assert.ok(hasSourceSnippet(js,'map-title-edit-btn'),'maps.js renders pencil button next to endpoint title');
+  assert.ok(hasSourceSnippet(js,'function editEndpointName()'),'maps.js defines editEndpointName handler');
+  assert.ok(hasSourceSnippet(js,"if(action==='edit-endpoint-name'){editEndpointName();return;}"),'maps.js routes click to editEndpointName');
+  assert.ok(hasSourceSnippet(js,'host.scrollLeft=0;'),'maps.js resets host.scrollLeft to 0 to prevent horizontal offset');
+  assert.ok(hasSourceSnippet(js,'host.scrollTop=0;'),'maps.js resets host.scrollTop to 0 to prevent vertical offset');
+  assert.ok(hasSourceSnippet(js,"if(view.selectedMarkerIds.size>1){"),'maps.js correctly checks selectedMarkerIds.size without TDZ error');
+  assert.ok(hasSourceSnippet(js,'if(mapBar)mapBar.hidden=!isFullscreen;'),'maps.js hides mapBar when not in fullscreen');
 });
 
 test('translations exist for quick name editing in EN and RU',()=>{

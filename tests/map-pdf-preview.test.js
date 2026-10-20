@@ -6,8 +6,13 @@ const vm=require('node:vm');
 
 function exporter(previewBlob){
   const source=fs.readFileSync(require.resolve('../src/client/js/maps'),'utf8');
-  const start=source.indexOf('async fd=>{',source.indexOf("modal(tr(sharing?'Կիսվել հղումով':'PDF արտահանում')"));
+  const modal=source.search(/modal\s*\(\s*tr\s*\(\s*sharing\s*\?/);
+  assert.ok(modal>=0,'PDF export dialog exists');
+  const callback=source.slice(modal).search(/async\s+fd\s*=>\s*\{/);
+  assert.ok(callback>=0,'PDF export submit handler exists');
+  const start=modal+callback;
   const end=source.indexOf('      });',start);
+  assert.ok(end>start,'PDF export submit handler ends');
   const downloads=[];
   const context={sharing:false,previewBlob,previewName:'preview.pdf',tr:x=>x,toast(){},download:(...args)=>downloads.push(args),getState(){throw new Error('Downloading a preview must not read newer project data');}};
   const submit=vm.runInNewContext('('+source.slice(start,end)+'})',context);

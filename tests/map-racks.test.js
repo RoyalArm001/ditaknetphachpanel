@@ -1,4 +1,5 @@
 'use strict';
+const hasSourceSnippet=require('./helpers/source-snippet');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const D = require('../src/shared/domain.js');
@@ -165,13 +166,13 @@ test('maps.js contains proper pointer and creation logic for placing racks', () 
   const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
 
   // Verify pointerdown does not start panning when placing a rack
-  assert.ok(mapsJs.includes('!view.placing && !view.placingRackId'), 'pointerdown checks both placing and placingRackId');
+  assert.ok(hasSourceSnippet(mapsJs,'!view.placing && !view.placingRackId'), 'pointerdown checks both placing and placingRackId');
 
   // Verify pointerup handles placingRackId correctly
-  assert.ok(mapsJs.includes('view.placingRackId&&!dragging&&(!pan||!pan.moved)'), 'pointerup triggers rack placement without pan interference');
+  assert.ok(hasSourceSnippet(mapsJs,'view.placingRackId&&!dragging&&(!pan||!pan.moved)'), 'pointerup triggers rack placement without pan interference');
 
   // Verify rack creation modal creates valid domain rack with u and devices
-  assert.ok(mapsJs.includes('u:height,location:\'\',photo:\'\',devices:[]'), 'createRackModal creates domain-compliant rack');
+  assert.ok(hasSourceSnippet(mapsJs,'u:height,location:\'\',photo:\'\',devices:[]'), 'createRackModal creates domain-compliant rack');
 });
 
 test('maps.js hides rack tab when all racks are placed and switches to devices tab', () => {
@@ -180,19 +181,19 @@ test('maps.js hides rack tab when all racks are placed and switches to devices t
   const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
 
   // Verify unplaced racks calculation filters out already placed racks across all plans
-  assert.ok(mapsJs.includes('const allPlacedRacks=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.rackMarkers||[]).map(rm=>rm.rackId)));'));
-  assert.ok(mapsJs.includes('const placedRackIds=allPlacedRacks();'));
-  assert.ok(mapsJs.includes('const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id))'));
+  assert.ok(hasSourceSnippet(mapsJs,'const allPlacedRacks=()=>new Set((state.floorPlans||[]).flatMap(p=>(p.rackMarkers||[]).map(rm=>rm.rackId)));'));
+  assert.ok(hasSourceSnippet(mapsJs,'const placedRackIds=allPlacedRacks();'));
+  assert.ok(hasSourceSnippet(mapsJs,'const unplacedRacks=curFloorRacks.filter(r=>!placedRackIds.has(r.id))'));
 
   // Verify tabs and rack tab button are hidden when unplacedRacks is 0
-  assert.ok(mapsJs.includes('sidebarTabs.hidden=unplacedRacks.length===0'));
-  assert.ok(mapsJs.includes('racksTabBtn.hidden=unplacedRacks.length===0'));
+  assert.ok(hasSourceSnippet(mapsJs,'sidebarTabs.hidden=unplacedRacks.length===0'));
+  assert.ok(hasSourceSnippet(mapsJs,'racksTabBtn.hidden=unplacedRacks.length===0'));
 
   // Verify placing a rack switches activeTab back to devices
-  assert.ok(mapsJs.includes("view.activeTab='devices';"));
+  assert.ok(hasSourceSnippet(mapsJs,"view.activeTab='devices';"));
 
   // Verify more menu has create rack option
-  assert.ok(mapsJs.includes("button('Ավելացնել ռաք','create-map-rack')"));
+  assert.ok(hasSourceSnippet(mapsJs,"button('Ավելացնել ռաք','create-map-rack')"));
 
   // Unit logic check:
   const curFloorRacks = [{ id: 'rack-1' }];
@@ -221,10 +222,10 @@ test('cables are hidden by default on map load and plan change', () => {
   const mapsJs = fs.readFileSync(path.join(__dirname, '../src/client/js/maps.js'), 'utf8');
 
   // Verify view.showCables starts false by default
-  assert.ok(mapsJs.includes('view.showCables=false;'));
+  assert.ok(hasSourceSnippet(mapsJs,'view.showCables=false;'));
 
   // Verify plan switch keeps cables hidden
-  assert.ok(mapsJs.includes('view.showCables=false;view.camera=null;'));
+  assert.ok(hasSourceSnippet(mapsJs,'view.showCables=false;view.camera=null;'));
 });
 
 test('RackMaps.mount executes cleanly without ReferenceError on curFloor', () => {
