@@ -35,5 +35,22 @@
     return result;
   }
   function connector(point,box){return {x:Math.max(box.x,Math.min(box.x+box.width,point.x)),y:Math.max(box.y,Math.min(box.y+box.height,point.y))};}
-  return {layout,connector};
+  // A short label tail aimed at its own icon, including diagonally shifted labels.
+  function pointer(point,box,{length=5,halfWidth=2.5,radius=0}={}){
+    if(box.width<=0||box.height<=0)return null;
+    const dx=point.x-box.x-box.width/2,dy=point.y-box.y-box.height/2;
+    if(Math.abs(dx)<=box.width/2&&Math.abs(dy)<=box.height/2)return null;
+    const vertical=Math.abs(dx)/box.width>Math.abs(dy)/box.height;
+    const half=Math.min(halfWidth,(vertical?box.height:box.width)/4);
+    const ratio=vertical?box.width/2/Math.abs(dx):box.height/2/Math.abs(dy);
+    const edge={x:box.x+box.width/2+dx*ratio,y:box.y+box.height/2+dy*ratio};
+    if(vertical)edge.y=Math.max(box.y+half+1,Math.min(box.y+box.height-half-1,edge.y));
+    else edge.x=Math.max(box.x+half+1,Math.min(box.x+box.width-half-1,edge.x));
+    const vx=point.x-edge.x,vy=point.y-edge.y,distance=Math.hypot(vx,vy),reach=Math.min(length,distance-radius-1);
+    if(reach<=0)return null;
+    return [{x:edge.x-(vertical?0:half),y:edge.y-(vertical?half:0)},
+      {x:edge.x+vx*reach/distance,y:edge.y+vy*reach/distance},
+      {x:edge.x+(vertical?0:half),y:edge.y+(vertical?half:0)}];
+  }
+  return {layout,connector,pointer};
 });

@@ -2,6 +2,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {layout}=require('../src/shared/map-label-layout');
+const {pointer}=require('../src/shared/map-label-layout');
 const intersects=(a,b)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
 test('dense labels remain readable, inside the page, clear of devices, without moving devices',()=>{
   const items=Array.from({length:48},(_,i)=>({id:String(i),x:370+(i%6)*5,y:210+Math.floor(i/6)*5,width:i%3?52:98,height:i%3?13:23,radius:10}));
@@ -35,4 +36,24 @@ test('bounded map labels stay beside their markers instead of drifting across th
     assert.ok(box,'Every device keeps its label');
     assert.ok(Math.hypot(box.x+box.width/2-item.x,box.y+box.height/2-item.y)<=32,'Labels stay within the local map area');
   }
+});
+
+test('short label pointers aim at their own device from every side and corner',()=>{
+  const box={x:100,y:80,width:70,height:20};
+  for(const point of [{x:135,y:30},{x:135,y:150},{x:40,y:90},{x:230,y:90},{x:40,y:30},{x:230,y:30},{x:40,y:150},{x:230,y:150}]){
+    const triangle=pointer(point,box,{radius:10}),[a,tip,b]=triangle;
+    const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2},dx=point.x-center.x,dy=point.y-center.y;
+    assert.ok(Math.abs((tip.x-center.x)*dy-(tip.y-center.y)*dx)<1e-7,'Pointer aims exactly at the device');
+    assert.ok((tip.x-center.x)*dx+(tip.y-center.y)*dy>0,'Pointer faces outward toward the device');
+    assert.ok(Math.hypot(tip.x-center.x,tip.y-center.y)<=5.001,'Pointer stays short');
+    for(const p of [a,b])assert.ok(p.x>=box.x&&p.x<=box.x+box.width&&p.y>=box.y&&p.y<=box.y+box.height,'Base remains on the label');
+  }
+});
+
+test('label pointers stop before the icon and are omitted when there is no free gap',()=>{
+  const point={x:100,y:100},box={x:80,y:115,width:40,height:15};
+  const triangle=pointer(point,box,{radius:12});
+  assert.ok(triangle);assert.ok(Math.hypot(triangle[1].x-point.x,triangle[1].y-point.y)>=13);
+  assert.equal(pointer(point,{...box,y:110},{radius:12}),null);
+  assert.equal(pointer(point,{x:80,y:90,width:40,height:20}),null);
 });

@@ -1,28 +1,50 @@
 {
-  "version": "5.0.10",
+  "version": "6.0.1",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Քարտեզի մոտ գտնվող նույն տեսակի նշանները միավորվում են մեկ SVG-ի մեջ՝ առանձին անունների ընտրությունն ու տեղափոխումը պահպանելով։",
-      "PDF արտահանման ժամանակ «Ցուցադրել ՏՏ մասնագետին» ընտրանքը միացնում է նրա անունը էջատակում։ Լռելյայն այն անջատված է։"
+      "Քարտեզի և PDF-ի սարքերի անունների պիտակներն ավելի փոքր են։ Փոքր ուղղորդող ծայրն այժմ ցույց է տալիս համապատասխան սարքը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Nearby map markers of the same type share one SVG while each name remains selectable and movable.",
-      "The Show IT specialist option adds the specialist name to PDF footers. It is off by default."
+      "Device name labels are more compact on maps and in PDFs. A small pointer now identifies the corresponding device."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Близкие значки одного типа на карте объединяются в один SVG. Каждое имя можно выбрать и переместить отдельно.",
-      "Опция «Показывать ИТ-специалиста» добавляет его имя в нижний колонтитул PDF. По умолчанию она отключена."
+      "Подписи устройств на карте и в PDF стали компактнее. Небольшой указатель направлен на соответствующее устройство."
     ]
   },
   "date": "2026-10-20",
   "history": [
+    {
+      "version": "5.0.10",
+      "date": "2026-10-20",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Քարտեզի մոտ գտնվող նույն տեսակի նշանները միավորվում են մեկ SVG-ի մեջ՝ առանձին անունների ընտրությունն ու տեղափոխումը պահպանելով։",
+          "PDF արտահանման ժամանակ «Ցուցադրել ՏՏ մասնագետին» ընտրանքը միացնում է նրա անունը էջատակում։ Լռելյայն այն անջատված է։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Nearby map markers of the same type share one SVG while each name remains selectable and movable.",
+          "The Show IT specialist option adds the specialist name to PDF footers. It is off by default."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Близкие значки одного типа на карте объединяются в один SVG. Каждое имя можно выбрать и переместить отдельно.",
+          "Опция «Показывать ИТ-специалиста» добавляет его имя в нижний колонтитул PDF. По умолчанию она отключена."
+        ]
+      }
+    },
     {
       "version": "5.0.9",
       "date": "2026-10-19",

@@ -290,7 +290,7 @@ globalThis.RackMaps=(()=>{
         return `<button type="button" class="map-rack-marker ${selected?'selected':''}" data-map-rack-marker="${esc(rm.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%" title="${esc(rm.rack.name)} (${rm.rack.u||rm.rack.height||42}U)" aria-label="${esc(rm.rack.name)}"><div class="map-rack-icon-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${paths.server}"/></svg><span class="map-rack-led"></span></div><span class="map-rack-label">${esc(rm.rack.name)}</span></button>`;
       }).join('');
       const markerGroups=groupMarkers(visible),autoLinks='';
-      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${autoLinks}${visible.filter(m=>m.anchorVisible).map(m=>{const p=markerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=markerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}>${esc(name(m.row))}</span></button>`;}).join('')+rackMarkersHtml;
+      root.querySelector('.map-markers').innerHTML=`<svg class="map-leaders" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${autoLinks}${visible.filter(m=>m.anchorVisible).map(m=>{const p=markerLayout(m);return `<line data-map-line="${esc(m.id)}" x1="${p.x*100}" y1="${p.y*100}" x2="${p.iconX*100}" y2="${p.iconY*100}" stroke="${D.serviceColor(state,m.row.service)}" vector-effect="non-scaling-stroke"/>`;}).join('')}</svg>`+visible.map(m=>{const p=markerLayout(m),selected=m.portId===view.portId||view.selectedMarkerIds.has(m.id),multi=view.selectedMarkerIds.has(m.id)&&view.selectedMarkerIds.size>1,color=D.serviceColor(state,m.row.service);return `${m.anchorVisible?`<button type="button" class="map-anchor ${selected?'selected':''}" data-map-anchor="${esc(m.id)}" style="left:${p.x*100}%;top:${p.y*100}%;--marker-color:${color}" title="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" aria-label="${esc(tr('Ճշգրիտ դիրք')+' · '+name(m.row))}" tabindex="${selected?'0':'-1'}"></button>`:''}<button type="button" class="map-marker ${selected?'selected':''} ${multi?'multi-selected':''} ${m.row.status==='free'?'inactive':''}" data-map-marker="${esc(m.id)}" style="left:${p.iconX*100}%;top:${p.iconY*100}%;--marker-color:${color}" title="${esc(label(m.row))}" aria-label="${esc(m.number+' · '+label(m.row))}">${icon(m.row.service)}<span class="map-marker-number">${m.number}</span><span class="map-marker-label" data-dir="down" ${view.labels?'':'hidden'}><span class="map-label-text">${esc(name(m.row))}</span></span></button>`;}).join('')+rackMarkersHtml;
       globalThis.RackMapMarkerGroups.decorate(root.querySelector('.map-markers'),markerGroups);
       const cablesLayer=root.querySelector('.map-cables-layer');
       if(cablesLayer){
@@ -777,7 +777,20 @@ globalThis.RackMaps=(()=>{
       });
       const anchors=[...root.querySelectorAll('[data-map-anchor]')].map(el=>{const r=el.getBoundingClientRect(),radius=7*(1+view.markerSize/100);return {left:r.left-bounds.left+r.width/2-radius,right:r.left-bounds.left+r.width/2+radius,top:r.top-bounds.top+r.height/2-radius,bottom:r.top-bounds.top+r.height/2+radius};});
       const layout=resolveLabelDirections(entries,bounds,anchors);
-      for(const p of entries){const pos=layout.get(p.id);p.text.dataset.dir=pos.dir;p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:none`;}
+      for(const p of entries){
+        const pos=layout.get(p.id),box={x:pos.left,y:pos.top,width:p.width,height:p.height};
+        const tip=globalThis.RackMapLabels.pointer(p,box,{radius:Math.max(p.iconWidth,p.iconHeight)/2});
+        p.text.dataset.dir=pos.dir;
+        p.text.style.cssText=`left:${pos.left-p.left}px;top:${pos.top-p.top}px;right:auto;bottom:auto;transform:none`;
+        if(tip){
+          const x=Math.min(...tip.map(q=>q.x)),y=Math.min(...tip.map(q=>q.y));
+          const w=Math.max(...tip.map(q=>q.x))-x,h=Math.max(...tip.map(q=>q.y))-y;
+          const style=p.text.style;
+          style.setProperty('--tip-display','block');style.setProperty('--tip-x',(x-pos.left-1)+'px');style.setProperty('--tip-y',(y-pos.top-1)+'px');
+          style.setProperty('--tip-width',w+'px');style.setProperty('--tip-height',h+'px');
+          style.setProperty('--tip-points',tip.map(q=>((q.x-x)/w*100)+'% '+((q.y-y)/h*100)+'%').join(','));
+        }
+      }
     }
     document.fonts?.ready.then(scheduleLabels);
     function groupMarkers(markers) {
