@@ -1,28 +1,53 @@
 {
-  "version": "6.0.7",
+  "version": "6.0.8",
   "date": "2026-10-21",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Գծագրությունն ունի առանձին հասցե՝ https://editor.ditaknet.com/։ Հիմնական կայքի հղումը բացում է խմբագրիչը նոր ներդիրով։",
-      "Խմբագրիչը մուտքից հետո բացվում է գծագրության բաժնով և ունի առանձին տեղադրվող հավելվածի մեկնարկ։"
+      "Խմբագրիչը բացվում է «Իմ Փաչ»-ից՝ միայն ընտրված նախագծի անկախ պատճենով, առանց նոր PIN-ի կամ հաշվի մուտքի։",
+      "Փոփոխությունները պահվում են խմբագրիչում և չեն փոխում հիմնական բազան։ Խմբագրված պատճենը կարելի է ներբեռնել JSON ֆայլով։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Drawing now has its own address: https://editor.ditaknet.com/. The main site opens the editor in a new tab.",
-      "The editor opens Drawing after sign-in and has its own installed-app entry point."
+      "Open the editor from My Patch with an independent copy of the selected project, without another PIN or account sign-in.",
+      "Edits stay in the editor and never update the main database. Download the edited copy as a JSON backup."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "У чертежей теперь отдельный адрес: https://editor.ditaknet.com/. Основной сайт открывает редактор в новой вкладке.",
-      "После входа редактор открывает раздел чертежей и использует отдельную точку запуска установленного приложения."
+      "Редактор открывается из My Patch с независимой копией выбранного проекта, без повторного PIN-кода или входа в аккаунт.",
+      "Изменения сохраняются в редакторе и не меняют основную базу. Отредактированную копию можно скачать в JSON."
     ]
   },
   "history": [
+    {
+      "version": "6.0.7",
+      "date": "2026-10-21",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Գծագրությունն ունի առանձին հասցե՝ https://editor.ditaknet.com/։ Հիմնական կայքի հղումը բացում է խմբագրիչը նոր ներդիրով։",
+          "Խմբագրիչը մուտքից հետո բացվում է գծագրության բաժնով և ունի առանձին տեղադրվող հավելվածի մեկնարկ։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Drawing now has its own address: https://editor.ditaknet.com/. The main site opens the editor in a new tab.",
+          "The editor opens Drawing after sign-in and has its own installed-app entry point."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "У чертежей теперь отдельный адрес: https://editor.ditaknet.com/. Основной сайт открывает редактор в новой вкладке.",
+          "После входа редактор открывает раздел чертежей и использует отдельную точку запуска установленного приложения."
+        ]
+      }
+    },
     {
       "version": "6.0.6",
       "date": "2026-10-20",

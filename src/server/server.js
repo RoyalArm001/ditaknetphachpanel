@@ -40,6 +40,7 @@ function createApp(options={}) {
     res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));
   };
   const server=http.createServer(async(req,res)=>{
+    if(require('./editor-isolation').blockEditorApi(req,res))return;
     if(require('./client-session').clearClientSession(req,res))return;
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');
     res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
@@ -372,7 +373,8 @@ function createApp(options={}) {
         res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-cache'});
         return res.end(fs.readFileSync(publicFiles['/sw.js'],'utf8').replace('__BUILD_ID__',id));
       }
-      const file=publicFiles[url.pathname==='/'?'/index.html':url.pathname];
+      const editorHost=String(req.headers.host||'').split(':')[0]==='editor.ditaknet.com';
+      const file=publicFiles[(url.pathname==='/'||url.pathname==='/index.html')&&editorHost?'/editor.html':url.pathname==='/'?'/index.html':url.pathname];
       if(req.method==='GET'&&file){
         const mime=file.endsWith('.json')?'application/json':file.endsWith('.xml')?'application/xml':file.endsWith('.txt')?'text/plain':file.endsWith('.ttf')?'font/ttf':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webmanifest')?'application/manifest+json':/\.(m?js)$/.test(file)?'text/javascript':file.endsWith('.css')?'text/css':'text/html';
         res.writeHead(200,{'Content-Type':mime+'; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(file).pipe(res);

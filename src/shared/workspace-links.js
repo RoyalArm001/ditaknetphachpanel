@@ -6,11 +6,12 @@
   const editorOrigin='https://editor.ditaknet.com';
   const isEditor=url=>new URL(url).hostname==='editor.ditaknet.com';
   const defaultView=url=>isEditor(url)?'drawing':'overview';
-  function drawingEntry(url,{demo=false,companyId=''}={}){
-    // Local installations, previews and demos keep their own project storage.
-    if(new URL(url).hostname!=='patch.ditaknet.com'||demo)return {href:'#drawing',external:false};
+  function drawingEntry(url){
+    // Local installations and previews keep their own project storage.
+    if(new URL(url).hostname!=='patch.ditaknet.com')return {href:'#drawing',external:false};
     const target=new URL('/',editorOrigin);
-    if(companyId)target.searchParams.set('company',companyId);
+    // The project is transferred once through the verified popup handshake.
+    // No project or authorization information is placed in the URL.
     return {href:target.href,external:true};
   }
   return {editorOrigin,isEditor,defaultView,drawingEntry};

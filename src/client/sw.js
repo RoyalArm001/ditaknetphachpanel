@@ -1,9 +1,12 @@
 'use strict';
 const CACHE='ditaknet-shell-v5-__BUILD_ID__';
+const EDITOR=self.location.hostname==='editor.ditaknet.com';
 const SHELL=['/share.html','/share-view.js','/share.css','/maps.css','/maps.js','/map-label-layout.js','/map-marker-groups.js','/map-routing.js','/pdf-branding.js','/assets/smart-tech.png','/handover-pdf.js','/pdfkit.js','/pdfjs/pdf.mjs','/pdfjs/pdf.worker.mjs','/release.json','/open-local.js','/assets/DejaVuSans.ttf','/','/locales.js','/i18n.js','/index.html','/styles.css','/theme.css','/theme.js','/merge-state.js','/domain.js','/connection-report.js','/personal-store.js','/project-file.js','/live.js','/app-reset.js','/app.js','/rack3d.js','/pwa.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/favicon.ico','/exceljs.min.js'];
 SHELL.push('/help.js','/demo.js');
 SHELL.push('/workspace-links.js','/editor.webmanifest');
+SHELL.push('/editor.html','/editor.js','/editor.css','/editor-handoff.js','/editor-draft-store.js');
 SHELL.push('/drawing-geometry.js','/drawing-model.js','/drawings.js','/drawings.css');
+if(EDITOR)for(let i=SHELL.length-1;i>=0;i--)if(['/index.html','/app.js','/personal-store.js','/live.js','/app-reset.js','/demo.js','/pwa.js'].includes(SHELL[i]))SHELL.splice(i,1);
 async function digest(response){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',await response.arrayBuffer()))].map(n=>n.toString(16).padStart(2,'0')).join('');}
 async function installSections(){
   const response=await fetch('/asset-manifest.json',{cache:'no-store'});
@@ -12,7 +15,7 @@ async function installSections(){
   const oldNames=(await caches.keys()).filter(name=>name.startsWith('ditaknet-shell-')&&name!==CACHE).reverse();
   const oldCaches=await Promise.all(oldNames.map(name=>caches.open(name)));
   for(const url of SHELL){
-    const source=url==='/'?'/index.html':url,expected=manifest.files[source]?.sha256;
+    const source=url==='/'?(EDITOR?'/editor.html':'/index.html'):url,expected=manifest.files[source]?.sha256;
     if(!/^[a-f0-9]{64}$/.test(expected||''))throw new Error('Missing update file');
     let asset;
     for(const previous of oldCaches){
@@ -46,6 +49,6 @@ async function fresh(request,key){
 self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);
   if(event.request.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
-  if(event.request.mode==='navigate'){event.respondWith(fresh(event.request,url.pathname==='/share.html'?'/share.html':'/index.html'));return;}
+  if(event.request.mode==='navigate'){event.respondWith(fresh(event.request,EDITOR?'/editor.html':url.pathname==='/share.html'?'/share.html':'/index.html'));return;}
   if(SHELL.includes(url.pathname))event.respondWith(fresh(event.request,url.pathname));
 });

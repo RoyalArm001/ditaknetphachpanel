@@ -8,6 +8,9 @@ for(const [url,source] of Object.entries(publicFiles)){
   fs.mkdirSync(path.dirname(destination),{recursive:true});
   fs.copyFileSync(source,destination);
 }
+// Vercel serves existing files before rewrites. Keep / and /index.html virtual
+// so the hostname can select the main app or the isolated editor shell.
+fs.renameSync(path.join(out,'index.html'),path.join(out,'patch.html'));
 const hash=require('node:crypto').createHash('sha256');
 fs.writeFileSync(path.join(out,'asset-manifest.json'),JSON.stringify(require('../src/server/asset-manifest').assetManifest()));
 for(const name of fs.readdirSync(out,{recursive:true}).sort())if(name!=='sw.js'&&fs.statSync(path.join(out,name)).isFile())hash.update(fs.readFileSync(path.join(out,name)));

@@ -7,6 +7,11 @@ const root=path.resolve(__dirname,'../..');
 // Only these files may be served locally or copied to the public build.
 const sources={
   'index.html':'src/client/index.html',
+  'editor.html':'src/client/editor.html',
+  'editor.js':'src/client/js/editor.js',
+  'editor.css':'src/client/css/editor.css',
+  'editor-handoff.js':'src/shared/editor-handoff.js',
+  'editor-draft-store.js':'src/client/js/editor-draft-store.js',
   'share.html':'src/client/share.html',
   'share-view.js':'src/client/js/share-view.js',
   'share.css':'src/client/css/share.css',

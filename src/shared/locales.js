@@ -1,6 +1,19 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Բացեք «Իմ Փաչ»-ից":["Open from My Patch","Откройте из My Patch"],
+"Ընտրեք նախագիծը և սեղմեք «Գծագրություն»։ Այստեղ կբացվի դրա անկախ խմբագրման պատճենը։":["Select a project and click Drawing. An independent editing copy will open here.","Выберите проект и нажмите «Проектирование». Здесь откроется независимая копия для редактирования."],
+"Բացել «Իմ Փաչ»-ը":["Open My Patch","Открыть My Patch"],
+"Խմբագրման պատճեն":["Editing copy","Копия для редактирования"],
+"Ներբեռնել պատճենը":["Download copy","Скачать копию"],
+"Հիմնական բազան չի փոխվում":["The original database stays unchanged","Основная база не изменяется"],
+"Պահված է պատճենում":["Saved in the copy","Сохранено в копии"],
+"Պատճենը բեռնվում է…":["Loading the copy…","Загрузка копии…"],
+"Նոր գծագրություն":["New drawing","Новый чертёж"],
+"Նախ բացեք նախագիծը «Իմ Փաչ»-ում։":["Open a project in My Patch first.","Сначала откройте проект в My Patch."],
+"Թույլատրեք նոր պատուհանի բացումը և կրկին փորձեք։":["Allow pop-up windows and try again.","Разрешите всплывающие окна и повторите попытку."],
+"Չհաջողվեց ստեղծել խմբագրման պատճենը։":["Could not create the editing copy.","Не удалось создать копию для редактирования."],
+"Խմբագրիչը չստացավ պատճենը։ Կրկին բացեք «Իմ Փաչ»-ից։":["The editor did not receive the copy. Open it again from My Patch.","Редактор не получил копию. Откройте его снова из My Patch."],
 "Բացել առանձին խմբագրիչը":["Open the separate editor","Открыть отдельный редактор"],
 "Սա գծագրության առանձին խմբագրիչն է։ Թիմային նախագծերը բացեք նույն PIN-ով կամ հաշվով։ Տեղային նախագծերը տեղափոխեք backup ֆայլով։":["This is the separate drawing editor. Open cloud projects with the same PIN or account. Transfer local projects using a backup file.","Это отдельный редактор чертежей. Откройте облачные проекты с тем же PIN-кодом или учётной записью. Локальные проекты перенесите с помощью резервной копии."],
 "Նախ չափաբերեք մասշտաբը":["Calibrate the scale first","Сначала откалибруйте масштаб"],

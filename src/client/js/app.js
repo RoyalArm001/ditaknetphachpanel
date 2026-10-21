@@ -2449,6 +2449,13 @@ const actions={
 };
 document.addEventListener('click',e=>{
   if(resetInProgress){if(e.target.closest('#modalForm button[type=submit]'))return;e.preventDefault();return;}
+  const drawingEntry=e.target.closest('[data-drawing-entry]');
+  if(drawingEntry&&new URL(drawingEntry.href).origin===RackEditorHandoff.editorOrigin&&location.origin===RackEditorHandoff.mainOrigin){
+    e.preventDefault();
+    if(!ready||!activeCompanyId||!state.company){toast(tr('Նախ բացեք նախագիծը «Իմ Փաչ»-ում։'));return;}
+    if(portDraftDirty&&!flushPortEditor())return;
+    void RackEditorHandoff.open(window,{state,readOnly:accountReadOnly}).catch(error=>toast(error.message));return;
+  }
   const port=e.target.closest('.mini-port,.port-overview [data-action="port"]');
   if(port&&(e.ctrlKey||e.metaKey)){
     e.preventDefault();
@@ -2493,6 +2500,7 @@ window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||s
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(!ready)return;if(route().view==='rack')render();else applyPanels();});
 window.matchMedia('(max-width:1150px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 async function init(){
+  if(editorWorkspace){location.replace('/editor.html'+location.search+location.hash);return;}
   updateDrawingEntry();
   if(location.protocol==='file:'){
     location.replace('https://patch.ditaknet.com/');

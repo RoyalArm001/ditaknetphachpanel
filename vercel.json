@@ -4,7 +4,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {"api/index.js": {"maxDuration": 60, "includeFiles": "{assets/**,migrations/011-session-audit.sql}"}},
-  "rewrites": [{"source":"/api/:path*","destination":"/api"}],
+  "rewrites": [
+    {"source":"/","has":[{"type":"host","value":"editor.ditaknet.com"}],"destination":"/editor.html"},
+    {"source":"/index.html","has":[{"type":"host","value":"editor.ditaknet.com"}],"destination":"/editor.html"},
+    {"source":"/","destination":"/patch.html"},
+    {"source":"/index.html","destination":"/patch.html"},
+    {"source":"/api/:path*","destination":"/api"}
+  ],
   "headers": [{"source":"/(.*)","headers":[
     {"key":"X-Content-Type-Options","value":"nosniff"},
     {"key":"Referrer-Policy","value":"same-origin"},
