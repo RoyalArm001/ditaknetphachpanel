@@ -1,6 +1,8 @@
 'use strict';
 // Armenian source phrases, with English and Russian interface translations.
 (function(root){const messages={
+"Բացել առանձին խմբագրիչը":["Open the separate editor","Открыть отдельный редактор"],
+"Սա գծագրության առանձին խմբագրիչն է։ Թիմային նախագծերը բացեք նույն PIN-ով կամ հաշվով։ Տեղային նախագծերը տեղափոխեք backup ֆայլով։":["This is the separate drawing editor. Open cloud projects with the same PIN or account. Transfer local projects using a backup file.","Это отдельный редактор чертежей. Откройте облачные проекты с тем же PIN-кодом или учётной записью. Локальные проекты перенесите с помощью резервной копии."],
 "Նախ չափաբերեք մասշտաբը":["Calibrate the scale first","Сначала откалибруйте масштаб"],
 "մ":["m","м"],
 "Գծագրություն՝ համակարգչով":["Drawing on desktop","Черчение на компьютере"],

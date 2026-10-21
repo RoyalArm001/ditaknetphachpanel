@@ -2,6 +2,7 @@
 const tr=globalThis.RackI18n?.t||((text,...values)=>Array.isArray(text)?text.reduce((out,part,i)=>out+part+(i<values.length?values[i]:''),''):text);
 
 const demoMode=!!globalThis.RackDemo?.enabled;
+const editorWorkspace=RackWorkspaceLinks.isEditor(location.href),defaultWorkspaceView=RackWorkspaceLinks.defaultView(location.href);
 const D=RackDomain, $=s=>document.querySelector(s), uid=()=>crypto.randomUUID?crypto.randomUUID():`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=D.empty(),revision=0,ready=false,dirty=false,saving=null,conflict=false,saveTimer,toastTimer,dialogSubmit=null;
@@ -185,9 +186,24 @@ async function save(){
   try{return await saving;}finally{saving=null;}
 }
 function commit(fn,redraw=true){if(resetInProgress)throw new Error(tr('Հավելվածը մաքրվում է…'));if(conflict)throw new Error(tr('Նախ ներբեռնեք ձեր փոփոխությունները և բեռնեք ընդհանուր տարբերակը'));const next=structuredClone(state);fn(next);RackDrawingModel.pruneMapRoutes(next);D.validate(next);state=next;scheduleSave();if(redraw)render();}
-function route(){const [v,id]=(location.hash.slice(1)||'overview').split('/');return v==='reports'?{view:'settings',id:'reports'}:{view:viewNames[v]?v:'overview',id};}
+function route(){const [v,id]=(location.hash.slice(1)||defaultWorkspaceView).split('/');return v==='reports'?{view:'settings',id:'reports'}:{view:viewNames[v]?v:defaultWorkspaceView,id};}
+function updateDrawingEntry(){
+  const entry=RackWorkspaceLinks.drawingEntry(location.href,{demo:demoMode,companyId:!personal()?activeCompanyId:''});
+  document.querySelectorAll('[data-drawing-entry]').forEach(link=>{
+    link.href=entry.href;
+    if(entry.external){link.target='_blank';link.rel='noopener';link.title=tr('Բացել առանձին խմբագրիչը')+' · editor.ditaknet.com';}
+    else {link.removeAttribute('target');link.removeAttribute('rel');link.title=tr('Գծագրություն');}
+  });
+  if(editorWorkspace){
+    document.title=tr('Գծագրություն')+' · My Patch';
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href',RackWorkspaceLinks.editorOrigin+'/');
+    document.querySelector('link[rel="manifest"]')?.setAttribute('href','/editor.webmanifest');
+    document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content',tr('Գծագրություն'));
+  }
+}
 let mapController=null;
 function render(){
+  updateDrawingEntry();
   mapController?.destroy();mapController=null;
   for(const key of Object.keys(D.statuses))document.documentElement.style.setProperty('--'+key,D.statusColor(state,key));
   document.body.classList.remove('login-view');
@@ -210,6 +226,7 @@ function renderSetup(){
   $('#setupForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);try{commit(s=>{Object.assign(s,readStyle(f));s.backupFormat=f.get('backupFormat');s.company=f.get('company').trim();if(!s.company)throw new Error(tr('Գրեք ընկերության անվանումը'));s.floors=Array.from({length:+f.get('count')},(_,i)=>({id:uid(),name:tr`${i+1}-րդ հարկ`,racks:[]}));});toast(tr('Շենքը ստեղծված է'));}catch(err){$('#setupError').hidden=false;$('#setupError').textContent=tr(err.message);}};
 }
 function renderWelcome(){
+  updateDrawingEntry();
   mapController?.destroy();mapController=null;
   ready=false;onboardingVisible=true;sceneController?.destroy();sceneController=null;
   document.body.classList.add('login-view');document.body.classList.remove('rack-view');zoomControls.hidden=true;$('#dialog').close();
@@ -222,6 +239,7 @@ function renderWelcome(){
   const arrow=icon('<path d="M5 12h14m-5-5 5 5-5 5"/>');
   $('#content').innerHTML=tr`<section class="welcome" aria-labelledby="welcomeTitle">
     <header class="welcome-heading"><span class="welcome-logo">${rack}</span><div><div class="eyebrow">ԻՄ ՓԱՉ</div><h1 id="welcomeTitle">Բարի գալուստ</h1><p>Բացեք ձեր նախագծերը կամ սկսեք նոր աշխատանք։</p></div></header>
+    ${editorWorkspace?`<p class="hint">${tr('Սա գծագրության առանձին խմբագրիչն է։ Թիմային նախագծերը բացեք նույն PIN-ով կամ հաշվով։ Տեղային նախագծերը տեղափոխեք backup ֆայլով։')}</p>`:''}
     <div class="actions welcome-guide"><a class="button primary" href="/?demo=1" target="_blank" rel="noopener">${tr('Բացել դեմոն')}</a>${button(tr('Օգնություն'),'help-open')}</div><div class="welcome-options">
       <section class="welcome-choice welcome-team" aria-labelledby="welcomeTeamTitle">
         <div class="welcome-card-top"><span class="welcome-icon">${pin}</span><span class="welcome-tag">Թիմային աշխատանք</span></div>
@@ -306,7 +324,7 @@ async function beginWorkspace(mode){
   onboardingChoice=mode;onboardingVisible=false;
   try{localStorage.setItem('rackmap-workspace-choice',mode);localStorage.setItem('rackmap-storage-mode',mode);}catch{}
   await switchStorage(mode);
-  if(fromWelcome&&ready){location.hash='overview';render();}
+  if(fromWelcome&&ready){location.hash=defaultWorkspaceView;render();}
 }
 function floorCards(){return `<div class="floor-grid">${state.floors.map(f=>{
   const linked=(f.linkedRackIds||[]).map(rid=>findRack(rid)).filter(Boolean);
@@ -2475,6 +2493,7 @@ window.addEventListener('beforeunload',e=>{if(resetInProgress)return;if(dirty||s
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{if(!ready)return;if(route().view==='rack')render();else applyPanels();});
 window.matchMedia('(max-width:1150px)').addEventListener('change',()=>{if(ready&&route().view==='rack')render();});
 async function init(){
+  updateDrawingEntry();
   if(location.protocol==='file:'){
     location.replace('https://patch.ditaknet.com/');
     return;

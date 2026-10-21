@@ -1,25 +1,50 @@
 {
-  "version": "6.0.6",
-  "date": "2026-10-20",
+  "version": "6.0.7",
+  "date": "2026-10-21",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Գծագրության առանձին վերնամասը հանվել է․ PDF ներմուծումը, քարտեզ արտահանումը և ամբողջ էկրանով բացելը տեղափոխվել են վերևի ընդհանուր վահանակ՝ աշխատանքային տարածքն ազատելու համար։"
+      "Գծագրությունն ունի առանձին հասցե՝ https://editor.ditaknet.com/։ Հիմնական կայքի հղումը բացում է խմբագրիչը նոր ներդիրով։",
+      "Խմբագրիչը մուտքից հետո բացվում է գծագրության բաժնով և ունի առանձին տեղադրվող հավելվածի մեկնարկ։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Removed the separate Drawing header. PDF import, map export and fullscreen controls now sit in the main top bar, freeing more workspace."
+      "Drawing now has its own address: https://editor.ditaknet.com/. The main site opens the editor in a new tab.",
+      "The editor opens Drawing after sign-in and has its own installed-app entry point."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Убрана отдельная шапка чертежа. Импорт PDF, экспорт на карту и полноэкранный режим перенесены в общую верхнюю панель, освобождая рабочее пространство."
+      "У чертежей теперь отдельный адрес: https://editor.ditaknet.com/. Основной сайт открывает редактор в новой вкладке.",
+      "После входа редактор открывает раздел чертежей и использует отдельную точку запуска установленного приложения."
     ]
   },
   "history": [
+    {
+      "version": "6.0.6",
+      "date": "2026-10-20",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Գծագրության առանձին վերնամասը հանվել է․ PDF ներմուծումը, քարտեզ արտահանումը և ամբողջ էկրանով բացելը տեղափոխվել են վերևի ընդհանուր վահանակ՝ աշխատանքային տարածքն ազատելու համար։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Removed the separate Drawing header. PDF import, map export and fullscreen controls now sit in the main top bar, freeing more workspace."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Убрана отдельная шапка чертежа. Импорт PDF, экспорт на карту и полноэкранный режим перенесены в общую верхнюю панель, освобождая рабочее пространство."
+        ]
+      }
+    },
     {
       "version": "6.0.5",
       "date": "2026-10-20",
