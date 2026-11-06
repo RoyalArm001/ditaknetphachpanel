@@ -42,7 +42,15 @@ globalThis.RackMaps = (() => {
     return placed;
   }
   async function exportPdf(state, kind, planId, tr, options = {}) {
-    if (!globalThis.PDFDocument) { pdfLoading ||= loadScript('/pdfkit.js').catch(e => { pdfLoading = null; throw e; }); await pdfLoading; }
+    if (!globalThis.PDFDocument) {
+      pdfLoading ||= new Promise((resolve, reject) => {
+        const script = document.createElement('script'); script.src = '/pdfkit.js';
+        const fail = () => { script.remove(); reject(new Error(tr('Չհաջողվեց կատարել գործողությունը'))); };
+        script.onload = () => { if (typeof globalThis.PDFDocument === 'function') resolve(); else fail(); };
+        script.onerror = fail; document.head.append(script);
+      }).catch(error => { pdfLoading = null; throw error; });
+      await pdfLoading;
+    }
     const response = await fetch('/assets/DejaVuSans.ttf'); if (!response.ok) throw new Error(tr('Չհաջողվեց կատարել գործողությունը'));
     const font = new Uint8Array(await response.arrayBuffer());
     const chunks = await RackHandover.create(PDFDocument, state, { ...options, font, tr, kind, planId });

@@ -1,28 +1,50 @@
 {
-  "version": "6.0.8",
-  "date": "2026-10-21",
+  "version": "6.0.9",
+  "date": "2026-11-06",
   "hy": {
     "title": "Հավելվածը թարմացվել է",
     "changes": [
-      "Խմբագրիչը բացվում է «Իմ Փաչ»-ից՝ միայն ընտրված նախագծի անկախ պատճենով, առանց նոր PIN-ի կամ հաշվի մուտքի։",
-      "Փոփոխությունները պահվում են խմբագրիչում և չեն փոխում հիմնական բազան։ Խմբագրված պատճենը կարելի է ներբեռնել JSON ֆայլով։"
+      "Ուղղվել է քարտեզի PDF նախադիտումն ու ներբեռնումը խափանող սխալը։ Բեռնման ձախողումից հետո կարելի է կրկին փորձել՝ թարմացնելով նախադիտումը։"
     ]
   },
   "en": {
     "title": "App updated",
     "changes": [
-      "Open the editor from My Patch with an independent copy of the selected project, without another PIN or account sign-in.",
-      "Edits stay in the editor and never update the main database. Download the edited copy as a JSON backup."
+      "Fixed an error blocking map PDF previews and downloads. If loading fails, refresh the preview to try again."
     ]
   },
   "ru": {
     "title": "Приложение обновлено",
     "changes": [
-      "Редактор открывается из My Patch с независимой копией выбранного проекта, без повторного PIN-кода или входа в аккаунт.",
-      "Изменения сохраняются в редакторе и не меняют основную базу. Отредактированную копию можно скачать в JSON."
+      "Исправлена ошибка, мешавшая просмотру и скачиванию PDF карты. При сбое загрузки можно обновить предпросмотр и повторить попытку."
     ]
   },
   "history": [
+    {
+      "version": "6.0.8",
+      "date": "2026-10-21",
+      "hy": {
+        "title": "Հավելվածը թարմացվել է",
+        "changes": [
+          "Խմբագրիչը բացվում է «Իմ Փաչ»-ից՝ միայն ընտրված նախագծի անկախ պատճենով, առանց նոր PIN-ի կամ հաշվի մուտքի։",
+          "Փոփոխությունները պահվում են խմբագրիչում և չեն փոխում հիմնական բազան։ Խմբագրված պատճենը կարելի է ներբեռնել JSON ֆայլով։"
+        ]
+      },
+      "en": {
+        "title": "App updated",
+        "changes": [
+          "Open the editor from My Patch with an independent copy of the selected project, without another PIN or account sign-in.",
+          "Edits stay in the editor and never update the main database. Download the edited copy as a JSON backup."
+        ]
+      },
+      "ru": {
+        "title": "Приложение обновлено",
+        "changes": [
+          "Редактор открывается из My Patch с независимой копией выбранного проекта, без повторного PIN-кода или входа в аккаунт.",
+          "Изменения сохраняются в редакторе и не меняют основную базу. Отредактированную копию можно скачать в JSON."
+        ]
+      }
+    },
     {
       "version": "6.0.7",
       "date": "2026-10-21",
